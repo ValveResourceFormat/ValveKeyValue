@@ -13,5 +13,14 @@
         {
             return (string)obj?.Value;
         }
+
+        /// <summary>
+        /// Explicit cast operator for KVObject to bool.
+        /// </summary>
+        /// <param name="obj">The <see cref="KVObject"/> to cast.</param>
+        public static explicit operator bool(KVObject obj)
+        {
+            return (bool)obj?.Value;
+        }
     }
 }

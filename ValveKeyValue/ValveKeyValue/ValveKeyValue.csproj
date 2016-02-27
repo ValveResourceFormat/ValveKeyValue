@@ -48,6 +48,8 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DefaultMapper.cs" />
+    <Compile Include="IPropertyMapper.cs" />
     <Compile Include="KeyValueException.cs" />
     <Compile Include="KVObject.cs" />
     <Compile Include="KVObject_operators.cs" />
@@ -61,6 +63,7 @@
     <Compile Include="KVTokenReader.cs" />
     <Compile Include="KVTokenType.cs" />
     <Compile Include="KVValue.cs" />
+    <Compile Include="ObjectCopier.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Require.cs" />
   </ItemGroup>
