@@ -1,0 +1,27 @@
+version: 1.0.0.{build}-AppVeyor
+os: Visual Studio 2015
+configuration: Release
+assembly_info:
+  patch: true
+  file: '**\AssemblyInfo.*'
+  assembly_version: '{version}'
+  assembly_file_version: '{version}'
+  assembly_informational_version: '{version}'
+environment:
+  COVERALLS_REPO_TOKEN:
+    secure: S7+xuGL3g/U1Inato8pf0yejfHMsT5/ZTeVWwjd3LRuV9c1Hm+za3MbSIDEomtIw
+cache: '%LocalAppData%\NuGet\Cache'
+before_build:
+- cmd: nuget restore ValveKeyValue\ValveKeyValue.sln
+build:
+  project: ValveKeyValue\ValveKeyValue.sln
+  verbosity: minimal
+test_script:
+- ps: >-
+    .\ValveKeyValue\packages\OpenCover.4.6.166\tools\OpenCover.Console.exe -target:nunit3-console.exe "-targetargs:Tests/bin/$($env:CONFIGURATION)/Tests.dll --result=testResults.xml;format=AppVeyor" -output:opencoverCoverage.xml -register:user -returntargetcode
+
+    if ($env:APPVEYOR_PULL_REQUEST_NUMBER -eq $null) {
+      $coveralls = (Resolve-Path "ValveKeyValue/packages/coveralls.net.*/tools/csmacnz.coveralls.exe").ToString()
+
+      & $coveralls --opencover -i opencoverCoverage.xml --repoToken $env:COVERALLS_REPO_TOKEN --commitId $env:APPVEYOR_REPO_COMMIT --commitBranch $env:APPVEYOR_REPO_BRANCH --commitAuthor $env:APPVEYOR_REPO_COMMIT_AUTHOR --commitEmail $env:APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL --commitMessage $env:APPVEYOR_REPO_COMMIT_MESSAGE --jobId $env:APPVEYOR_BUILD_NUMBER --serviceName appveyor
+    }
