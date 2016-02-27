@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 
@@ -13,12 +12,10 @@ namespace ValveKeyValue
 
             tokenReader = new KVTokenReader(stream);
             stateMachine = new KVTextReaderStateMachine();
-            objects = new List<KVObject>();
         }
 
         readonly KVTokenReader tokenReader;
         readonly KVTextReaderStateMachine stateMachine;
-        readonly IList<KVObject> objects;
         bool disposed;
 
         public KVObject ReadObject()
