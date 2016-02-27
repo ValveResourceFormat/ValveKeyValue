@@ -9,15 +9,12 @@
 
         public KVToken(KVTokenType type, string value)
         {
-            this.type = type;
-            this.value = value;
+            TokenType = type;
+            Value = value;
         }
 
-        readonly KVTokenType type;
-        readonly string value;
+        public KVTokenType TokenType { get; }
 
-        public KVTokenType TokenType => type;
-
-        public string Value => value;
+        public string Value { get; }
     }
 }

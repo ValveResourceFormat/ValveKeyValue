@@ -11,7 +11,7 @@
         /// <param name="obj">The <see cref="KVObject"/> to cast.</param>
         public static explicit operator string(KVObject obj)
         {
-            return (string)obj?.value;
+            return (string)obj?.Value;
         }
     }
 }

@@ -18,9 +18,9 @@ namespace ValveKeyValue
             Require.NotNull(name, nameof(name));
             Require.NotNull(value, nameof(value));
 
-            this.name = name;
-            this.value = value;
-            items = new List<KVObject>();
+            Name = name;
+            Value = value;
+            Items = new List<KVObject>();
         }
 
         /// <summary>
@@ -33,28 +33,24 @@ namespace ValveKeyValue
             Require.NotNull(name, nameof(name));
             Require.NotNull(items, nameof(items));
 
-            this.name = name;
-            this.items = items.ToList();
+            Name = name;
+            Items = items.ToList();
         }
-
-        readonly string name;
-        readonly KVValue value;
-        readonly IList<KVObject> items;
 
         /// <summary>
         /// Gets the name of this object.
         /// </summary>
-        public string Name => name;
+        public string Name { get; }
 
         /// <summary>
         /// Gets the value of this object.
         /// </summary>
-        public KVValue Value => value;
+        public KVValue Value { get; }
 
         /// <summary>
         /// Gets children of this object, if any.
         /// </summary>
-        public IEnumerable<KVObject> Items => items;
+        public IEnumerable<KVObject> Items { get; }
 
         /// <summary>
         /// Indexer to find a child item by name.
