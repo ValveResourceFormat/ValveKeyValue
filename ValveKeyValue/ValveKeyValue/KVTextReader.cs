@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 
 namespace ValveKeyValue
@@ -28,7 +29,17 @@ namespace ValveKeyValue
 
             while (stateMachine.IsInObject)
             {
-                var token = tokenReader.ReadNextToken();
+                KVToken token;
+
+                try
+                {
+                    token = tokenReader.ReadNextToken();
+                }
+                catch (EndOfStreamException ex)
+                {
+                    throw new KeyValueException("Found end of file while trying to read token.", ex);
+                }
+
                 switch (token.TokenType)
                 {
                     case KVTokenType.String:
@@ -44,7 +55,15 @@ namespace ValveKeyValue
                         break;
 
                     case KVTokenType.EndOfFile:
-                        @object = FinalizeDocument();
+                        try
+                        {
+                            @object = FinalizeDocument();
+                        }
+                        catch (InvalidOperationException ex)
+                        {
+                            throw new KeyValueException("Found end of file when another token type was expected.", ex);
+                        }
+
                         break;
                 }
             }
@@ -113,7 +132,11 @@ namespace ValveKeyValue
         {
             if (stateMachine.Current != KVTextReaderState.InObjectBeforeKey && stateMachine.Current != KVTextReaderState.InObjectAfterValue)
             {
-                throw new InvalidOperationException();
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        "Attempted to finalize object while in state {0}",
+                        stateMachine.Current));
             }
 
             var @object = stateMachine.PopObject();
@@ -133,7 +156,7 @@ namespace ValveKeyValue
 
             if (stateMachine.IsInObject)
             {
-                throw new InvalidOperationException();
+                throw new InvalidOperationException("Inconsistent state - at end of file whilst inside an object.");
             }
 
             return @object;

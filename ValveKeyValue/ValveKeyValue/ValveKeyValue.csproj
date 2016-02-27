@@ -48,6 +48,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="KeyValueException.cs" />
     <Compile Include="KVObject.cs" />
     <Compile Include="KVObject_operators.cs" />
     <Compile Include="KVPartialState.cs" />

@@ -81,7 +81,7 @@ namespace ValveKeyValue.Test
         [OneTimeSetUp]
         public void SetUp()
         {
-            using (var stream = TestDataHelper.OpenResource("legacydepotdata_subset.vdf"))
+            using (var stream = TestDataHelper.OpenResource("Text.legacydepotdata_subset.vdf"))
             {
                 data = KVSerialiser.Deserialize(stream);
             }

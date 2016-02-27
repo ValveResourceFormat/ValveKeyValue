@@ -25,6 +25,11 @@ namespace ValveKeyValue
         {
             var state = states.Pop();
 
+            if (state.Key == null)
+            {
+                throw new KeyValueException("Attempted to finish object construction without an object name.");
+            }
+
             if (state.Value != null)
             {
                 return new KVObject(state.Key, state.Value);

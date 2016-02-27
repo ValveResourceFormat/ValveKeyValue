@@ -50,7 +50,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="KVSerialiserNullInputsTestCase.cs" />
-    <Compile Include="LegacyDepotDataSubsetTestCase.cs" />
+    <Compile Include="Text\InvalidSyntaxTestCase.cs" />
+    <Compile Include="Text\LegacyDepotDataSubsetTestCase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Test Data\TestDataHelper.cs" />
   </ItemGroup>
@@ -62,7 +63,18 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <EmbeddedResource Include="Test Data\legacydepotdata_subset.vdf" />
+    <EmbeddedResource Include="Test Data\Text\legacydepotdata_subset.vdf" />
+    <EmbeddedResource Include="Test Data\Text\empty.vdf" />
+    <EmbeddedResource Include="Test Data\Text\quoteonly.vdf" />
+    <EmbeddedResource Include="Test Data\Text\partialname.vdf" />
+    <EmbeddedResource Include="Test Data\Text\nameonly.vdf" />
+    <EmbeddedResource Include="Test Data\Text\partial_nodata.vdf" />
+    <EmbeddedResource Include="Test Data\Text\partial_opening_key.vdf" />
+    <EmbeddedResource Include="Test Data\Text\partial_partialkey.vdf" />
+    <EmbeddedResource Include="Test Data\Text\partial_novalue.vdf" />
+    <EmbeddedResource Include="Test Data\Text\partial_opening_value.vdf" />
+    <EmbeddedResource Include="Test Data\Text\partial_partialvalue.vdf" />
+    <EmbeddedResource Include="Test Data\Text\partial_noclose.vdf" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\Newtonsoft.Json.dll" />
