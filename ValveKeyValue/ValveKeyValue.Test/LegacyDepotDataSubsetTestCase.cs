@@ -12,6 +12,12 @@ namespace ValveKeyValue.Test
         }
 
         [Test]
+        public void Name()
+        {
+            Assert.That(data.Name, Is.EqualTo("depots"));
+        }
+
+        [Test]
         public void HasFourItems()
         {
             Assert.That(data.Items, Is.Not.Null);

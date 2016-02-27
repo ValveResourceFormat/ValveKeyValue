@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="KVObject.cs" />
     <Compile Include="KVObject_operators.cs" />
+    <Compile Include="KVPartialState.cs" />
     <Compile Include="KVSerialiser.cs" />
     <Compile Include="KVStringValue.cs" />
     <Compile Include="KVTextReader.cs" />

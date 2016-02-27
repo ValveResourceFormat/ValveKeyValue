@@ -20,11 +20,11 @@ namespace ValveKeyValue
         readonly IList<KVObject> objects;
         bool disposed;
 
-        string currentKey;
-
         public KVObject ReadObject()
         {
             Require.NotDisposed(nameof(KVTextReader), disposed);
+
+            var @object = default(KVObject);
 
             while (stateMachine.IsInObject)
             {
@@ -44,17 +44,17 @@ namespace ValveKeyValue
                         break;
 
                     case KVTokenType.EndOfFile:
-                        FinalizeCurrentObject();
-                        if (stateMachine.IsInObject)
-                        {
-                            throw new InvalidOperationException();
-                        }
-
+                        @object = FinalizeDocument();
                         break;
                 }
             }
 
-            return new KVObject(currentKey, objects);
+            if (@object == null)
+            {
+                throw new InvalidOperationException(); // Should be unreachable.
+            }
+
+            return @object;
         }
 
         public void Dispose()
@@ -70,21 +70,32 @@ namespace ValveKeyValue
         {
             switch (stateMachine.Current)
             {
-                case KVTextReaderState.InObjectBeforeKey:
+                // If we're after a value when we find more text, then we must be starting a new key/value pair.
                 case KVTextReaderState.InObjectAfterValue:
-                    currentKey = text;
-                    stateMachine.Push(KVTextReaderState.InObjectBetweenKeyAndValue);
+                    FinalizeCurrentObject();
+                    stateMachine.PushObject();
+                    SetObjectKey(text);
+                    break;
+
+                case KVTextReaderState.InObjectBeforeKey:
+                    SetObjectKey(text);
                     break;
 
                 case KVTextReaderState.InObjectBetweenKeyAndValue:
-                    var currentValue = new KVStringValue(text);
-                    objects.Add(new KVObject(currentKey, currentValue));
+                    var value = new KVStringValue(text);
+                    stateMachine.SetValue(value);
                     stateMachine.Push(KVTextReaderState.InObjectAfterValue);
                     break;
 
                 default:
                     throw new InvalidOperationException();
             }
+        }
+
+        void SetObjectKey(string name)
+        {
+            stateMachine.SetName(name);
+            stateMachine.Push(KVTextReaderState.InObjectBetweenKeyAndValue);
         }
 
         void BeginNewObject()
@@ -98,19 +109,34 @@ namespace ValveKeyValue
             stateMachine.Push(KVTextReaderState.InObjectBeforeKey);
         }
 
-        void FinalizeCurrentObject()
+        KVObject FinalizeCurrentObject()
         {
             if (stateMachine.Current != KVTextReaderState.InObjectBeforeKey && stateMachine.Current != KVTextReaderState.InObjectAfterValue)
             {
                 throw new InvalidOperationException();
             }
 
-            stateMachine.PopObject();
+            var @object = stateMachine.PopObject();
 
             if (stateMachine.IsInObject)
             {
+                stateMachine.AddItem(@object);
                 stateMachine.Push(KVTextReaderState.InObjectAfterValue);
             }
+
+            return @object;
+        }
+
+        KVObject FinalizeDocument()
+        {
+            var @object = FinalizeCurrentObject();
+
+            if (stateMachine.IsInObject)
+            {
+                throw new InvalidOperationException();
+            }
+
+            return @object;
         }
     }
 }
