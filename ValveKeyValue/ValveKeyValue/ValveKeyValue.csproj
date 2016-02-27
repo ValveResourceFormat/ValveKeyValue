@@ -48,7 +48,19 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="KVObject.cs" />
+    <Compile Include="KVObject_operators.cs" />
+    <Compile Include="KVSerialiser.cs" />
+    <Compile Include="KVStringValue.cs" />
+    <Compile Include="KVTextReader.cs" />
+    <Compile Include="KVTextReaderState.cs" />
+    <Compile Include="KVTextReaderStateMachine.cs" />
+    <Compile Include="KVToken.cs" />
+    <Compile Include="KVTokenReader.cs" />
+    <Compile Include="KVTokenType.cs" />
+    <Compile Include="KVValue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Require.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
