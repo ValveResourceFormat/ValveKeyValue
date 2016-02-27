@@ -1,0 +1,10 @@
+language: csharp
+sudo: false
+solution: ValveKeyValue/ValveKeyValue.sln
+notifications:
+  email: false
+install:
+  - nuget restore ValveKeyValue/ValveKeyValue.sln
+script:
+  - xbuild /p:Configuration=Release ValveKeyValue/ValveKeyValue.sln
+  - mono ./packages/NUnit.Console.3.0.1/tools/nunit3-console.exe ./ValveKeyValue/ValveKeyValue.Test/bin/Release/ValveKeyValue.Test.dll
