@@ -58,6 +58,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Test Data\TestDataHelper.cs" />
     <Compile Include="Text\ObjectDeserializationTestCase.cs" />
+    <Compile Include="Text\SingleLineCommentTestCase.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ValveKeyValue\ValveKeyValue.csproj">
@@ -83,6 +84,10 @@
     <EmbeddedResource Include="Test Data\Text\list_of_values.vdf" />
     <EmbeddedResource Include="Test Data\Text\escaped_quotation_marks.vdf" />
     <EmbeddedResource Include="Test Data\Text\conditional.vdf" />
+    <EmbeddedResource Include="Test Data\Text\comment_singleline.vdf" />
+    <EmbeddedResource Include="Test Data\Text\comment_singleline_wholeline.vdf" />
+    <EmbeddedResource Include="Test Data\Text\comment_singleline_singleslash_wholeline.vdf" />
+    <EmbeddedResource Include="Test Data\Text\comment_singleline_singleslash.vdf" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\Newtonsoft.Json.dll" />
