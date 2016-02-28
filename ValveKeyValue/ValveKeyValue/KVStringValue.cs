@@ -1,4 +1,6 @@
-﻿namespace ValveKeyValue
+﻿using System;
+
+namespace ValveKeyValue
 {
     class KVStringValue : KVValue
     {
@@ -10,23 +12,41 @@
 
         readonly string value;
 
-        internal override bool TryConvert(out string value)
+        public override TypeCode GetTypeCode() => TypeCode.String;
+
+        public override bool ToBoolean(IFormatProvider provider) => ToInt32(provider) == 1;
+
+        public override byte ToByte(IFormatProvider provider) => (byte)Convert.ChangeType(value, typeof(byte), provider);
+
+        public override char ToChar(IFormatProvider provider) => (char)Convert.ChangeType(value, typeof(char), provider);
+
+        public override DateTime ToDateTime(IFormatProvider provider)
         {
-            value = this.value;
-            return true;
+            throw new InvalidCastException();
         }
 
-        internal override bool TryConvert(out bool value)
-        {
-            int intVal;
-            if (!int.TryParse(this.value, out intVal))
-            {
-                value = default(bool);
-                return false;
-            }
+        public override decimal ToDecimal(IFormatProvider provider) => (decimal)Convert.ChangeType(value, typeof(decimal), provider);
 
-            value = intVal == 1;
-            return true;
-        }
+        public override double ToDouble(IFormatProvider provider) => (double)Convert.ChangeType(value, typeof(double), provider);
+
+        public override short ToInt16(IFormatProvider provider) => (short)Convert.ChangeType(value, typeof(short), provider);
+
+        public override int ToInt32(IFormatProvider provider) => (int)Convert.ChangeType(value, typeof(int), provider);
+
+        public override long ToInt64(IFormatProvider provider) => (long)Convert.ChangeType(value, typeof(long), provider);
+
+        public override sbyte ToSByte(IFormatProvider provider) => (sbyte)Convert.ChangeType(value, typeof(sbyte), provider);
+
+        public override float ToSingle(IFormatProvider provider) => (float)Convert.ChangeType(value, typeof(float), provider);
+
+        public override string ToString(IFormatProvider provider) => value;
+
+        public override object ToType(Type conversionType, IFormatProvider provider) => Convert.ChangeType(value, conversionType, provider);
+
+        public override ushort ToUInt16(IFormatProvider provider) => (ushort)Convert.ChangeType(value, typeof(ushort), provider);
+
+        public override uint ToUInt32(IFormatProvider provider) => (uint)Convert.ChangeType(value, typeof(uint), provider);
+
+        public override ulong ToUInt64(IFormatProvider provider) => (ulong)Convert.ChangeType(value, typeof(ulong), provider);
     }
 }

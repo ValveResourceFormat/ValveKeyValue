@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="KVSerialiserNullInputsTestCase.cs" />
+    <Compile Include="Text\ArrayTestCase.cs" />
     <Compile Include="Text\InvalidSyntaxTestCase.cs" />
     <Compile Include="Text\LegacyDepotDataSubsetTestCase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -76,6 +77,7 @@
     <EmbeddedResource Include="Test Data\Text\partial_partialvalue.vdf" />
     <EmbeddedResource Include="Test Data\Text\partial_noclose.vdf" />
     <EmbeddedResource Include="Test Data\Text\object_person.vdf" />
+    <EmbeddedResource Include="Test Data\Text\list_of_values.vdf" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\Newtonsoft.Json.dll" />

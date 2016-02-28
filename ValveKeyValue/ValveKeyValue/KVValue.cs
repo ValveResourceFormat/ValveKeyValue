@@ -6,7 +6,7 @@ namespace ValveKeyValue
     /// <summary>
     /// Container type for value of a KeyValues object.
     /// </summary>
-    public abstract class KVValue
+    public abstract class KVValue : IConvertible
     {
         /// <summary>
         /// Converts a <see cref="KVValue"/> to a <see cref="string"/>.
@@ -14,18 +14,7 @@ namespace ValveKeyValue
         /// <param name="value">The <see cref="KVValue"/> to convert.</param>
         public static explicit operator string(KVValue value)
         {
-            if (value == null)
-            {
-                return null;
-            }
-
-            string retval;
-            if (!value.TryConvert(out retval))
-            {
-                throw MakeCastException(typeof(string));
-            }
-
-            return retval;
+            return value?.ToString(null);
         }
 
         /// <summary>
@@ -34,27 +23,58 @@ namespace ValveKeyValue
         /// <param name="value">The <see cref="KVValue"/> to convert.</param>
         public static explicit operator bool(KVValue value)
         {
-            if (value == null)
-            {
-                return default(bool);
-            }
-
-            bool retval;
-            if (!value.TryConvert(out retval))
-            {
-                throw MakeCastException(typeof(bool));
-            }
-
-            return retval;
+            return value.ToBoolean(null);
         }
 
-        internal abstract bool TryConvert(out string value);
+        /// <inheritdoc/>
+        public abstract TypeCode GetTypeCode();
 
-        internal abstract bool TryConvert(out bool value);
+        /// <inheritdoc/>
+        public abstract bool ToBoolean(IFormatProvider provider);
 
-        static Exception MakeCastException(Type type)
-        {
-            return new InvalidCastException(string.Format(CultureInfo.InvariantCulture, "The supplied KVValue object could not cast to type {0}.", type.Name));
-        }
+        /// <inheritdoc/>
+        public abstract byte ToByte(IFormatProvider provider);
+
+        /// <inheritdoc/>
+        public abstract char ToChar(IFormatProvider provider);
+
+        /// <inheritdoc/>
+        public abstract DateTime ToDateTime(IFormatProvider provider);
+
+        /// <inheritdoc/>
+        public abstract decimal ToDecimal(IFormatProvider provider);
+
+        /// <inheritdoc/>
+        public abstract double ToDouble(IFormatProvider provider);
+
+        /// <inheritdoc/>
+        public abstract short ToInt16(IFormatProvider provider);
+
+        /// <inheritdoc/>
+        public abstract int ToInt32(IFormatProvider provider);
+
+        /// <inheritdoc/>
+        public abstract long ToInt64(IFormatProvider provider);
+
+        /// <inheritdoc/>
+        public abstract sbyte ToSByte(IFormatProvider provider);
+
+        /// <inheritdoc/>
+        public abstract float ToSingle(IFormatProvider provider);
+
+        /// <inheritdoc/>
+        public abstract string ToString(IFormatProvider provider);
+
+        /// <inheritdoc/>
+        public abstract object ToType(Type conversionType, IFormatProvider provider);
+
+        /// <inheritdoc/>
+        public abstract ushort ToUInt16(IFormatProvider provider);
+
+        /// <inheritdoc/>
+        public abstract uint ToUInt32(IFormatProvider provider);
+
+        /// <inheritdoc/>
+        public abstract ulong ToUInt64(IFormatProvider provider);
     }
 }

@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyProduct("ValveKeyValue")]
 [assembly: AssemblyCopyright("Copyright © SteamDatabase 2016")]
 
-[assembly: CLSCompliant(true)]
+[assembly: CLSCompliant(false)]
 [assembly: ComVisible(false)]
 
 [assembly: Guid("9a10eff9-3cc6-448d-891d-ae33069134e0")]
