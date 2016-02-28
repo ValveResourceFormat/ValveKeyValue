@@ -63,6 +63,7 @@
     <Compile Include="KVTokenReader.cs" />
     <Compile Include="KVTokenType.cs" />
     <Compile Include="KVValue.cs" />
+    <Compile Include="KVValue_operators.cs" />
     <Compile Include="ObjectCopier.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Require.cs" />

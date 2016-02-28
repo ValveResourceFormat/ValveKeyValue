@@ -1,31 +1,12 @@
 ﻿using System;
-using System.Globalization;
 
 namespace ValveKeyValue
 {
     /// <summary>
     /// Container type for value of a KeyValues object.
     /// </summary>
-    public abstract class KVValue : IConvertible
+    public abstract partial class KVValue : IConvertible
     {
-        /// <summary>
-        /// Converts a <see cref="KVValue"/> to a <see cref="string"/>.
-        /// </summary>
-        /// <param name="value">The <see cref="KVValue"/> to convert.</param>
-        public static explicit operator string(KVValue value)
-        {
-            return value?.ToString(null);
-        }
-
-        /// <summary>
-        /// Converts a <see cref="KVValue"/> to a <see cref="bool"/>.
-        /// </summary>
-        /// <param name="value">The <see cref="KVValue"/> to convert.</param>
-        public static explicit operator bool(KVValue value)
-        {
-            return value.ToBoolean(null);
-        }
-
         /// <inheritdoc/>
         public abstract TypeCode GetTypeCode();
 

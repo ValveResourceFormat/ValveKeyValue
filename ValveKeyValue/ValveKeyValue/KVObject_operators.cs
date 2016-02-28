@@ -22,5 +22,14 @@
         {
             return (bool)obj?.Value;
         }
+
+        /// <summary>
+        /// Explicit cast operator for KVObject to int.
+        /// </summary>
+        /// <param name="obj">The <see cref="KVObject"/> to cast.</param>
+        public static explicit operator int(KVObject obj)
+        {
+            return (int)obj?.Value;
+        }
     }
 }

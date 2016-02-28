@@ -48,6 +48,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="KVObjectCastTestCase.cs" />
     <Compile Include="KVSerialiserNullInputsTestCase.cs" />
     <Compile Include="Text\ArrayTestCase.cs" />
     <Compile Include="Text\InvalidSyntaxTestCase.cs" />
