@@ -5,6 +5,8 @@
         ObjectStart,
         ObjectEnd,
         String,
-        EndOfFile
+        EndOfFile,
+        Comment,
+        Condition
     }
 }

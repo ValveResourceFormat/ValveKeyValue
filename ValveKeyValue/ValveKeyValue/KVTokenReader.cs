@@ -9,6 +9,9 @@ namespace ValveKeyValue
         const char QuotationMark = '"';
         const char ObjectStart = '{';
         const char ObjectEnd = '}';
+        const char CommentBegin = '/'; // Although Valve uses the double-slash convention, the KV spec allows for single-slash comments.
+        const char ConditionBegin = '[';
+        const char ConditionEnd = ']';
 
         public KVTokenReader(Stream stream)
         {
@@ -40,6 +43,12 @@ namespace ValveKeyValue
 
                 case ObjectEnd:
                     return ReadObjectEnd();
+
+                case CommentBegin:
+                    return ReadComment();
+
+                case ConditionBegin:
+                    return ReadCondition();
 
                 default:
                     throw new InvalidDataException();
@@ -79,6 +88,28 @@ namespace ValveKeyValue
             return new KVToken(KVTokenType.ObjectEnd);
         }
 
+        KVToken ReadComment()
+        {
+            ReadChar(CommentBegin);
+
+            if (Peek() == (char)CommentBegin)
+            {
+                Next();
+            }
+
+            var text = textReader.ReadLine();
+            return new KVToken(KVTokenType.Comment, text);
+        }
+
+        KVToken ReadCondition()
+        {
+            ReadChar(ConditionBegin);
+            var text = ReadUntil(ConditionEnd);
+            ReadChar(ConditionEnd);
+
+            return new KVToken(KVTokenType.Condition, text);
+        }
+
         char Next()
         {
             var next = textReader.Read();
@@ -107,10 +138,23 @@ namespace ValveKeyValue
         string ReadUntil(char terminator)
         {
             var sb = new StringBuilder();
+            var escapeNext = false;
 
-            while (Peek() != terminator)
+            while (Peek() != terminator || escapeNext)
             {
-                sb.Append(Next());
+                var next = Next();
+
+                if (next == '\\' && !escapeNext)
+                {
+                    escapeNext = true;
+                    continue;
+                }
+                else if (escapeNext)
+                {
+                    escapeNext = false;
+                }
+
+                sb.Append(next);
             }
 
             return sb.ToString();

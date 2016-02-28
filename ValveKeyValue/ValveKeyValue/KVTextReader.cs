@@ -6,14 +6,17 @@ namespace ValveKeyValue
 {
     class KVTextReader : IDisposable
     {
-        public KVTextReader(Stream stream)
+        public KVTextReader(Stream stream, string[] conditions)
         {
             Require.NotNull(stream, nameof(stream));
+            Require.NotNull(conditions, nameof(conditions));
 
+            this.conditions = conditions;
             tokenReader = new KVTokenReader(stream);
             stateMachine = new KVTextReaderStateMachine();
         }
 
+        readonly string[] conditions;
         readonly KVTokenReader tokenReader;
         readonly KVTextReaderStateMachine stateMachine;
         bool disposed;
@@ -49,6 +52,10 @@ namespace ValveKeyValue
 
                     case KVTokenType.ObjectEnd:
                         FinalizeCurrentObject();
+                        break;
+
+                    case KVTokenType.Condition:
+                        HandleCondition(token.Value);
                         break;
 
                     case KVTokenType.EndOfFile:
@@ -132,7 +139,7 @@ namespace ValveKeyValue
                 throw new InvalidOperationException(
                     string.Format(
                         CultureInfo.InvariantCulture,
-                        "Attempted to finalize object while in state {0}",
+                        "Attempted to finalize object while in state {0}.",
                         stateMachine.Current));
             }
 
@@ -140,7 +147,11 @@ namespace ValveKeyValue
 
             if (stateMachine.IsInObject)
             {
-                stateMachine.AddItem(@object);
+                if (@object != null)
+                {
+                    stateMachine.AddItem(@object);
+                }
+
                 stateMachine.Push(KVTextReaderState.InObjectAfterValue);
             }
 
@@ -157,6 +168,37 @@ namespace ValveKeyValue
             }
 
             return @object;
+        }
+
+        void HandleCondition(string text)
+        {
+            if (stateMachine.Current != KVTextReaderState.InObjectAfterValue)
+            {
+                throw new InvalidDataException(
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        "Found conditional while in state {0}.",
+                        stateMachine.Current));
+            }
+
+            if (text.Length < 2 || text[0] != '$' || (text[1] == '!' && text.Length < 3))
+            {
+                throw new InvalidDataException(
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        "Invalid conditional '{0}'.",
+                        text));
+            }
+
+            bool negate = text[1] == '!';
+            var variable = negate ? text.Substring(2) : text.Substring(1);
+            var hasVariable = Array.IndexOf(conditions, variable) < 0;
+            var matchesCondition = negate ? !hasVariable : hasVariable;
+
+            if (matchesCondition)
+            {
+                stateMachine.SetDiscardCurrent();
+            }
         }
     }
 }

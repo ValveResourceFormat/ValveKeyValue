@@ -15,9 +15,20 @@ namespace ValveKeyValue
         /// <returns>A <see cref="KVObject"/> representing the KeyValues structure in the stream.</returns>
         public static KVObject Deserialize(Stream stream)
         {
+            return Deserialize(stream, null);
+        }
+
+        /// <summary>
+        /// Deserializes a KeyValue object from a stream.
+        /// </summary>
+        /// <param name="stream">The stream to deserialize from.</param>
+        /// <param name="conditions">A list of conditions to use to match conditional values.</param>
+        /// <returns>A <see cref="KVObject"/> representing the KeyValues structure in the stream.</returns>
+        public static KVObject Deserialize(Stream stream, string[] conditions)
+        {
             Require.NotNull(stream, nameof(stream));
 
-            using (var reader = new KVTextReader(stream))
+            using (var reader = new KVTextReader(stream, conditions ?? new string[0]))
             {
                 return reader.ReadObject();
             }

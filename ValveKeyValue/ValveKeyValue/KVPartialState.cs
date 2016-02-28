@@ -10,6 +10,8 @@ namespace ValveKeyValue
 
         public IList<KVObject> Items { get; } = new List<KVObject>();
 
+        public bool Discard { get; set; }
+
         public Stack<KVTextReaderState> States { get; } = new Stack<KVTextReaderState>();
     }
 }

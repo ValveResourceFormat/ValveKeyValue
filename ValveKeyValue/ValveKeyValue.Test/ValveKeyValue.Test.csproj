@@ -48,6 +48,8 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Text\ConditionalTestCase.cs" />
+    <Compile Include="Text\EscapedQuotationMarksTestCase.cs" />
     <Compile Include="KVObjectCastTestCase.cs" />
     <Compile Include="KVSerialiserNullInputsTestCase.cs" />
     <Compile Include="Text\ArrayTestCase.cs" />
@@ -79,6 +81,8 @@
     <EmbeddedResource Include="Test Data\Text\partial_noclose.vdf" />
     <EmbeddedResource Include="Test Data\Text\object_person.vdf" />
     <EmbeddedResource Include="Test Data\Text\list_of_values.vdf" />
+    <EmbeddedResource Include="Test Data\Text\escaped_quotation_marks.vdf" />
+    <EmbeddedResource Include="Test Data\Text\conditional.vdf" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\Newtonsoft.Json.dll" />

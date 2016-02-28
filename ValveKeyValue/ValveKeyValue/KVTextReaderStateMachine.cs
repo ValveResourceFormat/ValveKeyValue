@@ -30,6 +30,11 @@ namespace ValveKeyValue
                 throw new KeyValueException("Attempted to finish object construction without an object name.");
             }
 
+            if (state.Discard)
+            {
+                return null;
+            }
+
             if (state.Value != null)
             {
                 return new KVObject(state.Key, state.Value);
@@ -47,6 +52,8 @@ namespace ValveKeyValue
         public void SetValue(KVValue value) => CurrentObject.Value = value;
 
         public void AddItem(KVObject item) => CurrentObject.Items.Add(item);
+
+        public void SetDiscardCurrent() => CurrentObject.Discard = true;
 
         KVPartialState CurrentObject => states.Peek();
     }

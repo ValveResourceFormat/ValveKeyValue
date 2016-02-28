@@ -1,0 +1,5 @@
+﻿"test case"
+{
+	"operating system"		"windows" [$WIN32]
+	"operating system"		"something else" [$!WIN32]
+}
