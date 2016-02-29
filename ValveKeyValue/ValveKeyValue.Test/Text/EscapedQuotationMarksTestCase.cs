@@ -17,7 +17,7 @@ namespace ValveKeyValue.Test.Text
         {
             using (var stream = TestDataHelper.OpenResource("Text.escaped_quotation_marks.vdf"))
             {
-                data = KVSerialiser.Deserialize(stream);
+                data = KVSerializer.Deserialize(stream);
             }
         }
     }

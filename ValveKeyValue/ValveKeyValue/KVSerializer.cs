@@ -6,7 +6,7 @@ namespace ValveKeyValue
     /// <summary>
     /// Helper class to easily deserialize KeyValue objects.
     /// </summary>
-    public static class KVSerialiser
+    public static class KVSerializer
     {
         /// <summary>
         /// Deserializes a KeyValue object from a stream.

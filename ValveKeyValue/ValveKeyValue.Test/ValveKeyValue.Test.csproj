@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -39,19 +39,17 @@
     <CodeAnalysisRuleSet>..\ValveKeyValue.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="nunit.framework, Version=3.0.5813.39031, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
-      <HintPath>..\packages\NUnit.3.0.1\lib\net45\nunit.framework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="nunit.framework, Version=3.0.5813.39031, Culture=neutral, PublicKeyToken=2638cd05610744eb">
+      <HintPath>..\packages\NUnit.3.0.1\lib\net45\nunit.framework.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Text\ConditionalTestCase.cs" />
     <Compile Include="Text\EscapedQuotationMarksTestCase.cs" />
     <Compile Include="KVObjectCastTestCase.cs" />
-    <Compile Include="KVSerialiserNullInputsTestCase.cs" />
     <Compile Include="Text\ArrayTestCase.cs" />
     <Compile Include="Text\InvalidSyntaxTestCase.cs" />
     <Compile Include="Text\LegacyDepotDataSubsetTestCase.cs" />
@@ -59,10 +57,11 @@
     <Compile Include="Test Data\TestDataHelper.cs" />
     <Compile Include="Text\ObjectDeserializationTestCase.cs" />
     <Compile Include="Text\SingleLineCommentTestCase.cs" />
+    <Compile Include="KVSerializerNullInputsTestCase.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ValveKeyValue\ValveKeyValue.csproj">
-      <Project>{df62ad4a-c7f4-43ab-b198-3f4009794437}</Project>
+      <Project>{DF62AD4A-C7F4-43AB-B198-3F4009794437}</Project>
       <Name>ValveKeyValue</Name>
     </ProjectReference>
   </ItemGroup>

@@ -11,7 +11,7 @@ namespace ValveKeyValue.Test
             KVObject data;
             using (var stream = TestDataHelper.OpenResource("Text.conditional.vdf"))
             {
-                data = KVSerialiser.Deserialize(stream, conditions);
+                data = KVSerializer.Deserialize(stream, conditions);
             }
 
             Assert.That((string)data["operating system"], Is.EqualTo("windows"));
@@ -36,7 +36,7 @@ namespace ValveKeyValue.Test
             KVObject data;
             using (var stream = TestDataHelper.OpenResource("Text.conditional.vdf"))
             {
-                data = KVSerialiser.Deserialize(stream, conditions);
+                data = KVSerializer.Deserialize(stream, conditions);
             }
 
             Assert.That((string)data["operating system"], Is.EqualTo("something else"));

@@ -35,7 +35,7 @@ namespace ValveKeyValue.Test
         {
             using (var stream = TestDataHelper.OpenResource("Text.object_person.vdf"))
             {
-                person = KVSerialiser.Deserialize<Person>(stream);
+                person = KVSerializer.Deserialize<Person>(stream);
             }
         }
 

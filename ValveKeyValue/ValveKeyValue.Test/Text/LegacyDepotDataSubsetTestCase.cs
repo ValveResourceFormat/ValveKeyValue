@@ -83,7 +83,7 @@ namespace ValveKeyValue.Test
         {
             using (var stream = TestDataHelper.OpenResource("Text.legacydepotdata_subset.vdf"))
             {
-                data = KVSerialiser.Deserialize(stream);
+                data = KVSerializer.Deserialize(stream);
             }
         }
     }
