@@ -3,17 +3,36 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 
 namespace ValveKeyValue
 {
     static class ObjectCopier
     {
-        public static void CopyObject<TObject>(KVObject kv, TObject obj)
+        public static TObject MakeObject<TObject>(KVObject keyValueObject)
+            => MakeObject<TObject>(keyValueObject, new DefaultMapper());
+
+        public static TObject MakeObject<TObject>(KVObject keyValueObject, IPropertyMapper mapper)
         {
-            CopyObject(kv, obj, new DefaultMapper());
+            Require.NotNull(keyValueObject, nameof(keyValueObject));
+            Require.NotNull(mapper, nameof(mapper));
+
+            object[] enumerableValues;
+            if (IsArray(keyValueObject, out enumerableValues))
+            {
+                object enumerable;
+                if (CreateTypedEnumerable(typeof(TObject), enumerableValues, out enumerable))
+                {
+                    return (TObject)enumerable;
+                }
+            }
+
+            var typedObject = (TObject)FormatterServices.GetSafeUninitializedObject(typeof(TObject));
+            CopyObject(keyValueObject, typedObject, mapper);
+            return typedObject;
         }
 
-        public static void CopyObject<TObject>(KVObject kv, TObject obj, IPropertyMapper mapper)
+        static void CopyObject<TObject>(KVObject kv, TObject obj, IPropertyMapper mapper)
         {
             Require.NotNull(kv, nameof(kv));
 
@@ -42,13 +61,21 @@ namespace ValveKeyValue
                     }
                     else
                     {
-                        throw new NotImplementedException();
+                        var property = typeof(TObject).GetProperty(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                        if (property != null)
+                        {
+                            var @object = typeof(ObjectCopier)
+                                .GetMethod(nameof(MakeObject), new[] { typeof(KVObject), typeof(IPropertyMapper) })
+                                .MakeGenericMethod(property.PropertyType)
+                                .Invoke(null, new object[] { item, mapper });
+                            property.SetValue(obj, @object);
+                        }
                     }
                 }
             }
         }
 
-        public static void CopyValue<TObject>(TObject obj, string mappedName, KVValue value)
+        static void CopyValue<TObject>(TObject obj, string mappedName, KVValue value)
         {
             var property = typeof(TObject).GetProperty(mappedName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             if (property == null)
@@ -60,7 +87,7 @@ namespace ValveKeyValue
             property.SetValue(obj, Convert.ChangeType(value, propertyType));
         }
 
-        public static bool IsArray(KVObject obj, out object[] values)
+        static bool IsArray(KVObject obj, out object[] values)
         {
             values = null;
 
@@ -96,7 +123,7 @@ namespace ValveKeyValue
             return true;
         }
 
-        public static bool CreateTypedEnumerable(Type type, object[] values, out object typedEnumerable)
+        static bool CreateTypedEnumerable(Type type, object[] values, out object typedEnumerable)
         {
             object listObject = null;
 
