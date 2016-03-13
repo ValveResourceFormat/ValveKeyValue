@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="TestFixtureSources.cs" />
+    <Compile Include="Text\DictionaryPropertyTestCase.cs" />
     <Compile Include="Text\NestedObjectGraphTestCase.cs" />
     <Compile Include="Text\DictionaryTestCase.cs" />
     <Compile Include="Text\ObjectDeserializationMixedCaseTestCase.cs" />

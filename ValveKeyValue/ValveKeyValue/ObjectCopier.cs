@@ -60,6 +60,11 @@ namespace ValveKeyValue
                 {
                     CopyValue(obj, property, item.Value);
                 }
+                else if (IsDictionary(property.PropertyType))
+                {
+                    var dictionary = MakeDictionary(property.PropertyType, item);
+                    property.SetValue(obj, dictionary);
+                }
                 else
                 {
                     object[] arrayValues;
