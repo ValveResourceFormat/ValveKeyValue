@@ -205,6 +205,11 @@ namespace ValveKeyValue
 
         static bool IsDictionary(Type type)
         {
+            if (!type.IsGenericType)
+            {
+                return false;
+            }
+
             var genericType = type.GetGenericTypeDefinition();
             if (genericType != typeof(Dictionary<,>))
             {
