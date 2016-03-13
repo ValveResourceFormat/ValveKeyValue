@@ -47,6 +47,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="TestFixtureSources.cs" />
+    <Compile Include="Text\TopLevelEnumerableTestCase.cs" />
     <Compile Include="Text\ConditionalTestCase.cs" />
     <Compile Include="Text\EscapedQuotationMarksTestCase.cs" />
     <Compile Include="KVObjectCastTestCase.cs" />
@@ -87,6 +89,7 @@
     <EmbeddedResource Include="Test Data\Text\comment_singleline_wholeline.vdf" />
     <EmbeddedResource Include="Test Data\Text\comment_singleline_singleslash_wholeline.vdf" />
     <EmbeddedResource Include="Test Data\Text\comment_singleline_singleslash.vdf" />
+    <EmbeddedResource Include="Test Data\Text\top_level_list_of_values.vdf" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\Newtonsoft.Json.dll" />

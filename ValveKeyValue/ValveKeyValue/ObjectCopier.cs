@@ -60,79 +60,7 @@ namespace ValveKeyValue
             property.SetValue(obj, Convert.ChangeType(value, propertyType));
         }
 
-        static void CopyList<TObject>(TObject obj, string mappedName, object[] values)
-        {
-            var property = typeof(TObject).GetProperty(mappedName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            if (property == null)
-            {
-                return;
-            }
-
-            var propertyType = property.PropertyType;
-            if (propertyType.IsArray)
-            {
-                var elementType = propertyType.GetElementType();
-                var itemArray = Array.CreateInstance(elementType, values.Length);
-
-                for (int i = 0; i < itemArray.Length; i++)
-                {
-                    itemArray.SetValue(Convert.ChangeType(values[i], elementType), i);
-                }
-
-                property.SetValue(obj, itemArray);
-            }
-            else if (propertyType.IsGenericType)
-            {
-                if (propertyType.GetGenericTypeDefinition() == typeof(List<>) || propertyType.GetGenericTypeDefinition() == typeof(IList<>))
-                {
-                    var list = InvokeGeneric(nameof(MakeList), propertyType.GetGenericArguments()[0], new[] { values });
-                    property.SetValue(obj, list);
-                }
-                else if (propertyType.GetGenericTypeDefinition() == typeof(Collection<>) || propertyType.GetGenericTypeDefinition() == typeof(ICollection<>))
-                {
-                    var list = InvokeGeneric(nameof(MakeCollection), propertyType.GetGenericArguments()[0], new[] { values });
-                    property.SetValue(obj, list);
-                }
-                else if (propertyType.GetGenericTypeDefinition() == typeof(ObservableCollection<>))
-                {
-                    var list = InvokeGeneric(nameof(MakeObservableCollection), propertyType.GetGenericArguments()[0], new[] { values });
-                    property.SetValue(obj, list);
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        static object InvokeGeneric(string methodName, Type genericType, params object[] parameters)
-        {
-            var method = typeof(ObjectCopier).GetMethod(methodName, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-            return method.MakeGenericMethod(genericType).Invoke(null, parameters);
-        }
-
-        static List<TElement> MakeList<TElement>(object[] items)
-        {
-            return items.Select(i => Convert.ChangeType(i, typeof(TElement)))
-                .Cast<TElement>()
-                .ToList();
-        }
-
-        static Collection<TElement> MakeCollection<TElement>(object[] items)
-        {
-            return new Collection<TElement>(MakeList<TElement>(items));
-        }
-
-        static ObservableCollection<TElement> MakeObservableCollection<TElement>(object[] items)
-        {
-            return new ObservableCollection<TElement>(MakeList<TElement>(items));
-        }
-
-        static bool IsArray(KVObject obj, out object[] values)
+        public static bool IsArray(KVObject obj, out object[] values)
         {
             values = null;
 
@@ -166,6 +94,83 @@ namespace ValveKeyValue
 
             values = items.Select(i => i.Value).ToArray();
             return true;
+        }
+
+        public static bool CreateTypedEnumerable(Type type, object[] values, out object typedEnumerable)
+        {
+            object listObject = null;
+
+            if (type.IsArray)
+            {
+                var elementType = type.GetElementType();
+                var itemArray = Array.CreateInstance(elementType, values.Length);
+
+                for (int i = 0; i < itemArray.Length; i++)
+                {
+                    itemArray.SetValue(Convert.ChangeType(values[i], elementType), i);
+                }
+
+                listObject = itemArray;
+            }
+            else if (type.IsGenericType)
+            {
+                if (type.GetGenericTypeDefinition() == typeof(List<>) || type.GetGenericTypeDefinition() == typeof(IList<>))
+                {
+                    listObject = InvokeGeneric(nameof(MakeList), type.GetGenericArguments()[0], new[] { values });
+                }
+                else if (type.GetGenericTypeDefinition() == typeof(Collection<>) || type.GetGenericTypeDefinition() == typeof(ICollection<>))
+                {
+                    listObject = InvokeGeneric(nameof(MakeCollection), type.GetGenericArguments()[0], new[] { values });
+                }
+                else if (type.GetGenericTypeDefinition() == typeof(ObservableCollection<>))
+                {
+                    listObject = InvokeGeneric(nameof(MakeObservableCollection), type.GetGenericArguments()[0], new[] { values });
+                }
+            }
+
+            typedEnumerable = listObject;
+            return listObject != null;
+        }
+
+        static void CopyList<TObject>(TObject obj, string mappedName, object[] values)
+        {
+            var property = typeof(TObject).GetProperty(mappedName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            if (property == null)
+            {
+                return;
+            }
+
+            var propertyType = property.PropertyType;
+            object list;
+            if (!CreateTypedEnumerable(property.PropertyType, values, out list))
+            {
+                throw new NotSupportedException();
+            }
+
+            property.SetValue(obj, list);
+        }
+
+        static object InvokeGeneric(string methodName, Type genericType, params object[] parameters)
+        {
+            var method = typeof(ObjectCopier).GetMethod(methodName, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            return method.MakeGenericMethod(genericType).Invoke(null, parameters);
+        }
+
+        static List<TElement> MakeList<TElement>(object[] items)
+        {
+            return items.Select(i => Convert.ChangeType(i, typeof(TElement)))
+                .Cast<TElement>()
+                .ToList();
+        }
+
+        static Collection<TElement> MakeCollection<TElement>(object[] items)
+        {
+            return new Collection<TElement>(MakeList<TElement>(items));
+        }
+
+        static ObservableCollection<TElement> MakeObservableCollection<TElement>(object[] items)
+        {
+            return new ObservableCollection<TElement>(MakeList<TElement>(items));
         }
 
         static bool IsNumeric(string str)

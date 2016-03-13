@@ -46,6 +46,16 @@ namespace ValveKeyValue
 
             var @object = Deserialize(stream);
 
+            object[] enumerableValues;
+            if (ObjectCopier.IsArray(@object, out enumerableValues))
+            {
+                object enumerable;
+                if (ObjectCopier.CreateTypedEnumerable(typeof(TObject), enumerableValues, out enumerable))
+                {
+                    return (TObject)enumerable;
+                }
+            }
+
             var typedObject = (TObject)FormatterServices.GetSafeUninitializedObject(typeof(TObject));
             ObjectCopier.CopyObject(@object, typedObject);
             return typedObject;

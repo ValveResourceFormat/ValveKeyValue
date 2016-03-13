@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace ValveKeyValue.Test
 {
     [TestFixtureSource(typeof(TestFixtureSources), nameof(TestFixtureSources.SupportedEnumerableTypesForDeserialization))]
-    class ArrayTestCase<TEnumerable>
+    class TopLevelEnumerableTestCase<TEnumerable>
         where TEnumerable : IEnumerable<string>
     {
         [Test]
@@ -15,10 +15,9 @@ namespace ValveKeyValue.Test
         }
 
         [Test]
-        public void NumbersIsNotNullOrEmpty()
+        public void IsNotEmpty()
         {
-            Assert.That(data.Numbers, Is.Not.Null);
-            Assert.That(data.Numbers.Any(), Is.True);
+            Assert.That(data.Any(), Is.True);
         }
 
         [TestCase(0, "zero")]
@@ -35,26 +34,21 @@ namespace ValveKeyValue.Test
         [TestCase(11, "eleven")]
         [TestCase(12, "twelve")]
         [TestCase(13, "thirteen")]
-        public void NumbersListHasValue(int index, string expectedValue)
+        public void HasValue(int index, string expectedValue)
         {
-            var actualValue = data.Numbers.ToArray()[index];
+            var actualValue = data.ToArray()[index];
             Assert.That(actualValue, Is.EqualTo(expectedValue));
         }
 
-        SerializedType data;
+        IEnumerable<string> data;
 
         [OneTimeSetUp]
         public void SetUp()
         {
-            using (var stream = TestDataHelper.OpenResource("Text.list_of_values.vdf"))
+            using (var stream = TestDataHelper.OpenResource("Text.top_level_list_of_values.vdf"))
             {
-                data = KVSerializer.Deserialize<SerializedType>(stream);
+                data = KVSerializer.Deserialize<TEnumerable>(stream);
             }
-        }
-
-        class SerializedType
-        {
-            public TEnumerable Numbers { get; set; }
         }
     }
 }
