@@ -1,7 +1,9 @@
-﻿namespace ValveKeyValue
+﻿using System;
+
+namespace ValveKeyValue
 {
     interface IPropertyMapper
     {
-        string MapFromKeyValue(string propertyName);
+        string MapFromKeyValue(Type objectType, string propertyName);
     }
 }

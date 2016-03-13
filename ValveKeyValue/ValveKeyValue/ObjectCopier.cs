@@ -46,7 +46,7 @@ namespace ValveKeyValue
 
             foreach (var item in kv.Items)
             {
-                var name = mapper.MapFromKeyValue(item.Name);
+                var name = mapper.MapFromKeyValue(typeof(TObject), item.Name);
 
                 if (item.Value != null)
                 {
