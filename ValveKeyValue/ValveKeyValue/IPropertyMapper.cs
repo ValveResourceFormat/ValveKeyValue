@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Reflection;
 
 namespace ValveKeyValue
 {
     interface IPropertyMapper
     {
-        string MapFromKeyValue(Type objectType, string propertyName);
+        PropertyInfo MapFromKeyValue(Type objectType, string propertyName);
     }
 }

@@ -54,6 +54,8 @@
     <Compile Include="KVObject.cs" />
     <Compile Include="KVObject_operators.cs" />
     <Compile Include="KVPartialState.cs" />
+    <Compile Include="KVIgnoreAttribute.cs" />
+    <Compile Include="KVPropertyAttribute.cs" />
     <Compile Include="KVStringValue.cs" />
     <Compile Include="KVTextReader.cs" />
     <Compile Include="KVTextReaderState.cs" />

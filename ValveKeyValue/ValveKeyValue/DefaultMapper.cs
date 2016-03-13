@@ -6,12 +6,29 @@ namespace ValveKeyValue
 {
    sealed class DefaultMapper : IPropertyMapper
     {
-        string IPropertyMapper.MapFromKeyValue(Type objectType, string propertyName)
+        PropertyInfo IPropertyMapper.MapFromKeyValue(Type objectType, string propertyName)
         {
-            var property = objectType.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+            var properties = objectType.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+            // First search for properties with a [KVProperty("...")] attribute.
+            var property = properties
+                .FirstOrDefault(p => p.GetCustomAttribute<KVPropertyAttribute>()?.PropertyName == propertyName);
+            if (property != null)
+            {
+                return property;
+            }
+
+            // Next, search by name.
+            property = properties
                 .FirstOrDefault(p => string.Equals(p.Name, propertyName, StringComparison.OrdinalIgnoreCase));
 
-            return property?.Name ?? propertyName;
+            // Drop it if it has a [KVIgnore].
+            if (property?.GetCustomAttribute<KVIgnoreAttribute>() != null)
+            {
+                return null;
+            }
+
+            return property;
         }
     }
 }

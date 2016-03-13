@@ -50,6 +50,7 @@
     <Compile Include="TestFixtureSources.cs" />
     <Compile Include="Text\NestedObjectGraphTestCase.cs" />
     <Compile Include="Text\ObjectDeserializationMixedCaseTestCase.cs" />
+    <Compile Include="Text\ObjectDeserializationAttributesTestCase.cs" />
     <Compile Include="Text\TopLevelEnumerableTestCase.cs" />
     <Compile Include="Text\ConditionalTestCase.cs" />
     <Compile Include="Text\EscapedQuotationMarksTestCase.cs" />
@@ -94,6 +95,7 @@
     <EmbeddedResource Include="Test Data\Text\top_level_list_of_values.vdf" />
     <EmbeddedResource Include="Test Data\Text\nested_object_graph.vdf" />
     <EmbeddedResource Include="Test Data\Text\object_person_mixed_case.vdf" />
+    <EmbeddedResource Include="Test Data\Text\object_person_attributes.vdf" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\Newtonsoft.Json.dll" />

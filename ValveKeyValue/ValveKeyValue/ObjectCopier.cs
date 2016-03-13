@@ -46,43 +46,37 @@ namespace ValveKeyValue
 
             foreach (var item in kv.Items)
             {
-                var name = mapper.MapFromKeyValue(typeof(TObject), item.Name);
+                var property = mapper.MapFromKeyValue(typeof(TObject), item.Name);
+                if (property == null)
+                {
+                    continue;
+                }
 
                 if (item.Value != null)
                 {
-                    CopyValue(obj, name, item.Value);
+                    CopyValue(obj, property, item.Value);
                 }
                 else
                 {
                     object[] arrayValues;
                     if (IsArray(item, out arrayValues))
                     {
-                        CopyList(obj, name, arrayValues);
+                        CopyList(obj, property, arrayValues);
                     }
                     else
                     {
-                        var property = typeof(TObject).GetProperty(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                        if (property != null)
-                        {
-                            var @object = typeof(ObjectCopier)
-                                .GetMethod(nameof(MakeObject), new[] { typeof(KVObject), typeof(IPropertyMapper) })
-                                .MakeGenericMethod(property.PropertyType)
-                                .Invoke(null, new object[] { item, mapper });
-                            property.SetValue(obj, @object);
-                        }
+                        var @object = typeof(ObjectCopier)
+                            .GetMethod(nameof(MakeObject), new[] { typeof(KVObject), typeof(IPropertyMapper) })
+                            .MakeGenericMethod(property.PropertyType)
+                            .Invoke(null, new object[] { item, mapper });
+                        property.SetValue(obj, @object);
                     }
                 }
             }
         }
 
-        static void CopyValue<TObject>(TObject obj, string mappedName, KVValue value)
+        static void CopyValue<TObject>(TObject obj, PropertyInfo property, KVValue value)
         {
-            var property = typeof(TObject).GetProperty(mappedName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            if (property == null)
-            {
-                return;
-            }
-
             var propertyType = property.PropertyType;
             property.SetValue(obj, Convert.ChangeType(value, propertyType));
         }
@@ -159,14 +153,8 @@ namespace ValveKeyValue
             return listObject != null;
         }
 
-        static void CopyList<TObject>(TObject obj, string mappedName, object[] values)
+        static void CopyList<TObject>(TObject obj, PropertyInfo property, object[] values)
         {
-            var property = typeof(TObject).GetProperty(mappedName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            if (property == null)
-            {
-                return;
-            }
-
             var propertyType = property.PropertyType;
             object list;
             if (!CreateTypedEnumerable(property.PropertyType, values, out list))
