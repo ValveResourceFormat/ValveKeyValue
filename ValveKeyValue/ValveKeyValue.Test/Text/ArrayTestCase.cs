@@ -4,7 +4,13 @@ using NUnit.Framework;
 
 namespace ValveKeyValue.Test
 {
-    [TestFixtureSource(typeof(TestFixtureSources), nameof(TestFixtureSources.SupportedEnumerableTypesForDeserialization))]
+    // [TestFixtureSource(typeof(TestFixtureSources), nameof(TestFixtureSources.SupportedEnumerableTypesForDeserialization))]
+    [TestFixture(typeof(List<string>))]
+    [TestFixture(typeof(string[]))]
+    [TestFixture(typeof(System.Collections.ObjectModel.Collection<string>))]
+    [TestFixture(typeof(IList<string>))]
+    [TestFixture(typeof(ICollection<string>))]
+    [TestFixture(typeof(System.Collections.ObjectModel.ObservableCollection<string>))]
     class ArrayTestCase<TEnumerable>
         where TEnumerable : IEnumerable<string>
     {
