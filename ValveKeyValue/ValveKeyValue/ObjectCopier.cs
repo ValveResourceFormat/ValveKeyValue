@@ -26,6 +26,10 @@ namespace ValveKeyValue
                     return (TObject)enumerable;
                 }
             }
+            else if (IsDictionary(typeof(TObject)))
+            {
+                return (TObject)MakeDictionary(typeof(TObject), keyValueObject);
+            }
 
             var typedObject = (TObject)FormatterServices.GetSafeUninitializedObject(typeof(TObject));
             CopyObject(keyValueObject, typedObject, mapper);
@@ -197,6 +201,37 @@ namespace ValveKeyValue
 
             int unused;
             return int.TryParse(str, out unused);
+        }
+
+        static bool IsDictionary(Type type)
+        {
+            var genericType = type.GetGenericTypeDefinition();
+            if (genericType != typeof(Dictionary<,>))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        static object MakeDictionary(Type type, KVObject kv)
+        {
+            var dictionary = Activator.CreateInstance(type);
+            var genericArguments = type.GetGenericArguments();
+            var keyType = genericArguments[0];
+            var valueType = genericArguments[1];
+
+            var addMethod = type.GetMethod(nameof(Dictionary<object, object>.Add), BindingFlags.Instance | BindingFlags.Public, null, new[] { keyType, valueType }, null);
+
+            foreach (var item in kv.Items)
+            {
+                var key = Convert.ChangeType(item.Name, keyType);
+                var value = Convert.ChangeType(item.Value, valueType);
+
+                addMethod.Invoke(dictionary, new[] { key, value });
+            }
+
+            return dictionary;
         }
     }
 }
