@@ -228,20 +228,24 @@ namespace ValveKeyValue
         {
             var dictionary = Activator.CreateInstance(type);
             var genericArguments = type.GetGenericArguments();
-            var keyType = genericArguments[0];
-            var valueType = genericArguments[1];
 
-            var addMethod = type.GetMethod(nameof(Dictionary<object, object>.Add), BindingFlags.Instance | BindingFlags.Public, null, new[] { keyType, valueType }, null);
-
-            foreach (var item in kv.Items)
-            {
-                var key = Convert.ChangeType(item.Name, keyType);
-                var value = Convert.ChangeType(item.Value, valueType);
-
-                addMethod.Invoke(dictionary, new[] { key, value });
-            }
+            typeof(ObjectCopier)
+                .GetMethod(nameof(FillDictionary), BindingFlags.Static | BindingFlags.NonPublic)
+                .MakeGenericMethod(genericArguments)
+                .Invoke(null, new[] { dictionary, kv });
 
             return dictionary;
+        }
+
+        static void FillDictionary<TKey, TValue>(Dictionary<TKey, TValue> dictionary, KVObject kv)
+        {
+            foreach (var item in kv.Items)
+            {
+                var key = (TKey)Convert.ChangeType(item.Name, typeof(TKey));
+                var value = (TValue)Convert.ChangeType(item.Value, typeof(TValue));
+
+                dictionary[key] = value;
+            }
         }
     }
 }

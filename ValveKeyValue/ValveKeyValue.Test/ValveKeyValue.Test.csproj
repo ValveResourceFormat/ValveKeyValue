@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="TestFixtureSources.cs" />
     <Compile Include="Text\DictionaryPropertyTestCase.cs" />
+    <Compile Include="Text\DictionaryDuplicateKeysTestCase.cs" />
     <Compile Include="Text\NestedObjectGraphTestCase.cs" />
     <Compile Include="Text\DictionaryTestCase.cs" />
     <Compile Include="Text\ObjectDeserializationMixedCaseTestCase.cs" />
@@ -98,6 +99,7 @@
     <EmbeddedResource Include="Test Data\Text\nested_object_graph.vdf" />
     <EmbeddedResource Include="Test Data\Text\object_person_mixed_case.vdf" />
     <EmbeddedResource Include="Test Data\Text\object_person_attributes.vdf" />
+    <EmbeddedResource Include="Test Data\Text\duplicate_keys.vdf" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\Newtonsoft.Json.dll" />

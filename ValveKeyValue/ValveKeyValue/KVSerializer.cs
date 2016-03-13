@@ -48,5 +48,22 @@ namespace ValveKeyValue
             var typedObject = ObjectCopier.MakeObject<TObject>(@object);
             return typedObject;
         }
+
+        /// <summary>
+        /// Deserializes an object from a KeyValues representation in a stream.
+        /// </summary>
+        /// <param name="stream">The stream to deserialize from.</param>
+        /// <param name="conditions">A list of conditions to use to match conditional values.</param>
+        /// <returns>A <typeparamref name="TObject" /> instance representing the KeyValues structure in the stream.</returns>
+        /// <typeparam name="TObject">The type of object to deserialize.</typeparam>;
+        public static TObject Deserialize<TObject>(Stream stream, string[] conditions)
+        {
+            Require.NotNull(stream, nameof(stream));
+            Require.NotNull(conditions, nameof(conditions));
+
+            var @object = Deserialize(stream, conditions);
+            var typedObject = ObjectCopier.MakeObject<TObject>(@object);
+            return typedObject;
+        }
     }
 }

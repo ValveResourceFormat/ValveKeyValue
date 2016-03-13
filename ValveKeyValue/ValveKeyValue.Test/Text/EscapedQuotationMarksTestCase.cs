@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 
-namespace ValveKeyValue.Test.Text
+namespace ValveKeyValue.Test
 {
     class EscapedQuotationMarksTestCase
     {
