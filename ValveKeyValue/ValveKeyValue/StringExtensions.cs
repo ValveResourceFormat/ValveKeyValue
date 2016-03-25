@@ -1,34 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace ValveKeyValue
 {
     static class StringExtensions
     {
-        public static IEnumerable<string> Split(this string haystack, string delimeter, StringSplitOptions options)
+        public static IEnumerable<string> Split(this string haystack, string delimeter)
         {
             Require.NotNull(haystack, nameof(haystack));
             Require.NotNull(delimeter, nameof(delimeter));
 
             var strings = new List<string>();
             var maxSubstring = haystack.Length - delimeter.Length;
+            var lastStartIndex = 0;
             var startIndex = 0;
 
-            for (int i = 0; i < maxSubstring; i++)
+            while ((startIndex = haystack.IndexOf(delimeter, startIndex)) >= 0)
             {
-                var possibleDelimeterText = haystack.Substring(i, delimeter.Length);
-                if (!string.Equals(possibleDelimeterText, delimeter, StringComparison.Ordinal))
-                {
-                    continue;
-                }
-
-                var foundText = haystack.Substring(startIndex, i - startIndex);
+                var foundText = haystack.Substring(lastStartIndex, startIndex - lastStartIndex);
                 strings.Add(foundText);
-                startIndex = i + delimeter.Length;
-                i += delimeter.Length;
+                startIndex += delimeter.Length;
+                lastStartIndex = startIndex;
             }
 
-            strings.Add(haystack.Substring(startIndex, haystack.Length - startIndex));
+            strings.Add(haystack.Substring(lastStartIndex, haystack.Length - lastStartIndex));
 
             return strings;
         }

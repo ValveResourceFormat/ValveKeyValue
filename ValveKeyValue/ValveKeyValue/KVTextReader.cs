@@ -173,7 +173,7 @@ namespace ValveKeyValue
 
         void HandleCondition(string text)
         {
-            var variables = text.Split("||", StringSplitOptions.None);
+            var variables = text.Split("||");
 
             if (variables.Any() && !variables.Any(MatchesCondition))
             {
