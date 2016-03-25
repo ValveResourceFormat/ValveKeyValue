@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 
 namespace ValveKeyValue
 {
@@ -172,6 +173,16 @@ namespace ValveKeyValue
 
         void HandleCondition(string text)
         {
+            var variables = text.Split("||", StringSplitOptions.None);
+
+            if (variables.Any() && !variables.Any(MatchesCondition))
+            {
+                stateMachine.SetDiscardCurrent();
+            }
+        }
+
+        bool MatchesCondition(string text)
+        {
             if (stateMachine.Current != KVTextReaderState.InObjectAfterValue)
             {
                 throw new InvalidDataException(
@@ -181,7 +192,8 @@ namespace ValveKeyValue
                         stateMachine.Current));
             }
 
-            if (text.Length < 2 || text[0] != '$' || (text[1] == '!' && text.Length < 3))
+            var isNegated = IsNegatedConditional(text);
+            if (!IsConditional(text) && !isNegated)
             {
                 throw new InvalidDataException(
                     string.Format(
@@ -190,15 +202,16 @@ namespace ValveKeyValue
                         text));
             }
 
-            bool negate = text[1] == '!';
-            var variable = negate ? text.Substring(2) : text.Substring(1);
-            var hasVariable = Array.IndexOf(conditions, variable) < 0;
-            var matchesCondition = negate ? !hasVariable : hasVariable;
-
-            if (matchesCondition)
-            {
-                stateMachine.SetDiscardCurrent();
-            }
+            var variableText = isNegated ? text.Substring(2) : text.Substring(1);
+            var hasVariable = Array.IndexOf(conditions, variableText) >= 0;
+            var matchesCondition = isNegated ? !hasVariable : hasVariable;
+            return matchesCondition;
         }
+
+        static bool IsConditional(string text)
+            => text.Length > 2 && text[0] == '$';
+
+        static bool IsNegatedConditional(string text)
+            => text.Length > 3 && text[0] == '!' && text[1] == '$';
     }
 }

@@ -1,5 +1,6 @@
 ﻿"test case"
 {
-	"operating system"		"windows" [$WIN32]
-	"operating system"		"something else" [$!WIN32]
+	"operating system"		"windows 32-bit" [$WIN32]
+	"operating system"		"something else" [!$WIN32]
+	"platform"				"windows" [$WIN32||$WIN64]
 }
