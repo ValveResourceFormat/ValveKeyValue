@@ -164,7 +164,6 @@ namespace ValveKeyValue
 
         static void CopyList<TObject>(TObject obj, PropertyInfo property, object[] values)
         {
-            var propertyType = property.PropertyType;
             object list;
             if (!CreateTypedEnumerable(property.PropertyType, values, out list))
             {

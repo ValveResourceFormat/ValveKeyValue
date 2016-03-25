@@ -10,7 +10,6 @@ namespace ValveKeyValue
             Require.NotNull(delimeter, nameof(delimeter));
 
             var strings = new List<string>();
-            var maxSubstring = haystack.Length - delimeter.Length;
             var lastStartIndex = 0;
             var startIndex = 0;
 
