@@ -7,4 +7,4 @@ install:
   - nuget restore ValveKeyValue/ValveKeyValue.sln
 script:
   - xbuild /p:Configuration=Release ValveKeyValue/ValveKeyValue.sln
-  - mono ./ValveKeyValue/packages/NUnit.Console.3.0.1/tools/nunit3-console.exe ./ValveKeyValue/ValveKeyValue.Test/bin/Release/ValveKeyValue.Test.dll
+  - mono ./ValveKeyValue/packages/NUnit.ConsoleRunner.3.2.0/tools/nunit3-console.exe ./ValveKeyValue/ValveKeyValue.Test/bin/Release/ValveKeyValue.Test.dll

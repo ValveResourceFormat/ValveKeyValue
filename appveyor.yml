@@ -18,7 +18,7 @@ build:
   verbosity: minimal
 test_script:
 - ps: >-
-    .\ValveKeyValue\packages\OpenCover.4.6.166\tools\OpenCover.Console.exe -target:nunit3-console.exe "-targetargs:ValveKeyValue/ValveKeyValue.Test/bin/$($env:CONFIGURATION)/ValveKeyValue.Test.dll --result=testResults.xml;format=AppVeyor" "-filter:+[ValveKeyValue*]* -[ValveKeyValue.Test]*" -output:opencoverCoverage.xml -register:user -returntargetcode
+    .\ValveKeyValue\packages\OpenCover.4.6.519\tools\OpenCover.Console.exe -target:nunit3-console.exe "-targetargs:ValveKeyValue/ValveKeyValue.Test/bin/$($env:CONFIGURATION)/ValveKeyValue.Test.dll --result=testResults.xml;format=AppVeyor" "-filter:+[ValveKeyValue*]* -[ValveKeyValue.Test]*" -output:opencoverCoverage.xml -register:user -returntargetcode
 
     if ($env:APPVEYOR_PULL_REQUEST_NUMBER -eq $null) {
       $coveralls = (Resolve-Path "ValveKeyValue/packages/coveralls.net.*/tools/csmacnz.coveralls.exe").ToString()
