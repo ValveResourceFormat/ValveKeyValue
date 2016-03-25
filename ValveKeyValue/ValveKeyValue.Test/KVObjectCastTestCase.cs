@@ -1,5 +1,5 @@
 ﻿using System;
-
+using System.Collections;
 using NUnit.Framework;
 
 namespace ValveKeyValue.Test
@@ -17,8 +17,7 @@ namespace ValveKeyValue.Test
             Assert.That((bool)kv, Is.EqualTo(expected));
         }
 
-        [TestCase("")]
-        [TestCase("abc")]
+        [TestCaseSource(nameof(CommonFailures))]
         [TestCase("true")]
         [TestCase("True")]
         [TestCase("false")]
@@ -64,13 +63,34 @@ namespace ValveKeyValue.Test
             Assert.That((char)kv, Is.EqualTo(value[0]));
         }
 
-        [TestCase("")]
-        [TestCase("abc")]
+        [TestCaseSource(nameof(CommonFailures))]
         [TestCase("..")]
         public void CharFailure(string value)
         {
             var kv = new KVObject("aaa", value);
             Assert.That(() => (char)kv, Throws.Exception.TypeOf<FormatException>());
+        }
+
+        [TestCase("123", (short)123)]
+        [TestCase("0", (short)0)]
+        [TestCase("1", (short)1)]
+        [TestCase("32767", (short)32767)]
+        [TestCase("-123", -123)]
+        public void Int16Success(string value, short expected)
+        {
+            var kv = new KVObject("aaa", value);
+            Assert.That((short)kv, Is.EqualTo(expected));
+        }
+
+        [TestCaseSource(nameof(CommonFailures))]
+        [TestCase("65535")]
+        [TestCase("123456789123456789")]
+        [TestCase("4294967295")]
+        [TestCase("76561197960265729")]
+        public void Int16Failure(string value)
+        {
+            var kv = new KVObject("aaa", value);
+            Assert.That(() => (short)kv, Throws.Exception.TypeOf<FormatException>().Or.TypeOf<OverflowException>());
         }
 
         [TestCase("123", 123)]
@@ -83,17 +103,32 @@ namespace ValveKeyValue.Test
             Assert.That((int)kv, Is.EqualTo(expected));
         }
 
-        [TestCase("")]
-        [TestCase("abc")]
-        [TestCase("zero")]
-        [TestCase("one")]
-        [TestCase("ZER0")]
-        [TestCase("2wo")]
+        [TestCaseSource(nameof(CommonFailures))]
         [TestCase("4294967295")]
         public void Int32Failure(string value)
         {
             var kv = new KVObject("aaa", value);
             Assert.That(() => (int)kv, Throws.Exception.TypeOf<FormatException>().Or.TypeOf<OverflowException>());
+        }
+
+        [TestCase("123", 123L)]
+        [TestCase("0", 0L)]
+        [TestCase("1", 1L)]
+        [TestCase("4294967295", 4294967295L)]
+        [TestCase("76561197960265729", 76561197960265729L)]
+        [TestCase("-123", -123)]
+        public void Int64Success(string value, long expected)
+        {
+            var kv = new KVObject("aaa", value);
+            Assert.That((long)kv, Is.EqualTo(expected));
+        }
+
+        [TestCaseSource(nameof(CommonFailures))]
+        [TestCase("123456789123456789012345678")]
+        public void Int64Failure(string value)
+        {
+            var kv = new KVObject("aaa", value);
+            Assert.That(() => (long)kv, Throws.Exception.TypeOf<FormatException>().Or.TypeOf<OverflowException>());
         }
 
         [TestCase("0", 0)]
@@ -107,8 +142,7 @@ namespace ValveKeyValue.Test
             Assert.That((sbyte)kv, Is.EqualTo(expected));
         }
 
-        [TestCase("")]
-        [TestCase("abc")]
+        [TestCaseSource(nameof(CommonFailures))]
         [TestCase("-129")]
         [TestCase("128")]
         [TestCase("256")]
@@ -122,6 +156,27 @@ namespace ValveKeyValue.Test
             Assert.That(() => (sbyte)kv, Throws.Exception.TypeOf<FormatException>().Or.TypeOf<OverflowException>());
         }
 
+        [TestCase("123", (ushort)123)]
+        [TestCase("0", (ushort)0)]
+        [TestCase("1", (ushort)1)]
+        [TestCase("65535", (ushort)65535)]
+        public void UInt16Success(string value, ushort expected)
+        {
+            var kv = new KVObject("aaa", value);
+            Assert.That((ushort)kv, Is.EqualTo(expected));
+        }
+
+        [TestCaseSource(nameof(CommonFailures))]
+        [TestCase("123456789123456789")]
+        [TestCase("-123")]
+        [TestCase("4294967295")]
+        [TestCase("76561197960265729")]
+        public void UInt16Failure(string value)
+        {
+            var kv = new KVObject("aaa", value);
+            Assert.That(() => (ushort)kv, Throws.Exception.TypeOf<FormatException>().Or.TypeOf<OverflowException>());
+        }
+
         [TestCase("123", 123U)]
         [TestCase("0", 0U)]
         [TestCase("1", 1U)]
@@ -132,12 +187,7 @@ namespace ValveKeyValue.Test
             Assert.That((uint)kv, Is.EqualTo(expected));
         }
 
-        [TestCase("")]
-        [TestCase("abc")]
-        [TestCase("zero")]
-        [TestCase("one")]
-        [TestCase("ZER0")]
-        [TestCase("2wo")]
+        [TestCaseSource(nameof(CommonFailures))]
         [TestCase("123456789123456789")]
         [TestCase("-123")]
         [TestCase("76561197960265729")]
@@ -158,18 +208,26 @@ namespace ValveKeyValue.Test
             Assert.That((ulong)kv, Is.EqualTo(expected));
         }
 
-        [TestCase("")]
-        [TestCase("abc")]
-        [TestCase("zero")]
-        [TestCase("one")]
-        [TestCase("ZER0")]
-        [TestCase("2wo")]
+        [TestCaseSource(nameof(CommonFailures))]
         [TestCase("123456789123456789012345678")]
         [TestCase("-123")]
         public void UInt64Failure(string value)
         {
             var kv = new KVObject("aaa", value);
             Assert.That(() => (ulong)kv, Throws.Exception.TypeOf<FormatException>().Or.TypeOf<OverflowException>());
+        }
+
+        static IEnumerable CommonFailures
+        {
+            get
+            {
+                yield return string.Empty;
+                yield return "abc";
+                yield return "zero";
+                yield return "one";
+                yield return "ZER0";
+                yield return "2wo";
+            }
         }
     }
 }

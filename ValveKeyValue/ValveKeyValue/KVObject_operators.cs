@@ -78,6 +78,15 @@
         }
 
         /// <summary>
+        /// Explicit cast operator for KVObject to short.
+        /// </summary>
+        /// <param name="obj">The <see cref="KVObject"/> to cast.</param>
+        public static explicit operator short(KVObject obj)
+        {
+            return (short)obj?.Value;
+        }
+
+        /// <summary>
         /// Explicit cast operator for KVObject to long.
         /// </summary>
         /// <param name="obj">The <see cref="KVObject"/> to cast.</param>
