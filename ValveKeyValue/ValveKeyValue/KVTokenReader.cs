@@ -168,6 +168,10 @@ namespace ValveKeyValue
                             sb.Append('\\');
                             break;
 
+                        case '"':
+                            sb.Append('"');
+                            break;
+
                         default:
                             throw new InvalidDataException($"Unknown escaped character '\\{next}'.");
                     }
