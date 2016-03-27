@@ -15,5 +15,14 @@ namespace ValveKeyValue.Test
 
             return stream;
         }
+
+        public static string ReadTextResource(string name)
+        {
+            using (var stream = OpenResource(name))
+            using (var reader = new StreamReader(stream))
+            {
+                return reader.ReadToEnd();
+            }
+        }
     }
 }
