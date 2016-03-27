@@ -229,5 +229,29 @@ namespace ValveKeyValue.Test
                 yield return "2wo";
             }
         }
+
+        [TestCase(typeof(bool))]
+        [TestCase(typeof(byte))]
+        [TestCase(typeof(char))]
+        [TestCase(typeof(DateTime))]
+        [TestCase(typeof(decimal))]
+        [TestCase(typeof(int))]
+        [TestCase(typeof(long))]
+        [TestCase(typeof(uint))]
+        [TestCase(typeof(ulong))]
+        [TestCase(typeof(ushort))]
+        [TestCase(typeof(sbyte))]
+        [TestCase(typeof(short))]
+        [TestCase(typeof(uint))]
+        public void ConvertingObjectWithChildrenIsNotSupported(Type type)
+        {
+            var kv = new KVObject(
+                "aaa",
+                new[] { new KVObject("bbb", "ccc") });
+
+            Assert.That(
+                () => Convert.ChangeType(kv.Value, type),
+                Throws.Exception.TypeOf<NotSupportedException>());
+        }
     }
 }
