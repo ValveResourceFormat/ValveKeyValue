@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Runtime.Serialization;
 
 namespace ValveKeyValue
@@ -25,6 +26,10 @@ namespace ValveKeyValue
                 {
                     return (TObject)enumerable;
                 }
+            }
+            else if (IsEnumerableType(typeof(TObject)))
+            {
+                throw new InvalidOperationException($"Cannot deserialize a non-array value to type \"{typeof(TObject).Namespace}.{typeof(TObject).Name}\".");
             }
             else if (IsDictionary(typeof(TObject)))
             {
@@ -72,13 +77,24 @@ namespace ValveKeyValue
                     {
                         CopyList(obj, property, arrayValues);
                     }
+                    else if (IsEnumerableType(typeof(TObject)))
+                    {
+                        throw new InvalidOperationException($"Cannot deserialize a non-array value to type \"{typeof(TObject).Namespace}.{typeof(TObject).Name}\".");
+                    }
                     else
                     {
-                        var @object = typeof(ObjectCopier)
-                            .GetMethod(nameof(MakeObject), new[] { typeof(KVObject), typeof(IPropertyMapper) })
-                            .MakeGenericMethod(property.PropertyType)
-                            .Invoke(null, new object[] { item, mapper });
-                        property.SetValue(obj, @object);
+                        try
+                        {
+                            var @object = typeof(ObjectCopier)
+                                .GetMethod(nameof(MakeObject), new[] { typeof(KVObject), typeof(IPropertyMapper) })
+                                .MakeGenericMethod(property.PropertyType)
+                                .Invoke(null, new object[] { item, mapper });
+                            property.SetValue(obj, @object);
+                        }
+                        catch (TargetInvocationException ex)
+                        {
+                            ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
+                        }
                     }
                 }
             }
@@ -155,6 +171,32 @@ namespace ValveKeyValue
 
             typedEnumerable = listObject;
             return listObject != null;
+        }
+
+        static bool IsEnumerableType(Type type)
+        {
+            if (type.IsArray)
+            {
+                return true;
+            }
+
+            if (!type.IsGenericType)
+            {
+                return false;
+            }
+
+            var gtd = type.GetGenericTypeDefinition();
+
+            if (gtd == typeof(List<>) ||
+                gtd == typeof(IList<>) ||
+                gtd == typeof(Collection<>) ||
+                gtd == typeof(ICollection<>) ||
+                gtd == typeof(ObservableCollection<>))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         static void CopyList<TObject>(TObject obj, PropertyInfo property, object[] values)
