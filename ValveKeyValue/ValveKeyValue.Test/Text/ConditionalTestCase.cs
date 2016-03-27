@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System.Linq;
+using NUnit.Framework;
 
 namespace ValveKeyValue.Test
 {
@@ -8,11 +9,7 @@ namespace ValveKeyValue.Test
         public void ReadsValueWhenConditionalEqual()
         {
             var conditions = new[] { "WIN32" };
-            KVObject data;
-            using (var stream = TestDataHelper.OpenResource("Text.conditional.vdf"))
-            {
-                data = KVSerializer.Deserialize(stream, conditions);
-            }
+            var data = ParseResource("Text.conditional.vdf", conditions);
 
             Assert.That((string)data["operating system"], Is.EqualTo("windows 32-bit"));
         }
@@ -22,11 +19,7 @@ namespace ValveKeyValue.Test
         public void ReadsValueWhenConditionalWithOrMatches(string condition)
         {
             var conditions = new[] { condition };
-            KVObject data;
-            using (var stream = TestDataHelper.OpenResource("Text.conditional.vdf"))
-            {
-                data = KVSerializer.Deserialize(stream, conditions);
-            }
+            var data = ParseResource("Text.conditional.vdf", conditions);
 
             Assert.That((string)data["platform"], Is.EqualTo("windows"));
         }
@@ -35,11 +28,7 @@ namespace ValveKeyValue.Test
         public void ReadsValueWhenConditionalWithAndMatches()
         {
             var conditions = new[] { "X360", "X360WIDE" };
-            KVObject data;
-            using (var stream = TestDataHelper.OpenResource("Text.conditional.vdf"))
-            {
-                data = KVSerializer.Deserialize(stream, conditions);
-            }
+            var data = ParseResource("Text.conditional.vdf", conditions);
 
             Assert.That((string)data["ui type"], Is.EqualTo("Widescreen Xbox 360"));
         }
@@ -48,11 +37,7 @@ namespace ValveKeyValue.Test
         public void ReadsValueWhenConditionalWithAndMatchesWithNegatedSide()
         {
             var conditions = new[] { "X360" };
-            KVObject data;
-            using (var stream = TestDataHelper.OpenResource("Text.conditional.vdf"))
-            {
-                data = KVSerializer.Deserialize(stream, conditions);
-            }
+            var data = ParseResource("Text.conditional.vdf", conditions);
 
             Assert.That((string)data["ui type"], Is.EqualTo("Xbox 360"));
         }
@@ -61,11 +46,7 @@ namespace ValveKeyValue.Test
         public void ReadsValueWhenConditionalWithAndOnlyMatchesOneSide()
         {
             var conditions = new[] { "X360WIDE" };
-            KVObject data;
-            using (var stream = TestDataHelper.OpenResource("Text.conditional.vdf"))
-            {
-                data = KVSerializer.Deserialize(stream, conditions);
-            }
+            var data = ParseResource("Text.conditional.vdf", conditions);
 
             Assert.That((string)data["ui type"], Is.Null);
         }
@@ -86,12 +67,7 @@ namespace ValveKeyValue.Test
                 conditions = new[] { condition };
             }
 
-            KVObject data;
-            using (var stream = TestDataHelper.OpenResource("Text.conditional.vdf"))
-            {
-                data = KVSerializer.Deserialize(stream, conditions);
-            }
-
+            var data = ParseResource("Text.conditional.vdf", conditions);
             Assert.That((string)data["operating system"], Is.EqualTo("something else"));
         }
 
@@ -101,13 +77,35 @@ namespace ValveKeyValue.Test
         [TestCase(new object[] { new[] { "X360", "POLISH" } }, ExpectedResult = "large", TestName = "ReadsValueFromComplexBracketedConditional([\"X360\", \"POLISH\"]) => \"large\"")]
         public string ReadsValueFromComplexBracketedConditional(string[] conditions)
         {
+            var data = ParseResource("Text.conditional.vdf", conditions);
+            return (string)data["ui size"];
+        }
+
+        [Test]
+        public void ConditionalInKey()
+        {
+            var data = ParseResource("Text.conditional_in_key.vdf");
+            Assert.That(data, Is.Not.Null);
+            Assert.That(data.Value.ValueType, Is.EqualTo(KVValueType.Children));
+
+            var children = data.Children.ToArray();
+            Assert.That(children, Has.Length.EqualTo(1));
+            Assert.That(children[0].Name, Is.EqualTo("operating system [$WIN32]"));
+            Assert.That((string)children[0].Value, Is.EqualTo("windows 32-bit"));
+        }
+
+        static KVObject ParseResource(string name)
+            => ParseResource(name, new string[0]);
+
+        static KVObject ParseResource(string name, string[] conditions)
+        {
             KVObject data;
-            using (var stream = TestDataHelper.OpenResource("Text.conditional.vdf"))
+            using (var stream = TestDataHelper.OpenResource(name))
             {
                 data = KVSerializer.Deserialize(stream, conditions);
             }
 
-            return (string)data["ui size"];
+            return data;
         }
     }
 }

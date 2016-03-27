@@ -113,6 +113,7 @@
     <EmbeddedResource Include="Test Data\Text\escaped_whitespace.vdf" />
     <EmbeddedResource Include="Test Data\Text\escaped_garbage.vdf" />
     <EmbeddedResource Include="Test Data\Text\escaped_backslash.vdf" />
+    <EmbeddedResource Include="Test Data\Text\conditional_in_key.vdf" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\Newtonsoft.Json.dll" />
