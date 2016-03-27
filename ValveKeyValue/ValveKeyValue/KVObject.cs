@@ -66,7 +66,7 @@ namespace ValveKeyValue
                     throw new InvalidOperationException($"The indexer on a {nameof(KVObject)} can only be used when the value has children.");
                 }
 
-                return children.Get(key)?.Value;
+                return children[key];
             }
         }
 
