@@ -235,6 +235,8 @@ namespace ValveKeyValue.Test
         [TestCase(typeof(char))]
         [TestCase(typeof(DateTime))]
         [TestCase(typeof(decimal))]
+        [TestCase(typeof(double))]
+        [TestCase(typeof(float))]
         [TestCase(typeof(int))]
         [TestCase(typeof(long))]
         [TestCase(typeof(uint))]
@@ -242,6 +244,7 @@ namespace ValveKeyValue.Test
         [TestCase(typeof(ushort))]
         [TestCase(typeof(sbyte))]
         [TestCase(typeof(short))]
+        [TestCase(typeof(string))]
         [TestCase(typeof(uint))]
         public void ConvertingObjectWithChildrenIsNotSupported(Type type)
         {
