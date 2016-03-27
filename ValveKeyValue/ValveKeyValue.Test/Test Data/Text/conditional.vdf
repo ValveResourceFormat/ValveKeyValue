@@ -3,4 +3,6 @@
 	"operating system"		"windows 32-bit" [$WIN32]
 	"operating system"		"something else" [!$WIN32]
 	"platform"				"windows" [$WIN32||$WIN64]
+	"ui type"				"Widescreen Xbox 360" [$X360 && $X360WIDE]
+	"ui type"				"Xbox 360" [$X360 && !$X360WIDE]
 }

@@ -51,6 +51,7 @@
     <Compile Include="DefaultMapper.cs" />
     <Compile Include="IPropertyMapper.cs" />
     <Compile Include="KeyValueException.cs" />
+    <Compile Include="KVConditionEvaluator.cs" />
     <Compile Include="KVObject.cs" />
     <Compile Include="KVObject_operators.cs" />
     <Compile Include="KVPartialState.cs" />

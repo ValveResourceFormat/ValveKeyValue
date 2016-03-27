@@ -31,6 +31,44 @@ namespace ValveKeyValue.Test
             Assert.That((string)data["platform"], Is.EqualTo("windows"));
         }
 
+        [Test]
+        public void ReadsValueWhenConditionalWithAndMatches()
+        {
+            var conditions = new[] { "X360", "X360WIDE" };
+            KVObject data;
+            using (var stream = TestDataHelper.OpenResource("Text.conditional.vdf"))
+            {
+                data = KVSerializer.Deserialize(stream, conditions);
+            }
+
+            Assert.That((string)data["ui type"], Is.EqualTo("Widescreen Xbox 360"));
+        }
+
+        [Test]
+        public void ReadsValueWhenConditionalWithAndMatchesWithNegatedSide()
+        {
+            var conditions = new[] { "X360" };
+            KVObject data;
+            using (var stream = TestDataHelper.OpenResource("Text.conditional.vdf"))
+            {
+                data = KVSerializer.Deserialize(stream, conditions);
+            }
+
+            Assert.That((string)data["ui type"], Is.EqualTo("Xbox 360"));
+        }
+
+        public void ReadsValueWhenConditionalWithAndOnlyMatchesOneSide()
+        {
+            var conditions = new[] { "X360WIDE" };
+            KVObject data;
+            using (var stream = TestDataHelper.OpenResource("Text.conditional.vdf"))
+            {
+                data = KVSerializer.Deserialize(stream, conditions);
+            }
+
+            Assert.That((string)data["ui type"], Is.Null);
+        }
+
         [TestCase(null)]
         [TestCase("OSX")]
         [TestCase("LINUX")]

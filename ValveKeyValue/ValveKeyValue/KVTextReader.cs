@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -7,17 +8,17 @@ namespace ValveKeyValue
 {
     class KVTextReader : IDisposable
     {
-        public KVTextReader(Stream stream, string[] conditions)
+        public KVTextReader(Stream stream, ICollection<string> conditions)
         {
             Require.NotNull(stream, nameof(stream));
             Require.NotNull(conditions, nameof(conditions));
 
-            this.conditions = conditions;
+            conditionEvaluator = new KVConditionEvaluator(conditions);
             tokenReader = new KVTokenReader(stream);
             stateMachine = new KVTextReaderStateMachine();
         }
 
-        readonly string[] conditions;
+        readonly KVConditionEvaluator conditionEvaluator;
         readonly KVTokenReader tokenReader;
         readonly KVTextReaderStateMachine stateMachine;
         bool disposed;
@@ -173,16 +174,6 @@ namespace ValveKeyValue
 
         void HandleCondition(string text)
         {
-            var variables = text.Split("||");
-
-            if (variables.Any() && !variables.Any(MatchesCondition))
-            {
-                stateMachine.SetDiscardCurrent();
-            }
-        }
-
-        bool MatchesCondition(string text)
-        {
             if (stateMachine.Current != KVTextReaderState.InObjectAfterValue)
             {
                 throw new InvalidDataException(
@@ -192,26 +183,10 @@ namespace ValveKeyValue
                         stateMachine.Current));
             }
 
-            var isNegated = IsNegatedConditional(text);
-            if (!IsConditional(text) && !isNegated)
+            if (!conditionEvaluator.Evalute(text))
             {
-                throw new InvalidDataException(
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        "Invalid conditional '{0}'.",
-                        text));
+                stateMachine.SetDiscardCurrent();
             }
-
-            var variableText = isNegated ? text.Substring(2) : text.Substring(1);
-            var hasVariable = Array.IndexOf(conditions, variableText) >= 0;
-            var matchesCondition = isNegated ? !hasVariable : hasVariable;
-            return matchesCondition;
         }
-
-        static bool IsConditional(string text)
-            => text.Length > 2 && text[0] == '$';
-
-        static bool IsNegatedConditional(string text)
-            => text.Length > 3 && text[0] == '!' && text[1] == '$';
     }
 }
