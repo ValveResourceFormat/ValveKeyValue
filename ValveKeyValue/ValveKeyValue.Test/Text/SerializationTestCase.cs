@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Text;
 using NUnit.Framework;
 
 namespace ValveKeyValue.Test.Text
@@ -43,7 +44,23 @@ namespace ValveKeyValue.Test.Text
             }
 
             var expected = TestDataHelper.ReadTextResource("Text.serialization_expected.vdf");
+            expected = NormalizeLineEndings(expected);
             Assert.That(text, Is.EqualTo(expected));
+        }
+
+        static string NormalizeLineEndings(string text)
+        {
+            var builder = new StringBuilder(text.Length);
+            using (var reader = new StringReader(text))
+            {
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    builder.AppendLine(line);
+                }
+            }
+
+            return builder.ToString();
         }
     }
 }
