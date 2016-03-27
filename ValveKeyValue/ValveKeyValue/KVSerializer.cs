@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Runtime.Serialization;
 
 namespace ValveKeyValue
@@ -31,6 +32,19 @@ namespace ValveKeyValue
             using (var reader = new KVTextReader(stream, conditions ?? new string[0]))
             {
                 return reader.ReadObject();
+            }
+        }
+
+        /// <summary>
+        /// Serializes a KeyValue object into stream in plain text..
+        /// </summary>
+        /// <param name="stream">The stream to serialize into.</param>
+        /// <param name="data">The data to serialize.</param>
+        public static void Serialize(Stream stream, KVObject data)
+        {
+            using (var writer = new KVTextWriter(stream))
+            {
+                writer.WriteObject(data);
             }
         }
 

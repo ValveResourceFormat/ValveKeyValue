@@ -61,6 +61,7 @@
     <Compile Include="KVTextReader.cs" />
     <Compile Include="KVTextReaderState.cs" />
     <Compile Include="KVTextReaderStateMachine.cs" />
+    <Compile Include="KVTextWriter.cs" />
     <Compile Include="KVToken.cs" />
     <Compile Include="KVTokenReader.cs" />
     <Compile Include="KVTokenType.cs" />

@@ -56,6 +56,7 @@
     <Compile Include="Text\DictionaryTestCase.cs" />
     <Compile Include="Text\ObjectDeserializationMixedCaseTestCase.cs" />
     <Compile Include="Text\ObjectDeserializationAttributesTestCase.cs" />
+    <Compile Include="Text\SerializationTestCase.cs" />
     <Compile Include="Text\TopLevelEnumerableTestCase.cs" />
     <Compile Include="Text\ConditionalTestCase.cs" />
     <Compile Include="Text\EscapedQuotationMarksTestCase.cs" />
@@ -103,6 +104,7 @@
     <EmbeddedResource Include="Test Data\Text\object_person_attributes.vdf" />
     <EmbeddedResource Include="Test Data\Text\duplicate_keys.vdf" />
     <EmbeddedResource Include="Test Data\Text\invalid_conditional.vdf" />
+    <EmbeddedResource Include="Test Data\Text\serialization_expected.vdf" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\Newtonsoft.Json.dll" />
