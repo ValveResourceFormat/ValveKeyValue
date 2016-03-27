@@ -22,12 +22,12 @@ namespace ValveKeyValue
             if (IsArray(keyValueObject, out enumerableValues))
             {
                 object enumerable;
-                if (CreateTypedEnumerable(typeof(TObject), enumerableValues, out enumerable))
+                if (ConstructTypedEnumerable(typeof(TObject), enumerableValues, out enumerable))
                 {
                     return (TObject)enumerable;
                 }
             }
-            else if (IsEnumerableType(typeof(TObject)))
+            else if (IsConstructibleEnumerableType(typeof(TObject)))
             {
                 throw new InvalidOperationException($"Cannot deserialize a non-array value to type \"{typeof(TObject).Namespace}.{typeof(TObject).Name}\".");
             }
@@ -77,7 +77,7 @@ namespace ValveKeyValue
                     {
                         CopyList(obj, property, arrayValues);
                     }
-                    else if (IsEnumerableType(typeof(TObject)))
+                    else if (IsConstructibleEnumerableType(typeof(TObject)))
                     {
                         throw new InvalidOperationException($"Cannot deserialize a non-array value to type \"{typeof(TObject).Namespace}.{typeof(TObject).Name}\".");
                     }
@@ -137,7 +137,16 @@ namespace ValveKeyValue
             return true;
         }
 
-        static bool CreateTypedEnumerable(Type type, object[] values, out object typedEnumerable)
+        static readonly Dictionary<Type, Func<Type, object[], object>> EnumerableBuilders = new Dictionary<Type, Func<Type, object[], object>>
+        {
+            [typeof(List<>)] = (type, values) => InvokeGeneric(nameof(MakeList), type.GetGenericArguments()[0], new[] { values }),
+            [typeof(IList<>)] = (type, values) => InvokeGeneric(nameof(MakeList), type.GetGenericArguments()[0], new[] { values }),
+            [typeof(Collection<>)] = (type, values) => InvokeGeneric(nameof(MakeCollection), type.GetGenericArguments()[0], new[] { values }),
+            [typeof(ICollection<>)] = (type, values) => InvokeGeneric(nameof(MakeCollection), type.GetGenericArguments()[0], new[] { values }),
+            [typeof(ObservableCollection<>)] = (type, values) => InvokeGeneric(nameof(MakeObservableCollection), type.GetGenericArguments()[0], new[] { values }),
+        };
+
+        static bool ConstructTypedEnumerable(Type type, object[] values, out object typedEnumerable)
         {
             object listObject = null;
 
@@ -155,17 +164,10 @@ namespace ValveKeyValue
             }
             else if (type.IsGenericType)
             {
-                if (type.GetGenericTypeDefinition() == typeof(List<>) || type.GetGenericTypeDefinition() == typeof(IList<>))
+                Func<Type, object[], object> builder;
+                if (EnumerableBuilders.TryGetValue(type.GetGenericTypeDefinition(), out builder))
                 {
-                    listObject = InvokeGeneric(nameof(MakeList), type.GetGenericArguments()[0], new[] { values });
-                }
-                else if (type.GetGenericTypeDefinition() == typeof(Collection<>) || type.GetGenericTypeDefinition() == typeof(ICollection<>))
-                {
-                    listObject = InvokeGeneric(nameof(MakeCollection), type.GetGenericArguments()[0], new[] { values });
-                }
-                else if (type.GetGenericTypeDefinition() == typeof(ObservableCollection<>))
-                {
-                    listObject = InvokeGeneric(nameof(MakeObservableCollection), type.GetGenericArguments()[0], new[] { values });
+                    listObject = builder(type, values);
                 }
             }
 
@@ -173,7 +175,7 @@ namespace ValveKeyValue
             return listObject != null;
         }
 
-        static bool IsEnumerableType(Type type)
+        static bool IsConstructibleEnumerableType(Type type)
         {
             if (type.IsArray)
             {
@@ -187,11 +189,7 @@ namespace ValveKeyValue
 
             var gtd = type.GetGenericTypeDefinition();
 
-            if (gtd == typeof(List<>) ||
-                gtd == typeof(IList<>) ||
-                gtd == typeof(Collection<>) ||
-                gtd == typeof(ICollection<>) ||
-                gtd == typeof(ObservableCollection<>))
+            if (EnumerableBuilders.ContainsKey(gtd))
             {
                 return true;
             }
@@ -202,7 +200,7 @@ namespace ValveKeyValue
         static void CopyList<TObject>(TObject obj, PropertyInfo property, object[] values)
         {
             object list;
-            if (!CreateTypedEnumerable(property.PropertyType, values, out list))
+            if (!ConstructTypedEnumerable(property.PropertyType, values, out list))
             {
                 throw new NotSupportedException();
             }
