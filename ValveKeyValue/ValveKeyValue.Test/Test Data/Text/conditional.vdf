@@ -5,4 +5,7 @@
 	"platform"				"windows" [$WIN32||$WIN64]
 	"ui type"				"Widescreen Xbox 360" [$X360 && $X360WIDE]
 	"ui type"				"Xbox 360" [$X360 && !$X360WIDE]
+	"ui size"				"small" [$X360 && (!$GERMAN && !$FRENCH && !$POLISH)]
+	"ui size"				"medium" [$X360 && ($GERMAN || $FRENCH)]
+	"ui size"				"large" [$X360 && $POLISH]
 }

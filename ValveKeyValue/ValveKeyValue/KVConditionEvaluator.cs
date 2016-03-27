@@ -21,17 +21,26 @@ namespace ValveKeyValue
 
         public bool Evalute(string expressionText)
         {
-            var tokens = new List<KVConditionToken>();
-            using (var reader = new StringReader(expressionText))
+            Expression expression;
+            try
             {
-                KVConditionToken token;
-                while ((token = ReadToken(reader)) != null)
+                var tokens = new List<KVConditionToken>();
+                using (var reader = new StringReader(expressionText))
                 {
-                    tokens.Add(token);
+                    KVConditionToken token;
+                    while ((token = ReadToken(reader)) != null)
+                    {
+                        tokens.Add(token);
+                    }
                 }
+
+                expression = CreateExpression(tokens);
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new InvalidDataException($"Invalid conditional syntax \"{expressionText}\"", ex);
             }
 
-            var expression = CreateExpression(tokens);
             var value = Expression.Lambda(expression).Compile().DynamicInvoke() as bool?;
             return value.Value;
         }
@@ -42,14 +51,18 @@ namespace ValveKeyValue
         {
             if (tokens.Count == 0)
             {
-                throw new ArgumentException($"{nameof(CreateExpression)} called with no condition tokens.", nameof(tokens));
+                throw new InvalidOperationException($"{nameof(CreateExpression)} called with no condition tokens.");
             }
 
-            // Process AND and OR first. Split the list of expressions into two parts, and recursively process
+            PreprocessBracketedExpressions(tokens);
+
+            KVConditionToken token;
+
+            // Process AND and OR next. Split the list of expressions into two parts, and recursively process
             // each part before joining in the desired expression.
             for (int i = 0; i < tokens.Count; i++)
             {
-                var token = tokens[i];
+                token = tokens[i];
                 if (token.TokenType != KVConditionTokenType.OrJoin && token.TokenType != KVConditionTokenType.AndJoin)
                 {
                     continue;
@@ -71,18 +84,66 @@ namespace ValveKeyValue
                 }
             }
 
-            if (tokens[0].TokenType == KVConditionTokenType.Negation)
+            if (tokens.Count == 2 && tokens[0].TokenType == KVConditionTokenType.Negation)
             {
                 var positiveExpression = CreateExpression(tokens.Skip(1).ToList());
                 return Expression.Not(positiveExpression);
             }
-
-            if (tokens[0].TokenType == KVConditionTokenType.Value)
+            else if (tokens.Count == 1)
             {
-                return EvaluteVariableExpression(tokens[0].Value);
+                token = tokens.Single();
+                switch (token.TokenType)
+                {
+                    case KVConditionTokenType.Value:
+                        return EvaluteVariableExpression((string)token.Value);
+
+                    case KVConditionTokenType.PreprocessedExpression:
+                        return (Expression)token.Value;
+                }
             }
 
-            throw new InvalidOperationException("What the hell am I doing?");
+            throw new InvalidOperationException("Invalid conditional syntax.");
+        }
+
+        void PreprocessBracketedExpressions(IList<KVConditionToken> tokens)
+        {
+            int startIndex;
+            for (startIndex = 0; startIndex < tokens.Count; startIndex++)
+            {
+                if (tokens[startIndex].TokenType == KVConditionTokenType.BeginSubExpression)
+                {
+                    break;
+                }
+            }
+
+            if (startIndex == tokens.Count)
+            {
+                return;
+            }
+
+            int endIndex;
+            for (endIndex = tokens.Count - 1; endIndex > startIndex; endIndex--)
+            {
+                if (tokens[endIndex].TokenType == KVConditionTokenType.EndSubExpression)
+                {
+                    break;
+                }
+            }
+
+            if (endIndex == 0)
+            {
+                return;
+            }
+
+            var subRange = tokens.Skip(startIndex + 1).Take(endIndex - startIndex - 1).ToList();
+            var evalutedExpression = CreateExpression(subRange);
+
+            for (int i = 0; i < endIndex - startIndex + 1; i++)
+            {
+                tokens.RemoveAt(startIndex);
+            }
+
+            tokens.Insert(startIndex, new KVConditionToken(evalutedExpression));
         }
 
         Expression EvaluteVariableExpression(string variable)
@@ -119,12 +180,12 @@ namespace ValveKeyValue
                     var next = reader.Peek();
                     if (next != -1 && (char)next == '|')
                     {
-                            reader.Read();
+                        reader.Read();
                         return KVConditionToken.Or;
                     }
 
                     break;
-                    }
+                }
 
                 case '&':
                 {
@@ -137,9 +198,15 @@ namespace ValveKeyValue
 
                     break;
                 }
+
+                case '(':
+                    return KVConditionToken.LeftParenthesis;
+
+                case ')':
+                    return KVConditionToken.RightParenthesis;
             }
 
-            throw new InvalidDataException("Bad condition syntax.");
+            throw new InvalidOperationException("Bad condition syntax.");
         }
 
         static void SkipWhitespace(TextReader reader)
@@ -179,6 +246,9 @@ namespace ValveKeyValue
             Negation,
             OrJoin,
             AndJoin,
+            BeginSubExpression,
+            EndSubExpression,
+            PreprocessedExpression // Used internally for bracketed expressions
         }
 
         class KVConditionToken
@@ -189,6 +259,12 @@ namespace ValveKeyValue
                 Value = variable;
             }
 
+            public KVConditionToken(Expression expression)
+                 : this(KVConditionTokenType.PreprocessedExpression)
+            {
+                Value = expression;
+            }
+
             KVConditionToken(KVConditionTokenType type)
             {
                 TokenType = type;
@@ -196,7 +272,7 @@ namespace ValveKeyValue
 
             public KVConditionTokenType TokenType { get; }
 
-            public string Value { get; }
+            public object Value { get; }
 
             public static KVConditionToken Not
                 => new KVConditionToken(KVConditionTokenType.Negation);
@@ -206,6 +282,12 @@ namespace ValveKeyValue
 
             public static KVConditionToken And
                 => new KVConditionToken(KVConditionTokenType.AndJoin);
+
+            public static KVConditionToken LeftParenthesis
+                => new KVConditionToken(KVConditionTokenType.BeginSubExpression);
+
+            public static KVConditionToken RightParenthesis
+                => new KVConditionToken(KVConditionTokenType.EndSubExpression);
         }
     }
 }
