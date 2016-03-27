@@ -19,7 +19,10 @@ namespace ValveKeyValue.Test
         [TestCase("$ABC & ()")]
         [TestCase("$ABC && (!)")]
         [TestCase("$ABC && ($DEF!)")]
-        [TestCase("$DEF!")]
+        [TestCase("(")]
+        [TestCase(")")]
+        [TestCase("$ABC && ($DEF || $GHI")]
+        [TestCase("$ABC && $DEF)")]
         [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times", Justification = "It's fine to dispose something multiple times.")]
         public void ThrowsInvalidDataException(string conditional)
         {

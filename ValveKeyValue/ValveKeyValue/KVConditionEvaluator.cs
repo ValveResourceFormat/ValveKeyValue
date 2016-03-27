@@ -159,10 +159,6 @@ namespace ValveKeyValue
             SkipWhitespace(reader);
 
             var current = reader.Read();
-            if (current == -1)
-            {
-                return null;
-            }
 
             switch (current)
             {
