@@ -121,10 +121,7 @@ namespace ValveKeyValue
             return (char)next;
         }
 
-        int Peek()
-        {
-            return textReader.Peek();
-        }
+        int Peek() => textReader.Peek();
 
         void ReadChar(char expectedChar)
         {
@@ -152,9 +149,33 @@ namespace ValveKeyValue
                 else if (escapeNext)
                 {
                     escapeNext = false;
-                }
 
-                sb.Append(next);
+                    switch (next)
+                    {
+                        case 'r':
+                            sb.Append('\r');
+                            break;
+
+                        case 'n':
+                            sb.Append('\n');
+                            break;
+
+                        case 't':
+                            sb.Append('\t');
+                            break;
+
+                        case '\\':
+                            sb.Append('\\');
+                            break;
+
+                        default:
+                            throw new InvalidDataException($"Unknown escaped character '\\{next}'.");
+                    }
+                }
+                else
+                {
+                    sb.Append(next);
+                }
             }
 
             return sb.ToString();

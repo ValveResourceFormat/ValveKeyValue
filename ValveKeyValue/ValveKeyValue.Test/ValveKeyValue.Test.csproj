@@ -49,6 +49,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="TestFixtureSources.cs" />
+    <Compile Include="Text\EscapedGarbageTestCase.cs" />
+    <Compile Include="Text\EscapedBackslashTestCase.cs" />
+    <Compile Include="Text\EscapedWhitespaceTestCase.cs" />
     <Compile Include="Text\InvalidConditionalTestCase.cs" />
     <Compile Include="Text\DictionaryPropertyTestCase.cs" />
     <Compile Include="Text\DictionaryDuplicateKeysTestCase.cs" />
@@ -105,6 +108,9 @@
     <EmbeddedResource Include="Test Data\Text\duplicate_keys.vdf" />
     <EmbeddedResource Include="Test Data\Text\invalid_conditional.vdf" />
     <EmbeddedResource Include="Test Data\Text\serialization_expected.vdf" />
+    <EmbeddedResource Include="Test Data\Text\escaped_whitespace.vdf" />
+    <EmbeddedResource Include="Test Data\Text\escaped_garbage.vdf" />
+    <EmbeddedResource Include="Test Data\Text\escaped_backslash.vdf" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\Newtonsoft.Json.dll" />
