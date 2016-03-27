@@ -48,6 +48,8 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="KVBasicObjectIndexerTestCase.cs" />
+    <Compile Include="KVObjectIndexerTestCase.cs" />
     <Compile Include="TestFixtureSources.cs" />
     <Compile Include="Text\EscapedGarbageTestCase.cs" />
     <Compile Include="Text\EscapedBackslashTestCase.cs" />

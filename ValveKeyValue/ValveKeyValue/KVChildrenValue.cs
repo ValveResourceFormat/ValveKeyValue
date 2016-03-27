@@ -16,11 +16,7 @@ namespace ValveKeyValue
 
         public override KVValueType ValueType => KVValueType.Children;
 
-        public void Add(KVObject value)
-        {
-            Require.NotNull(value, nameof(value));
-            children.Add(value);
-        }
+        public override KVValue this[string key] => Get(key)?.Value;
 
         public void AddRange(IEnumerable<KVObject> values)
         {
@@ -32,12 +28,6 @@ namespace ValveKeyValue
         {
             Require.NotNull(name, nameof(name));
             return children.FirstOrDefault(c => c.Name == name);
-        }
-
-        public void Set(string name, KVValue value)
-        {
-            var @object = new KVObject(name, value);
-            Set(@object);
         }
 
         #region IEnumerable<KVObject>
@@ -140,16 +130,5 @@ namespace ValveKeyValue
         IEnumerator IEnumerable.GetEnumerator() => children.GetEnumerator();
 
         #endregion
-
-        void Set(KVObject value)
-        {
-            var childrenWithSameName = children.Where(c => c.Name == value.Name).ToArray();
-            foreach (var child in childrenWithSameName)
-            {
-                children.Remove(child);
-            }
-
-            Add(value);
-        }
     }
 }

@@ -12,6 +12,16 @@ namespace ValveKeyValue
         /// </summary>
         public abstract KVValueType ValueType { get; }
 
+        /// <summary>
+        /// Gets the child with the given key.
+        /// </summary>
+        /// <param name="key">The name of the child to locate.</param>
+        /// <returns>A <see cref="KVValue"/>, or <c>null</c>.</returns>
+        public virtual KVValue this[string key]
+        {
+            get { throw new NotSupportedException($"The indexer on a {nameof(KVValue)} can only be used on a {nameof(KVValue)} that has children."); }
+        }
+
         /// <inheritdoc/>
         public abstract TypeCode GetTypeCode();
 

@@ -99,11 +99,6 @@ namespace ValveKeyValue
                 return false;
             }
 
-            if (obj.Children.Any(i => i.Value == null))
-            {
-                return false;
-            }
-
             if (obj.Children.Any(i => !IsNumeric(i.Name)))
             {
                 return false;

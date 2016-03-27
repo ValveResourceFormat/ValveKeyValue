@@ -63,7 +63,7 @@ namespace ValveKeyValue
                 var children = Value as KVChildrenValue;
                 if (children == null)
                 {
-                    throw new InvalidOperationException($"This operation is only valid on a {nameof(KVObject)} with children.");
+                    throw new InvalidOperationException($"The indexer on a {nameof(KVObject)} can only be used when the value has children.");
                 }
 
                 return children.Get(key)?.Value;
