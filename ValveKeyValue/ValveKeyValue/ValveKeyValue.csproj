@@ -51,9 +51,10 @@
     <Compile Include="DefaultMapper.cs" />
     <Compile Include="IPropertyMapper.cs" />
     <Compile Include="KeyValueException.cs" />
+    <Compile Include="KVChildrenValue.cs" />
     <Compile Include="KVConditionEvaluator.cs" />
     <Compile Include="KVObject.cs" />
-    <Compile Include="KVObject_operators.cs" />
+    <Compile Include="KVObject_IEnumerable.cs" />
     <Compile Include="KVPartialState.cs" />
     <Compile Include="KVIgnoreAttribute.cs" />
     <Compile Include="KVPropertyAttribute.cs" />
@@ -66,6 +67,7 @@
     <Compile Include="KVTokenReader.cs" />
     <Compile Include="KVTokenType.cs" />
     <Compile Include="KVValue.cs" />
+    <Compile Include="KVValueType.cs" />
     <Compile Include="KVValue_operators.cs" />
     <Compile Include="ObjectCopier.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -12,6 +12,8 @@ namespace ValveKeyValue
 
         readonly string value;
 
+        public override KVValueType ValueType => KVValueType.String;
+
         public override TypeCode GetTypeCode() => TypeCode.String;
 
         public override bool ToBoolean(IFormatProvider provider) => ToInt32(provider) == 1;

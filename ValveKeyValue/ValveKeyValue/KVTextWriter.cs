@@ -19,20 +19,21 @@ namespace ValveKeyValue
 
         public void WriteObject(KVObject data)
         {
-            if (data.Value != null)
-            {
-                WriteKeyValuePair(data.Name, data.Value);
-            }
-            else
+            if (data.Value.ValueType == KVValueType.Children)
             {
                 WriteStartObject(data.Name);
 
-                foreach (var item in data.Items)
+                var children = data.Children;
+                foreach (var item in children)
                 {
                     WriteObject(item);
                 }
 
                 WriteEndObject();
+            }
+            else
+            {
+                WriteKeyValuePair(data.Name, data.Value);
             }
         }
 

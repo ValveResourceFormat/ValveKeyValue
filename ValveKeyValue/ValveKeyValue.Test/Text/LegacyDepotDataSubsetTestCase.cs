@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Linq;
 using NUnit.Framework;
 
 namespace ValveKeyValue.Test
@@ -20,17 +21,14 @@ namespace ValveKeyValue.Test
         [Test]
         public void HasFourItems()
         {
-            Assert.That(data.Items, Is.Not.Null);
-            Assert.That(data.Items, Has.Count.EqualTo(4));
+            Assert.That(data.Children.Count(), Is.EqualTo(4));
         }
 
         [TestCaseSource(nameof(ItemsTestCaseData))]
         public void HasItems(string key, string expectedValue)
         {
             var value = data[key];
-            Assert.That(value.Name, Is.EqualTo(key));
-            Assert.That(value.Items, Is.Empty);
-            Assert.That((string)value.Value, Is.EqualTo(expectedValue));
+            Assert.That((string)value, Is.EqualTo(expectedValue));
         }
 
         [TestCaseSource(nameof(ItemsTestCaseData))]

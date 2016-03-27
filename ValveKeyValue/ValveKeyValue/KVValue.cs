@@ -7,6 +7,11 @@ namespace ValveKeyValue
     /// </summary>
     public abstract partial class KVValue : IConvertible
     {
+        /// <summary>
+        /// Gets the value type of this <see cref="KVValue"/>
+        /// </summary>
+        public abstract KVValueType ValueType { get; }
+
         /// <inheritdoc/>
         public abstract TypeCode GetTypeCode();
 

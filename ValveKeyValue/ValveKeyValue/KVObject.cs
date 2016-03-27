@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ValveKeyValue
@@ -20,7 +21,6 @@ namespace ValveKeyValue
 
             Name = name;
             Value = value;
-            Items = new List<KVObject>();
         }
 
         /// <summary>
@@ -34,7 +34,10 @@ namespace ValveKeyValue
             Require.NotNull(items, nameof(items));
 
             Name = name;
-            Items = items.ToList();
+            var value = new KVChildrenValue();
+            value.AddRange(items);
+
+            Value = value;
         }
 
         /// <summary>
@@ -48,21 +51,28 @@ namespace ValveKeyValue
         public KVValue Value { get; }
 
         /// <summary>
-        /// Gets children of this object, if any.
-        /// </summary>
-        public IEnumerable<KVObject> Items { get; }
-
-        /// <summary>
         /// Indexer to find a child item by name.
         /// </summary>
         /// <param name="key">Key of the child object to find</param>
         /// <returns>A <see cref="KVObject"/> if the child item exists, otherwise <c>null</c>.</returns>
-        public KVObject this[string key]
+        public KVValue this[string key]
         {
             get
             {
-                return Items.SingleOrDefault(kv => kv.Name == key);
+                Require.NotNull(key, nameof(key));
+                var children = Value as KVChildrenValue;
+                if (children == null)
+                {
+                    throw new InvalidOperationException($"This operation is only valid on a {nameof(KVObject)} with children.");
+                }
+
+                return children.Get(key)?.Value;
             }
         }
+
+        /// <summary>
+        /// Gets the children of this <see cref="KVObject"/>.
+        /// </summary>
+        public IEnumerable<KVObject> Children => (Value as KVChildrenValue) ?? Enumerable.Empty<KVObject>();
     }
 }

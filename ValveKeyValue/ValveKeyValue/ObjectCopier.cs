@@ -48,7 +48,7 @@ namespace ValveKeyValue
 
             Require.NotNull(mapper, nameof(mapper));
 
-            foreach (var item in kv.Items)
+            foreach (var item in kv.Children)
             {
                 var property = mapper.MapFromKeyValue(typeof(TObject), item.Name);
                 if (property == null)
@@ -56,7 +56,7 @@ namespace ValveKeyValue
                     continue;
                 }
 
-                if (item.Value != null)
+                if (item.Value.ValueType != KVValueType.Children)
                 {
                     CopyValue(obj, property, item.Value);
                 }
@@ -94,22 +94,22 @@ namespace ValveKeyValue
         {
             values = null;
 
-            if (obj.Value != null)
+            if (obj.Value.ValueType != KVValueType.Children)
             {
                 return false;
             }
 
-            if (obj.Items.Any(i => i.Value == null))
+            if (obj.Children.Any(i => i.Value == null))
             {
                 return false;
             }
 
-            if (obj.Items.Any(i => !IsNumeric(i.Name)))
+            if (obj.Children.Any(i => !IsNumeric(i.Name)))
             {
                 return false;
             }
 
-            var items = obj.Items
+            var items = obj.Children
                 .Select(i => new { Index = int.Parse(i.Name), i.Value })
                 .OrderBy(i => i.Index)
                 .ToArray();
@@ -238,7 +238,7 @@ namespace ValveKeyValue
 
         static void FillDictionary<TKey, TValue>(Dictionary<TKey, TValue> dictionary, KVObject kv)
         {
-            foreach (var item in kv.Items)
+            foreach (var item in kv.Children)
             {
                 var key = (TKey)Convert.ChangeType(item.Name, typeof(TKey));
                 var value = (TValue)Convert.ChangeType(item.Value, typeof(TValue));
