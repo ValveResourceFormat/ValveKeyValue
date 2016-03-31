@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package>
+	<metadata>
+		<id>$id$</id>
+		<version>$version$</version>
+		<title>$title$</title>
+		<authors>$author$</authors>
+		<owners>$author$</owners>
+		<licenseUrl>https://raw.githubusercontent.com/SteamDatabase/ValveKeyValue/master/LICENSE</licenseUrl>
+		<projectUrl>https://github.com/SteamDatabase/ValveKeyValue</projectUrl>
+		<iconUrl>https://raw.githubusercontent.com/SteamDatabase/ValveKeyValue/master/Misc/logo.png</iconUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>Next-generation Valve's key value framework for .NET</description>
+		<releaseNotes>View release notes at https://github.com/SteamDatabase/ValveKeyValue/releases</releaseNotes>
+		<copyright />
+		<tags>steam valve keyvalues kv3 csgo dota2 tf2</tags>
+	</metadata>
+</package>
