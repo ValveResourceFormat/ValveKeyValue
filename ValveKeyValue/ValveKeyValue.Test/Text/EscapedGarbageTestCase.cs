@@ -12,7 +12,8 @@ namespace ValveKeyValue.Test
             {
                 Assert.That(
                     () => KVSerializer.Deserialize(stream),
-                    Throws.Exception.TypeOf<InvalidDataException>()
+                    Throws.Exception.TypeOf<KeyValueException>()
+                    .With.InnerException.TypeOf<InvalidDataException>()
                     .With.Message.EqualTo(@"Unknown escaped character '\7'."));
             }
         }

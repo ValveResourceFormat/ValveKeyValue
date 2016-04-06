@@ -118,6 +118,7 @@
     <EmbeddedResource Include="Test Data\Text\conditional_in_key.vdf" />
     <EmbeddedResource Include="Test Data\Text\list_of_values_skipping_keys.vdf" />
     <EmbeddedResource Include="Test Data\Text\list_of_values_empty_key.vdf" />
+    <EmbeddedResource Include="Test Data\Text\invalid_zerobracerepeated.vdf" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\Newtonsoft.Json.dll" />

@@ -37,6 +37,10 @@ namespace ValveKeyValue
                 {
                     token = tokenReader.ReadNextToken();
                 }
+                catch (InvalidDataException ex)
+                {
+                    throw new KeyValueException(ex.Message, ex);
+                }
                 catch (EndOfStreamException ex)
                 {
                     throw new KeyValueException("Found end of file while trying to read token.", ex);
