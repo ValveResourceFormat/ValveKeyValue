@@ -7,15 +7,20 @@ namespace ValveKeyValue
         public KVTextReaderStateMachine()
         {
             states = new Stack<KVPartialState>();
+            includedObjectsToMerge = new List<KVObject>();
+
             PushObject();
             Push(KVTextReaderState.InObjectBeforeKey);
         }
 
         readonly Stack<KVPartialState> states;
+        readonly IList<KVObject> includedObjectsToMerge;
 
         public KVTextReaderState Current => CurrentObject.States.Peek();
 
         public bool IsInObject => states.Count > 0;
+
+        public bool IsAtStart => states.Count == 1 && CurrentObject.States.Count == 1 && Current == KVTextReaderState.InObjectBeforeKey;
 
         public void PushObject() => states.Push(new KVPartialState());
 
@@ -54,6 +59,10 @@ namespace ValveKeyValue
         public void AddItem(KVObject item) => CurrentObject.Items.Add(item);
 
         public void SetDiscardCurrent() => CurrentObject.Discard = true;
+
+        public IEnumerable<KVObject> ItemsForMerging => includedObjectsToMerge;
+
+        public void AddItemForMerging(KVObject item) => includedObjectsToMerge.Add(item);
 
         KVPartialState CurrentObject => states.Peek();
     }

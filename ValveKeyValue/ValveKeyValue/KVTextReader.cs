@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -8,16 +7,18 @@ namespace ValveKeyValue
 {
     class KVTextReader : IDisposable
     {
-        public KVTextReader(Stream stream, ICollection<string> conditions)
+        public KVTextReader(Stream stream, KVSerializerOptions options)
         {
             Require.NotNull(stream, nameof(stream));
-            Require.NotNull(conditions, nameof(conditions));
+            Require.NotNull(options, nameof(options));
 
-            conditionEvaluator = new KVConditionEvaluator(conditions);
+            this.options = options;
+            conditionEvaluator = new KVConditionEvaluator(options.Conditions);
             tokenReader = new KVTokenReader(stream);
             stateMachine = new KVTextReaderStateMachine();
         }
 
+        readonly KVSerializerOptions options;
         readonly KVConditionEvaluator conditionEvaluator;
         readonly KVTokenReader tokenReader;
         readonly KVTextReaderStateMachine stateMachine;
@@ -75,6 +76,16 @@ namespace ValveKeyValue
                         }
 
                         break;
+
+                    case KVTokenType.Comment:
+                        break;
+
+                    case KVTokenType.IncludeAndMerge:
+                        HandleIncludeAndMerge(token.Value);
+                        break;
+
+                    default:
+                        throw new NotImplementedException("The developer forgot to handle a KVTokenType.");
                 }
             }
 
@@ -173,6 +184,11 @@ namespace ValveKeyValue
                 throw new InvalidOperationException("Inconsistent state - at end of file whilst inside an object.");
             }
 
+            foreach (var includedForMerge in stateMachine.ItemsForMerging)
+            {
+                Merge(from: includedForMerge, into: @object);
+            }
+
             return @object;
         }
 
@@ -190,6 +206,56 @@ namespace ValveKeyValue
             if (!conditionEvaluator.Evalute(text))
             {
                 stateMachine.SetDiscardCurrent();
+            }
+        }
+
+        void HandleIncludeAndMerge(string filePath)
+        {
+            var stream = OpenFileForInclude(filePath);
+            KVObject includedKeyValues;
+
+            using (var reader = new KVTextReader(stream, options))
+            {
+                includedKeyValues = reader.ReadObject();
+            }
+
+            stateMachine.AddItemForMerging(includedKeyValues);
+        }
+
+        Stream OpenFileForInclude(string filePath)
+        {
+            if (!stateMachine.IsAtStart)
+            {
+                throw new KeyValueException("Inclusions are only valid at the beginning of a file.");
+            }
+
+            if (options.FileLoader == null)
+            {
+                throw new KeyValueException("Inclusions requirer a FileLoader to be provided in KVSerializerOptions.");
+            }
+
+            var stream = options.FileLoader.OpenFile(filePath);
+            if (stream == null)
+            {
+                throw new KeyValueException("IIncludedFileLoader returned null for included file path.");
+            }
+
+            return stream;
+        }
+
+        static void Merge(KVObject from, KVObject into)
+        {
+            foreach (var child in from)
+            {
+                var matchingChild = into.Children.FirstOrDefault(c => c.Name == child.Name);
+                if (matchingChild == null && into.Value.ValueType == KVValueType.Children)
+                {
+                    into.Add(child);
+                }
+                else
+                {
+                    Merge(from: child, into: matchingChild);
+                }
             }
         }
     }

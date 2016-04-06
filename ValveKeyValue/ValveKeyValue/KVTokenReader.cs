@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace ValveKeyValue
@@ -12,6 +14,7 @@ namespace ValveKeyValue
         const char CommentBegin = '/'; // Although Valve uses the double-slash convention, the KV spec allows for single-slash comments.
         const char ConditionBegin = '[';
         const char ConditionEnd = ']';
+        const char InclusionMark = '#';
 
         public KVTokenReader(Stream stream)
         {
@@ -50,6 +53,9 @@ namespace ValveKeyValue
                 case ConditionBegin:
                     return ReadCondition();
 
+                case InclusionMark:
+                    return ReadInclusion();
+
                 default:
                     throw new InvalidDataException();
             }
@@ -68,11 +74,7 @@ namespace ValveKeyValue
 
         KVToken ReadString()
         {
-            SwallowWhitespace();
-            ReadChar(QuotationMark);
-            var text = ReadUntil(QuotationMark);
-            ReadChar(QuotationMark);
-
+            var text = ReadQuotedStringRaw();
             return new KVToken(KVTokenType.String, text);
         }
 
@@ -110,6 +112,24 @@ namespace ValveKeyValue
             return new KVToken(KVTokenType.Condition, text);
         }
 
+        KVToken ReadInclusion()
+        {
+            ReadChar(InclusionMark);
+            var term = ReadUntil(new[] { ' ', '\t' });
+            var value = ReadQuotedStringRaw();
+
+            if (string.Equals(term, "include", StringComparison.Ordinal))
+            {
+                return new KVToken(KVTokenType.IncludeAndAppend, value);
+            }
+            else if (string.Equals(term, "base", StringComparison.Ordinal))
+            {
+                return new KVToken(KVTokenType.IncludeAndMerge, value);
+            }
+
+            throw new InvalidDataException("Unrecognized term after '#' symbol.");
+        }
+
         char Next()
         {
             var next = textReader.Read();
@@ -132,12 +152,13 @@ namespace ValveKeyValue
             }
         }
 
-        string ReadUntil(char terminator)
+        string ReadUntil(params char[] terminators)
         {
             var sb = new StringBuilder();
             var escapeNext = false;
 
-            while (Peek() != terminator || escapeNext)
+            var integerTerminators = new HashSet<int>(terminators.Select(t => (int)t));
+            while (!integerTerminators.Contains(Peek()) || escapeNext)
             {
                 var next = Next();
 
@@ -197,6 +218,15 @@ namespace ValveKeyValue
         {
             var next = Peek();
             return !IsEndOfFile(next) && char.IsWhiteSpace((char)next);
+        }
+
+        string ReadQuotedStringRaw()
+        {
+            SwallowWhitespace();
+            ReadChar(QuotationMark);
+            var text = ReadUntil(QuotationMark);
+            ReadChar(QuotationMark);
+            return text;
         }
 
         bool IsEndOfFile(int value) => value == -1;

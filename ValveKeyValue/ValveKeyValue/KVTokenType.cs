@@ -7,6 +7,8 @@
         String,
         EndOfFile,
         Comment,
-        Condition
+        Condition,
+        IncludeAndAppend,
+        IncludeAndMerge
     }
 }

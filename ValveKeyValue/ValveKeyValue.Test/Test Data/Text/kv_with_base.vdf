@@ -1,0 +1,7 @@
+﻿#base "file.vdf"
+
+"test case"
+{
+	"foo"	"bar"
+	"bar"	"baz"
+}

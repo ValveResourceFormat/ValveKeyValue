@@ -102,7 +102,7 @@ namespace ValveKeyValue.Test
             KVObject data;
             using (var stream = TestDataHelper.OpenResource(name))
             {
-                data = KVSerializer.Deserialize(stream, conditions);
+                data = KVSerializer.Deserialize(stream, new KVSerializerOptions { Conditions = conditions });
             }
 
             return data;

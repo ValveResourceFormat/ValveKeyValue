@@ -11,7 +11,7 @@ namespace ValveKeyValue.Test
             Assert.That(
                 () => data["baz"],
                 Throws.Exception.InstanceOf<InvalidOperationException>()
-                .With.Message.EqualTo("The indexer on a KVObject can only be used when the value has children."));
+                .With.Message.EqualTo("This operation on a KVObject can only be used when the value has children."));
         }
 
         KVObject data;

@@ -60,19 +60,44 @@ namespace ValveKeyValue
             get
             {
                 Require.NotNull(key, nameof(key));
-                var children = Value as KVChildrenValue;
-                if (children == null)
-                {
-                    throw new InvalidOperationException($"The indexer on a {nameof(KVObject)} can only be used when the value has children.");
-                }
 
+                var children = GetChildrenValue();
                 return children[key];
             }
+
+            set
+            {
+                Require.NotNull(key, nameof(key));
+
+                var children = GetChildrenValue();
+                children.Set(key, value);
+            }
+        }
+
+        /// <summary>
+        /// Adds a <see cref="KVObject" /> as a child of the current object.
+        /// </summary>
+        /// <param name="value">The child to add.</param>
+        public void Add(KVObject value)
+        {
+            Require.NotNull(value, nameof(value));
+            GetChildrenValue().Add(value);
         }
 
         /// <summary>
         /// Gets the children of this <see cref="KVObject"/>.
         /// </summary>
         public IEnumerable<KVObject> Children => (Value as KVChildrenValue) ?? Enumerable.Empty<KVObject>();
+
+        KVChildrenValue GetChildrenValue()
+        {
+            var children = Value as KVChildrenValue;
+            if (children == null)
+            {
+                throw new InvalidOperationException($"This operation on a {nameof(KVObject)} can only be used when the value has children.");
+            }
+
+            return children;
+        }
     }
 }

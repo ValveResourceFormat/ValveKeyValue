@@ -51,6 +51,7 @@
     <Compile Include="KVBasicObjectIndexerTestCase.cs" />
     <Compile Include="KVObjectIndexerTestCase.cs" />
     <Compile Include="TestFixtureSources.cs" />
+    <Compile Include="Text\BaseIncludeTestCase.cs" />
     <Compile Include="Text\ArrayWithEmptyKeyTestCase.cs" />
     <Compile Include="Text\ArrayWhenSkippingKeysTestCase.cs" />
     <Compile Include="Text\EscapedGarbageTestCase.cs" />
@@ -119,6 +120,8 @@
     <EmbeddedResource Include="Test Data\Text\list_of_values_skipping_keys.vdf" />
     <EmbeddedResource Include="Test Data\Text\list_of_values_empty_key.vdf" />
     <EmbeddedResource Include="Test Data\Text\invalid_zerobracerepeated.vdf" />
+    <EmbeddedResource Include="Test Data\Text\kv_with_base.vdf" />
+    <EmbeddedResource Include="Test Data\Text\kv_base_included.vdf" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\Newtonsoft.Json.dll" />

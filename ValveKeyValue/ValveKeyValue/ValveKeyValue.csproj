@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DefaultMapper.cs" />
+    <Compile Include="IIncludedFileLoader.cs" />
     <Compile Include="IPropertyMapper.cs" />
     <Compile Include="KeyValueException.cs" />
     <Compile Include="KVChildrenValue.cs" />
@@ -58,6 +59,7 @@
     <Compile Include="KVPartialState.cs" />
     <Compile Include="KVIgnoreAttribute.cs" />
     <Compile Include="KVPropertyAttribute.cs" />
+    <Compile Include="KVSerializerOptions.cs" />
     <Compile Include="KVStringValue.cs" />
     <Compile Include="KVTextReader.cs" />
     <Compile Include="KVTextReaderState.cs" />
