@@ -211,9 +211,9 @@ namespace ValveKeyValue
 
         void HandleIncludeAndMerge(string filePath)
         {
-            var stream = OpenFileForInclude(filePath);
             KVObject includedKeyValues;
 
+            using (var stream = OpenFileForInclude(filePath))
             using (var reader = new KVTextReader(stream, options))
             {
                 includedKeyValues = reader.ReadObject();
