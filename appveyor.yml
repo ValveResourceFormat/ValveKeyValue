@@ -16,6 +16,8 @@ before_build:
 build:
   project: ValveKeyValue\ValveKeyValue.sln
   verbosity: minimal
+after_build:
+- cmd: nuget pack ValveKeyValue\ValveKeyValue\ValveKeyValue.csproj
 test_script:
 - ps: >-
     .\ValveKeyValue\packages\OpenCover.4.6.519\tools\OpenCover.Console.exe -target:nunit3-console.exe "-targetargs:ValveKeyValue/ValveKeyValue.Test/bin/$($env:CONFIGURATION)/ValveKeyValue.Test.dll --result=testResults.xml;format=AppVeyor" "-filter:+[ValveKeyValue*]* -[ValveKeyValue.Test]*" -output:opencoverCoverage.xml -register:user -returntargetcode
@@ -25,3 +27,8 @@ test_script:
 
       & $coveralls --opencover -i opencoverCoverage.xml --repoToken $env:COVERALLS_REPO_TOKEN --commitId $env:APPVEYOR_REPO_COMMIT --commitBranch $env:APPVEYOR_REPO_BRANCH --commitAuthor $env:APPVEYOR_REPO_COMMIT_AUTHOR --commitEmail $env:APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL --commitMessage $env:APPVEYOR_REPO_COMMIT_MESSAGE --jobId $env:APPVEYOR_BUILD_NUMBER --serviceName appveyor
     }
+artifacts:
+- path: ValveKeyValue\ValveKeyValue\bin\$(configuration)
+  name: ValveKeyValue
+- path: '*.nupkg'
+  name: ValveKeyValue.nupkg
