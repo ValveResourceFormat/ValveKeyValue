@@ -1,4 +1,5 @@
 ﻿"test case"
 {
 	"key"		"back\\slash"
+	"edge case"	"this is fun\\"
 }

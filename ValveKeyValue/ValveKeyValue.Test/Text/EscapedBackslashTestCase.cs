@@ -10,6 +10,12 @@ namespace ValveKeyValue.Test
             Assert.That((string)data["key"], Is.EqualTo(@"back\slash"));
         }
 
+        [Test]
+        public void DoubleBackslashQuoteEscapesJustTheBackslashNotTheQuote()
+        {
+            Assert.That((string)data["edge case"], Is.EqualTo(@"this is fun\"));
+        }
+
         KVObject data;
 
         [OneTimeSetUp]
