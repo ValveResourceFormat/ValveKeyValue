@@ -3,9 +3,9 @@ using System.Reflection;
 
 namespace ValveKeyValue
 {
-    sealed class DefaultMapper : IPropertyMapper
+    sealed class DefaultObjectReflector : IObjectReflector
     {
-        IEnumerable<IObjectMember> IPropertyMapper.GetMembers(object @object)
+        IEnumerable<IObjectMember> IObjectReflector.GetMembers(object @object)
         {
             Require.NotNull(@object, nameof(@object));
             var properties = @object.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);

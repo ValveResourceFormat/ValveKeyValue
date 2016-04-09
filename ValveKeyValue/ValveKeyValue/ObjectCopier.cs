@@ -12,12 +12,12 @@ namespace ValveKeyValue
     static class ObjectCopier
     {
         public static TObject MakeObject<TObject>(KVObject keyValueObject)
-            => MakeObject<TObject>(keyValueObject, new DefaultMapper());
+            => MakeObject<TObject>(keyValueObject, new DefaultObjectReflector());
 
-        public static TObject MakeObject<TObject>(KVObject keyValueObject, IPropertyMapper mapper)
+        public static TObject MakeObject<TObject>(KVObject keyValueObject, IObjectReflector reflector)
         {
             Require.NotNull(keyValueObject, nameof(keyValueObject));
-            Require.NotNull(mapper, nameof(mapper));
+            Require.NotNull(reflector, nameof(reflector));
 
             object[] enumerableValues;
             if (IsArray(keyValueObject, out enumerableValues))
@@ -38,14 +38,14 @@ namespace ValveKeyValue
             }
 
             var typedObject = (TObject)FormatterServices.GetSafeUninitializedObject(typeof(TObject));
-            CopyObject(keyValueObject, typedObject, mapper);
+            CopyObject(keyValueObject, typedObject, reflector);
             return typedObject;
         }
 
         public static KVObject FromObject<TObject>(TObject managedObject, string topLevelName)
-            => FromObjectCore(managedObject, topLevelName, new DefaultMapper(), new HashSet<object>());
+            => FromObjectCore(managedObject, topLevelName, new DefaultObjectReflector(), new HashSet<object>());
 
-        static KVObject FromObjectCore<TObject>(TObject managedObject, string topLevelName, IPropertyMapper mapper, HashSet<object> visitedObjects)
+        static KVObject FromObjectCore<TObject>(TObject managedObject, string topLevelName, IObjectReflector reflector, HashSet<object> visitedObjects)
         {
             if (managedObject == null)
             {
@@ -53,7 +53,7 @@ namespace ValveKeyValue
             }
 
             Require.NotNull(topLevelName, nameof(topLevelName));
-            Require.NotNull(mapper, nameof(mapper));
+            Require.NotNull(reflector, nameof(reflector));
             Require.NotNull(visitedObjects, nameof(visitedObjects));
 
             if (!visitedObjects.Add(managedObject))
@@ -78,7 +78,7 @@ namespace ValveKeyValue
                 var counter = 0;
                 foreach (var child in (IEnumerable)managedObject)
                 {
-                    var childKVObject = CopyObject(child, counter.ToString(), mapper, visitedObjects);
+                    var childKVObject = CopyObject(child, counter.ToString(), reflector, visitedObjects);
                     childObjects.Add(childKVObject);
 
                     counter++;
@@ -86,7 +86,7 @@ namespace ValveKeyValue
             }
             else
             {
-                foreach (var member in mapper.GetMembers(managedObject).OrderBy(p => p.Name))
+                foreach (var member in reflector.GetMembers(managedObject).OrderBy(p => p.Name))
                 {
                     var name = member.Name;
                     if (!member.IsExplicitName && name.Length > 0 && char.IsUpper(name[0]))
@@ -100,7 +100,7 @@ namespace ValveKeyValue
                     }
                     else
                     {
-                        childObjects.Add(CopyObject(member.Value, member.Name, mapper, visitedObjects));
+                        childObjects.Add(CopyObject(member.Value, member.Name, reflector, visitedObjects));
                     }
                 }
             }
@@ -108,14 +108,14 @@ namespace ValveKeyValue
             return new KVObject(topLevelName, childObjects);
         }
 
-        static KVObject CopyObject(object @object, string name, IPropertyMapper mapper, HashSet<object> visitedObjects)
+        static KVObject CopyObject(object @object, string name, IObjectReflector reflector, HashSet<object> visitedObjects)
         {
             try
             {
                 var keyValueRepresentation = (KVObject)typeof(ObjectCopier)
                     .GetMethod(nameof(FromObjectCore), BindingFlags.NonPublic | BindingFlags.Static)
                     .MakeGenericMethod(@object.GetType())
-                    .Invoke(null, new[] { @object, name, mapper, visitedObjects });
+                    .Invoke(null, new[] { @object, name, reflector, visitedObjects });
 
                 return keyValueRepresentation;
             }
@@ -126,7 +126,7 @@ namespace ValveKeyValue
             }
         }
 
-        static void CopyObject<TObject>(KVObject kv, TObject obj, IPropertyMapper mapper)
+        static void CopyObject<TObject>(KVObject kv, TObject obj, IObjectReflector reflector)
         {
             Require.NotNull(kv, nameof(kv));
 
@@ -136,9 +136,9 @@ namespace ValveKeyValue
                 throw new ArgumentNullException(nameof(obj));
             }
 
-            Require.NotNull(mapper, nameof(mapper));
+            Require.NotNull(reflector, nameof(reflector));
 
-            var members = mapper.GetMembers(obj).ToDictionary(m => m.Name, m => m, StringComparer.OrdinalIgnoreCase);
+            var members = reflector.GetMembers(obj).ToDictionary(m => m.Name, m => m, StringComparer.OrdinalIgnoreCase);
 
             foreach (var item in kv.Children)
             {
@@ -173,9 +173,9 @@ namespace ValveKeyValue
                         try
                         {
                             var @object = typeof(ObjectCopier)
-                                .GetMethod(nameof(MakeObject), new[] { typeof(KVObject), typeof(IPropertyMapper) })
+                                .GetMethod(nameof(MakeObject), new[] { typeof(KVObject), typeof(IObjectReflector) })
                                 .MakeGenericMethod(member.MemberType)
-                                .Invoke(null, new object[] { item, mapper });
+                                .Invoke(null, new object[] { item, reflector });
                             member.Value = @object;
                         }
                         catch (TargetInvocationException ex)

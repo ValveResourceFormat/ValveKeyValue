@@ -48,10 +48,10 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DefaultMapper.cs" />
+    <Compile Include="DefaultObjectReflector.cs" />
     <Compile Include="IIncludedFileLoader.cs" />
     <Compile Include="IObjectMember.cs" />
-    <Compile Include="IPropertyMapper.cs" />
+    <Compile Include="IObjectReflector.cs" />
     <Compile Include="KeyValueException.cs" />
     <Compile Include="KVChildrenValue.cs" />
     <Compile Include="KVConditionEvaluator.cs" />
