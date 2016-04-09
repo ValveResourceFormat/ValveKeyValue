@@ -84,6 +84,10 @@ namespace ValveKeyValue
                         HandleIncludeAndMerge(token.Value);
                         break;
 
+                    case KVTokenType.IncludeAndAppend:
+                        HandleIncludeAndAppend(token.Value);
+                        break;
+
                     default:
                         throw new NotImplementedException("The developer forgot to handle a KVTokenType.");
                 }
@@ -189,6 +193,14 @@ namespace ValveKeyValue
                 Merge(from: includedForMerge, into: @object);
             }
 
+            foreach (var includedDocument in stateMachine.ItemsForAppending)
+            {
+                foreach (var child in includedDocument.Children)
+                {
+                    @object.Add(child);
+                }
+            }
+
             return @object;
         }
 
@@ -220,6 +232,19 @@ namespace ValveKeyValue
             }
 
             stateMachine.AddItemForMerging(includedKeyValues);
+        }
+
+        void HandleIncludeAndAppend(string filePath)
+        {
+            KVObject includedKeyValues;
+
+            using (var stream = OpenFileForInclude(filePath))
+            using (var reader = new KVTextReader(stream, options))
+            {
+                includedKeyValues = reader.ReadObject();
+            }
+
+            stateMachine.AddItemForAppending(includedKeyValues);
         }
 
         Stream OpenFileForInclude(string filePath)
