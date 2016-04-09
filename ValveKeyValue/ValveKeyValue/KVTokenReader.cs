@@ -206,7 +206,15 @@ namespace ValveKeyValue
                     else
                     {
                         sb.Append('\\');
-                        sb.Append(next);
+
+                        if (next == '\\')
+                        {
+                            escapeNext = true;
+                        }
+                        else
+                        {
+                            sb.Append(next);
+                        }
                     }
                 }
                 else
