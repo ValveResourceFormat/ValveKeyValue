@@ -14,7 +14,7 @@ namespace ValveKeyValue
 
             this.options = options;
             conditionEvaluator = new KVConditionEvaluator(options.Conditions);
-            tokenReader = new KVTokenReader(stream);
+            tokenReader = new KVTokenReader(stream, options);
             stateMachine = new KVTextReaderStateMachine();
         }
 

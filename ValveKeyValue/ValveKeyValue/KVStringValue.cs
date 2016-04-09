@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace ValveKeyValue
 {
+    [DebuggerDisplay("{value}")]
     class KVStringValue : KVValue
     {
         public KVStringValue(string value)

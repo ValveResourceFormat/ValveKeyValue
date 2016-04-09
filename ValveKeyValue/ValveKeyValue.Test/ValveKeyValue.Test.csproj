@@ -54,6 +54,7 @@
     <Compile Include="Text\BaseIncludeTestCase.cs" />
     <Compile Include="Text\ArrayWithEmptyKeyTestCase.cs" />
     <Compile Include="Text\ArrayWhenSkippingKeysTestCase.cs" />
+    <Compile Include="Text\SteamDataTestCase.cs" />
     <Compile Include="Text\EscapedGarbageTestCase.cs" />
     <Compile Include="Text\EscapedBackslashTestCase.cs" />
     <Compile Include="Text\EscapedWhitespaceTestCase.cs" />
@@ -122,6 +123,7 @@
     <EmbeddedResource Include="Test Data\Text\invalid_zerobracerepeated.vdf" />
     <EmbeddedResource Include="Test Data\Text\kv_with_base.vdf" />
     <EmbeddedResource Include="Test Data\Text\kv_base_included.vdf" />
+    <EmbeddedResource Include="Test Data\Text\steam_440.vdf" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\Newtonsoft.Json.dll" />

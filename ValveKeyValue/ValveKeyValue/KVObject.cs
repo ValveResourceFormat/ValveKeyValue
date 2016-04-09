@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Text;
 
 namespace ValveKeyValue
 {
     /// <summary>
     /// Represents a dynamic KeyValue object.
     /// </summary>
+    [DebuggerDisplay("{DebuggerDescription}")]
     public partial class KVObject
     {
         /// <summary>
@@ -98,6 +101,33 @@ namespace ValveKeyValue
             }
 
             return children;
+        }
+
+        string DebuggerDescription
+        {
+            get
+            {
+                var description = new StringBuilder();
+                description.Append(Name);
+                description.Append(": ");
+
+                switch (Value.ValueType)
+                {
+                    case KVValueType.String:
+                        description.Append((string)Value);
+                        break;
+
+                    case KVValueType.Children:
+                        description.Append("[Collection]");
+                        break;
+
+                    default:
+                        description.Append(Value.ToString());
+                        break;
+                }
+
+                return description.ToString();
+            }
         }
     }
 }

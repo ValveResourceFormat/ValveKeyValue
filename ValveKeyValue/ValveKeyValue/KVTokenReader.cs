@@ -16,12 +16,16 @@ namespace ValveKeyValue
         const char ConditionEnd = ']';
         const char InclusionMark = '#';
 
-        public KVTokenReader(Stream stream)
+        public KVTokenReader(Stream stream, KVSerializerOptions options)
         {
             Require.NotNull(stream, nameof(stream));
+            Require.NotNull(options, nameof(options));
+
             textReader = new StreamReader(stream);
+            this.options = options;
         }
 
+        readonly KVSerializerOptions options;
         TextReader textReader;
         bool disposed;
 
@@ -171,30 +175,38 @@ namespace ValveKeyValue
                 {
                     escapeNext = false;
 
-                    switch (next)
+                    if (next == '"')
                     {
-                        case 'r':
-                            sb.Append('\r');
-                            break;
+                        sb.Append('"');
+                    }
+                    else if (options.HasEscapeSequences)
+                    {
+                        switch (next)
+                        {
+                            case 'r':
+                                sb.Append('\r');
+                                break;
 
-                        case 'n':
-                            sb.Append('\n');
-                            break;
+                            case 'n':
+                                sb.Append('\n');
+                                break;
 
-                        case 't':
-                            sb.Append('\t');
-                            break;
+                            case 't':
+                                sb.Append('\t');
+                                break;
 
-                        case '\\':
-                            sb.Append('\\');
-                            break;
+                            case '\\':
+                                sb.Append('\\');
+                                break;
 
-                        case '"':
-                            sb.Append('"');
-                            break;
-
-                        default:
-                            throw new InvalidDataException($"Unknown escaped character '\\{next}'.");
+                            default:
+                                throw new InvalidDataException($"Unknown escaped character '\\{next}'.");
+                        }
+                    }
+                    else
+                    {
+                        sb.Append('\\');
+                        sb.Append(next);
                     }
                 }
                 else
