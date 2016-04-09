@@ -1,4 +1,4 @@
-version: 1.0.0.{build}-AppVeyor
+version: 0.1.0.{build}-AppVeyor
 os: Visual Studio 2015
 configuration: Release
 assembly_info:
@@ -16,6 +16,8 @@ before_build:
 build:
   project: ValveKeyValue\ValveKeyValue.sln
   verbosity: minimal
+after_build:
+- cmd: nuget pack ValveKeyValue\ValveKeyValue\ValveKeyValue.csproj
 test_script:
 - ps: >-
     .\ValveKeyValue\packages\OpenCover.4.6.519\tools\OpenCover.Console.exe -target:nunit3-console.exe "-targetargs:ValveKeyValue/ValveKeyValue.Test/bin/$($env:CONFIGURATION)/ValveKeyValue.Test.dll --result=testResults.xml;format=AppVeyor" "-filter:+[ValveKeyValue*]* -[ValveKeyValue.Test]*" -output:opencoverCoverage.xml -register:user -returntargetcode
@@ -25,3 +27,24 @@ test_script:
 
       & $coveralls --opencover -i opencoverCoverage.xml --repoToken $env:COVERALLS_REPO_TOKEN --commitId $env:APPVEYOR_REPO_COMMIT --commitBranch $env:APPVEYOR_REPO_BRANCH --commitAuthor $env:APPVEYOR_REPO_COMMIT_AUTHOR --commitEmail $env:APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL --commitMessage $env:APPVEYOR_REPO_COMMIT_MESSAGE --jobId $env:APPVEYOR_BUILD_NUMBER --serviceName appveyor
     }
+artifacts:
+- path: ValveKeyValue\ValveKeyValue\bin\$(configuration)
+  name: ValveKeyValue
+- path: '*.nupkg'
+  name: ValveKeyValue.nupkg
+deploy:
+- provider: GitHub
+  auth_token:
+    secure: X+cHjOmqN/BfH2aEQg0Z8YC6NT8V/JSfirSPwsJoTEmn41Wr/Uaw284MtmUZtBf7
+  draft: false
+  prerelease: true
+  on:
+    branch: master
+    APPVEYOR_REPO_TAG: true
+- provider: NuGet
+  api_key:
+    secure: hqSxAQZqtX5Z5aWzulXmaIwPQmM87RvTurYOLmLnpHWHlQm1DfWmJn5fAUAuuLZH
+  artifact: ValveKeyValue.nupkg
+  on:
+    branch: master
+    APPVEYOR_REPO_TAG: true
