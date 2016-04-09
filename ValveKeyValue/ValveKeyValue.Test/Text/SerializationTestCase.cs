@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Text;
 using NUnit.Framework;
 
 namespace ValveKeyValue.Test.Text
@@ -17,17 +16,17 @@ namespace ValveKeyValue.Test.Text
                         "0",
                         new[]
                         {
+                            new KVObject("description", "Dota 2 is a complex game where you get sworn at\nin Russian all the time."),
                             new KVObject("developer", "Valve Software"),
-                            new KVObject("name", "Dota 2"),
-                            new KVObject("description", "Dota 2 is a complex game where you get sworn at\nin Russian all the time.")
+                            new KVObject("name", "Dota 2")
                         }),
                     new KVObject(
                         "1",
                         new[]
                         {
+                            new KVObject("description", "Known as \"America's #1 war-themed hat simulator\", this game lets you wear stupid items while killing people."),
                             new KVObject("developer", "Valve Software"),
-                            new KVObject("name", "Team Fortress 2"),
-                            new KVObject("description", "Known as \"America's #1 war-themed hat simulator\", this game lets you wear stupid items while killing people.")
+                            new KVObject("name", "Team Fortress 2")
                         })
                 });
 
@@ -44,23 +43,8 @@ namespace ValveKeyValue.Test.Text
             }
 
             var expected = TestDataHelper.ReadTextResource("Text.serialization_expected.vdf");
-            expected = NormalizeLineEndings(expected);
+            expected = Helpers.NormalizeLineEndings(expected);
             Assert.That(text, Is.EqualTo(expected));
-        }
-
-        static string NormalizeLineEndings(string text)
-        {
-            var builder = new StringBuilder(text.Length);
-            using (var reader = new StringReader(text))
-            {
-                string line;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    builder.AppendLine(line);
-                }
-            }
-
-            return builder.ToString();
         }
     }
 }

@@ -1,10 +1,9 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Collections.Generic;
 
 namespace ValveKeyValue
 {
     interface IPropertyMapper
     {
-        PropertyInfo MapFromKeyValue(Type objectType, string propertyName);
+        IEnumerable<IObjectMember> GetMembers(object @object);
     }
 }

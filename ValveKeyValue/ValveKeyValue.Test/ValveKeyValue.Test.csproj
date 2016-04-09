@@ -48,6 +48,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helpers.cs" />
     <Compile Include="KVBasicObjectIndexerTestCase.cs" />
     <Compile Include="KVObjectIndexerTestCase.cs" />
     <Compile Include="TestFixtureSources.cs" />
@@ -56,6 +57,9 @@
     <Compile Include="Text\ArrayWithEmptyKeyTestCase.cs" />
     <Compile Include="Text\ArrayWhenSkippingKeysTestCase.cs" />
     <Compile Include="Text\EscapedBackslashNotSpecialTestCase.cs" />
+    <Compile Include="Text\DictionarySerializationTestCase.cs" />
+    <Compile Include="Text\CircularObjectSerializationTestCase.cs" />
+    <Compile Include="Text\ObjectSerializationTestCase.cs" />
     <Compile Include="Text\SteamDataTestCase.cs" />
     <Compile Include="Text\EscapedGarbageTestCase.cs" />
     <Compile Include="Text\EscapedBackslashTestCase.cs" />

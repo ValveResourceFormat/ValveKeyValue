@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace ValveKeyValue
 {
@@ -77,6 +78,28 @@ namespace ValveKeyValue
             var @object = Deserialize(stream, options);
             var typedObject = ObjectCopier.MakeObject<TObject>(@object);
             return typedObject;
+        }
+
+        /// <summary>
+        /// Serializes a KeyValue object into stream in plain text..
+        /// </summary>
+        /// <param name="stream">The stream to serialize into.</param>
+        /// <param name="data">The data to serialize.</param>
+        /// <param name="name">The top-level object name</param>
+        /// <typeparam name="TData">The type of object to serialize.</typeparam>
+        public static void Serialize<TData>(Stream stream, TData data, string name)
+        {
+            Require.NotNull(stream, nameof(stream));
+
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
+
+            Require.NotNull(name, nameof(name));
+
+            var kvObjectTree = ObjectCopier.FromObject<TData>(data, name);
+            Serialize(stream, kvObjectTree);
         }
     }
 }

@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="DefaultMapper.cs" />
     <Compile Include="IIncludedFileLoader.cs" />
+    <Compile Include="IObjectMember.cs" />
     <Compile Include="IPropertyMapper.cs" />
     <Compile Include="KeyValueException.cs" />
     <Compile Include="KVChildrenValue.cs" />
@@ -73,6 +74,7 @@
     <Compile Include="KVValue_operators.cs" />
     <Compile Include="ObjectCopier.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PropertyMember.cs" />
     <Compile Include="Require.cs" />
     <Compile Include="KVSerializer.cs" />
   </ItemGroup>

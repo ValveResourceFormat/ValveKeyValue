@@ -1,34 +1,24 @@
-﻿using System;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Reflection;
 
 namespace ValveKeyValue
 {
-   sealed class DefaultMapper : IPropertyMapper
+    sealed class DefaultMapper : IPropertyMapper
     {
-        PropertyInfo IPropertyMapper.MapFromKeyValue(Type objectType, string propertyName)
+        IEnumerable<IObjectMember> IPropertyMapper.GetMembers(object @object)
         {
-            var properties = objectType.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            Require.NotNull(@object, nameof(@object));
+            var properties = @object.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
-            // First search for properties with a [KVProperty("...")] attribute.
-            var property = properties
-                .FirstOrDefault(p => p.GetCustomAttribute<KVPropertyAttribute>()?.PropertyName == propertyName);
-            if (property != null)
+            foreach (var property in properties)
             {
-                return property;
+                if (property.GetCustomAttribute<KVIgnoreAttribute>() != null)
+                {
+                    continue;
+                }
+
+                yield return new PropertyMember(property, @object);
             }
-
-            // Next, search by name.
-            property = properties
-                .FirstOrDefault(p => string.Equals(p.Name, propertyName, StringComparison.OrdinalIgnoreCase));
-
-            // Drop it if it has a [KVIgnore].
-            if (property?.GetCustomAttribute<KVIgnoreAttribute>() != null)
-            {
-                return null;
-            }
-
-            return property;
         }
     }
 }

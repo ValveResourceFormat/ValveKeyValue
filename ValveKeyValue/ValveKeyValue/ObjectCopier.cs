@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -41,6 +42,90 @@ namespace ValveKeyValue
             return typedObject;
         }
 
+        public static KVObject FromObject<TObject>(TObject managedObject, string topLevelName)
+            => FromObjectCore(managedObject, topLevelName, new DefaultMapper(), new HashSet<object>());
+
+        static KVObject FromObjectCore<TObject>(TObject managedObject, string topLevelName, IPropertyMapper mapper, HashSet<object> visitedObjects)
+        {
+            if (managedObject == null)
+            {
+                throw new ArgumentNullException(nameof(managedObject));
+            }
+
+            Require.NotNull(topLevelName, nameof(topLevelName));
+            Require.NotNull(mapper, nameof(mapper));
+            Require.NotNull(visitedObjects, nameof(visitedObjects));
+
+            if (!visitedObjects.Add(managedObject))
+            {
+                throw new KeyValueException("Serialization failed - circular object reference detected.");
+            }
+
+            var childObjects = new List<KVObject>();
+
+            if (typeof(IDictionary).IsAssignableFrom(typeof(TObject)))
+            {
+                var dictionary = (IDictionary)managedObject;
+                var enumerator = dictionary.GetEnumerator();
+                while (enumerator.MoveNext())
+                {
+                    var entry = enumerator.Entry;
+                    childObjects.Add(new KVObject(entry.Key.ToString(), entry.Value.ToString()));
+                }
+            }
+            else if (typeof(TObject).IsArray || typeof(IEnumerable).IsAssignableFrom(typeof(TObject)))
+            {
+                var counter = 0;
+                foreach (var child in (IEnumerable)managedObject)
+                {
+                    var childKVObject = CopyObject(child, counter.ToString(), mapper, visitedObjects);
+                    childObjects.Add(childKVObject);
+
+                    counter++;
+                }
+            }
+            else
+            {
+                foreach (var member in mapper.GetMembers(managedObject).OrderBy(p => p.Name))
+                {
+                    var name = member.Name;
+                    if (!member.IsExplicitName && name.Length > 0 && char.IsUpper(name[0]))
+                    {
+                        name = char.ToLower(name[0]) + name.Substring(1);
+                    }
+
+                    if (typeof(IConvertible).IsAssignableFrom(member.MemberType))
+                    {
+                        childObjects.Add(new KVObject(name, (string)Convert.ChangeType(member.Value, typeof(string))));
+                    }
+                    else
+                    {
+                        childObjects.Add(CopyObject(member.Value, member.Name, mapper, visitedObjects));
+                    }
+                }
+            }
+
+            return new KVObject(topLevelName, childObjects);
+        }
+
+        static KVObject CopyObject(object @object, string name, IPropertyMapper mapper, HashSet<object> visitedObjects)
+        {
+            try
+            {
+                var keyValueRepresentation = (KVObject)typeof(ObjectCopier)
+                    .GetMethod(nameof(FromObjectCore), BindingFlags.NonPublic | BindingFlags.Static)
+                    .MakeGenericMethod(@object.GetType())
+                    .Invoke(null, new[] { @object, name, mapper, visitedObjects });
+
+                return keyValueRepresentation;
+            }
+            catch (TargetInvocationException ex)
+            {
+                ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
+                return default(KVObject); // Unreachable.
+            }
+        }
+
         static void CopyObject<TObject>(KVObject kv, TObject obj, IPropertyMapper mapper)
         {
             Require.NotNull(kv, nameof(kv));
@@ -53,29 +138,31 @@ namespace ValveKeyValue
 
             Require.NotNull(mapper, nameof(mapper));
 
+            var members = mapper.GetMembers(obj).ToDictionary(m => m.Name, m => m, StringComparer.OrdinalIgnoreCase);
+
             foreach (var item in kv.Children)
             {
-                var property = mapper.MapFromKeyValue(typeof(TObject), item.Name);
-                if (property == null)
+                IObjectMember member;
+                if (!members.TryGetValue(item.Name, out member))
                 {
                     continue;
                 }
 
                 if (item.Value.ValueType != KVValueType.Children)
                 {
-                    CopyValue(obj, property, item.Value);
+                    CopyValue(member, item.Value);
                 }
-                else if (IsDictionary(property.PropertyType))
+                else if (IsDictionary(member.MemberType))
                 {
-                    var dictionary = MakeDictionary(property.PropertyType, item);
-                    property.SetValue(obj, dictionary);
+                    var dictionary = MakeDictionary(member.MemberType, item);
+                    member.Value = dictionary;
                 }
                 else
                 {
                     object[] arrayValues;
                     if (IsArray(item, out arrayValues))
                     {
-                        CopyList(obj, property, arrayValues);
+                        CopyList(member, arrayValues);
                     }
                     else if (IsConstructibleEnumerableType(typeof(TObject)))
                     {
@@ -87,9 +174,9 @@ namespace ValveKeyValue
                         {
                             var @object = typeof(ObjectCopier)
                                 .GetMethod(nameof(MakeObject), new[] { typeof(KVObject), typeof(IPropertyMapper) })
-                                .MakeGenericMethod(property.PropertyType)
+                                .MakeGenericMethod(member.MemberType)
                                 .Invoke(null, new object[] { item, mapper });
-                            property.SetValue(obj, @object);
+                            member.Value = @object;
                         }
                         catch (TargetInvocationException ex)
                         {
@@ -100,11 +187,8 @@ namespace ValveKeyValue
             }
         }
 
-        static void CopyValue<TObject>(TObject obj, PropertyInfo property, KVValue value)
-        {
-            var propertyType = property.PropertyType;
-            property.SetValue(obj, Convert.ChangeType(value, propertyType));
-        }
+        static void CopyValue(IObjectMember member, KVValue value)
+            => member.Value = Convert.ChangeType(value, member.MemberType);
 
         static bool IsArray(KVObject obj, out object[] values)
         {
@@ -197,15 +281,15 @@ namespace ValveKeyValue
             return false;
         }
 
-        static void CopyList<TObject>(TObject obj, PropertyInfo property, object[] values)
+        static void CopyList(IObjectMember member, object[] values)
         {
             object list;
-            if (!ConstructTypedEnumerable(property.PropertyType, values, out list))
+            if (!ConstructTypedEnumerable(member.MemberType, values, out list))
             {
                 throw new NotSupportedException();
             }
 
-            property.SetValue(obj, list);
+            member.Value = list;
         }
 
         static object InvokeGeneric(string methodName, Type genericType, params object[] parameters)

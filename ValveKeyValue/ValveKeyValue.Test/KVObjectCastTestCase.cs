@@ -245,7 +245,6 @@ namespace ValveKeyValue.Test
         [TestCase(typeof(sbyte))]
         [TestCase(typeof(short))]
         [TestCase(typeof(string))]
-        [TestCase(typeof(uint))]
         public void ConvertingObjectWithChildrenIsNotSupported(Type type)
         {
             var kv = new KVObject(
