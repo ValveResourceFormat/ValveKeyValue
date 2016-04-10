@@ -1,5 +1,4 @@
 version: 0.1.0.{build}-AppVeyor
-os: Visual Studio 2015
 configuration: Release
 assembly_info:
   patch: true
@@ -20,7 +19,12 @@ after_build:
 - cmd: nuget pack ValveKeyValue\ValveKeyValue\ValveKeyValue.csproj
 test_script:
 - ps: >-
-    .\ValveKeyValue\packages\OpenCover.4.6.519\tools\OpenCover.Console.exe -target:nunit3-console.exe "-targetargs:ValveKeyValue/ValveKeyValue.Test/bin/$($env:CONFIGURATION)/ValveKeyValue.Test.dll --result=testResults.xml;format=AppVeyor" "-filter:+[ValveKeyValue*]* -[ValveKeyValue.Test]*" -output:opencoverCoverage.xml -register:user -returntargetcode
+    $opencover = (Resolve-Path "./ValveKeyValue/packages/OpenCover.*/tools/OpenCover.Console.exe").ToString();
+    & $opencover -target:nunit3-console.exe "-targetargs:ValveKeyValue/ValveKeyValue.Test/bin/$($env:CONFIGURATION)/ValveKeyValue.Test.dll --result=testResults.xml;format=AppVeyor" "-filter:+[ValveKeyValue*]* -[ValveKeyValue.Test]*" -output:opencoverCoverage.xml -register:user -returntargetcode
+
+    if ($LastExitCode -ne 0) {
+      throw "Exec: $ErrorMessage`nExit code: $LastExitCode";
+    }
 
     if ($env:APPVEYOR_PULL_REQUEST_NUMBER -eq $null) {
       $coveralls = (Resolve-Path "ValveKeyValue/packages/coveralls.net.*/tools/csmacnz.coveralls.exe").ToString()
