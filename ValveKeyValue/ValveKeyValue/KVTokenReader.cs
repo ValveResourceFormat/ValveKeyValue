@@ -42,9 +42,6 @@ namespace ValveKeyValue
 
             switch (nextChar)
             {
-                case QuotationMark:
-                    return ReadString();
-
                 case ObjectStart:
                     return ReadObjectStart();
 
@@ -60,8 +57,9 @@ namespace ValveKeyValue
                 case InclusionMark:
                     return ReadInclusion();
 
+                case QuotationMark:
                 default:
-                    throw new InvalidDataException();
+                    return ReadString();
             }
         }
 
@@ -78,7 +76,7 @@ namespace ValveKeyValue
 
         KVToken ReadString()
         {
-            var text = ReadQuotedStringRaw();
+            var text = ReadStringRaw();
             return new KVToken(KVTokenType.String, text);
         }
 
@@ -120,7 +118,7 @@ namespace ValveKeyValue
         {
             ReadChar(InclusionMark);
             var term = ReadUntil(new[] { ' ', '\t' });
-            var value = ReadQuotedStringRaw();
+            var value = ReadStringRaw();
 
             if (string.Equals(term, "include", StringComparison.Ordinal))
             {
@@ -226,6 +224,24 @@ namespace ValveKeyValue
             return sb.ToString();
         }
 
+        string ReadUntilWhitespace()
+        {
+            var sb = new StringBuilder();
+
+            while (true)
+            {
+                var next = Peek();
+                if (next == -1 || char.IsWhiteSpace((char)next))
+                {
+                    break;
+                }
+
+                sb.Append(Next());
+            }
+
+            return sb.ToString();
+        }
+
         void SwallowWhitespace()
         {
             while (PeekWhitespace())
@@ -240,9 +256,21 @@ namespace ValveKeyValue
             return !IsEndOfFile(next) && char.IsWhiteSpace((char)next);
         }
 
-        string ReadQuotedStringRaw()
+        string ReadStringRaw()
         {
             SwallowWhitespace();
+            if (Peek() == '"')
+            {
+                return ReadQuotedStringRaw();
+            }
+            else
+            {
+                return ReadUntilWhitespace();
+            }
+        }
+
+        string ReadQuotedStringRaw()
+        {
             ReadChar(QuotationMark);
             var text = ReadUntil(QuotationMark);
             ReadChar(QuotationMark);
