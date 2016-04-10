@@ -19,7 +19,7 @@ namespace ValveKeyValue
 
         public void WriteObject(KVObject data)
         {
-            if (data.Value.ValueType == KVValueType.Children)
+            if (data.Value.ValueType == KVValueType.Collection)
             {
                 WriteStartObject(data.Name);
 

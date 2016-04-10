@@ -6,9 +6,9 @@
     public enum KVValueType
     {
         /// <summary>
-        /// This <see cref="KVValue"/> contains <see cref="KVObject"/>s.
+        /// This <see cref="KVValue"/> represents a collection of child <see cref="KVObject"/>s.
         /// </summary>
-        Children,
+        Collection,
 
         /// <summary>
         /// This <see cref="KVValue"/> is represented by a <see cref="string"/>.

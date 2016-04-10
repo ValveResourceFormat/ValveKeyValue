@@ -86,7 +86,7 @@ namespace ValveKeyValue.Test
         {
             var data = ParseResource("Text.conditional_in_key.vdf");
             Assert.That(data, Is.Not.Null);
-            Assert.That(data.Value.ValueType, Is.EqualTo(KVValueType.Children));
+            Assert.That(data.Value.ValueType, Is.EqualTo(KVValueType.Collection));
 
             var children = data.Children.ToArray();
             Assert.That(children, Has.Length.EqualTo(1));

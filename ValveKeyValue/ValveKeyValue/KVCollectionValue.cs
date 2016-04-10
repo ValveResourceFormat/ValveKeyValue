@@ -5,16 +5,16 @@ using System.Linq;
 
 namespace ValveKeyValue
 {
-    class KVChildrenValue : KVValue, IEnumerable<KVObject>
+    class KVCollectionValue : KVValue, IEnumerable<KVObject>
     {
-        public KVChildrenValue()
+        public KVCollectionValue()
         {
             children = new List<KVObject>();
         }
 
         readonly List<KVObject> children;
 
-        public override KVValueType ValueType => KVValueType.Children;
+        public override KVValueType ValueType => KVValueType.Collection;
 
         public override KVValue this[string key]
         {

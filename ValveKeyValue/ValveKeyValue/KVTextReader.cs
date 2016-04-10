@@ -273,7 +273,7 @@ namespace ValveKeyValue
             foreach (var child in from)
             {
                 var matchingChild = into.Children.FirstOrDefault(c => c.Name == child.Name);
-                if (matchingChild == null && into.Value.ValueType == KVValueType.Children)
+                if (matchingChild == null && into.Value.ValueType == KVValueType.Collection)
                 {
                     into.Add(child);
                 }

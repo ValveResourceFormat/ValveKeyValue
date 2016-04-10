@@ -37,7 +37,7 @@ namespace ValveKeyValue
             Require.NotNull(items, nameof(items));
 
             Name = name;
-            var value = new KVChildrenValue();
+            var value = new KVCollectionValue();
             value.AddRange(items);
 
             Value = value;
@@ -64,7 +64,7 @@ namespace ValveKeyValue
             {
                 Require.NotNull(key, nameof(key));
 
-                var children = GetChildrenValue();
+                var children = GetCollectionValue();
                 return children[key];
             }
 
@@ -72,7 +72,7 @@ namespace ValveKeyValue
             {
                 Require.NotNull(key, nameof(key));
 
-                var children = GetChildrenValue();
+                var children = GetCollectionValue();
                 children.Set(key, value);
             }
         }
@@ -84,23 +84,23 @@ namespace ValveKeyValue
         public void Add(KVObject value)
         {
             Require.NotNull(value, nameof(value));
-            GetChildrenValue().Add(value);
+            GetCollectionValue().Add(value);
         }
 
         /// <summary>
         /// Gets the children of this <see cref="KVObject"/>.
         /// </summary>
-        public IEnumerable<KVObject> Children => (Value as KVChildrenValue) ?? Enumerable.Empty<KVObject>();
+        public IEnumerable<KVObject> Children => (Value as KVCollectionValue) ?? Enumerable.Empty<KVObject>();
 
-        KVChildrenValue GetChildrenValue()
+        KVCollectionValue GetCollectionValue()
         {
-            var children = Value as KVChildrenValue;
-            if (children == null)
+            var collection = Value as KVCollectionValue;
+            if (collection == null)
             {
                 throw new InvalidOperationException($"This operation on a {nameof(KVObject)} can only be used when the value has children.");
             }
 
-            return children;
+            return collection;
         }
 
         string DebuggerDescription
@@ -117,7 +117,7 @@ namespace ValveKeyValue
                         description.Append((string)Value);
                         break;
 
-                    case KVValueType.Children:
+                    case KVValueType.Collection:
                         description.Append("[Collection]");
                         break;
 

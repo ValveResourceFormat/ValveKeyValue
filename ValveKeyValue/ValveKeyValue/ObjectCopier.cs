@@ -148,7 +148,7 @@ namespace ValveKeyValue
                     continue;
                 }
 
-                if (item.Value.ValueType != KVValueType.Children)
+                if (item.Value.ValueType != KVValueType.Collection)
                 {
                     CopyValue(member, item.Value);
                 }
@@ -194,7 +194,7 @@ namespace ValveKeyValue
         {
             values = null;
 
-            if (obj.Value.ValueType != KVValueType.Children)
+            if (obj.Value.ValueType != KVValueType.Collection)
             {
                 return false;
             }
