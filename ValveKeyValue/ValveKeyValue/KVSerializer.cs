@@ -12,19 +12,9 @@ namespace ValveKeyValue
         /// Deserializes a KeyValue object from a stream.
         /// </summary>
         /// <param name="stream">The stream to deserialize from.</param>
-        /// <returns>A <see cref="KVObject"/> representing the KeyValues structure in the stream.</returns>
-        public static KVObject Deserialize(Stream stream)
-        {
-            return Deserialize(stream, null);
-        }
-
-        /// <summary>
-        /// Deserializes a KeyValue object from a stream.
-        /// </summary>
-        /// <param name="stream">The stream to deserialize from.</param>
         /// <param name="options">Options to use that can influence the deserialization process.</param>
         /// <returns>A <see cref="KVObject"/> representing the KeyValues structure in the stream.</returns>
-        public static KVObject Deserialize(Stream stream, KVSerializerOptions options)
+        public static KVObject Deserialize(Stream stream, KVSerializerOptions options = null)
         {
             Require.NotNull(stream, nameof(stream));
 
@@ -39,9 +29,10 @@ namespace ValveKeyValue
         /// </summary>
         /// <param name="stream">The stream to serialize into.</param>
         /// <param name="data">The data to serialize.</param>
-        public static void Serialize(Stream stream, KVObject data)
+        /// <param name="options">Options to use that can influence the serialization process.</param>
+        public static void Serialize(Stream stream, KVObject data, KVSerializerOptions options = null)
         {
-            using (var writer = new KVTextWriter(stream))
+            using (var writer = new KVTextWriter(stream, options ?? KVSerializerOptions.DefaultOptions))
             {
                 writer.WriteObject(data);
             }
@@ -86,8 +77,9 @@ namespace ValveKeyValue
         /// <param name="stream">The stream to serialize into.</param>
         /// <param name="data">The data to serialize.</param>
         /// <param name="name">The top-level object name</param>
+        /// <param name="options">Options to use that can influence the serialization process.</param>
         /// <typeparam name="TData">The type of object to serialize.</typeparam>
-        public static void Serialize<TData>(Stream stream, TData data, string name)
+        public static void Serialize<TData>(Stream stream, TData data, string name, KVSerializerOptions options = null)
         {
             Require.NotNull(stream, nameof(stream));
 
@@ -99,7 +91,7 @@ namespace ValveKeyValue
             Require.NotNull(name, nameof(name));
 
             var kvObjectTree = ObjectCopier.FromObject<TData>(data, name);
-            Serialize(stream, kvObjectTree);
+            Serialize(stream, kvObjectTree, options);
         }
     }
 }

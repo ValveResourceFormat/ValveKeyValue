@@ -9,11 +9,16 @@ namespace ValveKeyValue
 {
     class KVTextWriter : IDisposable
     {
-        public KVTextWriter(Stream stream)
+        public KVTextWriter(Stream stream, KVSerializerOptions options)
         {
+            Require.NotNull(stream, nameof(stream));
+            Require.NotNull(options, nameof(options));
+
+            this.options = options;
             writer = new StreamWriter(stream, Encoding.UTF8, bufferSize: 1024, leaveOpen: true);
         }
 
+        readonly KVSerializerOptions options;
         readonly TextWriter writer;
         int indentation = 0;
 
@@ -89,16 +94,12 @@ namespace ValveKeyValue
             {
                 switch (@char)
                 {
-                    case '\r':
-                        writer.Write(@"\r");
-                        break;
-
-                    case '\n':
-                        writer.Write(@"\n");
-                        break;
-
                     case '"':
                         writer.Write("\\\"");
+                        break;
+
+                    case '\\':
+                        writer.Write(options.HasEscapeSequences ? "\\\\" : "\\");
                         break;
 
                     default:
