@@ -48,6 +48,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ApiSurfaceTestCase.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="KVBasicObjectIndexerTestCase.cs" />
     <Compile Include="KVObjectIndexerTestCase.cs" />
@@ -135,6 +136,7 @@
     <EmbeddedResource Include="Test Data\Text\kv_with_include.vdf" />
     <EmbeddedResource Include="Test Data\Text\kv_included.vdf" />
     <EmbeddedResource Include="Test Data\Text\unquoted_document.vdf" />
+    <EmbeddedResource Include="Test Data\apisurface.txt" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\Newtonsoft.Json.dll" />

@@ -1,0 +1,247 @@
+﻿using System;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using NUnit.Framework;
+
+namespace ValveKeyValue.Test
+{
+    class ApiSurfaceTestCase
+    {
+        [Test]
+        public void ApiSurfaceIsWellKnown()
+        {
+            var expected = TestDataHelper.ReadTextResource("apisurface.txt");
+            var actual = GenerateApiSurface(typeof(KVObject).Assembly);
+
+            Assert.That(actual, Is.EqualTo(expected), "This may indicate a breaking change.");
+        }
+
+        static string GenerateApiSurface(Assembly assembly)
+        {
+            var sb = new StringBuilder();
+
+            var publicTypes = assembly.GetTypes()
+                .Where(t => t.IsPublic)
+                .OrderBy(t => t.Namespace)
+                .ThenBy(t => t.Name);
+
+            foreach (var type in publicTypes)
+            {
+                GenerateTypeApiSurface(sb, type);
+            }
+
+            return sb.ToString();
+        }
+
+        static void GenerateTypeApiSurface(StringBuilder sb, Type type)
+        {
+            sb.Append("public ");
+
+            if (type.IsSealed)
+            {
+                sb.Append("sealed ");
+            }
+
+            if (type.IsClass)
+            {
+                sb.Append("class");
+            }
+            else if (type.IsInterface)
+            {
+                sb.Append("interface");
+            }
+            else
+            {
+                sb.Append("struct");
+            }
+
+            sb.Append(' ');
+
+            sb.AppendLine(GetTypeAsString(type));
+            sb.AppendLine("{");
+
+            var methods = type
+                .GetMethods(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                .OrderBy(t => t.Name);
+
+            foreach (var method in methods)
+            {
+                if (method.IsPrivate || method.IsAssembly || method.IsFamilyAndAssembly)
+                {
+                    continue;
+                }
+
+                sb.Append("    ");
+
+                if (method.IsPublic)
+                {
+                    sb.Append("public");
+                }
+                else
+                {
+                    sb.Append("protected");
+                }
+
+                if (IsHidingMember(method))
+                {
+                    sb.Append(" new");
+                }
+
+                if (method.IsStatic)
+                {
+                    sb.Append(" static");
+                }
+
+                sb.Append(' ');
+                sb.Append(GetTypeAsString(method.ReturnType));
+                sb.Append(' ');
+                sb.Append(method.Name);
+                sb.Append('(');
+
+                sb.Append(string.Join(", ", method.GetParameters().Select(GetParameterAsString)));
+
+                sb.AppendLine(");");
+            }
+
+            sb.AppendLine("}");
+            sb.AppendLine();
+        }
+
+        static bool IsHidingMember(MethodInfo method)
+        {
+            var baseType = method.DeclaringType.BaseType;
+            if (baseType == null)
+            {
+                return false;
+            }
+
+            var baseMethod = baseType.GetMethod(method.Name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            if (baseMethod == null)
+            {
+                return false;
+            }
+
+            if (baseMethod.DeclaringType == method.DeclaringType)
+            {
+                return false;
+            }
+
+            var methodDefinition = method.GetBaseDefinition();
+            var baseMethodDefinition = baseMethod.GetBaseDefinition();
+
+            if (methodDefinition.DeclaringType == baseMethodDefinition.DeclaringType)
+            {
+                return false;
+            }
+
+            var methodParameters = method.GetParameters();
+            var baseMethodParameters = baseMethod.GetParameters();
+            if (methodParameters.Length != baseMethodParameters.Length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < methodParameters.Length; i++)
+            {
+                if (methodParameters[i].ParameterType != baseMethodParameters[i].ParameterType)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        static string GetTypeAsString(Type type)
+        {
+            if (type == typeof(void))
+            {
+                return "void";
+            }
+            else if (type == typeof(bool))
+            {
+                return "bool";
+            }
+            else if (type == typeof(string))
+            {
+                return "string";
+            }
+            else if (type == typeof(int))
+            {
+                return "int";
+            }
+            else if (type == typeof(uint))
+            {
+                return "uint";
+            }
+            else if (type == typeof(short))
+            {
+                return "short";
+            }
+            else if (type == typeof(ushort))
+            {
+                return "ushort";
+            }
+            else if (type == typeof(byte))
+            {
+                return "byte";
+            }
+            else if (type == typeof(sbyte))
+            {
+                return "sbyte";
+            }
+            else if (type == typeof(long))
+            {
+                return "long";
+            }
+            else if (type == typeof(ulong))
+            {
+                return "ulong";
+            }
+            else if (type == typeof(object))
+            {
+                return "object";
+            }
+
+            var sb = new StringBuilder();
+
+            if (type.Namespace != "System")
+            {
+                sb.Append(type.Namespace);
+                sb.Append('.');
+            }
+
+            sb.Append(type.Name);
+
+            if (type.IsGenericType)
+            {
+                sb.Append("[[");
+                sb.Append(string.Join(", ", type.GetGenericArguments().Select(GetTypeAsString)));
+                sb.Append("]]");
+            }
+
+            return sb.ToString();
+        }
+
+        static string GetParameterAsString(ParameterInfo parameter)
+        {
+            var sb = new StringBuilder();
+
+            if (parameter.IsOut)
+            {
+                sb.Append("out ");
+            }
+            else if (parameter.ParameterType.IsByRef)
+            {
+                sb.Append("ref ");
+            }
+
+            sb.Append(GetTypeAsString(parameter.ParameterType));
+            sb.Append(' ');
+            sb.Append(parameter.Name);
+
+            return sb.ToString();
+        }
+    }
+}
