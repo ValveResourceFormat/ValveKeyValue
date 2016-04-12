@@ -53,6 +53,7 @@
     <Compile Include="KVBasicObjectIndexerTestCase.cs" />
     <Compile Include="KVObjectIndexerTestCase.cs" />
     <Compile Include="TestFixtureSources.cs" />
+    <Compile Include="Text\NewLinesTestCase.cs" />
     <Compile Include="Text\UnquotedTextTestCase.cs" />
     <Compile Include="Text\IncludeTestCase.cs" />
     <Compile Include="Text\BaseIncludeTestCase.cs" />
