@@ -16,12 +16,12 @@ namespace ValveKeyValue
         const char ConditionEnd = ']';
         const char InclusionMark = '#';
 
-        public KVTokenReader(Stream stream, KVSerializerOptions options)
+        public KVTokenReader(TextReader textReader, KVSerializerOptions options)
         {
-            Require.NotNull(stream, nameof(stream));
+            Require.NotNull(textReader, nameof(textReader));
             Require.NotNull(options, nameof(options));
 
-            textReader = new StreamReader(stream);
+            this.textReader = textReader;
             this.options = options;
         }
 

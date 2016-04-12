@@ -18,7 +18,7 @@ namespace ValveKeyValue
         {
             Require.NotNull(stream, nameof(stream));
 
-            using (var reader = new KVTextReader(stream, options ?? KVSerializerOptions.DefaultOptions))
+            using (var reader = new KVTextReader(new StreamReader(stream), options ?? KVSerializerOptions.DefaultOptions))
             {
                 return reader.ReadObject();
             }

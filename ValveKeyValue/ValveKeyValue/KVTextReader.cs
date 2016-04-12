@@ -7,14 +7,14 @@ namespace ValveKeyValue
 {
     class KVTextReader : IDisposable
     {
-        public KVTextReader(Stream stream, KVSerializerOptions options)
+        public KVTextReader(TextReader textReader, KVSerializerOptions options)
         {
-            Require.NotNull(stream, nameof(stream));
+            Require.NotNull(textReader, nameof(textReader));
             Require.NotNull(options, nameof(options));
 
             this.options = options;
             conditionEvaluator = new KVConditionEvaluator(options.Conditions);
-            tokenReader = new KVTokenReader(stream, options);
+            tokenReader = new KVTokenReader(textReader, options);
             stateMachine = new KVTextReaderStateMachine();
         }
 
@@ -226,7 +226,7 @@ namespace ValveKeyValue
             KVObject includedKeyValues;
 
             using (var stream = OpenFileForInclude(filePath))
-            using (var reader = new KVTextReader(stream, options))
+            using (var reader = new KVTextReader(new StreamReader(stream), options))
             {
                 includedKeyValues = reader.ReadObject();
             }
@@ -239,7 +239,7 @@ namespace ValveKeyValue
             KVObject includedKeyValues;
 
             using (var stream = OpenFileForInclude(filePath))
-            using (var reader = new KVTextReader(stream, options))
+            using (var reader = new KVTextReader(new StreamReader(stream), options))
             {
                 includedKeyValues = reader.ReadObject();
             }
