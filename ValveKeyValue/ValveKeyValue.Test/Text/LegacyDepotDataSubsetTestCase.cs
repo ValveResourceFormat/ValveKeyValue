@@ -4,7 +4,10 @@ using NUnit.Framework;
 
 namespace ValveKeyValue.Test
 {
-    class LegacyDepotDataSubsetTestCase
+    [TestFixture(typeof(StreamKVTextReader))]
+    [TestFixture(typeof(StringKVTextReader))]
+    class LegacyDepotDataSubsetTestCase<TReader>
+        where TReader : IKVTextReader, new()
     {
         [Test]
         public void IsNotNull()
@@ -79,10 +82,7 @@ namespace ValveKeyValue.Test
         [OneTimeSetUp]
         public void SetUp()
         {
-            using (var stream = TestDataHelper.OpenResource("Text.legacydepotdata_subset.vdf"))
-            {
-                data = KVSerializer.Deserialize(stream);
-            }
+            data = new TReader().Read("Text.legacydepotdata_subset.vdf");
         }
     }
 }

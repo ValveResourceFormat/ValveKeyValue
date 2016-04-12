@@ -97,6 +97,14 @@ namespace ValveKeyValue.Test
                 sb.Append(GetTypeAsString(method.ReturnType));
                 sb.Append(' ');
                 sb.Append(method.Name);
+
+                if (method.IsGenericMethodDefinition)
+                {
+                    sb.Append('<');
+                    sb.Append(string.Join(", ", method.GetGenericArguments().Select(GetTypeAsString)));
+                    sb.Append('>');
+                }
+
                 sb.Append('(');
 
                 sb.Append(string.Join(", ", method.GetParameters().Select(GetParameterAsString)));

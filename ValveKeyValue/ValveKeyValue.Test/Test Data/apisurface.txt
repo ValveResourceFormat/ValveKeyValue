@@ -76,15 +76,16 @@ public sealed class ValveKeyValue.KVPropertyAttribute
 public sealed class ValveKeyValue.KVSerializer
 {
     public static ValveKeyValue.KVObject Deserialize(System.IO.Stream stream, ValveKeyValue.KVSerializerOptions options);
-    public static ValveKeyValue.TObject Deserialize(System.IO.Stream stream);
-    public static ValveKeyValue.TObject Deserialize(System.IO.Stream stream, ValveKeyValue.KVSerializerOptions options);
+    public static ValveKeyValue.KVObject Deserialize(string text, ValveKeyValue.KVSerializerOptions options);
+    public static ValveKeyValue.TObject Deserialize<ValveKeyValue.TObject>(System.IO.Stream stream, ValveKeyValue.KVSerializerOptions options);
+    public static ValveKeyValue.TObject Deserialize<ValveKeyValue.TObject>(string text, ValveKeyValue.KVSerializerOptions options);
     public bool Equals(object obj);
     protected void Finalize();
     public int GetHashCode();
     public Type GetType();
     protected object MemberwiseClone();
     public static void Serialize(System.IO.Stream stream, ValveKeyValue.KVObject data, ValveKeyValue.KVSerializerOptions options);
-    public static void Serialize(System.IO.Stream stream, ValveKeyValue.TData data, string name, ValveKeyValue.KVSerializerOptions options);
+    public static void Serialize<ValveKeyValue.TData>(System.IO.Stream stream, ValveKeyValue.TData data, string name, ValveKeyValue.KVSerializerOptions options);
     public string ToString();
 }
 

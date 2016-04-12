@@ -2,7 +2,10 @@
 
 namespace ValveKeyValue.Test
 {
-    class ObjectDeserializationTestCase
+    [TestFixture(typeof(StreamKVTextReader))]
+    [TestFixture(typeof(StringKVTextReader))]
+    class ObjectDeserializationTestCase<TReader>
+        where TReader : IKVTextReader, new()
     {
         [Test]
         public void IsNotNull()
@@ -33,10 +36,7 @@ namespace ValveKeyValue.Test
         [OneTimeSetUp]
         public void SetUp()
         {
-            using (var stream = TestDataHelper.OpenResource("Text.object_person.vdf"))
-            {
-                person = KVSerializer.Deserialize<Person>(stream);
-            }
+            person = new TReader().Read<Person>("Text.object_person.vdf");
         }
 
         class Person

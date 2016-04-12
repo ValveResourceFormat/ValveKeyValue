@@ -3,7 +3,10 @@ using NUnit.Framework;
 
 namespace ValveKeyValue.Test
 {
-    class DictionaryTestCase
+    [TestFixture(typeof(StreamKVTextReader))]
+    [TestFixture(typeof(StringKVTextReader))]
+    class DictionaryTestCase<TReader>
+        where TReader : IKVTextReader, new()
     {
         [Test]
         public void IsNotNull()
@@ -27,10 +30,7 @@ namespace ValveKeyValue.Test
         [OneTimeSetUp]
         public void SetUp()
         {
-            using (var stream = TestDataHelper.OpenResource("Text.object_person.vdf"))
-            {
-                data = KVSerializer.Deserialize<Dictionary<string, string>>(stream);
-            }
+            data = new TReader().Read<Dictionary<string, string>>("Text.object_person.vdf");
         }
     }
 }

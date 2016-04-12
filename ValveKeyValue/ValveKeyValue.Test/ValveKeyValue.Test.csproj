@@ -50,9 +50,12 @@
   <ItemGroup>
     <Compile Include="ApiSurfaceTestCase.cs" />
     <Compile Include="Helpers.cs" />
+    <Compile Include="IKVTextReader.cs" />
     <Compile Include="KVBasicObjectIndexerTestCase.cs" />
     <Compile Include="KVObjectIndexerTestCase.cs" />
     <Compile Include="KVValueToStringTestCase.cs" />
+    <Compile Include="StringKVTextReader.cs" />
+    <Compile Include="StreamKVTextReader.cs" />
     <Compile Include="TestFixtureSources.cs" />
     <Compile Include="Text\NewLinesTestCase.cs" />
     <Compile Include="Text\UnquotedTextTestCase.cs" />
