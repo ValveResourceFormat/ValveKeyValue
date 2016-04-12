@@ -52,5 +52,7 @@ namespace ValveKeyValue
         public override uint ToUInt32(IFormatProvider provider) => (uint)Convert.ChangeType(value, typeof(uint), provider);
 
         public override ulong ToUInt64(IFormatProvider provider) => (ulong)Convert.ChangeType(value, typeof(ulong), provider);
+
+        public override string ToString() => ToString(null);
     }
 }

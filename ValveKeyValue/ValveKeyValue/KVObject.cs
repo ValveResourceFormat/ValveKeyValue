@@ -110,21 +110,7 @@ namespace ValveKeyValue
                 var description = new StringBuilder();
                 description.Append(Name);
                 description.Append(": ");
-
-                switch (Value.ValueType)
-                {
-                    case KVValueType.String:
-                        description.Append((string)Value);
-                        break;
-
-                    case KVValueType.Collection:
-                        description.Append("[Collection]");
-                        break;
-
-                    default:
-                        description.Append(Value.ToString());
-                        break;
-                }
+                description.Append(Value.ToString());
 
                 return description.ToString();
             }

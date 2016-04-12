@@ -121,9 +121,7 @@ namespace ValveKeyValue
         }
 
         public override string ToString(IFormatProvider provider)
-        {
-            throw new NotSupportedException();
-        }
+             => ToString();
 
         public override object ToType(Type conversionType, IFormatProvider provider)
         {
@@ -152,5 +150,7 @@ namespace ValveKeyValue
         IEnumerator IEnumerable.GetEnumerator() => children.GetEnumerator();
 
         #endregion
+
+        public override string ToString() => "[Collection]";
     }
 }

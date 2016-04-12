@@ -244,7 +244,6 @@ namespace ValveKeyValue.Test
         [TestCase(typeof(ushort))]
         [TestCase(typeof(sbyte))]
         [TestCase(typeof(short))]
-        [TestCase(typeof(string))]
         public void ConvertingObjectWithChildrenIsNotSupported(Type type)
         {
             var kv = new KVObject(
@@ -254,6 +253,16 @@ namespace ValveKeyValue.Test
             Assert.That(
                 () => Convert.ChangeType(kv.Value, type),
                 Throws.Exception.TypeOf<NotSupportedException>());
+        }
+
+        [TestCase(typeof(string), ExpectedResult = "[Collection]")]
+        public object ConvertingObjectWithChildren(Type type)
+        {
+            var kv = new KVObject(
+                "aaa",
+                new[] { new KVObject("bbb", "ccc") });
+
+            return Convert.ChangeType(kv.Value, type);
         }
     }
 }
