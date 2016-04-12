@@ -16,6 +16,7 @@ namespace ValveKeyValue
 
             this.options = options;
             writer = new StreamWriter(stream, Encoding.UTF8, bufferSize: 1024, leaveOpen: true);
+            writer.NewLine = "\n";
         }
 
         readonly KVSerializerOptions options;
