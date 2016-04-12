@@ -43,7 +43,6 @@ namespace ValveKeyValue.Test
             }
 
             var expected = TestDataHelper.ReadTextResource("Text.serialization_expected.vdf");
-            expected = Helpers.NormalizeLineEndings(expected);
             Assert.That(text, Is.EqualTo(expected));
         }
     }

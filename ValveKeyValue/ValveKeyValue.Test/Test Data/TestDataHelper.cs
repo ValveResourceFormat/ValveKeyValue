@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Text;
 
 namespace ValveKeyValue.Test
 {
@@ -18,11 +19,20 @@ namespace ValveKeyValue.Test
 
         public static string ReadTextResource(string name)
         {
+            var builder = new StringBuilder();
+
             using (var stream = OpenResource(name))
             using (var reader = new StreamReader(stream))
             {
-                return reader.ReadToEnd();
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    builder.Append(line);
+                    builder.Append("\n");
+                }
             }
+
+            return builder.ToString();
         }
     }
 }

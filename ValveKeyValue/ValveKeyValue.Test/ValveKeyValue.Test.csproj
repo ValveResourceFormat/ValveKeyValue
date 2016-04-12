@@ -49,7 +49,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApiSurfaceTestCase.cs" />
-    <Compile Include="Helpers.cs" />
     <Compile Include="IKVTextReader.cs" />
     <Compile Include="KVBasicObjectIndexerTestCase.cs" />
     <Compile Include="KVObjectIndexerTestCase.cs" />

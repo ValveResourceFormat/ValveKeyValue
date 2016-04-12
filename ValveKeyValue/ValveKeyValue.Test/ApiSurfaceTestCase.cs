@@ -57,9 +57,8 @@ namespace ValveKeyValue.Test
             }
 
             sb.Append(' ');
-
-            sb.AppendLine(GetTypeAsString(type));
-            sb.AppendLine("{");
+            sb.Append(GetTypeAsString(type));
+            sb.Append("\n{\n");
 
             var methods = type
                 .GetMethods(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
@@ -109,11 +108,10 @@ namespace ValveKeyValue.Test
 
                 sb.Append(string.Join(", ", method.GetParameters().Select(GetParameterAsString)));
 
-                sb.AppendLine(");");
+                sb.Append(");\n");
             }
 
-            sb.AppendLine("}");
-            sb.AppendLine();
+            sb.Append("}\n\n");
         }
 
         static bool IsHidingMember(MethodInfo method)
