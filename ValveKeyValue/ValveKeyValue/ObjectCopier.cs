@@ -14,37 +14,48 @@ namespace ValveKeyValue
         public static TObject MakeObject<TObject>(KVObject keyValueObject)
             => MakeObject<TObject>(keyValueObject, new DefaultObjectReflector());
 
+        public static object MakeObject(Type objectType, KVObject keyValueObject, IObjectReflector reflector)
+            => InvokeGeneric(nameof(MakeObject), objectType, new object[] { keyValueObject, reflector });
+
         public static TObject MakeObject<TObject>(KVObject keyValueObject, IObjectReflector reflector)
         {
             Require.NotNull(keyValueObject, nameof(keyValueObject));
             Require.NotNull(reflector, nameof(reflector));
 
-            object[] enumerableValues;
-            Type lookupValueType;
-            if (IsArray(keyValueObject, out enumerableValues))
+            if (keyValueObject.Value.ValueType == KVValueType.Collection)
             {
+                object[] enumerableValues;
+                Type lookupValueType;
                 object enumerable;
-                if (ConstructTypedEnumerable(typeof(TObject), enumerableValues, out enumerable))
+                if (IsLookupWithStringKey(typeof(TObject), out lookupValueType))
+                {
+                    return (TObject)MakeLookup(lookupValueType, keyValueObject);
+                }
+                else if (IsDictionary(typeof(TObject)))
+                {
+                    return (TObject)MakeDictionary(typeof(TObject), keyValueObject);
+                }
+                else if (IsArray(keyValueObject, out enumerableValues) && ConstructTypedEnumerable(typeof(TObject), enumerableValues, out enumerable))
                 {
                     return (TObject)enumerable;
                 }
-            }
-            else if (IsLookupWithStringKey(typeof(TObject), out lookupValueType))
-            {
-                return (TObject)MakeLookup(lookupValueType, keyValueObject);
-            }
-            else if (IsConstructibleEnumerableType(typeof(TObject)))
-            {
-                throw new InvalidOperationException($"Cannot deserialize a non-array value to type \"{typeof(TObject).Namespace}.{typeof(TObject).Name}\".");
-            }
-            else if (IsDictionary(typeof(TObject)))
-            {
-                return (TObject)MakeDictionary(typeof(TObject), keyValueObject);
-            }
+                else if (IsConstructibleEnumerableType(typeof(TObject)))
+                {
+                    throw new InvalidOperationException($"Cannot deserialize a non-array value to type \"{typeof(TObject).Namespace}.{typeof(TObject).Name}\".");
+                }
 
-            var typedObject = (TObject)FormatterServices.GetSafeUninitializedObject(typeof(TObject));
-            CopyObject(keyValueObject, typedObject, reflector);
-            return typedObject;
+                var typedObject = (TObject)FormatterServices.GetSafeUninitializedObject(typeof(TObject));
+                CopyObject(keyValueObject, typedObject, reflector);
+                return typedObject;
+            }
+            else if (CanConvertValueTo(typeof(TObject)))
+            {
+                return (TObject)Convert.ChangeType(keyValueObject.Value, typeof(TObject));
+            }
+            else
+            {
+                throw new NotSupportedException(typeof(TObject).Name);
+            }
         }
 
         public static KVObject FromObject<TObject>(TObject managedObject, string topLevelName)
@@ -153,53 +164,9 @@ namespace ValveKeyValue
                     continue;
                 }
 
-                Type lookupValueType;
-                if (item.Value.ValueType != KVValueType.Collection)
-                {
-                    CopyValue(member, item.Value);
-                }
-                else if (IsLookupWithStringKey(member.MemberType, out lookupValueType))
-                {
-                    var lookup = MakeLookup(lookupValueType, item.Children);
-                    member.Value = lookup;
-                }
-                else if (IsDictionary(member.MemberType))
-                {
-                    var dictionary = MakeDictionary(member.MemberType, item);
-                    member.Value = dictionary;
-                }
-                else
-                {
-                    object[] arrayValues;
-                    if (IsArray(item, out arrayValues))
-                    {
-                        CopyList(member, arrayValues);
-                    }
-                    else if (IsConstructibleEnumerableType(typeof(TObject)))
-                    {
-                        throw new InvalidOperationException($"Cannot deserialize a non-array value to type \"{typeof(TObject).Namespace}.{typeof(TObject).Name}\".");
-                    }
-                    else
-                    {
-                        try
-                        {
-                            var @object = typeof(ObjectCopier)
-                                .GetMethod(nameof(MakeObject), new[] { typeof(KVObject), typeof(IObjectReflector) })
-                                .MakeGenericMethod(member.MemberType)
-                                .Invoke(null, new object[] { item, reflector });
-                            member.Value = @object;
-                        }
-                        catch (TargetInvocationException ex)
-                        {
-                            ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
-                        }
-                    }
-                }
+                member.Value = MakeObject(member.MemberType, item, reflector);
             }
         }
-
-        static void CopyValue(IObjectMember member, KVValue value)
-            => member.Value = Convert.ChangeType(value, member.MemberType);
 
         static bool IsArray(KVObject obj, out object[] values)
         {
@@ -328,21 +295,20 @@ namespace ValveKeyValue
             return false;
         }
 
-        static void CopyList(IObjectMember member, object[] values)
-        {
-            object list;
-            if (!ConstructTypedEnumerable(member.MemberType, values, out list))
-            {
-                throw new NotSupportedException();
-            }
-
-            member.Value = list;
-        }
-
         static object InvokeGeneric(string methodName, Type genericType, params object[] parameters)
         {
-            var method = typeof(ObjectCopier).GetMethod(methodName, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-            return method.MakeGenericMethod(genericType).Invoke(null, parameters);
+            var methodTypes = parameters.Select(o => o.GetType()).ToArray();
+            var method = typeof(ObjectCopier).GetMethod(methodName, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, null, methodTypes, null);
+
+            try
+            {
+                return method.MakeGenericMethod(genericType).Invoke(null, parameters);
+            }
+            catch (TargetInvocationException ex) when (ex.InnerException != null)
+            {
+                ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
+                throw; // Unreachable
+            }
         }
 
         static List<TElement> MakeList<TElement>(object[] items)
@@ -411,6 +377,26 @@ namespace ValveKeyValue
 
                 dictionary[key] = value;
             }
+        }
+
+        static bool CanConvertValueTo(Type type)
+        {
+            return
+                type == typeof(bool) ||
+                type == typeof(byte) ||
+                type == typeof(char) ||
+                type == typeof(DateTime) ||
+                type == typeof(decimal) ||
+                type == typeof(double) ||
+                type == typeof(float) ||
+                type == typeof(int) ||
+                type == typeof(long) ||
+                type == typeof(uint) ||
+                type == typeof(ulong) ||
+                type == typeof(ushort) ||
+                type == typeof(sbyte) ||
+                type == typeof(short) ||
+                type == typeof(string);
         }
     }
 }
