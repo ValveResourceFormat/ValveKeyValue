@@ -20,6 +20,7 @@ namespace ValveKeyValue
             Require.NotNull(reflector, nameof(reflector));
 
             object[] enumerableValues;
+            Type lookupValueType;
             if (IsArray(keyValueObject, out enumerableValues))
             {
                 object enumerable;
@@ -27,6 +28,10 @@ namespace ValveKeyValue
                 {
                     return (TObject)enumerable;
                 }
+            }
+            else if (IsLookupWithStringKey(typeof(TObject), out lookupValueType))
+            {
+                return (TObject)MakeLookup(lookupValueType, keyValueObject);
             }
             else if (IsConstructibleEnumerableType(typeof(TObject)))
             {
@@ -148,9 +153,15 @@ namespace ValveKeyValue
                     continue;
                 }
 
+                Type lookupValueType;
                 if (item.Value.ValueType != KVValueType.Collection)
                 {
                     CopyValue(member, item.Value);
+                }
+                else if (IsLookupWithStringKey(member.MemberType, out lookupValueType))
+                {
+                    var lookup = MakeLookup(lookupValueType, item.Children);
+                    member.Value = lookup;
                 }
                 else if (IsDictionary(member.MemberType))
                 {
@@ -220,6 +231,42 @@ namespace ValveKeyValue
             values = items.Select(i => i.Value).ToArray();
             return true;
         }
+
+        static bool IsLookupWithStringKey(Type type, out Type valueType)
+        {
+            valueType = null;
+
+            if (!type.IsGenericType)
+            {
+                return false;
+            }
+
+            var genericType = type.GetGenericTypeDefinition();
+            if (genericType != typeof(ILookup<,>))
+            {
+                return false;
+            }
+
+            var genericArguments = type.GetGenericArguments();
+            if (genericArguments.Length != 2)
+            {
+                return false;
+            }
+
+            if (genericArguments[0] != typeof(string))
+            {
+                return false;
+            }
+
+            valueType = genericArguments[1];
+            return true;
+        }
+
+        static object MakeLookup(Type valueType, IEnumerable<KVObject> items)
+            => InvokeGeneric(nameof(MakeLookupCore), valueType, new object[] { items });
+
+        static ILookup<string, TValue> MakeLookupCore<TValue>(IEnumerable<KVObject> items)
+            => items.ToLookup(kv => kv.Name, kv => (TValue)Convert.ChangeType(kv.Value, typeof(TValue)));
 
         static readonly Dictionary<Type, Func<Type, object[], object>> EnumerableBuilders = new Dictionary<Type, Func<Type, object[], object>>
         {
