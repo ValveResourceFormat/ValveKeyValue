@@ -172,11 +172,6 @@ namespace ValveKeyValue
         {
             values = null;
 
-            if (obj.Value.ValueType != KVValueType.Collection)
-            {
-                return false;
-            }
-
             if (obj.Children.Any(i => !IsNumeric(i.Name)))
             {
                 return false;
