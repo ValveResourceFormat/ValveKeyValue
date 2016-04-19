@@ -29,7 +29,7 @@ namespace ValveKeyValue.Test
 
         KVObject data;
 
-        [SetUp]
+        [OneTimeSetUp]
         public void SetUp()
         {
             using (var stream = TestDataHelper.OpenResource("Text.unquoted_document.vdf"))
