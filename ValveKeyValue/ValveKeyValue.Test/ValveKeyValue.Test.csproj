@@ -56,6 +56,7 @@
     <Compile Include="StringKVTextReader.cs" />
     <Compile Include="StreamKVTextReader.cs" />
     <Compile Include="TestFixtureSources.cs" />
+    <Compile Include="Text\TypeGuessingTestCase.cs" />
     <Compile Include="Text\LookupTestCase.cs" />
     <Compile Include="Text\NewLinesTestCase.cs" />
     <Compile Include="Text\UnquotedTextTestCase.cs" />
@@ -143,6 +144,7 @@
     <EmbeddedResource Include="Test Data\Text\unquoted_document.vdf" />
     <EmbeddedResource Include="Test Data\apisurface.txt" />
     <EmbeddedResource Include="Test Data\Text\duplicate_keys_object.vdf" />
+    <EmbeddedResource Include="Test Data\Text\type_guessing.vdf" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\Newtonsoft.Json.dll" />

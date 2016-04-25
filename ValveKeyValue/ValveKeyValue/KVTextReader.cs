@@ -126,7 +126,7 @@ namespace ValveKeyValue
                     break;
 
                 case KVTextReaderState.InObjectBetweenKeyAndValue:
-                    var value = new KVStringValue(text);
+                    var value = ParseValue(text);
                     stateMachine.SetValue(value);
                     stateMachine.Push(KVTextReaderState.InObjectAfterValue);
                     break;
@@ -282,6 +282,49 @@ namespace ValveKeyValue
                     Merge(from: child, into: matchingChild);
                 }
             }
+        }
+
+        static KVValue ParseValue(string text)
+        {
+            // "0x" + 2 digits per byte. Long is 8 bytes, so s + 16 = 18.
+            // Expressed this way for readability, rather than using a magic value.
+            const int HexStringLengthForUnsignedLong = 2 + (sizeof(long) * 2);
+
+            if (text.Length == HexStringLengthForUnsignedLong && text.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+            {
+                var hexadecimalString = text.Substring(2);
+                var data = ParseHexStringAsByteArray(hexadecimalString);
+                var value = BitConverter.ToUInt64(data, 0);
+                return new KVObjectValue<ulong>(value, KVValueType.UInt64);
+            }
+
+            int intValue;
+            if (int.TryParse(text, out intValue))
+            {
+                return new KVObjectValue<int>(intValue, KVValueType.Int32);
+            }
+
+            float floatValue;
+            if (float.TryParse(text, out floatValue))
+            {
+                return new KVObjectValue<float>(floatValue, KVValueType.FloatingPoint);
+            }
+
+            return new KVObjectValue<string>(text, KVValueType.String);
+        }
+
+        static byte[] ParseHexStringAsByteArray(string hexadecimalRepresentation)
+        {
+            Require.NotNull(hexadecimalRepresentation, nameof(hexadecimalRepresentation));
+
+            var data = new byte[hexadecimalRepresentation.Length / 2];
+            for (var i = 0; i < data.Length; i++)
+            {
+                var currentByteText = hexadecimalRepresentation.Substring(i * 2, 2);
+                data[i] = byte.Parse(currentByteText, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+            }
+
+            return data;
         }
     }
 }

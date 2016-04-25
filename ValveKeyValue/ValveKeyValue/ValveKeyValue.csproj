@@ -61,7 +61,7 @@
     <Compile Include="KVIgnoreAttribute.cs" />
     <Compile Include="KVPropertyAttribute.cs" />
     <Compile Include="KVSerializerOptions.cs" />
-    <Compile Include="KVStringValue.cs" />
+    <Compile Include="KVObjectValue.cs" />
     <Compile Include="KVTextReader.cs" />
     <Compile Include="KVTextReaderState.cs" />
     <Compile Include="KVTextReaderStateMachine.cs" />

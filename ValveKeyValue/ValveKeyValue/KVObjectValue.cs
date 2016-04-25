@@ -1,22 +1,51 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace ValveKeyValue
 {
     [DebuggerDisplay("{value}")]
-    class KVStringValue : KVValue
+    class KVObjectValue<TObject> : KVValue
+        where TObject : IConvertible
     {
-        public KVStringValue(string value)
+        public KVObjectValue(TObject value, KVValueType valueType)
         {
-            Require.NotNull(value, nameof(value));
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
             this.value = value;
+            ValueType = valueType;
         }
 
-        readonly string value;
+        readonly TObject value;
 
-        public override KVValueType ValueType => KVValueType.String;
+        public override KVValueType ValueType { get; }
 
-        public override TypeCode GetTypeCode() => TypeCode.String;
+        public override TypeCode GetTypeCode()
+        {
+            switch (ValueType)
+            {
+                case KVValueType.Collection:
+                    return TypeCode.Object;
+
+                case KVValueType.FloatingPoint:
+                    return TypeCode.Single;
+
+                case KVValueType.Int32:
+                    return TypeCode.Int32;
+
+                case KVValueType.String:
+                    return TypeCode.String;
+
+                case KVValueType.UInt64:
+                    return TypeCode.UInt64;
+
+                default:
+                    throw new NotImplementedException(string.Format(CultureInfo.InvariantCulture, "No known TypeCode for '{0}'", ValueType));
+            }
+        }
 
         public override bool ToBoolean(IFormatProvider provider) => ToInt32(provider) == 1;
 
@@ -43,7 +72,7 @@ namespace ValveKeyValue
 
         public override float ToSingle(IFormatProvider provider) => (float)Convert.ChangeType(value, typeof(float), provider);
 
-        public override string ToString(IFormatProvider provider) => value;
+        public override string ToString(IFormatProvider provider) => (string)Convert.ChangeType(value, typeof(string), provider);
 
         public override object ToType(Type conversionType, IFormatProvider provider) => Convert.ChangeType(value, conversionType, provider);
 

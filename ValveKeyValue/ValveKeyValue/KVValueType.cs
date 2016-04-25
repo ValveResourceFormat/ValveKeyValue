@@ -13,6 +13,21 @@
         /// <summary>
         /// This <see cref="KVValue"/> is represented by a <see cref="string"/>.
         /// </summary>
-        String
+        String,
+
+        /// <summary>
+        /// This <see cref="KVValue"/> is represented by a <see cref="int"/>
+        /// </summary>
+        Int32,
+
+        /// <summary>
+        /// This <see cref="KVValue"/> is represented by a <see cref="long"/>
+        /// </summary>
+        UInt64,
+
+        /// <summary>
+        /// This <see cref="KVValue"/> is represented by a <see cref="float"/>
+        /// </summary>
+        FloatingPoint
     }
 }

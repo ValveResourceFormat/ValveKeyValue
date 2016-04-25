@@ -12,7 +12,7 @@
         public static implicit operator KVValue(string value)
         {
             Require.NotNull(value, nameof(value));
-            return new KVStringValue(value);
+            return new KVObjectValue<string>(value, KVValueType.String);
         }
 
         /// <summary>
