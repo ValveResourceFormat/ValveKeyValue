@@ -6,11 +6,6 @@ namespace ValveKeyValue.Test
 {
     class KVValueToStringTestCase
     {
-        [Test]
-        public void Foo()
-        {
-        }
-
         [TestCaseSource(nameof(ToStringTestCases))]
         public string KVValueToStringIsSane(KVValue value) => value.ToString();
 
