@@ -3,6 +3,7 @@
 	"bigint"		"0x0000000000000001"
 	"gaben_steamid"	"0x01100001000056bA"
 	"float"			"123.456"
+	"float_exp"		"1.23456E+2"
 	"int"			"1234"
 	"negint"		"-1234"
 	"string"		"123foo"

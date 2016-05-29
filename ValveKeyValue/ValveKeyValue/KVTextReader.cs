@@ -294,6 +294,12 @@ namespace ValveKeyValue
             {
                 var hexadecimalString = text.Substring(2);
                 var data = ParseHexStringAsByteArray(hexadecimalString);
+
+                if (BitConverter.IsLittleEndian)
+                {
+                    Array.Reverse(data);
+                }
+
                 var value = BitConverter.ToUInt64(data, 0);
                 return new KVObjectValue<ulong>(value, KVValueType.UInt64);
             }
@@ -304,8 +310,13 @@ namespace ValveKeyValue
                 return new KVObjectValue<int>(intValue, KVValueType.Int32);
             }
 
+            const NumberStyles FloatingPointNumberStyles =
+                NumberStyles.AllowDecimalPoint |
+                NumberStyles.AllowExponent |
+                NumberStyles.AllowLeadingSign;
+
             float floatValue;
-            if (float.TryParse(text, out floatValue))
+            if (float.TryParse(text, FloatingPointNumberStyles, CultureInfo.InvariantCulture, out floatValue))
             {
                 return new KVObjectValue<float>(floatValue, KVValueType.FloatingPoint);
             }
