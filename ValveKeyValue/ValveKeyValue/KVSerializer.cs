@@ -13,7 +13,7 @@ namespace ValveKeyValue
         /// </summary>
         /// <param name="stream">The stream to deserialize from.</param>
         /// <param name="options">Options to use that can influence the deserialization process.</param>
-        /// <returns>A <see cref="KVObject"/> representing the KeyValues structure in the stream.</returns>
+        /// <returns>A <see cref="KVObject"/> representing the KeyValues structure encoded in the stream.</returns>
         public static KVObject Deserialize(Stream stream, KVSerializerOptions options = null)
         {
             Require.NotNull(stream, nameof(stream));
@@ -29,7 +29,7 @@ namespace ValveKeyValue
         /// </summary>
         /// <param name="text">The text to deserialize.</param>
         /// <param name="options">Options to use that can influence the deserialization process.</param>
-        /// <returns>A <see cref="KVObject"/> representing the KeyValues structure in the stream.</returns>
+        /// <returns>A <see cref="KVObject"/> representing the KeyValues structure encoded in the text.</returns>
         public static KVObject Deserialize(string text, KVSerializerOptions options = null)
         {
             Require.NotNull(text, nameof(text));
@@ -41,11 +41,26 @@ namespace ValveKeyValue
         }
 
         /// <summary>
+        /// Deserializes an object from a binary KeyValues representation.
+        /// </summary>
+        /// <param name="data">The data to deserialize.</param>
+        /// <returns>A <see cref="KVObject"/> representing the KeyValues structure encoded in the data.</returns>
+        public static KVObject Deserialize(byte[] data)
+        {
+            Require.NotNull(data, nameof(data));
+
+            using (var ms = new MemoryStream(data))
+            using (var reader = new KVBinaryReader(ms))
+            {
+                return reader.ReadObject();
+            }
+        }
+
+        /// <summary>
         /// Deserializes an object from a KeyValues representation in a stream.
         /// </summary>
         /// <param name="stream">The stream to deserialize from.</param>
         /// <param name="options">Options to use that can influence the deserialization process.</param>
-        /// <returns>A <see cref="KVObject"/> representing the KeyValues structure in the stream.</returns>
         /// <returns>A <typeparamref name="TObject" /> instance representing the KeyValues structure in the stream.</returns>
         /// <typeparam name="TObject">The type of object to deserialize.</typeparam>;
         public static TObject Deserialize<TObject>(Stream stream, KVSerializerOptions options = null)
@@ -62,14 +77,28 @@ namespace ValveKeyValue
         /// </summary>
         /// <param name="text">The text to deserialize.</param>
         /// <param name="options">Options to use that can influence the deserialization process.</param>
-        /// <returns>A <see cref="KVObject"/> representing the KeyValues structure in the stream.</returns>
-        /// <returns>A <typeparamref name="TObject" /> instance representing the KeyValues structure in the stream.</returns>
+        /// <returns>A <typeparamref name="TObject" /> instance representing the KeyValues structure encoded in the stream.</returns>
         /// <typeparam name="TObject">The type of object to deserialize.</typeparam>;
         public static TObject Deserialize<TObject>(string text, KVSerializerOptions options = null)
         {
             Require.NotNull(text, nameof(text));
 
             var @object = Deserialize(text, options ?? KVSerializerOptions.DefaultOptions);
+            var typedObject = ObjectCopier.MakeObject<TObject>(@object);
+            return typedObject;
+        }
+
+        /// <summary>
+        /// Deserializes an object from a binary KeyValues representation.
+        /// </summary>
+        /// <param name="data">The data to deserialize.</param>
+        /// <returns>A <typeparamref name="TObject" /> instance representing the KeyValues structure encoded in the stream.</returns>
+        /// <typeparam name="TObject">The type of object to deserialize.</typeparam>;
+        public static TObject Deserialize<TObject>(byte[] data)
+        {
+            Require.NotNull(data, nameof(data));
+
+            var @object = Deserialize(data);
             var typedObject = ObjectCopier.MakeObject<TObject>(@object);
             return typedObject;
         }

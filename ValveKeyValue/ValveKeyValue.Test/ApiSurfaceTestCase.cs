@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -161,6 +162,13 @@ namespace ValveKeyValue.Test
 
         static string GetTypeAsString(Type type)
         {
+            if (type.IsArray)
+            {
+                var elementType = type.GetElementType();
+                var elementTypeAsString = GetTypeAsString(elementType);
+                return string.Format(CultureInfo.InvariantCulture, "{0}[]", elementTypeAsString);
+            }
+
             if (type == typeof(bool))
             {
                 return "bool";

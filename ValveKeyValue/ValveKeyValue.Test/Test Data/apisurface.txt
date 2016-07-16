@@ -77,8 +77,10 @@ public sealed class ValveKeyValue.KVSerializer
 {
     public static ValveKeyValue.KVObject Deserialize(System.IO.Stream stream, ValveKeyValue.KVSerializerOptions options);
     public static ValveKeyValue.KVObject Deserialize(string text, ValveKeyValue.KVSerializerOptions options);
+    public static ValveKeyValue.KVObject Deserialize(byte[] data);
     public static ValveKeyValue.TObject Deserialize<ValveKeyValue.TObject>(System.IO.Stream stream, ValveKeyValue.KVSerializerOptions options);
     public static ValveKeyValue.TObject Deserialize<ValveKeyValue.TObject>(string text, ValveKeyValue.KVSerializerOptions options);
+    public static ValveKeyValue.TObject Deserialize<ValveKeyValue.TObject>(byte[] data);
     public bool Equals(object obj);
     protected void Finalize();
     public int GetHashCode();
@@ -93,14 +95,14 @@ public sealed class ValveKeyValue.KVSerializerOptions
 {
     public bool Equals(object obj);
     protected void Finalize();
-    public String[] get_Conditions();
+    public string[] get_Conditions();
     public static ValveKeyValue.KVSerializerOptions get_DefaultOptions();
     public ValveKeyValue.IIncludedFileLoader get_FileLoader();
     public bool get_HasEscapeSequences();
     public int GetHashCode();
     public Type GetType();
     protected object MemberwiseClone();
-    public void set_Conditions(String[] value);
+    public void set_Conditions(string[] value);
     public void set_FileLoader(ValveKeyValue.IIncludedFileLoader value);
     public void set_HasEscapeSequences(bool value);
     public string ToString();

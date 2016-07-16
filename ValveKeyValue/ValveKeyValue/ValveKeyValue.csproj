@@ -53,6 +53,7 @@
     <Compile Include="IObjectMember.cs" />
     <Compile Include="IObjectReflector.cs" />
     <Compile Include="KeyValueException.cs" />
+    <Compile Include="KVBinaryReader.cs" />
     <Compile Include="KVCollectionValue.cs" />
     <Compile Include="KVConditionEvaluator.cs" />
     <Compile Include="KVObject.cs" />
