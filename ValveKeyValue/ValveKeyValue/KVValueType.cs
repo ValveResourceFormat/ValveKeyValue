@@ -28,6 +28,11 @@
         /// <summary>
         /// This <see cref="KVValue"/> is represented by a <see cref="float"/>
         /// </summary>
-        FloatingPoint
+        FloatingPoint,
+
+        /// <summary>
+        /// This <see cref="KVValue"/> is represented by a <see cref="int"/>, but represents a pointer.
+        /// </summary>
+        Pointer
     }
 }

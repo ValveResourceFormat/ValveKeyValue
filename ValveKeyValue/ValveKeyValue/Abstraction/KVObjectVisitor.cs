@@ -31,6 +31,7 @@ namespace ValveKeyValue.Abstraction
 
                 case KVValueType.FloatingPoint:
                 case KVValueType.Int32:
+                case KVValueType.Pointer:
                 case KVValueType.String:
                 case KVValueType.UInt64:
                     listener.OnKeyValuePair(name, value);

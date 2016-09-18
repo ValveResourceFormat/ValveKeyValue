@@ -49,11 +49,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApiSurfaceTestCase.cs" />
+    <Compile Include="Binary\BinaryObjectSerializationTestCase.cs" />
     <Compile Include="Binary\BinaryObjectDeserializationTestCase.cs" />
     <Compile Include="Binary\OutOfRangeNodeTypeTestCase.cs" />
     <Compile Include="Binary\TruncatedDataTestCase.cs" />
     <Compile Include="Binary\WideStringTestCase.cs" />
     <Compile Include="Binary\SimpleBinaryTestCase.cs" />
+    <Compile Include="Helpers\KVSerializerExtensions.cs" />
     <Compile Include="IKVTextReader.cs" />
     <Compile Include="KVBasicObjectIndexerTestCase.cs" />
     <Compile Include="KVObjectIndexerTestCase.cs" />

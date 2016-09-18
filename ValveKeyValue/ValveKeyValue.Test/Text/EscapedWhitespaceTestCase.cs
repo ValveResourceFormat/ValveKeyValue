@@ -18,7 +18,7 @@ namespace ValveKeyValue.Test
             var options = new KVSerializerOptions { HasEscapeSequences = true };
             using (var stream = TestDataHelper.OpenResource("Text.escaped_whitespace.vdf"))
             {
-                data = KVSerializer.Deserialize(stream, options);
+                data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream, options);
             }
         }
     }

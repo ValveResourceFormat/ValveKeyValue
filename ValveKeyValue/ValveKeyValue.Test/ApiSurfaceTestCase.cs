@@ -52,6 +52,10 @@ namespace ValveKeyValue.Test
             {
                 sb.Append("interface");
             }
+            else if (type.IsEnum)
+            {
+                sb.Append("enum");
+            }
             else
             {
                 sb.Append("struct");
@@ -60,6 +64,24 @@ namespace ValveKeyValue.Test
             sb.Append(' ');
             sb.Append(GetTypeAsString(type));
             sb.Append("\n{\n");
+
+            if (type.IsEnum)
+            {
+                var members = Enum.GetNames(type);
+                foreach (var member in members)
+                {
+                    var rawValue = type.GetField(member, BindingFlags.Public | BindingFlags.Static).GetValue(null);
+                    var convertedValue = Convert.ChangeType(rawValue, Enum.GetUnderlyingType(type));
+
+                    sb.Append("    ");
+                    sb.Append(member);
+                    sb.Append(" = ");
+                    sb.Append(convertedValue);
+                    sb.Append(";\n");
+                }
+
+                sb.Append("\n");
+            }
 
             var methods = type
                 .GetMethods(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)

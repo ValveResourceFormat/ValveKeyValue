@@ -17,7 +17,7 @@ namespace ValveKeyValue.Test
         {
             using (var stream = TestDataHelper.OpenResource("Text.escaped_backslash_not_special.vdf"))
             {
-                data = KVSerializer.Deserialize(stream);
+                data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream);
             }
         }
     }

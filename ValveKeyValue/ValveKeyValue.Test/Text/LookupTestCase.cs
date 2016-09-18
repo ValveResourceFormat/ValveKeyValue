@@ -36,7 +36,7 @@ namespace ValveKeyValue.Test
         [OneTimeSetUp]
         public void SetUp()
         {
-            data = KVSerializer.Deserialize<ContainerClass>(TestDataHelper.ReadTextResource("Text.duplicate_keys_object.vdf"));
+            data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<ContainerClass>(TestDataHelper.ReadTextResource("Text.duplicate_keys_object.vdf"));
         }
 
         class ContainerClass

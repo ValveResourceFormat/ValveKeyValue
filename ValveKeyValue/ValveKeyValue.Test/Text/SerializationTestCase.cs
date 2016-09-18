@@ -33,7 +33,7 @@ namespace ValveKeyValue.Test
             string text;
             using (var ms = new MemoryStream())
             {
-                KVSerializer.Serialize(ms, kv);
+                KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Serialize(ms, kv);
 
                 ms.Seek(0, SeekOrigin.Begin);
                 using (var reader = new StreamReader(ms))

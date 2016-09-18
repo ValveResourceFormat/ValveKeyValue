@@ -34,6 +34,7 @@ namespace ValveKeyValue
                     return TypeCode.Single;
 
                 case KVValueType.Int32:
+                case KVValueType.Pointer:
                     return TypeCode.Int32;
 
                 case KVValueType.String:

@@ -31,13 +31,15 @@ namespace ValveKeyValue.Test
             string text;
             using (var ms = new MemoryStream())
             {
-                KVSerializer.Serialize(ms, kv, options);
+                var serializer = KVSerializer.Create(KVSerializationFormat.KeyValues1Text);
+
+                serializer.Serialize(ms, kv, options);
 
                 ms.Seek(0, SeekOrigin.Begin);
 
                 text = Encoding.ASCII.GetString(ms.GetBuffer(), 0, (int)ms.Length);
 
-                convertedKv = KVSerializer.Deserialize(ms, options);
+                convertedKv = serializer.Deserialize(ms, options);
             }
 
             Assert.That((string)convertedKv.Value, Is.EqualTo(value));

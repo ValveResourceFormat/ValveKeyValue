@@ -5,7 +5,7 @@ using ValveKeyValue.Abstraction;
 
 namespace ValveKeyValue.Deserialization
 {
-    sealed class KV1TextReader : IDisposable
+    sealed class KV1TextReader : IVisitingReader
     {
         public KV1TextReader(TextReader textReader, IParsingVisitationListener listener, KVSerializerOptions options)
         {

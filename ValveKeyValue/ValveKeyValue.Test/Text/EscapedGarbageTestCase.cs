@@ -11,7 +11,7 @@ namespace ValveKeyValue.Test
             KVObject data;
             using (var stream = TestDataHelper.OpenResource("Text.escaped_garbage.vdf"))
             {
-                data = KVSerializer.Deserialize(stream);
+                data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream);
             }
 
             Assert.That((string)data["key"], Is.EqualTo(@"\7"));
@@ -24,7 +24,7 @@ namespace ValveKeyValue.Test
             using (var stream = TestDataHelper.OpenResource("Text.escaped_garbage.vdf"))
             {
                 Assert.That(
-                    () => KVSerializer.Deserialize(stream, options),
+                    () => KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream, options),
                     Throws.Exception.TypeOf<KeyValueException>()
                     .With.InnerException.TypeOf<InvalidDataException>()
                     .With.Message.EqualTo(@"Unknown escaped character '\7'."));

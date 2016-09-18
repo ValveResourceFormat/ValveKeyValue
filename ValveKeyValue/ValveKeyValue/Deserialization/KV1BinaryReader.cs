@@ -5,21 +5,8 @@ using ValveKeyValue.Abstraction;
 
 namespace ValveKeyValue.Deserialization
 {
-    class KV1BinaryReader : IDisposable
+    class KV1BinaryReader : IVisitingReader
     {
-        enum BinaryNodeType : byte
-        {
-            ChildObject = 0,
-            String = 1,
-            Int32 = 2,
-            Float32 = 3,
-            Pointer = 4,
-            WideString = 5,
-            Color = 6,
-            UInt64 = 7,
-            End = 8,
-        }
-
         public KV1BinaryReader(Stream stream, IVisitationListener listener)
         {
             Require.NotNull(stream, nameof(stream));
@@ -79,42 +66,42 @@ namespace ValveKeyValue.Deserialization
             ReadValue(name, type);
         }
 
-        void ReadValue(string name, BinaryNodeType type)
+        void ReadValue(string name, KV1BinaryNodeType type)
         {
             KVValue value;
 
             switch (type)
             {
-                case BinaryNodeType.ChildObject:
+                case KV1BinaryNodeType.ChildObject:
                     {
                         listener.OnObjectStart(name);
                         do
                         {
                             ReadObjectCore();
                         }
-                        while (PeekNextNodeType() != BinaryNodeType.End);
+                        while (PeekNextNodeType() != KV1BinaryNodeType.End);
                         listener.OnObjectEnd();
                         return;
                     }
 
-                case BinaryNodeType.String:
+                case KV1BinaryNodeType.String:
                     value = new KVObjectValue<string>(ReadNullTerminatedString(), KVValueType.String);
                     break;
 
-                case BinaryNodeType.WideString:
+                case KV1BinaryNodeType.WideString:
                     throw new NotSupportedException("Wide String is not supported.");
 
-                case BinaryNodeType.Int32:
-                case BinaryNodeType.Color:
-                case BinaryNodeType.Pointer:
+                case KV1BinaryNodeType.Int32:
+                case KV1BinaryNodeType.Color:
+                case KV1BinaryNodeType.Pointer:
                     value = new KVObjectValue<int>(reader.ReadInt32(), KVValueType.Int32);
                     break;
 
-                case BinaryNodeType.UInt64:
+                case KV1BinaryNodeType.UInt64:
                     value = new KVObjectValue<ulong>(reader.ReadUInt64(), KVValueType.UInt64);
                     break;
 
-                case BinaryNodeType.Float32:
+                case KV1BinaryNodeType.Float32:
                     var floatValue = BitConverter.ToSingle(reader.ReadBytes(4), 0);
                     value = new KVObjectValue<float>(floatValue, KVValueType.FloatingPoint);
                     break;
@@ -138,10 +125,10 @@ namespace ValveKeyValue.Deserialization
             return sb.ToString();
         }
 
-        BinaryNodeType ReadNextNodeType()
-            => (BinaryNodeType)reader.ReadByte();
+        KV1BinaryNodeType ReadNextNodeType()
+            => (KV1BinaryNodeType)reader.ReadByte();
 
-        BinaryNodeType PeekNextNodeType()
+        KV1BinaryNodeType PeekNextNodeType()
         {
             var value = ReadNextNodeType();
             stream.Seek(-1, SeekOrigin.Current);

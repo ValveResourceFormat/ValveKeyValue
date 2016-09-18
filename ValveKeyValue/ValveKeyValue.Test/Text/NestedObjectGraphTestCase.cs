@@ -47,7 +47,7 @@ namespace ValveKeyValue.Test
         {
             using (var stream = TestDataHelper.OpenResource("Text.nested_object_graph.vdf"))
             {
-                data = KVSerializer.Deserialize<ObjectGraph>(stream);
+                data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<ObjectGraph>(stream);
             }
         }
 

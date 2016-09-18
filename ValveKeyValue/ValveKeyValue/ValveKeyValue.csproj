@@ -51,6 +51,7 @@
     <Compile Include="Abstraction\IParsingVisitationListener.cs" />
     <Compile Include="Abstraction\IVisitationListener.cs" />
     <Compile Include="DefaultObjectReflector.cs" />
+    <Compile Include="Deserialization\IVisitingReader.cs" />
     <Compile Include="Deserialization\KVAppendingObjectBuilder.cs" />
     <Compile Include="Deserialization\KVMergingObjectBuilder.cs" />
     <Compile Include="Deserialization\KVObjectBuilder.cs" />
@@ -60,6 +61,7 @@
     <Compile Include="IObjectReflector.cs" />
     <Compile Include="KeyValueException.cs" />
     <Compile Include="Deserialization\KV1BinaryReader.cs" />
+    <Compile Include="KV1BinaryNodeType.cs" />
     <Compile Include="KVCollectionValue.cs" />
     <Compile Include="KVConditionEvaluator.cs" />
     <Compile Include="KVObject.cs" />
@@ -67,11 +69,13 @@
     <Compile Include="Deserialization\KVPartialState.cs" />
     <Compile Include="KVIgnoreAttribute.cs" />
     <Compile Include="KVPropertyAttribute.cs" />
+    <Compile Include="KVSerializationFormat.cs" />
     <Compile Include="KVSerializerOptions.cs" />
     <Compile Include="KVObjectValue.cs" />
     <Compile Include="Deserialization\KV1TextReader.cs" />
     <Compile Include="Deserialization\KV1TextReaderState.cs" />
     <Compile Include="Deserialization\KV1TextReaderStateMachine.cs" />
+    <Compile Include="Serialization\KV1BinarySerializer.cs" />
     <Compile Include="Serialization\KV1TextSerializer.cs" />
     <Compile Include="KVToken.cs" />
     <Compile Include="Deserialization\KV1TokenReader.cs" />

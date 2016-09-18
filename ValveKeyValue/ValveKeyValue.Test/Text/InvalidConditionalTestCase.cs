@@ -31,7 +31,7 @@ namespace ValveKeyValue.Test
             using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(text)))
             {
                 Assert.That(
-                    () => KVSerializer.Deserialize(stream),
+                    () => KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream),
                     Throws.Exception.InstanceOf<InvalidDataException>()
                     .With.Message.EqualTo($"Invalid conditional syntax \"{conditional}\""));
             }

@@ -1,7 +1,7 @@
 ﻿using System;
 using NUnit.Framework;
 
-namespace ValveKeyValue
+namespace ValveKeyValue.Test
 {
     class WideStringTestCase
     {
@@ -20,7 +20,7 @@ namespace ValveKeyValue
             };
 
             Assert.That(
-                () => KVSerializer.Deserialize(data),
+                () => KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Deserialize(data),
                 Throws.Exception.InstanceOf<KeyValueException>().With.InnerException.TypeOf<NotSupportedException>());
         }
     }

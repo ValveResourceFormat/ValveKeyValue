@@ -15,7 +15,7 @@ namespace ValveKeyValue.Test
             using (var stream = TestDataHelper.OpenResource("Text.list_of_values_skipping_keys.vdf"))
             {
                 Assert.That(
-                     () => KVSerializer.Deserialize<SerializedType>(stream),
+                     () => KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<SerializedType>(stream),
                      Throws.Exception.InstanceOf<InvalidOperationException>()
                      .With.Message.EqualTo($"Cannot deserialize a non-array value to type \"{typeof(TEnumerable).Namespace}.{typeof(TEnumerable).Name}\"."));
             }

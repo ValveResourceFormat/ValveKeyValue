@@ -1,4 +1,6 @@
-﻿namespace ValveKeyValue
+﻿using System;
+
+namespace ValveKeyValue
 {
     /// <summary>
     /// Container type for value of a KeyValues object.
@@ -6,13 +8,49 @@
     public abstract partial class KVValue
     {
         /// <summary>
-        /// Implicit cast operator for string to KVValue.
+        /// Implicit cast operator for <see cref="string"/>  to KVValue.
         /// </summary>
         /// <param name="value">The <see cref="string"/> to cast.</param>
         public static implicit operator KVValue(string value)
         {
             Require.NotNull(value, nameof(value));
             return new KVObjectValue<string>(value, KVValueType.String);
+        }
+
+        /// <summary>
+        /// Implicit cast operator for <see cref="int"/>  to KVValue.
+        /// </summary>
+        /// <param name="value">The <see cref="int"/> to cast.</param>
+        public static implicit operator KVValue(int value)
+        {
+            return new KVObjectValue<int>(value, KVValueType.Int32);
+        }
+
+        /// <summary>
+        /// Implicit cast operator for <see cref="IntPtr"/>  to KVValue.
+        /// </summary>
+        /// <param name="value">The <see cref="IntPtr"/> to cast.</param>
+        public static implicit operator KVValue(IntPtr value)
+        {
+            return new KVObjectValue<int>(value.ToInt32(), KVValueType.Pointer);
+        }
+
+        /// <summary>
+        /// Implicit cast operator for <see cref="ulong"/>  to KVValue.
+        /// </summary>
+        /// <param name="value">The <see cref="ulong"/> to cast.</param>
+        public static implicit operator KVValue(ulong value)
+        {
+            return new KVObjectValue<ulong>(value, KVValueType.UInt64);
+        }
+
+        /// <summary>
+        /// Implicit cast operator for <see cref="float"/>  to KVValue.
+        /// </summary>
+        /// <param name="value">The <see cref="float"/> to cast.</param>
+        public static implicit operator KVValue(float value)
+        {
+            return new KVObjectValue<float>(value, KVValueType.FloatingPoint);
         }
 
         /// <summary>

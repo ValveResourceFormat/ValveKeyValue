@@ -73,21 +73,37 @@ public sealed class ValveKeyValue.KVPropertyAttribute
     public string ToString();
 }
 
-public sealed class ValveKeyValue.KVSerializer
+public sealed enum ValveKeyValue.KVSerializationFormat
 {
-    public static ValveKeyValue.KVObject Deserialize(System.IO.Stream stream, ValveKeyValue.KVSerializerOptions options);
-    public static ValveKeyValue.KVObject Deserialize(string text, ValveKeyValue.KVSerializerOptions options);
-    public static ValveKeyValue.KVObject Deserialize(byte[] data);
-    public static ValveKeyValue.TObject Deserialize<ValveKeyValue.TObject>(System.IO.Stream stream, ValveKeyValue.KVSerializerOptions options);
-    public static ValveKeyValue.TObject Deserialize<ValveKeyValue.TObject>(string text, ValveKeyValue.KVSerializerOptions options);
-    public static ValveKeyValue.TObject Deserialize<ValveKeyValue.TObject>(byte[] data);
+    KeyValues1Text = 0;
+    KeyValues1Binary = 1;
+
+    public int CompareTo(object target);
+    public bool Equals(object obj);
+    protected void Finalize();
+    public int GetHashCode();
+    public Type GetType();
+    public TypeCode GetTypeCode();
+    public bool HasFlag(Enum flag);
+    protected object MemberwiseClone();
+    public string ToString();
+    public string ToString(string format, IFormatProvider provider);
+    public string ToString(string format);
+    public string ToString(IFormatProvider provider);
+}
+
+public class ValveKeyValue.KVSerializer
+{
+    public static ValveKeyValue.KVSerializer Create(ValveKeyValue.KVSerializationFormat format);
+    public ValveKeyValue.KVObject Deserialize(System.IO.Stream stream, ValveKeyValue.KVSerializerOptions options);
+    public ValveKeyValue.TObject Deserialize<ValveKeyValue.TObject>(System.IO.Stream stream, ValveKeyValue.KVSerializerOptions options);
     public bool Equals(object obj);
     protected void Finalize();
     public int GetHashCode();
     public Type GetType();
     protected object MemberwiseClone();
-    public static void Serialize(System.IO.Stream stream, ValveKeyValue.KVObject data, ValveKeyValue.KVSerializerOptions options);
-    public static void Serialize<ValveKeyValue.TData>(System.IO.Stream stream, ValveKeyValue.TData data, string name, ValveKeyValue.KVSerializerOptions options);
+    public void Serialize(System.IO.Stream stream, ValveKeyValue.KVObject data, ValveKeyValue.KVSerializerOptions options);
+    public void Serialize<ValveKeyValue.TData>(System.IO.Stream stream, ValveKeyValue.TData data, string name, ValveKeyValue.KVSerializerOptions options);
     public string ToString();
 }
 
@@ -133,6 +149,10 @@ public class ValveKeyValue.KVValue
     public static ulong op_Explicit(ValveKeyValue.KVValue value);
     public static ushort op_Explicit(ValveKeyValue.KVValue value);
     public static ValveKeyValue.KVValue op_Implicit(string value);
+    public static ValveKeyValue.KVValue op_Implicit(int value);
+    public static ValveKeyValue.KVValue op_Implicit(IntPtr value);
+    public static ValveKeyValue.KVValue op_Implicit(ulong value);
+    public static ValveKeyValue.KVValue op_Implicit(float value);
     public bool ToBoolean(IFormatProvider provider);
     public byte ToByte(IFormatProvider provider);
     public char ToChar(IFormatProvider provider);
@@ -152,8 +172,15 @@ public class ValveKeyValue.KVValue
     public ulong ToUInt64(IFormatProvider provider);
 }
 
-public sealed struct ValveKeyValue.KVValueType
+public sealed enum ValveKeyValue.KVValueType
 {
+    Collection = 0;
+    String = 1;
+    Int32 = 2;
+    UInt64 = 3;
+    FloatingPoint = 4;
+    Pointer = 5;
+
     public int CompareTo(object target);
     public bool Equals(object obj);
     protected void Finalize();

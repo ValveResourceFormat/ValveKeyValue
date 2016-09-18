@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 
-namespace ValveKeyValue
+namespace ValveKeyValue.Test
 {
     class BinaryObjectDeserializationTestCase
     {
@@ -50,20 +50,20 @@ namespace ValveKeyValue
                     0x03, // float32: flt = 1234.5678f
                         0x66, 0x6C, 0x74, 0x00,
                         0x2B, 0x52, 0x9A, 0x44,
-                    0x04, // color: col = 0x10203040
-                        0x63, 0x6F, 0x6C, 0x00,
-                        0x40, 0x30, 0x20, 0x10,
-                    0x06, // pointer: ptr = 0x11223344
+                    0x04, // pointer: ptr = 0x11223344
                         0x70, 0x74, 0x72, 0x00,
                         0x44, 0x33, 0x22, 0x11,
-                    0x07, // uint64: long = 0x1122334455667788
+                    0x06, // color: col = 0x10203040
+                        0x63, 0x6F, 0x6C, 0x00,
+                        0x40, 0x30, 0x20, 0x10,
+                    0x07, // uint64: lng = 0x1122334455667788
                         0x6C, 0x6E, 0x67, 0x00,
                         0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11,
                     0x08, // end object
                 0x08, // end document
             };
 
-            obj = KVSerializer.Deserialize<TestObject>(data);
+            obj = KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Deserialize<TestObject>(data);
         }
 
         class TestObject

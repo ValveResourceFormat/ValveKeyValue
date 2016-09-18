@@ -92,6 +92,10 @@ namespace ValveKeyValue.Deserialization
             return builder;
         }
 
+        public void Dispose()
+        {
+        }
+
         internal Stack<KVPartialState> StateStack => stateStack;
 
         protected virtual void FinalizeState()

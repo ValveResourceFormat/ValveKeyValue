@@ -2,16 +2,23 @@
 {
     sealed class StringKVTextReader : IKVTextReader
     {
+        public StringKVTextReader()
+        {
+            serializer = KVSerializer.Create(KVSerializationFormat.KeyValues1Text);
+        }
+
+        readonly KVSerializer serializer;
+
         KVObject IKVTextReader.Read(string resourceName, KVSerializerOptions options)
         {
             var text = TestDataHelper.ReadTextResource(resourceName);
-            return KVSerializer.Deserialize(text, options);
+            return serializer.Deserialize(text, options);
         }
 
         T IKVTextReader.Read<T>(string resourceName, KVSerializerOptions options)
         {
             var text = TestDataHelper.ReadTextResource(resourceName);
-            return KVSerializer.Deserialize<T>(text, options);
+            return serializer.Deserialize<T>(text, options);
         }
     }
 }

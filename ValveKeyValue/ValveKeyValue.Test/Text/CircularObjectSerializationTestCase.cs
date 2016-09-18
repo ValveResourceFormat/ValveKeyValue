@@ -27,7 +27,7 @@ namespace ValveKeyValue.Test
             using (var ms = new MemoryStream())
             {
                 Assert.That(
-                    () => KVSerializer.Serialize(ms, dataObject1, "test data"),
+                    () => KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Serialize(ms, dataObject1, "test data"),
                     Throws.Exception.InstanceOf<KeyValueException>()
                     .With.Message.EqualTo("Serialization failed - circular object reference detected."));
             }

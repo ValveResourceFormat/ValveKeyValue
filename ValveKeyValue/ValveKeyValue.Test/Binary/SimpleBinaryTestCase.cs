@@ -2,7 +2,7 @@
 using System.Linq;
 using NUnit.Framework;
 
-namespace ValveKeyValue
+namespace ValveKeyValue.Test
 {
     class SimpleBinaryTestCase
     {
@@ -63,7 +63,7 @@ namespace ValveKeyValue
                     0x08, // end object
                 0x08, // end document
             };
-            obj = KVSerializer.Deserialize(data);
+            obj = KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Deserialize(data);
         }
     }
 }

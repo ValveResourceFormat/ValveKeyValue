@@ -9,61 +9,35 @@ namespace ValveKeyValue
     /// <summary>
     /// Helper class to easily deserialize KeyValue objects.
     /// </summary>
-    public static class KVSerializer
+    public class KVSerializer
     {
+        KVSerializer(KVSerializationFormat format)
+        {
+            this.format = format;
+        }
+
+        readonly KVSerializationFormat format;
+
+        /// <summary>
+        /// Creates a new <see cref="KVSerializer"/> for the given format.
+        /// </summary>
+        /// <param name="format">The <see cref="KVSerializationFormat"/> to use when (de)serializing. </param>
+        /// <returns>A new <see cref="KVSerializer"/> that (de)serializes with the given format.</returns>
+        public static KVSerializer Create(KVSerializationFormat format)
+            => new KVSerializer(format);
+
         /// <summary>
         /// Deserializes a KeyValue object from a stream.
         /// </summary>
         /// <param name="stream">The stream to deserialize from.</param>
         /// <param name="options">Options to use that can influence the deserialization process.</param>
         /// <returns>A <see cref="KVObject"/> representing the KeyValues structure encoded in the stream.</returns>
-        public static KVObject Deserialize(Stream stream, KVSerializerOptions options = null)
+        public KVObject Deserialize(Stream stream, KVSerializerOptions options = null)
         {
             Require.NotNull(stream, nameof(stream));
-
             var builder = new KVObjectBuilder();
 
-            using (var reader = new KV1TextReader(new StreamReader(stream), builder, options ?? KVSerializerOptions.DefaultOptions))
-            {
-                reader.ReadObject();
-            }
-
-            return builder.GetObject();
-        }
-
-        /// <summary>
-        /// Deserializes an object from a textual KeyValues representation.
-        /// </summary>
-        /// <param name="text">The text to deserialize.</param>
-        /// <param name="options">Options to use that can influence the deserialization process.</param>
-        /// <returns>A <see cref="KVObject"/> representing the KeyValues structure encoded in the text.</returns>
-        public static KVObject Deserialize(string text, KVSerializerOptions options = null)
-        {
-            Require.NotNull(text, nameof(text));
-
-            var builder = new KVObjectBuilder();
-
-            using (var reader = new KV1TextReader(new StringReader(text), builder, options ?? KVSerializerOptions.DefaultOptions))
-            {
-                reader.ReadObject();
-            }
-
-            return builder.GetObject();
-        }
-
-        /// <summary>
-        /// Deserializes an object from a binary KeyValues representation.
-        /// </summary>
-        /// <param name="data">The data to deserialize.</param>
-        /// <returns>A <see cref="KVObject"/> representing the KeyValues structure encoded in the data.</returns>
-        public static KVObject Deserialize(byte[] data)
-        {
-            Require.NotNull(data, nameof(data));
-
-            var builder = new KVObjectBuilder();
-
-            using (var ms = new MemoryStream(data))
-            using (var reader = new KV1BinaryReader(ms, builder))
+            using (var reader = MakeReader(stream, builder, options ?? KVSerializerOptions.DefaultOptions))
             {
                 reader.ReadObject();
             }
@@ -78,7 +52,7 @@ namespace ValveKeyValue
         /// <param name="options">Options to use that can influence the deserialization process.</param>
         /// <returns>A <typeparamref name="TObject" /> instance representing the KeyValues structure in the stream.</returns>
         /// <typeparam name="TObject">The type of object to deserialize.</typeparam>;
-        public static TObject Deserialize<TObject>(Stream stream, KVSerializerOptions options = null)
+        public TObject Deserialize<TObject>(Stream stream, KVSerializerOptions options = null)
         {
             Require.NotNull(stream, nameof(stream));
 
@@ -88,45 +62,14 @@ namespace ValveKeyValue
         }
 
         /// <summary>
-        /// Deserializes an object from a textual KeyValues representation.
-        /// </summary>
-        /// <param name="text">The text to deserialize.</param>
-        /// <param name="options">Options to use that can influence the deserialization process.</param>
-        /// <returns>A <typeparamref name="TObject" /> instance representing the KeyValues structure encoded in the stream.</returns>
-        /// <typeparam name="TObject">The type of object to deserialize.</typeparam>;
-        public static TObject Deserialize<TObject>(string text, KVSerializerOptions options = null)
-        {
-            Require.NotNull(text, nameof(text));
-
-            var @object = Deserialize(text, options ?? KVSerializerOptions.DefaultOptions);
-            var typedObject = ObjectCopier.MakeObject<TObject>(@object);
-            return typedObject;
-        }
-
-        /// <summary>
-        /// Deserializes an object from a binary KeyValues representation.
-        /// </summary>
-        /// <param name="data">The data to deserialize.</param>
-        /// <returns>A <typeparamref name="TObject" /> instance representing the KeyValues structure encoded in the stream.</returns>
-        /// <typeparam name="TObject">The type of object to deserialize.</typeparam>;
-        public static TObject Deserialize<TObject>(byte[] data)
-        {
-            Require.NotNull(data, nameof(data));
-
-            var @object = Deserialize(data);
-            var typedObject = ObjectCopier.MakeObject<TObject>(@object);
-            return typedObject;
-        }
-
-        /// <summary>
-        /// Serializes a KeyValue object into stream in plain text..
+        /// Serializes a KeyValue object into stream.
         /// </summary>
         /// <param name="stream">The stream to serialize into.</param>
         /// <param name="data">The data to serialize.</param>
         /// <param name="options">Options to use that can influence the serialization process.</param>
-        public static void Serialize(Stream stream, KVObject data, KVSerializerOptions options = null)
+        public void Serialize(Stream stream, KVObject data, KVSerializerOptions options = null)
         {
-            using (var serializer = new KV1TextSerializer(stream, options ?? KVSerializerOptions.DefaultOptions))
+            using (var serializer = MakeSerializer(stream, options ?? KVSerializerOptions.DefaultOptions))
             {
                 var visitor = new KVObjectVisitor(serializer);
                 visitor.Visit(data);
@@ -141,7 +84,7 @@ namespace ValveKeyValue
         /// <param name="name">The top-level object name</param>
         /// <param name="options">Options to use that can influence the serialization process.</param>
         /// <typeparam name="TData">The type of object to serialize.</typeparam>
-        public static void Serialize<TData>(Stream stream, TData data, string name, KVSerializerOptions options = null)
+        public void Serialize<TData>(Stream stream, TData data, string name, KVSerializerOptions options = null)
         {
             Require.NotNull(stream, nameof(stream));
 
@@ -152,8 +95,45 @@ namespace ValveKeyValue
 
             Require.NotNull(name, nameof(name));
 
-            var kvObjectTree = ObjectCopier.FromObject<TData>(data, name);
+            var kvObjectTree = ObjectCopier.FromObject(data, name);
             Serialize(stream, kvObjectTree, options);
+        }
+
+        IVisitingReader MakeReader(Stream stream, IParsingVisitationListener listener, KVSerializerOptions options)
+        {
+            Require.NotNull(stream, nameof(stream));
+            Require.NotNull(listener, nameof(listener));
+            Require.NotNull(options, nameof(options));
+
+            switch (format)
+            {
+                case KVSerializationFormat.KeyValues1Text:
+                    return new KV1TextReader(new StreamReader(stream), listener, options);
+
+                case KVSerializationFormat.KeyValues1Binary:
+                    return new KV1BinaryReader(stream, listener);
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(format), format, "Invalid serialization format.");
+            }
+        }
+
+        IVisitationListener MakeSerializer(Stream stream, KVSerializerOptions options)
+        {
+            Require.NotNull(stream, nameof(stream));
+            Require.NotNull(options, nameof(options));
+
+            switch (format)
+            {
+                case KVSerializationFormat.KeyValues1Text:
+                    return new KV1TextSerializer(stream, options);
+
+                case KVSerializationFormat.KeyValues1Binary:
+                    return new KV1BinarySerializer(stream);
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(format), format, "Invalid serialization format.");
+            }
         }
     }
 }

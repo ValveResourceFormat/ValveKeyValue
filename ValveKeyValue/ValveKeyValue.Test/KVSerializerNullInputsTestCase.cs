@@ -1,26 +1,20 @@
 ﻿using System;
+using System.Collections;
 using NUnit.Framework;
 
 namespace ValveKeyValue.Test
 {
     class KVSerializerNullInputsTestCase
     {
-        [Test]
-        public void DeserializeWithNullStream()
+        [TestCaseSource(nameof(Formats))]
+        public void DeserializeWithNullStream(KVSerializationFormat format)
         {
             Assert.That(
-                () => KVSerializer.Deserialize(stream: null),
+                () => KVSerializer.Create(format).Deserialize(stream: null),
                 Throws.Exception.TypeOf<ArgumentNullException>()
                 .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("stream"));
         }
 
-        [Test]
-        public void DeserializeWithNullString()
-        {
-            Assert.That(
-                () => KVSerializer.Deserialize(text: null),
-                Throws.Exception.TypeOf<ArgumentNullException>()
-                .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("text"));
-        }
+        public static IEnumerable Formats => Enum.GetValues(typeof(KVSerializationFormat));
     }
 }

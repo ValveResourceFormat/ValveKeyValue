@@ -6,7 +6,7 @@
         {
             using (var stream = TestDataHelper.OpenResource(resourceName))
             {
-                return KVSerializer.Deserialize(stream, options);
+                return KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream, options);
             }
         }
 
@@ -14,7 +14,7 @@
         {
             using (var stream = TestDataHelper.OpenResource(resourceName))
             {
-                return KVSerializer.Deserialize<T>(stream, options);
+                return KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<T>(stream, options);
             }
         }
     }
