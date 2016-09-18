@@ -1,5 +1,8 @@
 ﻿using System;
 using System.IO;
+using ValveKeyValue.Abstraction;
+using ValveKeyValue.Deserialization;
+using ValveKeyValue.Serialization;
 
 namespace ValveKeyValue
 {
@@ -18,10 +21,14 @@ namespace ValveKeyValue
         {
             Require.NotNull(stream, nameof(stream));
 
-            using (var reader = new KVTextReader(new StreamReader(stream), options ?? KVSerializerOptions.DefaultOptions))
+            var builder = new KVObjectBuilder();
+
+            using (var reader = new KV1TextReader(new StreamReader(stream), builder, options ?? KVSerializerOptions.DefaultOptions))
             {
-                return reader.ReadObject();
+                reader.ReadObject();
             }
+
+            return builder.GetObject();
         }
 
         /// <summary>
@@ -34,10 +41,14 @@ namespace ValveKeyValue
         {
             Require.NotNull(text, nameof(text));
 
-            using (var reader = new KVTextReader(new StringReader(text), options ?? KVSerializerOptions.DefaultOptions))
+            var builder = new KVObjectBuilder();
+
+            using (var reader = new KV1TextReader(new StringReader(text), builder, options ?? KVSerializerOptions.DefaultOptions))
             {
-                return reader.ReadObject();
+                reader.ReadObject();
             }
+
+            return builder.GetObject();
         }
 
         /// <summary>
@@ -49,11 +60,15 @@ namespace ValveKeyValue
         {
             Require.NotNull(data, nameof(data));
 
+            var builder = new KVObjectBuilder();
+
             using (var ms = new MemoryStream(data))
-            using (var reader = new KVBinaryReader(ms))
+            using (var reader = new KV1BinaryReader(ms, builder))
             {
-                return reader.ReadObject();
+                reader.ReadObject();
             }
+
+            return builder.GetObject();
         }
 
         /// <summary>
@@ -111,9 +126,10 @@ namespace ValveKeyValue
         /// <param name="options">Options to use that can influence the serialization process.</param>
         public static void Serialize(Stream stream, KVObject data, KVSerializerOptions options = null)
         {
-            using (var writer = new KVTextWriter(stream, options ?? KVSerializerOptions.DefaultOptions))
+            using (var serializer = new KV1TextSerializer(stream, options ?? KVSerializerOptions.DefaultOptions))
             {
-                writer.WriteObject(data);
+                var visitor = new KVObjectVisitor(serializer);
+                visitor.Visit(data);
             }
         }
 

@@ -48,27 +48,33 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Abstraction\IParsingVisitationListener.cs" />
+    <Compile Include="Abstraction\IVisitationListener.cs" />
     <Compile Include="DefaultObjectReflector.cs" />
+    <Compile Include="Deserialization\KVAppendingObjectBuilder.cs" />
+    <Compile Include="Deserialization\KVMergingObjectBuilder.cs" />
+    <Compile Include="Deserialization\KVObjectBuilder.cs" />
+    <Compile Include="Deserialization\KVPartialState{TState}.cs" />
     <Compile Include="IIncludedFileLoader.cs" />
     <Compile Include="IObjectMember.cs" />
     <Compile Include="IObjectReflector.cs" />
     <Compile Include="KeyValueException.cs" />
-    <Compile Include="KVBinaryReader.cs" />
+    <Compile Include="Deserialization\KV1BinaryReader.cs" />
     <Compile Include="KVCollectionValue.cs" />
     <Compile Include="KVConditionEvaluator.cs" />
     <Compile Include="KVObject.cs" />
     <Compile Include="KVObject_IEnumerable.cs" />
-    <Compile Include="KVPartialState.cs" />
+    <Compile Include="Deserialization\KVPartialState.cs" />
     <Compile Include="KVIgnoreAttribute.cs" />
     <Compile Include="KVPropertyAttribute.cs" />
     <Compile Include="KVSerializerOptions.cs" />
     <Compile Include="KVObjectValue.cs" />
-    <Compile Include="KVTextReader.cs" />
-    <Compile Include="KVTextReaderState.cs" />
-    <Compile Include="KVTextReaderStateMachine.cs" />
-    <Compile Include="KVTextWriter.cs" />
+    <Compile Include="Deserialization\KV1TextReader.cs" />
+    <Compile Include="Deserialization\KV1TextReaderState.cs" />
+    <Compile Include="Deserialization\KV1TextReaderStateMachine.cs" />
+    <Compile Include="Serialization\KV1TextSerializer.cs" />
     <Compile Include="KVToken.cs" />
-    <Compile Include="KVTokenReader.cs" />
+    <Compile Include="Deserialization\KV1TokenReader.cs" />
     <Compile Include="KVTokenType.cs" />
     <Compile Include="KVValue.cs" />
     <Compile Include="KVValueType.cs" />
@@ -78,6 +84,7 @@
     <Compile Include="PropertyMember.cs" />
     <Compile Include="Require.cs" />
     <Compile Include="KVSerializer.cs" />
+    <Compile Include="Abstraction\KVObjectVisitor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -87,6 +94,7 @@
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

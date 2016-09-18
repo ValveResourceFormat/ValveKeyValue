@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace ValveKeyValue
+namespace ValveKeyValue.Deserialization
 {
-    class KVTokenReader : IDisposable
+    class KV1TokenReader : IDisposable
     {
         const char QuotationMark = '"';
         const char ObjectStart = '{';
@@ -16,7 +16,7 @@ namespace ValveKeyValue
         const char ConditionEnd = ']';
         const char InclusionMark = '#';
 
-        public KVTokenReader(TextReader textReader, KVSerializerOptions options)
+        public KV1TokenReader(TextReader textReader, KVSerializerOptions options)
         {
             Require.NotNull(textReader, nameof(textReader));
             Require.NotNull(options, nameof(options));
@@ -31,7 +31,7 @@ namespace ValveKeyValue
 
         public KVToken ReadNextToken()
         {
-            Require.NotDisposed(nameof(KVTokenReader), disposed);
+            Require.NotDisposed(nameof(KV1TokenReader), disposed);
             SwallowWhitespace();
 
             var nextChar = Peek();

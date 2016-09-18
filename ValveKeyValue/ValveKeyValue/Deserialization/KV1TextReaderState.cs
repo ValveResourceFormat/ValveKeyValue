@@ -1,6 +1,6 @@
-﻿namespace ValveKeyValue
+﻿namespace ValveKeyValue.Deserialization
 {
-    enum KVTextReaderState
+    enum KV1TextReaderState
     {
        InObjectBeforeKey,
        InObjectBetweenKeyAndValue,

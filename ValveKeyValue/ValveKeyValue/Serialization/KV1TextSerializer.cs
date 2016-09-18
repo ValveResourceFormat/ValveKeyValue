@@ -1,15 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using ValveKeyValue.Abstraction;
 
-namespace ValveKeyValue
+namespace ValveKeyValue.Serialization
 {
-    class KVTextWriter : IDisposable
+    sealed class KV1TextSerializer : IVisitationListener, IDisposable
     {
-        public KVTextWriter(Stream stream, KVSerializerOptions options)
+        public KV1TextSerializer(Stream stream, KVSerializerOptions options)
         {
             Require.NotNull(stream, nameof(stream));
             Require.NotNull(options, nameof(options));
@@ -23,29 +21,23 @@ namespace ValveKeyValue
         readonly TextWriter writer;
         int indentation = 0;
 
-        public void WriteObject(KVObject data)
-        {
-            if (data.Value.ValueType == KVValueType.Collection)
-            {
-                WriteStartObject(data.Name);
-
-                var children = data.Children;
-                foreach (var item in children)
-                {
-                    WriteObject(item);
-                }
-
-                WriteEndObject();
-            }
-            else
-            {
-                WriteKeyValuePair(data.Name, data.Value);
-            }
-        }
-
         public void Dispose()
         {
             writer.Dispose();
+        }
+
+        public void OnObjectStart(string name)
+            => WriteStartObject(name);
+
+        public void OnObjectEnd()
+            => WriteEndObject();
+
+        public void OnKeyValuePair(string name, KVValue value)
+            => WriteKeyValuePair(name, value);
+
+        public void DiscardCurrentObject()
+        {
+            throw new NotSupportedException("Discard not supported when writing.");
         }
 
         void WriteStartObject(string name)
@@ -67,6 +59,15 @@ namespace ValveKeyValue
             writer.WriteLine();
         }
 
+        void WriteKeyValuePair(string name, IConvertible value)
+        {
+            WriteIndentation();
+            WriteText(name);
+            writer.Write('\t');
+            WriteText(value.ToString(null));
+            WriteLine();
+        }
+
         void WriteIndentation()
         {
             if (indentation == 0)
@@ -76,15 +77,6 @@ namespace ValveKeyValue
 
             var text = new string('\t', indentation);
             writer.Write(text);
-        }
-
-        void WriteKeyValuePair(string name, KVValue value)
-        {
-            WriteIndentation();
-            WriteText(name);
-            writer.Write('\t');
-            WriteText((string)value);
-            WriteLine();
         }
 
         void WriteText(string text)

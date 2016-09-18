@@ -1,34 +1,37 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
-using System.Linq;
+using ValveKeyValue.Abstraction;
 
-namespace ValveKeyValue
+namespace ValveKeyValue.Deserialization
 {
-    class KVTextReader : IDisposable
+    sealed class KV1TextReader : IDisposable
     {
-        public KVTextReader(TextReader textReader, KVSerializerOptions options)
+        public KV1TextReader(TextReader textReader, IParsingVisitationListener listener, KVSerializerOptions options)
         {
             Require.NotNull(textReader, nameof(textReader));
+            Require.NotNull(listener, nameof(listener));
             Require.NotNull(options, nameof(options));
 
+            this.listener = listener;
             this.options = options;
+
             conditionEvaluator = new KVConditionEvaluator(options.Conditions);
-            tokenReader = new KVTokenReader(textReader, options);
-            stateMachine = new KVTextReaderStateMachine();
+            tokenReader = new KV1TokenReader(textReader, options);
+            stateMachine = new KV1TextReaderStateMachine();
         }
 
+        readonly IParsingVisitationListener listener;
         readonly KVSerializerOptions options;
+
         readonly KVConditionEvaluator conditionEvaluator;
-        readonly KVTokenReader tokenReader;
-        readonly KVTextReaderStateMachine stateMachine;
+        readonly KV1TokenReader tokenReader;
+        readonly KV1TextReaderStateMachine stateMachine;
         bool disposed;
 
-        public KVObject ReadObject()
+        public void ReadObject()
         {
-            Require.NotDisposed(nameof(KVTextReader), disposed);
-
-            var @object = default(KVObject);
+            Require.NotDisposed(nameof(KV1TextReader), disposed);
 
             while (stateMachine.IsInObject)
             {
@@ -58,7 +61,7 @@ namespace ValveKeyValue
                         break;
 
                     case KVTokenType.ObjectEnd:
-                        FinalizeCurrentObject();
+                        FinalizeCurrentObject(@explicit: true);
                         break;
 
                     case KVTokenType.Condition:
@@ -68,7 +71,7 @@ namespace ValveKeyValue
                     case KVTokenType.EndOfFile:
                         try
                         {
-                            @object = FinalizeDocument();
+                            FinalizeDocument();
                         }
                         catch (InvalidOperationException ex)
                         {
@@ -81,24 +84,27 @@ namespace ValveKeyValue
                         break;
 
                     case KVTokenType.IncludeAndMerge:
-                        HandleIncludeAndMerge(token.Value);
+                        if (!stateMachine.IsAtStart)
+                        {
+                            throw new KeyValueException("Inclusions are only valid at the beginning of a file.");
+                        }
+
+                        stateMachine.AddItemForMerging(token.Value);
                         break;
 
                     case KVTokenType.IncludeAndAppend:
-                        HandleIncludeAndAppend(token.Value);
+                        if (!stateMachine.IsAtStart)
+                        {
+                            throw new KeyValueException("Inclusions are only valid at the beginning of a file.");
+                        }
+
+                        stateMachine.AddItemForAppending(token.Value);
                         break;
 
                     default:
                         throw new NotImplementedException("The developer forgot to handle a KVTokenType.");
                 }
             }
-
-            if (@object == null)
-            {
-                throw new InvalidOperationException(); // Should be unreachable.
-            }
-
-            return @object;
         }
 
         public void Dispose()
@@ -115,20 +121,22 @@ namespace ValveKeyValue
             switch (stateMachine.Current)
             {
                 // If we're after a value when we find more text, then we must be starting a new key/value pair.
-                case KVTextReaderState.InObjectAfterValue:
-                    FinalizeCurrentObject();
+                case KV1TextReaderState.InObjectAfterValue:
+                    FinalizeCurrentObject(@explicit: false);
                     stateMachine.PushObject();
                     SetObjectKey(text);
                     break;
 
-                case KVTextReaderState.InObjectBeforeKey:
+                case KV1TextReaderState.InObjectBeforeKey:
                     SetObjectKey(text);
                     break;
 
-                case KVTextReaderState.InObjectBetweenKeyAndValue:
+                case KV1TextReaderState.InObjectBetweenKeyAndValue:
                     var value = ParseValue(text);
-                    stateMachine.SetValue(value);
-                    stateMachine.Push(KVTextReaderState.InObjectAfterValue);
+                    var name = stateMachine.CurrentName;
+                    listener.OnKeyValuePair(name, value);
+
+                    stateMachine.Push(KV1TextReaderState.InObjectAfterValue);
                     break;
 
                 default:
@@ -139,23 +147,25 @@ namespace ValveKeyValue
         void SetObjectKey(string name)
         {
             stateMachine.SetName(name);
-            stateMachine.Push(KVTextReaderState.InObjectBetweenKeyAndValue);
+            stateMachine.Push(KV1TextReaderState.InObjectBetweenKeyAndValue);
         }
 
         void BeginNewObject()
         {
-            if (stateMachine.Current != KVTextReaderState.InObjectBetweenKeyAndValue)
+            if (stateMachine.Current != KV1TextReaderState.InObjectBetweenKeyAndValue)
             {
                 throw new InvalidOperationException();
             }
 
+            listener.OnObjectStart(stateMachine.CurrentName);
+
             stateMachine.PushObject();
-            stateMachine.Push(KVTextReaderState.InObjectBeforeKey);
+            stateMachine.Push(KV1TextReaderState.InObjectBeforeKey);
         }
 
-        KVObject FinalizeCurrentObject()
+        void FinalizeCurrentObject(bool @explicit)
         {
-            if (stateMachine.Current != KVTextReaderState.InObjectBeforeKey && stateMachine.Current != KVTextReaderState.InObjectAfterValue)
+            if (stateMachine.Current != KV1TextReaderState.InObjectBeforeKey && stateMachine.Current != KV1TextReaderState.InObjectAfterValue)
             {
                 throw new InvalidOperationException(
                     string.Format(
@@ -164,24 +174,27 @@ namespace ValveKeyValue
                         stateMachine.Current));
             }
 
-            var @object = stateMachine.PopObject();
+            bool discard;
+            stateMachine.PopObject(out discard);
 
             if (stateMachine.IsInObject)
             {
-                if (@object != null)
-                {
-                    stateMachine.AddItem(@object);
-                }
-
-                stateMachine.Push(KVTextReaderState.InObjectAfterValue);
+                stateMachine.Push(KV1TextReaderState.InObjectAfterValue);
             }
 
-            return @object;
+            if (discard)
+            {
+                listener.DiscardCurrentObject();
+            }
+            else if (@explicit)
+            {
+                listener.OnObjectEnd();
+            }
         }
 
-        KVObject FinalizeDocument()
+        void FinalizeDocument()
         {
-            var @object = FinalizeCurrentObject();
+            FinalizeCurrentObject(@explicit: true);
 
             if (stateMachine.IsInObject)
             {
@@ -190,23 +203,18 @@ namespace ValveKeyValue
 
             foreach (var includedForMerge in stateMachine.ItemsForMerging)
             {
-                Merge(from: includedForMerge, into: @object);
+                DoIncludeAndMerge(includedForMerge);
             }
 
             foreach (var includedDocument in stateMachine.ItemsForAppending)
             {
-                foreach (var child in includedDocument.Children)
-                {
-                    @object.Add(child);
-                }
+                DoIncludeAndAppend(includedDocument);
             }
-
-            return @object;
         }
 
         void HandleCondition(string text)
         {
-            if (stateMachine.Current != KVTextReaderState.InObjectAfterValue)
+            if (stateMachine.Current != KV1TextReaderState.InObjectAfterValue)
             {
                 throw new InvalidDataException(
                     string.Format(
@@ -221,39 +229,30 @@ namespace ValveKeyValue
             }
         }
 
-        void HandleIncludeAndMerge(string filePath)
+        void DoIncludeAndMerge(string filePath)
         {
-            KVObject includedKeyValues;
+            var mergeListener = listener.GetMergeListener();
 
             using (var stream = OpenFileForInclude(filePath))
-            using (var reader = new KVTextReader(new StreamReader(stream), options))
+            using (var reader = new KV1TextReader(new StreamReader(stream), mergeListener, options))
             {
-                includedKeyValues = reader.ReadObject();
+                reader.ReadObject();
             }
-
-            stateMachine.AddItemForMerging(includedKeyValues);
         }
 
-        void HandleIncludeAndAppend(string filePath)
+        void DoIncludeAndAppend(string filePath)
         {
-            KVObject includedKeyValues;
+            var appendListener = listener.GetAppendListener();
 
             using (var stream = OpenFileForInclude(filePath))
-            using (var reader = new KVTextReader(new StreamReader(stream), options))
+            using (var reader = new KV1TextReader(new StreamReader(stream), appendListener, options))
             {
-                includedKeyValues = reader.ReadObject();
+                reader.ReadObject();
             }
-
-            stateMachine.AddItemForAppending(includedKeyValues);
         }
 
         Stream OpenFileForInclude(string filePath)
         {
-            if (!stateMachine.IsAtStart)
-            {
-                throw new KeyValueException("Inclusions are only valid at the beginning of a file.");
-            }
-
             if (options.FileLoader == null)
             {
                 throw new KeyValueException("Inclusions requirer a FileLoader to be provided in KVSerializerOptions.");
@@ -266,22 +265,6 @@ namespace ValveKeyValue
             }
 
             return stream;
-        }
-
-        static void Merge(KVObject from, KVObject into)
-        {
-            foreach (var child in from)
-            {
-                var matchingChild = into.Children.FirstOrDefault(c => c.Name == child.Name);
-                if (matchingChild == null && into.Value.ValueType == KVValueType.Collection)
-                {
-                    into.Add(child);
-                }
-                else
-                {
-                    Merge(from: child, into: matchingChild);
-                }
-            }
         }
 
         static KVValue ParseValue(string text)

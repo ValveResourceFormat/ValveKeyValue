@@ -1,10 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using ValveKeyValue.Abstraction;
 
-namespace ValveKeyValue
+namespace ValveKeyValue.Deserialization
 {
-    class KVBinaryReader : IDisposable
+    class KV1BinaryReader : IDisposable
     {
         enum BinaryNodeType : byte
         {
@@ -19,29 +20,33 @@ namespace ValveKeyValue
             End = 8,
         }
 
-        public KVBinaryReader(Stream stream)
+        public KV1BinaryReader(Stream stream, IVisitationListener listener)
         {
             Require.NotNull(stream, nameof(stream));
+            Require.NotNull(listener, nameof(listener));
+
             if (!stream.CanSeek)
             {
                 throw new ArgumentException("Stream must be seekable", nameof(stream));
             }
 
             this.stream = stream;
+            this.listener = listener;
             reader = new BinaryReader(stream);
         }
 
         readonly Stream stream;
         readonly BinaryReader reader;
+        readonly IVisitationListener listener;
         bool disposed;
 
-        public KVObject ReadObject()
+        public void ReadObject()
         {
-            Require.NotDisposed(nameof(KVTextReader), disposed);
+            Require.NotDisposed(nameof(KV1TextReader), disposed);
 
             try
             {
-                return ReadObjectCore();
+                ReadObjectCore();
             }
             catch (IOException ex)
             {
@@ -67,33 +72,34 @@ namespace ValveKeyValue
             }
         }
 
-        KVObject ReadObjectCore()
+        void ReadObjectCore()
         {
             var type = ReadNextNodeType();
             var name = ReadNullTerminatedString();
-            var value = ReadValue(type);
-            return new KVObject(name, value);
+            ReadValue(name, type);
         }
 
-        KVValue ReadValue(BinaryNodeType type)
+        void ReadValue(string name, BinaryNodeType type)
         {
+            KVValue value;
+
             switch (type)
             {
                 case BinaryNodeType.ChildObject:
                     {
-                        var children = new KVCollectionValue();
+                        listener.OnObjectStart(name);
                         do
                         {
-                            var child = ReadObjectCore();
-                            children.Add(child);
+                            ReadObjectCore();
                         }
                         while (PeekNextNodeType() != BinaryNodeType.End);
-
-                        return children;
+                        listener.OnObjectEnd();
+                        return;
                     }
 
                 case BinaryNodeType.String:
-                    return ReadNullTerminatedString();
+                    value = new KVObjectValue<string>(ReadNullTerminatedString(), KVValueType.String);
+                    break;
 
                 case BinaryNodeType.WideString:
                     throw new NotSupportedException("Wide String is not supported.");
@@ -101,18 +107,23 @@ namespace ValveKeyValue
                 case BinaryNodeType.Int32:
                 case BinaryNodeType.Color:
                 case BinaryNodeType.Pointer:
-                    return new KVObjectValue<int>(reader.ReadInt32(), KVValueType.Int32);
+                    value = new KVObjectValue<int>(reader.ReadInt32(), KVValueType.Int32);
+                    break;
 
                 case BinaryNodeType.UInt64:
-                    return new KVObjectValue<ulong>(reader.ReadUInt64(), KVValueType.UInt64);
+                    value = new KVObjectValue<ulong>(reader.ReadUInt64(), KVValueType.UInt64);
+                    break;
 
                 case BinaryNodeType.Float32:
                     var floatValue = BitConverter.ToSingle(reader.ReadBytes(4), 0);
-                    return new KVObjectValue<float>(floatValue, KVValueType.FloatingPoint);
+                    value = new KVObjectValue<float>(floatValue, KVValueType.FloatingPoint);
+                    break;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type));
             }
+
+            listener.OnKeyValuePair(name, value);
         }
 
         string ReadNullTerminatedString()

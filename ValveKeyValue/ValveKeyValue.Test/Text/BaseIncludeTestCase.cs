@@ -24,7 +24,7 @@ namespace ValveKeyValue.Test
         public void HasKeyWithValue(string key, string expectedValue)
         {
             var actualValue = (string)data[key];
-            Assert.That(actualValue, Is.EqualTo(expectedValue));
+            Assert.That(actualValue, Is.EqualTo(expectedValue), key);
         }
 
         KVObject data;

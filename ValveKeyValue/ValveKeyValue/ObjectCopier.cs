@@ -9,6 +9,7 @@ using System.Runtime.Serialization;
 
 namespace ValveKeyValue
 {
+    // TODO: Migrate to IVisitationListener
     static class ObjectCopier
     {
         public static TObject MakeObject<TObject>(KVObject keyValueObject)
