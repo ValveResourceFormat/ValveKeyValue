@@ -43,12 +43,10 @@ deploy:
   draft: false
   prerelease: true
   on:
-    branch: master
     APPVEYOR_REPO_TAG: true
 - provider: NuGet
   api_key:
     secure: hqSxAQZqtX5Z5aWzulXmaIwPQmM87RvTurYOLmLnpHWHlQm1DfWmJn5fAUAuuLZH
   artifact: ValveKeyValue.nupkg
   on:
-    branch: master
     APPVEYOR_REPO_TAG: true
