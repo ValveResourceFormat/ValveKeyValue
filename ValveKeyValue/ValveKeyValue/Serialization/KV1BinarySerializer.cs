@@ -64,6 +64,10 @@ namespace ValveKeyValue.Serialization
                     writer.Write((ulong)value);
                     break;
 
+                case KVValueType.Int64:
+                    writer.Write((long)value);
+                    break;
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(value.ValueType), value.ValueType, "Value was of an unsupported type.");
             }
@@ -102,6 +106,9 @@ namespace ValveKeyValue.Serialization
 
                 case KVValueType.UInt64:
                     return KV1BinaryNodeType.UInt64;
+
+                case KVValueType.Int64:
+                    return KV1BinaryNodeType.Int64;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, "Unsupported value type.");

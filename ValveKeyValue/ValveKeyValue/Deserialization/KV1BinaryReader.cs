@@ -106,6 +106,10 @@ namespace ValveKeyValue.Deserialization
                     value = new KVObjectValue<float>(floatValue, KVValueType.FloatingPoint);
                     break;
 
+                case KV1BinaryNodeType.Int64:
+                    value = new KVObjectValue<long>(reader.ReadInt64(), KVValueType.Int64);
+                    break;
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type));
             }

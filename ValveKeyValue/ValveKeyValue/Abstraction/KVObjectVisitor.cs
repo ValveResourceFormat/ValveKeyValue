@@ -34,6 +34,7 @@ namespace ValveKeyValue.Abstraction
                 case KVValueType.Pointer:
                 case KVValueType.String:
                 case KVValueType.UInt64:
+                case KVValueType.Int64:
                     listener.OnKeyValuePair(name, value);
                     break;
 

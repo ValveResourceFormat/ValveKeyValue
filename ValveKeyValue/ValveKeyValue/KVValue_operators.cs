@@ -54,6 +54,15 @@ namespace ValveKeyValue
         }
 
         /// <summary>
+        /// Implicit cast operator for <see cref="long"/>  to KVValue.
+        /// </summary>
+        /// <param name="value">The <see cref="long"/> to cast.</param>
+        public static implicit operator KVValue(long value)
+        {
+            return new KVObjectValue<long>(value, KVValueType.Int64);
+        }
+
+        /// <summary>
         /// Converts a <see cref="KVValue"/> to a <see cref="string"/>.
         /// </summary>
         /// <param name="value">The <see cref="KVValue"/> to convert.</param>

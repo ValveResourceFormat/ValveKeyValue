@@ -15,7 +15,8 @@ namespace ValveKeyValue.Test
                 new KVObject("int", 0x10203040),
                 new KVObject("flt", 1234.5678f),
                 new KVObject("ptr", new IntPtr(0x12345678)),
-                new KVObject("lng", 0x8877665544332211)
+                new KVObject("lng", 0x8877665544332211u),
+                new KVObject("i64", 0x0102030405060708)
             });
 
             var expectedData = new byte[]
@@ -37,6 +38,9 @@ namespace ValveKeyValue.Test
                     0x07, // uint64: lng = 0x8877665544332211
                         0x6C, 0x6E, 0x67, 0x00,
                         0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
+                    0x0A, // int64, i64 = 0x0102030405070809
+                        0x69, 0x36, 0x34, 0x00,
+                        0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01,
                     0x08, // end object
                 0x08, // end document
             };

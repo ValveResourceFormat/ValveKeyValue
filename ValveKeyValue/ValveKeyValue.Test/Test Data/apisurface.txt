@@ -153,6 +153,7 @@ public class ValveKeyValue.KVValue
     public static ValveKeyValue.KVValue op_Implicit(IntPtr value);
     public static ValveKeyValue.KVValue op_Implicit(ulong value);
     public static ValveKeyValue.KVValue op_Implicit(float value);
+    public static ValveKeyValue.KVValue op_Implicit(long value);
     public bool ToBoolean(IFormatProvider provider);
     public byte ToByte(IFormatProvider provider);
     public char ToChar(IFormatProvider provider);
@@ -180,6 +181,7 @@ public sealed enum ValveKeyValue.KVValueType
     UInt64 = 3;
     FloatingPoint = 4;
     Pointer = 5;
+    Int64 = 6;
 
     public int CompareTo(object target);
     public bool Equals(object obj);

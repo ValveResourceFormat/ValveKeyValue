@@ -21,7 +21,7 @@
         Int32,
 
         /// <summary>
-        /// This <see cref="KVValue"/> is represented by a <see cref="long"/>
+        /// This <see cref="KVValue"/> is represented by a <see cref="ulong"/>
         /// </summary>
         UInt64,
 
@@ -33,6 +33,11 @@
         /// <summary>
         /// This <see cref="KVValue"/> is represented by a <see cref="int"/>, but represents a pointer.
         /// </summary>
-        Pointer
+        Pointer,
+
+        /// <summary>
+        /// This <see cref="KVValue"/> is represented by a <see cref="long"/>.
+        /// </summary>
+        Int64
     }
 }

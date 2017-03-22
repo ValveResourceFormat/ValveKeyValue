@@ -32,6 +32,10 @@ namespace ValveKeyValue.Test
         public void ULongValue()
             => Assert.That(obj.ULongValue, Is.EqualTo(0x1122334455667788u));
 
+        [Test]
+        public void LongValue()
+            => Assert.That(obj.LongValue, Is.EqualTo(0x0102030405060708));
+
         TestObject obj;
 
         [OneTimeSetUp]
@@ -59,6 +63,9 @@ namespace ValveKeyValue.Test
                     0x07, // uint64: lng = 0x1122334455667788
                         0x6C, 0x6E, 0x67, 0x00,
                         0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11,
+                    0x0A, // int64, i64 = 0x0102030405070809
+                        0x69, 0x36, 0x34, 0x00,
+                        0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01,
                     0x08, // end object
                 0x08, // end document
             };
@@ -85,6 +92,9 @@ namespace ValveKeyValue.Test
 
             [KVProperty("lng")]
             public ulong ULongValue { get; set; }
+
+            [KVProperty("i64")]
+            public long LongValue { get; set; }
         }
     }
 }
