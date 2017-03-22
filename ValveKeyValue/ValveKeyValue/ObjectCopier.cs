@@ -45,7 +45,8 @@ namespace ValveKeyValue
                     throw new InvalidOperationException($"Cannot deserialize a non-array value to type \"{typeof(TObject).Namespace}.{typeof(TObject).Name}\".");
                 }
 
-                var typedObject = (TObject)FormatterServices.GetSafeUninitializedObject(typeof(TObject));
+                var typedObject = (TObject)lazyGetSafeUnitializedObjectFn.Value.Invoke(typeof(TObject));
+
                 CopyObject(keyValueObject, typedObject, reflector);
                 return typedObject;
             }
@@ -58,6 +59,18 @@ namespace ValveKeyValue
                 throw new NotSupportedException(typeof(TObject).Name);
             }
         }
+
+        // HACK HACK HACK
+        // dotnet/corefx#17377
+        // The method definitely exists, seems to be some sort of SDK issue at this point.
+        // HACK HACK HACK
+        static Lazy<Func<Type, object>> lazyGetSafeUnitializedObjectFn = new Lazy<Func<Type, object>>(() =>
+        {
+            var formatterServicesType = Type.GetType("System.Runtime.Serialization.FormatterServices");
+            var method = formatterServicesType.GetMethod("GetUninitializedObject", BindingFlags.Public | BindingFlags.Static);
+            Func<Type, object> func = t => method.Invoke(null, new object[] { t });
+            return func;
+        });
 
         public static KVObject FromObject<TObject>(TObject managedObject, string topLevelName)
             => FromObjectCore(managedObject, topLevelName, new DefaultObjectReflector(), new HashSet<object>());
@@ -199,7 +212,7 @@ namespace ValveKeyValue
         {
             valueType = null;
 
-            if (!type.IsGenericType)
+            if (!type.IsConstructedGenericType)
             {
                 return false;
             }
@@ -256,7 +269,7 @@ namespace ValveKeyValue
 
                 listObject = itemArray;
             }
-            else if (type.IsGenericType)
+            else if (type.IsConstructedGenericType)
             {
                 Func<Type, object[], object> builder;
                 if (EnumerableBuilders.TryGetValue(type.GetGenericTypeDefinition(), out builder))
@@ -276,7 +289,7 @@ namespace ValveKeyValue
                 return true;
             }
 
-            if (!type.IsGenericType)
+            if (!type.IsConstructedGenericType)
             {
                 return false;
             }
@@ -293,8 +306,10 @@ namespace ValveKeyValue
 
         static object InvokeGeneric(string methodName, Type genericType, params object[] parameters)
         {
-            var methodTypes = parameters.Select(o => o.GetType()).ToArray();
-            var method = typeof(ObjectCopier).GetMethod(methodName, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, null, methodTypes, null);
+            var method = typeof(ObjectCopier)
+                .GetTypeInfo()
+                .GetDeclaredMethods(methodName)
+                .Single(m => m.IsStatic && m.GetParameters().Length == parameters.Length);
 
             try
             {
@@ -337,7 +352,7 @@ namespace ValveKeyValue
 
         static bool IsDictionary(Type type)
         {
-            if (!type.IsGenericType)
+            if (!type.IsConstructedGenericType)
             {
                 return false;
             }

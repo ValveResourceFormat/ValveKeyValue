@@ -1,172 +1,124 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{9A10EFF9-3CC6-448D-891D-AE33069134E0}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ValveKeyValue.Test</RootNamespace>
-    <AssemblyName>ValveKeyValue.Test</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <PackageId>ValveKeyValue.Test</PackageId>
+    <Product>Valve KeyValue Library - Unit Tests</Product>
+    <Description>Unit Tests for library to parse and write Valve KeyValue formats</Description>
+    <Authors>SteamDatabase</Authors>
+    <Company>SteamDatabase</Company>
+    <Copyright>Copyright © SteamDatabase 2017</Copyright>
+    <ApplicationIcon />
+    <StartupObject />
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
-    <CodeAnalysisRuleSet>..\ValveKeyValue.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
-    <CodeAnalysisRuleSet>..\ValveKeyValue.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="nunit.framework, Version=3.2.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
-      <HintPath>..\packages\NUnit.3.2.0\lib\net45\nunit.framework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="Microsoft.CSharp" />
+    <None Remove="Test Data\apisurface.txt" />
+    <None Remove="Test Data\Text\comment_singleline.vdf" />
+    <None Remove="Test Data\Text\comment_singleline_singleslash.vdf" />
+    <None Remove="Test Data\Text\comment_singleline_singleslash_wholeline.vdf" />
+    <None Remove="Test Data\Text\comment_singleline_wholeline.vdf" />
+    <None Remove="Test Data\Text\conditional.vdf" />
+    <None Remove="Test Data\Text\conditional_in_key.vdf" />
+    <None Remove="Test Data\Text\duplicate_keys.vdf" />
+    <None Remove="Test Data\Text\duplicate_keys_object.vdf" />
+    <None Remove="Test Data\Text\empty.vdf" />
+    <None Remove="Test Data\Text\escaped_backslash.vdf" />
+    <None Remove="Test Data\Text\escaped_backslash_not_special.vdf" />
+    <None Remove="Test Data\Text\escaped_garbage.vdf" />
+    <None Remove="Test Data\Text\escaped_quotation_marks.vdf" />
+    <None Remove="Test Data\Text\escaped_whitespace.vdf" />
+    <None Remove="Test Data\Text\invalid_conditional.vdf" />
+    <None Remove="Test Data\Text\invalid_zerobracerepeated.vdf" />
+    <None Remove="Test Data\Text\kv_base_included.vdf" />
+    <None Remove="Test Data\Text\kv_included.vdf" />
+    <None Remove="Test Data\Text\kv_with_base.vdf" />
+    <None Remove="Test Data\Text\kv_with_include.vdf" />
+    <None Remove="Test Data\Text\legacydepotdata_subset.vdf" />
+    <None Remove="Test Data\Text\list_of_values.vdf" />
+    <None Remove="Test Data\Text\list_of_values_empty_key.vdf" />
+    <None Remove="Test Data\Text\list_of_values_skipping_keys.vdf" />
+    <None Remove="Test Data\Text\nameonly.vdf" />
+    <None Remove="Test Data\Text\nested_object_graph.vdf" />
+    <None Remove="Test Data\Text\object_person.vdf" />
+    <None Remove="Test Data\Text\object_person_attributes.vdf" />
+    <None Remove="Test Data\Text\object_person_mixed_case.vdf" />
+    <None Remove="Test Data\Text\partialname.vdf" />
+    <None Remove="Test Data\Text\partial_noclose.vdf" />
+    <None Remove="Test Data\Text\partial_nodata.vdf" />
+    <None Remove="Test Data\Text\partial_novalue.vdf" />
+    <None Remove="Test Data\Text\partial_opening_key.vdf" />
+    <None Remove="Test Data\Text\partial_opening_value.vdf" />
+    <None Remove="Test Data\Text\partial_partialkey.vdf" />
+    <None Remove="Test Data\Text\partial_partialvalue.vdf" />
+    <None Remove="Test Data\Text\quoteonly.vdf" />
+    <None Remove="Test Data\Text\serialization_expected.vdf" />
+    <None Remove="Test Data\Text\steam_440.vdf" />
+    <None Remove="Test Data\Text\top_level_list_of_values.vdf" />
+    <None Remove="Test Data\Text\type_guessing.vdf" />
+    <None Remove="Test Data\Text\unquoted_document.vdf" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="ApiSurfaceTestCase.cs" />
-    <Compile Include="Binary\BinaryObjectSerializationTestCase.cs" />
-    <Compile Include="Binary\BinaryObjectDeserializationTestCase.cs" />
-    <Compile Include="Binary\OutOfRangeNodeTypeTestCase.cs" />
-    <Compile Include="Binary\TruncatedDataTestCase.cs" />
-    <Compile Include="Binary\WideStringTestCase.cs" />
-    <Compile Include="Binary\SimpleBinaryTestCase.cs" />
-    <Compile Include="Helpers\KVSerializerExtensions.cs" />
-    <Compile Include="IKVTextReader.cs" />
-    <Compile Include="KVBasicObjectIndexerTestCase.cs" />
-    <Compile Include="KVObjectIndexerTestCase.cs" />
-    <Compile Include="KVValueToStringTestCase.cs" />
-    <Compile Include="StringKVTextReader.cs" />
-    <Compile Include="StreamKVTextReader.cs" />
-    <Compile Include="TestFixtureSources.cs" />
-    <Compile Include="Text\TypeGuessingTestCase.cs" />
-    <Compile Include="Text\LookupTestCase.cs" />
-    <Compile Include="Text\NewLinesTestCase.cs" />
-    <Compile Include="Text\UnquotedTextTestCase.cs" />
-    <Compile Include="Text\IncludeTestCase.cs" />
-    <Compile Include="Text\BaseIncludeTestCase.cs" />
-    <Compile Include="Text\ArrayWithEmptyKeyTestCase.cs" />
-    <Compile Include="Text\ArrayWhenSkippingKeysTestCase.cs" />
-    <Compile Include="Text\EscapedBackslashNotSpecialTestCase.cs" />
-    <Compile Include="Text\DictionarySerializationTestCase.cs" />
-    <Compile Include="Text\CircularObjectSerializationTestCase.cs" />
-    <Compile Include="Text\ObjectSerializationTestCase.cs" />
-    <Compile Include="Text\SteamDataTestCase.cs" />
-    <Compile Include="Text\EscapedGarbageTestCase.cs" />
-    <Compile Include="Text\EscapedBackslashTestCase.cs" />
-    <Compile Include="Text\EscapedWhitespaceTestCase.cs" />
-    <Compile Include="Text\InvalidConditionalTestCase.cs" />
-    <Compile Include="Text\DictionaryPropertyTestCase.cs" />
-    <Compile Include="Text\DictionaryDuplicateKeysTestCase.cs" />
-    <Compile Include="Text\NestedObjectGraphTestCase.cs" />
-    <Compile Include="Text\DictionaryTestCase.cs" />
-    <Compile Include="Text\ObjectDeserializationMixedCaseTestCase.cs" />
-    <Compile Include="Text\ObjectDeserializationAttributesTestCase.cs" />
-    <Compile Include="Text\SerializationTestCase.cs" />
-    <Compile Include="Text\TopLevelEnumerableTestCase.cs" />
-    <Compile Include="Text\ConditionalTestCase.cs" />
-    <Compile Include="Text\EscapedQuotationMarksTestCase.cs" />
-    <Compile Include="KVObjectCastTestCase.cs" />
-    <Compile Include="Text\ArrayTestCase.cs" />
-    <Compile Include="Text\InvalidSyntaxTestCase.cs" />
-    <Compile Include="Text\LegacyDepotDataSubsetTestCase.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Test Data\TestDataHelper.cs" />
-    <Compile Include="Text\ObjectDeserializationTestCase.cs" />
-    <Compile Include="Text\SingleLineCommentTestCase.cs" />
-    <Compile Include="KVSerializerNullInputsTestCase.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ValveKeyValue\ValveKeyValue.csproj">
-      <Project>{DF62AD4A-C7F4-43AB-B198-3F4009794437}</Project>
-      <Name>ValveKeyValue</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-    <EmbeddedResource Include="Test Data\Text\legacydepotdata_subset.vdf" />
-    <EmbeddedResource Include="Test Data\Text\empty.vdf" />
-    <EmbeddedResource Include="Test Data\Text\quoteonly.vdf" />
-    <EmbeddedResource Include="Test Data\Text\partialname.vdf" />
-    <EmbeddedResource Include="Test Data\Text\nameonly.vdf" />
-    <EmbeddedResource Include="Test Data\Text\partial_nodata.vdf" />
-    <EmbeddedResource Include="Test Data\Text\partial_opening_key.vdf" />
-    <EmbeddedResource Include="Test Data\Text\partial_partialkey.vdf" />
-    <EmbeddedResource Include="Test Data\Text\partial_novalue.vdf" />
-    <EmbeddedResource Include="Test Data\Text\partial_opening_value.vdf" />
-    <EmbeddedResource Include="Test Data\Text\partial_partialvalue.vdf" />
-    <EmbeddedResource Include="Test Data\Text\partial_noclose.vdf" />
-    <EmbeddedResource Include="Test Data\Text\object_person.vdf" />
-    <EmbeddedResource Include="Test Data\Text\list_of_values.vdf" />
-    <EmbeddedResource Include="Test Data\Text\escaped_quotation_marks.vdf" />
-    <EmbeddedResource Include="Test Data\Text\conditional.vdf" />
-    <EmbeddedResource Include="Test Data\Text\comment_singleline.vdf" />
-    <EmbeddedResource Include="Test Data\Text\comment_singleline_wholeline.vdf" />
-    <EmbeddedResource Include="Test Data\Text\comment_singleline_singleslash_wholeline.vdf" />
-    <EmbeddedResource Include="Test Data\Text\comment_singleline_singleslash.vdf" />
-    <EmbeddedResource Include="Test Data\Text\top_level_list_of_values.vdf" />
-    <EmbeddedResource Include="Test Data\Text\nested_object_graph.vdf" />
-    <EmbeddedResource Include="Test Data\Text\object_person_mixed_case.vdf" />
-    <EmbeddedResource Include="Test Data\Text\object_person_attributes.vdf" />
-    <EmbeddedResource Include="Test Data\Text\duplicate_keys.vdf" />
-    <EmbeddedResource Include="Test Data\Text\invalid_conditional.vdf" />
-    <EmbeddedResource Include="Test Data\Text\serialization_expected.vdf" />
-    <EmbeddedResource Include="Test Data\Text\escaped_whitespace.vdf" />
-    <EmbeddedResource Include="Test Data\Text\escaped_garbage.vdf" />
-    <EmbeddedResource Include="Test Data\Text\escaped_backslash.vdf" />
-    <EmbeddedResource Include="Test Data\Text\conditional_in_key.vdf" />
-    <EmbeddedResource Include="Test Data\Text\list_of_values_skipping_keys.vdf" />
-    <EmbeddedResource Include="Test Data\Text\list_of_values_empty_key.vdf" />
-    <EmbeddedResource Include="Test Data\Text\invalid_zerobracerepeated.vdf" />
-    <EmbeddedResource Include="Test Data\Text\kv_with_base.vdf" />
-    <EmbeddedResource Include="Test Data\Text\kv_base_included.vdf" />
-    <EmbeddedResource Include="Test Data\Text\steam_440.vdf" />
-    <EmbeddedResource Include="Test Data\Text\escaped_backslash_not_special.vdf" />
-    <EmbeddedResource Include="Test Data\Text\kv_with_include.vdf" />
-    <EmbeddedResource Include="Test Data\Text\kv_included.vdf" />
-    <EmbeddedResource Include="Test Data\Text\unquoted_document.vdf" />
     <EmbeddedResource Include="Test Data\apisurface.txt" />
+    <EmbeddedResource Include="Test Data\Text\comment_singleline.vdf" />
+    <EmbeddedResource Include="Test Data\Text\comment_singleline_singleslash.vdf" />
+    <EmbeddedResource Include="Test Data\Text\comment_singleline_singleslash_wholeline.vdf" />
+    <EmbeddedResource Include="Test Data\Text\comment_singleline_wholeline.vdf" />
+    <EmbeddedResource Include="Test Data\Text\conditional.vdf" />
+    <EmbeddedResource Include="Test Data\Text\conditional_in_key.vdf" />
+    <EmbeddedResource Include="Test Data\Text\duplicate_keys.vdf" />
     <EmbeddedResource Include="Test Data\Text\duplicate_keys_object.vdf" />
+    <EmbeddedResource Include="Test Data\Text\empty.vdf" />
+    <EmbeddedResource Include="Test Data\Text\escaped_backslash.vdf" />
+    <EmbeddedResource Include="Test Data\Text\escaped_backslash_not_special.vdf" />
+    <EmbeddedResource Include="Test Data\Text\escaped_garbage.vdf" />
+    <EmbeddedResource Include="Test Data\Text\escaped_quotation_marks.vdf" />
+    <EmbeddedResource Include="Test Data\Text\escaped_whitespace.vdf" />
+    <EmbeddedResource Include="Test Data\Text\invalid_conditional.vdf" />
+    <EmbeddedResource Include="Test Data\Text\invalid_zerobracerepeated.vdf" />
+    <EmbeddedResource Include="Test Data\Text\kv_base_included.vdf" />
+    <EmbeddedResource Include="Test Data\Text\kv_included.vdf" />
+    <EmbeddedResource Include="Test Data\Text\kv_with_base.vdf" />
+    <EmbeddedResource Include="Test Data\Text\kv_with_include.vdf" />
+    <EmbeddedResource Include="Test Data\Text\legacydepotdata_subset.vdf" />
+    <EmbeddedResource Include="Test Data\Text\list_of_values.vdf" />
+    <EmbeddedResource Include="Test Data\Text\list_of_values_empty_key.vdf" />
+    <EmbeddedResource Include="Test Data\Text\list_of_values_skipping_keys.vdf" />
+    <EmbeddedResource Include="Test Data\Text\nameonly.vdf" />
+    <EmbeddedResource Include="Test Data\Text\nested_object_graph.vdf" />
+    <EmbeddedResource Include="Test Data\Text\object_person.vdf" />
+    <EmbeddedResource Include="Test Data\Text\object_person_attributes.vdf" />
+    <EmbeddedResource Include="Test Data\Text\object_person_mixed_case.vdf" />
+    <EmbeddedResource Include="Test Data\Text\partialname.vdf" />
+    <EmbeddedResource Include="Test Data\Text\partial_noclose.vdf" />
+    <EmbeddedResource Include="Test Data\Text\partial_nodata.vdf" />
+    <EmbeddedResource Include="Test Data\Text\partial_novalue.vdf" />
+    <EmbeddedResource Include="Test Data\Text\partial_opening_key.vdf" />
+    <EmbeddedResource Include="Test Data\Text\partial_opening_value.vdf" />
+    <EmbeddedResource Include="Test Data\Text\partial_partialkey.vdf" />
+    <EmbeddedResource Include="Test Data\Text\partial_partialvalue.vdf" />
+    <EmbeddedResource Include="Test Data\Text\quoteonly.vdf" />
+    <EmbeddedResource Include="Test Data\Text\serialization_expected.vdf" />
+    <EmbeddedResource Include="Test Data\Text\steam_440.vdf" />
+    <EmbeddedResource Include="Test Data\Text\top_level_list_of_values.vdf" />
     <EmbeddedResource Include="Test Data\Text\type_guessing.vdf" />
+    <EmbeddedResource Include="Test Data\Text\unquoted_document.vdf" />
   </ItemGroup>
+
   <ItemGroup>
-    <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\Newtonsoft.Json.dll" />
-    <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
-    <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
+    <PackageReference Include="NUnit" Version="3.6.1" />
+    <PackageReference Include="NUnitLite" Version="3.6.1" />
+    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.3.0" />
   </ItemGroup>
+
   <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+    <ProjectReference Include="..\ValveKeyValue\ValveKeyValue.csproj" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+
 </Project>

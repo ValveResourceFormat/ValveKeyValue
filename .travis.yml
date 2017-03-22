@@ -1,10 +1,17 @@
 language: csharp
-sudo: false
+sudo: required
+dist: trusty
+
+mono: none
+dotnet: 1.0.1
+
 solution: ValveKeyValue/ValveKeyValue.sln
+
 notifications:
   email: false
+
 install:
-  - nuget restore ValveKeyValue/ValveKeyValue.sln
+  - dotnet restore ValveKeyValue/ValveKeyValue.sln
 script:
-  - xbuild /p:Configuration=Release ValveKeyValue/ValveKeyValue.sln
-  - mono ./ValveKeyValue/packages/NUnit.ConsoleRunner.3.2.0/tools/nunit3-console.exe ./ValveKeyValue/ValveKeyValue.Test/bin/Release/ValveKeyValue.Test.dll
+  - dotnet build ValveKeyValue/ValveKeyValue.sln --configuration Release
+  - dotnet run --configuration Release --project ValveKeyValue/ValveKeyValue.Test/ValveKeyValue.Test.csproj
