@@ -28,7 +28,7 @@ after_build:
 test_script:
 - ps: >-
     $opencover = (Resolve-Path "./ValveKeyValue/packages/OpenCover.*/tools/OpenCover.Console.exe").ToString();
-    & $opencover -target:%ProgramFiles%\dotnet\dotnet.exe "-targetargs:run --project ValveKeyValue\ValveKeyValue.Test\ValveKeyValue.Test.csproj" "-filter:+[ValveKeyValue*]* -[ValveKeyValue.Test]*" -output:opencoverCoverage.xml -register:user -returntargetcode
+    & $opencover -target:%ProgramFiles%\dotnet\dotnet.exe "-targetargs:test ValveKeyValue\ValveKeyValue.Test\ValveKeyValue.Test.csproj" "-filter:+[ValveKeyValue*]* -[ValveKeyValue.Test]*" -output:opencoverCoverage.xml -register:user -returntargetcode
 
     if ($LastExitCode -ne 0) {
       throw "Exec: $ErrorMessage`nExit code: $LastExitCode";
