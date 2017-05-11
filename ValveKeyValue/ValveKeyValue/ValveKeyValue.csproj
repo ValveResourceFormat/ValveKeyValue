@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.3</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <Product>Valve KeyValue Library</Product>
     <Description>Library to parse and write Valve KeyValue formats</Description>
     <Copyright>Copyright © SteamDatabase 2017</Copyright>

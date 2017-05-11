@@ -1,10 +1,11 @@
-﻿public interface ValveKeyValue.IIncludedFileLoader
+public interface ValveKeyValue.IIncludedFileLoader
 {
     public System.IO.Stream OpenFile(string filePath);
 }
 
 public class ValveKeyValue.KeyValueException
 {
+    protected void add_SerializeObjectState(EventHandler`1[[System.Runtime.Serialization.SafeSerializationEventArgs]] value);
     public bool Equals(object obj);
     protected void Finalize();
     public System.Collections.IDictionary get_Data();
@@ -21,6 +22,7 @@ public class ValveKeyValue.KeyValueException
     public new Type GetType();
     public Type GetType();
     protected object MemberwiseClone();
+    protected void remove_SerializeObjectState(EventHandler`1[[System.Runtime.Serialization.SafeSerializationEventArgs]] value);
     public void set_HelpLink(string value);
     protected void set_HResult(int value);
     public void set_Source(string value);

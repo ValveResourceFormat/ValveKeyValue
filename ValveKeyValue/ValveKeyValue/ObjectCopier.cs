@@ -45,7 +45,7 @@ namespace ValveKeyValue
                     throw new InvalidOperationException($"Cannot deserialize a non-array value to type \"{typeof(TObject).Namespace}.{typeof(TObject).Name}\".");
                 }
 
-                var typedObject = (TObject)lazyGetSafeUnitializedObjectFn.Value.Invoke(typeof(TObject));
+                var typedObject = (TObject)FormatterServices.GetUninitializedObject(typeof(TObject));
 
                 CopyObject(keyValueObject, typedObject, reflector);
                 return typedObject;
@@ -59,18 +59,6 @@ namespace ValveKeyValue
                 throw new NotSupportedException(typeof(TObject).Name);
             }
         }
-
-        // HACK HACK HACK
-        // dotnet/corefx#17377
-        // The method definitely exists, seems to be some sort of SDK issue at this point.
-        // HACK HACK HACK
-        static Lazy<Func<Type, object>> lazyGetSafeUnitializedObjectFn = new Lazy<Func<Type, object>>(() =>
-        {
-            var formatterServicesType = Type.GetType("System.Runtime.Serialization.FormatterServices");
-            var method = formatterServicesType.GetMethod("GetUninitializedObject", BindingFlags.Public | BindingFlags.Static);
-            Func<Type, object> func = t => method.Invoke(null, new object[] { t });
-            return func;
-        });
 
         public static KVObject FromObject<TObject>(TObject managedObject, string topLevelName)
             => FromObjectCore(managedObject, topLevelName, new DefaultObjectReflector(), new HashSet<object>());
