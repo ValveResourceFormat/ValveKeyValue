@@ -12,107 +12,19 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="Test Data\apisurface.txt" />
-    <None Remove="Test Data\Text\comment_singleline.vdf" />
-    <None Remove="Test Data\Text\comment_singleline_singleslash.vdf" />
-    <None Remove="Test Data\Text\comment_singleline_singleslash_wholeline.vdf" />
-    <None Remove="Test Data\Text\comment_singleline_wholeline.vdf" />
-    <None Remove="Test Data\Text\conditional.vdf" />
-    <None Remove="Test Data\Text\conditional_in_key.vdf" />
-    <None Remove="Test Data\Text\duplicate_keys.vdf" />
-    <None Remove="Test Data\Text\duplicate_keys_object.vdf" />
-    <None Remove="Test Data\Text\empty.vdf" />
-    <None Remove="Test Data\Text\escaped_backslash.vdf" />
-    <None Remove="Test Data\Text\escaped_backslash_not_special.vdf" />
-    <None Remove="Test Data\Text\escaped_garbage.vdf" />
-    <None Remove="Test Data\Text\escaped_quotation_marks.vdf" />
-    <None Remove="Test Data\Text\escaped_whitespace.vdf" />
-    <None Remove="Test Data\Text\invalid_conditional.vdf" />
-    <None Remove="Test Data\Text\invalid_zerobracerepeated.vdf" />
-    <None Remove="Test Data\Text\kv_base_included.vdf" />
-    <None Remove="Test Data\Text\kv_included.vdf" />
-    <None Remove="Test Data\Text\kv_with_base.vdf" />
-    <None Remove="Test Data\Text\kv_with_include.vdf" />
-    <None Remove="Test Data\Text\legacydepotdata_subset.vdf" />
-    <None Remove="Test Data\Text\list_of_values.vdf" />
-    <None Remove="Test Data\Text\list_of_values_empty_key.vdf" />
-    <None Remove="Test Data\Text\list_of_values_skipping_keys.vdf" />
-    <None Remove="Test Data\Text\nameonly.vdf" />
-    <None Remove="Test Data\Text\nested_object_graph.vdf" />
-    <None Remove="Test Data\Text\object_person.vdf" />
-    <None Remove="Test Data\Text\object_person_attributes.vdf" />
-    <None Remove="Test Data\Text\object_person_mixed_case.vdf" />
-    <None Remove="Test Data\Text\partialname.vdf" />
-    <None Remove="Test Data\Text\partial_noclose.vdf" />
-    <None Remove="Test Data\Text\partial_nodata.vdf" />
-    <None Remove="Test Data\Text\partial_novalue.vdf" />
-    <None Remove="Test Data\Text\partial_opening_key.vdf" />
-    <None Remove="Test Data\Text\partial_opening_value.vdf" />
-    <None Remove="Test Data\Text\partial_partialkey.vdf" />
-    <None Remove="Test Data\Text\partial_partialvalue.vdf" />
-    <None Remove="Test Data\Text\quoteonly.vdf" />
-    <None Remove="Test Data\Text\serialization_expected.vdf" />
-    <None Remove="Test Data\Text\steam_440.vdf" />
-    <None Remove="Test Data\Text\top_level_list_of_values.vdf" />
-    <None Remove="Test Data\Text\type_guessing.vdf" />
-    <None Remove="Test Data\Text\unquoted_document.vdf" />
+    <None Remove="Test Data\**\*.txt" />
+    <None Remove="Test Data\**\*.vdf" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Test Data\apisurface.txt" />
-    <EmbeddedResource Include="Test Data\Text\comment_singleline.vdf" />
-    <EmbeddedResource Include="Test Data\Text\comment_singleline_singleslash.vdf" />
-    <EmbeddedResource Include="Test Data\Text\comment_singleline_singleslash_wholeline.vdf" />
-    <EmbeddedResource Include="Test Data\Text\comment_singleline_wholeline.vdf" />
-    <EmbeddedResource Include="Test Data\Text\conditional.vdf" />
-    <EmbeddedResource Include="Test Data\Text\conditional_in_key.vdf" />
-    <EmbeddedResource Include="Test Data\Text\duplicate_keys.vdf" />
-    <EmbeddedResource Include="Test Data\Text\duplicate_keys_object.vdf" />
-    <EmbeddedResource Include="Test Data\Text\empty.vdf" />
-    <EmbeddedResource Include="Test Data\Text\escaped_backslash.vdf" />
-    <EmbeddedResource Include="Test Data\Text\escaped_backslash_not_special.vdf" />
-    <EmbeddedResource Include="Test Data\Text\escaped_garbage.vdf" />
-    <EmbeddedResource Include="Test Data\Text\escaped_quotation_marks.vdf" />
-    <EmbeddedResource Include="Test Data\Text\escaped_whitespace.vdf" />
-    <EmbeddedResource Include="Test Data\Text\invalid_conditional.vdf" />
-    <EmbeddedResource Include="Test Data\Text\invalid_zerobracerepeated.vdf" />
-    <EmbeddedResource Include="Test Data\Text\kv_base_included.vdf" />
-    <EmbeddedResource Include="Test Data\Text\kv_included.vdf" />
-    <EmbeddedResource Include="Test Data\Text\kv_with_base.vdf" />
-    <EmbeddedResource Include="Test Data\Text\kv_with_include.vdf" />
-    <EmbeddedResource Include="Test Data\Text\legacydepotdata_subset.vdf" />
-    <EmbeddedResource Include="Test Data\Text\list_of_values.vdf" />
-    <EmbeddedResource Include="Test Data\Text\list_of_values_empty_key.vdf" />
-    <EmbeddedResource Include="Test Data\Text\list_of_values_skipping_keys.vdf" />
-    <EmbeddedResource Include="Test Data\Text\nameonly.vdf" />
-    <EmbeddedResource Include="Test Data\Text\nested_object_graph.vdf" />
-    <EmbeddedResource Include="Test Data\Text\object_person.vdf" />
-    <EmbeddedResource Include="Test Data\Text\object_person_attributes.vdf" />
-    <EmbeddedResource Include="Test Data\Text\object_person_mixed_case.vdf" />
-    <EmbeddedResource Include="Test Data\Text\partialname.vdf" />
-    <EmbeddedResource Include="Test Data\Text\partial_noclose.vdf" />
-    <EmbeddedResource Include="Test Data\Text\partial_nodata.vdf" />
-    <EmbeddedResource Include="Test Data\Text\partial_novalue.vdf" />
-    <EmbeddedResource Include="Test Data\Text\partial_opening_key.vdf" />
-    <EmbeddedResource Include="Test Data\Text\partial_opening_value.vdf" />
-    <EmbeddedResource Include="Test Data\Text\partial_partialkey.vdf" />
-    <EmbeddedResource Include="Test Data\Text\partial_partialvalue.vdf" />
-    <EmbeddedResource Include="Test Data\Text\quoteonly.vdf" />
-    <EmbeddedResource Include="Test Data\Text\serialization_expected.vdf" />
-    <EmbeddedResource Include="Test Data\Text\steam_440.vdf" />
-    <EmbeddedResource Include="Test Data\Text\top_level_list_of_values.vdf" />
-    <EmbeddedResource Include="Test Data\Text\type_guessing.vdf" />
-    <EmbeddedResource Include="Test Data\Text\unquoted_document.vdf" />
+    <EmbeddedResource Include="Test Data\**\*.txt" />
+    <EmbeddedResource Include="Test Data\**\*.vdf" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
     <PackageReference Include="NUnit" Version="3.6.1" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.8.0-alpha1" />
-    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.3.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.8.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ValveKeyValue\ValveKeyValue.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
   </ItemGroup>
 </Project>
