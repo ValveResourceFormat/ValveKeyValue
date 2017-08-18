@@ -37,7 +37,7 @@ namespace ValveKeyValue.Test
 
                 ms.Seek(0, SeekOrigin.Begin);
 
-                text = Encoding.ASCII.GetString(ms.GetBuffer(), 0, (int)ms.Length);
+                text = Encoding.ASCII.GetString(ms.ToArray(), 0, (int)ms.Length);
 
                 convertedKv = serializer.Deserialize(ms, options);
             }

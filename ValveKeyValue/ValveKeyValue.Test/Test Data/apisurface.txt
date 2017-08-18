@@ -1,4 +1,4 @@
-﻿public interface ValveKeyValue.IIncludedFileLoader
+public interface ValveKeyValue.IIncludedFileLoader
 {
     public System.IO.Stream OpenFile(string filePath);
 }

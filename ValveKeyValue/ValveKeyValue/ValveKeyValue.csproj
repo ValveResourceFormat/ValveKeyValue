@@ -1,110 +1,17 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{DF62AD4A-C7F4-43AB-B198-3F4009794437}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ValveKeyValue</RootNamespace>
-    <AssemblyName>ValveKeyValue</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Product>Valve KeyValue Library</Product>
+    <Description>Library to parse and write Valve KeyValue formats</Description>
+    <Copyright>Copyright © SteamDatabase 2017</Copyright>
+    <Company>SteamDatabase</Company>
+    <Authors>SteamDatabase</Authors>
+    <RepositoryUrl>https://github.com/SteamDatabase/ValveKeyValue</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/SteamDatabase/ValveKeyValue</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
-    <DocumentationFile>bin\Debug\ValveKeyValue.xml</DocumentationFile>
-    <CodeAnalysisRuleSet>..\ValveKeyValue.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisIgnoreGeneratedCode>true</CodeAnalysisIgnoreGeneratedCode>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
-    <DocumentationFile>bin\Release\ValveKeyValue.xml</DocumentationFile>
-    <CodeAnalysisRuleSet>..\ValveKeyValue.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisIgnoreGeneratedCode>true</CodeAnalysisIgnoreGeneratedCode>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Abstraction\IParsingVisitationListener.cs" />
-    <Compile Include="Abstraction\IVisitationListener.cs" />
-    <Compile Include="DefaultObjectReflector.cs" />
-    <Compile Include="Deserialization\IVisitingReader.cs" />
-    <Compile Include="Deserialization\KVAppendingObjectBuilder.cs" />
-    <Compile Include="Deserialization\KVMergingObjectBuilder.cs" />
-    <Compile Include="Deserialization\KVObjectBuilder.cs" />
-    <Compile Include="Deserialization\KVPartialState{TState}.cs" />
-    <Compile Include="IIncludedFileLoader.cs" />
-    <Compile Include="IObjectMember.cs" />
-    <Compile Include="IObjectReflector.cs" />
-    <Compile Include="KeyValueException.cs" />
-    <Compile Include="Deserialization\KV1BinaryReader.cs" />
-    <Compile Include="KV1BinaryNodeType.cs" />
-    <Compile Include="KVCollectionValue.cs" />
-    <Compile Include="KVConditionEvaluator.cs" />
-    <Compile Include="KVObject.cs" />
-    <Compile Include="KVObject_IEnumerable.cs" />
-    <Compile Include="Deserialization\KVPartialState.cs" />
-    <Compile Include="KVIgnoreAttribute.cs" />
-    <Compile Include="KVPropertyAttribute.cs" />
-    <Compile Include="KVSerializationFormat.cs" />
-    <Compile Include="KVSerializerOptions.cs" />
-    <Compile Include="KVObjectValue.cs" />
-    <Compile Include="Deserialization\KV1TextReader.cs" />
-    <Compile Include="Deserialization\KV1TextReaderState.cs" />
-    <Compile Include="Deserialization\KV1TextReaderStateMachine.cs" />
-    <Compile Include="Serialization\KV1BinarySerializer.cs" />
-    <Compile Include="Serialization\KV1TextSerializer.cs" />
-    <Compile Include="KVToken.cs" />
-    <Compile Include="Deserialization\KV1TokenReader.cs" />
-    <Compile Include="KVTokenType.cs" />
-    <Compile Include="KVValue.cs" />
-    <Compile Include="KVValueType.cs" />
-    <Compile Include="KVValue_operators.cs" />
-    <Compile Include="ObjectCopier.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PropertyMember.cs" />
-    <Compile Include="Require.cs" />
-    <Compile Include="KVSerializer.cs" />
-    <Compile Include="Abstraction\KVObjectVisitor.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\Newtonsoft.Json.dll" />
-    <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
-    <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>

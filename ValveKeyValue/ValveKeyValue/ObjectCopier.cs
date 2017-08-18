@@ -45,7 +45,8 @@ namespace ValveKeyValue
                     throw new InvalidOperationException($"Cannot deserialize a non-array value to type \"{typeof(TObject).Namespace}.{typeof(TObject).Name}\".");
                 }
 
-                var typedObject = (TObject)FormatterServices.GetSafeUninitializedObject(typeof(TObject));
+                var typedObject = (TObject)FormatterServices.GetUninitializedObject(typeof(TObject));
+
                 CopyObject(keyValueObject, typedObject, reflector);
                 return typedObject;
             }
@@ -199,7 +200,7 @@ namespace ValveKeyValue
         {
             valueType = null;
 
-            if (!type.IsGenericType)
+            if (!type.IsConstructedGenericType)
             {
                 return false;
             }
@@ -256,7 +257,7 @@ namespace ValveKeyValue
 
                 listObject = itemArray;
             }
-            else if (type.IsGenericType)
+            else if (type.IsConstructedGenericType)
             {
                 Func<Type, object[], object> builder;
                 if (EnumerableBuilders.TryGetValue(type.GetGenericTypeDefinition(), out builder))
@@ -276,7 +277,7 @@ namespace ValveKeyValue
                 return true;
             }
 
-            if (!type.IsGenericType)
+            if (!type.IsConstructedGenericType)
             {
                 return false;
             }
@@ -293,8 +294,10 @@ namespace ValveKeyValue
 
         static object InvokeGeneric(string methodName, Type genericType, params object[] parameters)
         {
-            var methodTypes = parameters.Select(o => o.GetType()).ToArray();
-            var method = typeof(ObjectCopier).GetMethod(methodName, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, null, methodTypes, null);
+            var method = typeof(ObjectCopier)
+                .GetTypeInfo()
+                .GetDeclaredMethods(methodName)
+                .Single(m => m.IsStatic && m.GetParameters().Length == parameters.Length);
 
             try
             {
@@ -337,7 +340,7 @@ namespace ValveKeyValue
 
         static bool IsDictionary(Type type)
         {
-            if (!type.IsGenericType)
+            if (!type.IsConstructedGenericType)
             {
                 return false;
             }

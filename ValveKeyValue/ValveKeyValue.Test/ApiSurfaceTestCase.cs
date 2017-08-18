@@ -13,7 +13,7 @@ namespace ValveKeyValue.Test
         public void ApiSurfaceIsWellKnown()
         {
             var expected = TestDataHelper.ReadTextResource("apisurface.txt");
-            var actual = GenerateApiSurface(typeof(KVObject).Assembly);
+            var actual = GenerateApiSurface(typeof(KVObject).GetTypeInfo().Assembly);
 
             Assert.That(actual, Is.EqualTo(expected), "This may indicate a breaking change.");
         }
@@ -23,7 +23,7 @@ namespace ValveKeyValue.Test
             var sb = new StringBuilder();
 
             var publicTypes = assembly.GetTypes()
-                .Where(t => t.IsPublic)
+                .Where(t => t.GetTypeInfo().IsPublic)
                 .OrderBy(t => t.Namespace)
                 .ThenBy(t => t.Name);
 
@@ -37,22 +37,24 @@ namespace ValveKeyValue.Test
 
         static void GenerateTypeApiSurface(StringBuilder sb, Type type)
         {
+            var typeInfo = type.GetTypeInfo();
+
             sb.Append("public ");
 
-            if (type.IsSealed)
+            if (typeInfo.IsSealed)
             {
                 sb.Append("sealed ");
             }
 
-            if (type.IsClass)
+            if (typeInfo.IsClass)
             {
                 sb.Append("class");
             }
-            else if (type.IsInterface)
+            else if (typeInfo.IsInterface)
             {
                 sb.Append("interface");
             }
-            else if (type.IsEnum)
+            else if (typeInfo.IsEnum)
             {
                 sb.Append("enum");
             }
@@ -65,7 +67,7 @@ namespace ValveKeyValue.Test
             sb.Append(GetTypeAsString(type));
             sb.Append("\n{\n");
 
-            if (type.IsEnum)
+            if (typeInfo.IsEnum)
             {
                 var members = Enum.GetNames(type);
                 foreach (var member in members)
@@ -139,7 +141,7 @@ namespace ValveKeyValue.Test
 
         static bool IsHidingMember(MethodInfo method)
         {
-            var baseType = method.DeclaringType.BaseType;
+            var baseType = method.DeclaringType.GetTypeInfo().BaseType;
             if (baseType == null)
             {
                 return false;
@@ -266,7 +268,7 @@ namespace ValveKeyValue.Test
 
             sb.Append(type.Name);
 
-            if (type.IsGenericType)
+            if (type.IsConstructedGenericType)
             {
                 sb.Append("[[");
                 sb.Append(string.Join(", ", type.GetGenericArguments().Select(GetTypeAsString)));
