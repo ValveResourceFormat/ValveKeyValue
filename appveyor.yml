@@ -15,7 +15,7 @@ cache: '%UserProfile%\.nuget'
 
 install:
 - dotnet restore ValveKeyValue\ValveKeyValue.sln
-- nuget install OpenCover -Version 4.6.166 -OutputDirectory ValveKeyValue\packages
+- nuget install OpenCover -Version 4.6.519 -OutputDirectory ValveKeyValue\packages
 - nuget install coveralls.net -Version 0.7.0 -OutputDirectory ValveKeyValue\packages
 
 build:
@@ -28,7 +28,7 @@ after_build:
 test_script:
 - ps: >-
     $opencover = (Resolve-Path "./ValveKeyValue/packages/OpenCover.*/tools/OpenCover.Console.exe").ToString();
-    & $opencover -target:%ProgramFiles%\dotnet\dotnet.exe "-targetargs:test ValveKeyValue\ValveKeyValue.Test\ValveKeyValue.Test.csproj" "-filter:+[ValveKeyValue*]* -[ValveKeyValue.Test]*" -output:opencoverCoverage.xml -register:user -returntargetcode
+    & $opencover -target:%ProgramFiles%\dotnet\dotnet.exe "-targetargs:test ValveKeyValue\ValveKeyValue.Test\ValveKeyValue.Test.csproj" "-filter:+[ValveKeyValue*]* -[ValveKeyValue.Test]*" -output:opencoverCoverage.xml -register:user -returntargetcode -oldStyle
 
     if ($LastExitCode -ne 0) {
       throw "Exec: $ErrorMessage`nExit code: $LastExitCode";
