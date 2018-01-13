@@ -74,9 +74,14 @@ namespace ValveKeyValue
             Require.NotNull(reflector, nameof(reflector));
             Require.NotNull(visitedObjects, nameof(visitedObjects));
 
-            if (!visitedObjects.Add(managedObject))
+            if (!typeof(TObject).IsValueType && typeof(TObject) != typeof(string) && !visitedObjects.Add(managedObject))
             {
                 throw new KeyValueException("Serialization failed - circular object reference detected.");
+            }
+
+            if (typeof(IConvertible).IsAssignableFrom(typeof(TObject)))
+            {
+                  return new KVObject(topLevelName, (string)Convert.ChangeType(managedObject, typeof(string)));
             }
 
             var childObjects = new List<KVObject>();
@@ -106,6 +111,11 @@ namespace ValveKeyValue
             {
                 foreach (var member in reflector.GetMembers(managedObject).OrderBy(p => p.Name))
                 {
+                    if (!member.MemberType.IsValueType && member.Value is null)
+                    {
+                        continue;
+                    }
+
                     var name = member.Name;
                     if (!member.IsExplicitName && name.Length > 0 && char.IsUpper(name[0]))
                     {
