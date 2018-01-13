@@ -1,4 +1,4 @@
-version: 0.1.0.{build}-AppVeyor
+version: 0.2.0.{build}
 os: Visual Studio 2017
 
 configuration: Release
@@ -28,7 +28,7 @@ after_build:
 test_script:
 - ps: >-
     $opencover = (Resolve-Path "./ValveKeyValue/packages/OpenCover.*/tools/OpenCover.Console.exe").ToString();
-    & $opencover -target:%ProgramFiles%\dotnet\dotnet.exe "-targetargs:test ValveKeyValue\ValveKeyValue.Test\ValveKeyValue.Test.csproj" "-filter:+[ValveKeyValue*]* -[ValveKeyValue.Test]*" -output:opencoverCoverage.xml -register:user -returntargetcode -oldStyle
+    & $opencover -target:%ProgramFiles%\dotnet\dotnet.exe "-targetargs:test -c debug ValveKeyValue\ValveKeyValue.Test\ValveKeyValue.Test.csproj" "-filter:+[ValveKeyValue*]* -[ValveKeyValue.Test]*" -output:opencoverCoverage.xml -register:user -returntargetcode -oldStyle
 
     if ($LastExitCode -ne 0) {
       throw "Exec: $ErrorMessage`nExit code: $LastExitCode";
