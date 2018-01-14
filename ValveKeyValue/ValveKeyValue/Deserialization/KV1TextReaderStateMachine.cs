@@ -32,11 +32,6 @@ namespace ValveKeyValue.Deserialization
         {
             var state = states.Pop();
             discard = state.Discard;
-
-            if (state.Key == null)
-            {
-                throw new KeyValueException("Attempted to finish object construction without an object name.");
-            }
         }
 
         public string CurrentName => CurrentObject.Key;
