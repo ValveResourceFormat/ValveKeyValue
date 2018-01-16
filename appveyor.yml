@@ -11,7 +11,6 @@ assembly_info:
 environment:
   COVERALLS_REPO_TOKEN:
     secure: S7+xuGL3g/U1Inato8pf0yejfHMsT5/ZTeVWwjd3LRuV9c1Hm+za3MbSIDEomtIw
-cache: '%UserProfile%\.nuget'
 
 install:
 - dotnet restore ValveKeyValue\ValveKeyValue.sln
