@@ -17,19 +17,19 @@ namespace ValveKeyValue.Deserialization
                 throw new ArgumentException("Stream must be seekable", nameof(stream));
             }
 
-            this.stream = stream;
-            this.listener = listener;
-            reader = new BinaryReader(stream);
+            _stream = stream;
+            _listener = listener;
+            _reader = new BinaryReader(stream);
         }
 
-        readonly Stream stream;
-        readonly BinaryReader reader;
-        readonly IVisitationListener listener;
-        bool disposed;
+        private readonly Stream _stream;
+        private readonly BinaryReader _reader;
+        private readonly IVisitationListener _listener;
+        private bool _disposed;
 
         public void ReadObject()
         {
-            Require.NotDisposed(nameof(KV1TextReader), disposed);
+            Require.NotDisposed(nameof(KV1TextReader), _disposed);
 
             try
             {
@@ -51,92 +51,90 @@ namespace ValveKeyValue.Deserialization
 
         public void Dispose()
         {
-            if (!disposed)
-            {
-                reader.Dispose();
-                stream.Dispose();
-                disposed = true;
-            }
+            if (_disposed) return;
+
+            _reader.Dispose();
+            _stream.Dispose();
+            _disposed = true;
         }
 
-        void ReadObjectCore()
+        private void ReadObjectCore()
         {
-            var type = ReadNextNodeType();
-            var name = ReadNullTerminatedString();
-            ReadValue(name, type);
-        }
-
-        void ReadValue(string name, KV1BinaryNodeType type)
-        {
-            KVValue value;
-
-            switch (type)
+            while (true)
             {
-                case KV1BinaryNodeType.ChildObject:
+                var type = ReadNextNodeType();
+
+                // Break if we hit the end
+                if (type == KV1BinaryNodeType.End)
+                    break;
+
+                var name = ReadNullTerminatedString();
+                if (type == KV1BinaryNodeType.ChildObject)
+                {
+                    _listener.OnObjectStart(name);
+                    ReadObjectCore();
+                    _listener.OnObjectEnd();
+                }
+                else
+                {
+                    KVValue value;
+
+                    switch (type)
                     {
-                        listener.OnObjectStart(name);
-                        do
-                        {
-                            ReadObjectCore();
-                        }
-                        while (PeekNextNodeType() != KV1BinaryNodeType.End);
-                        listener.OnObjectEnd();
-                        return;
+                        case KV1BinaryNodeType.String:
+                            value = new KVObjectValue<string>(ReadNullTerminatedString(Encoding.UTF8), KVValueType.String);
+                            break;
+
+                        case KV1BinaryNodeType.WideString:
+                            throw new NotSupportedException("Wide String is not supported.");
+
+                        case KV1BinaryNodeType.Int32:
+                        case KV1BinaryNodeType.Color:
+                        case KV1BinaryNodeType.Pointer:
+                            value = new KVObjectValue<int>(_reader.ReadInt32(), KVValueType.Int32);
+                            break;
+
+                        case KV1BinaryNodeType.UInt64:
+                            value = new KVObjectValue<ulong>(_reader.ReadUInt64(), KVValueType.UInt64);
+                            break;
+
+                        case KV1BinaryNodeType.Float32:
+                            var floatValue = BitConverter.ToSingle(_reader.ReadBytes(4), 0);
+                            value = new KVObjectValue<float>(floatValue, KVValueType.FloatingPoint);
+                            break;
+
+                        case KV1BinaryNodeType.Int64:
+                            value = new KVObjectValue<long>(_reader.ReadInt64(), KVValueType.Int64);
+                            break;
+
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(type));
                     }
 
-                case KV1BinaryNodeType.String:
-                    value = new KVObjectValue<string>(ReadNullTerminatedString(), KVValueType.String);
-                    break;
-
-                case KV1BinaryNodeType.WideString:
-                    throw new NotSupportedException("Wide String is not supported.");
-
-                case KV1BinaryNodeType.Int32:
-                case KV1BinaryNodeType.Color:
-                case KV1BinaryNodeType.Pointer:
-                    value = new KVObjectValue<int>(reader.ReadInt32(), KVValueType.Int32);
-                    break;
-
-                case KV1BinaryNodeType.UInt64:
-                    value = new KVObjectValue<ulong>(reader.ReadUInt64(), KVValueType.UInt64);
-                    break;
-
-                case KV1BinaryNodeType.Float32:
-                    var floatValue = BitConverter.ToSingle(reader.ReadBytes(4), 0);
-                    value = new KVObjectValue<float>(floatValue, KVValueType.FloatingPoint);
-                    break;
-
-                case KV1BinaryNodeType.Int64:
-                    value = new KVObjectValue<long>(reader.ReadInt64(), KVValueType.Int64);
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(type));
+                    _listener.OnKeyValuePair(name, value);
+                }
             }
-
-            listener.OnKeyValuePair(name, value);
         }
 
-        string ReadNullTerminatedString()
+        private string ReadNullTerminatedString(Encoding encoding = null)
         {
-            var sb = new StringBuilder();
-            byte nextByte;
-            while ((nextByte = reader.ReadByte()) != 0)
-            {
-                sb.Append((char)nextByte);
-            }
+            if (encoding == null) encoding = Encoding.ASCII;
+            var b = _reader.ReadByte();
 
-            return sb.ToString();
+            int len;
+            for (len = 0; b != 0; len++)
+                b = _reader.ReadByte();
+
+            _reader.BaseStream.Position -= len + 1;
+            var str = _reader.ReadBytes(len);
+
+            // read the null terminator
+            _reader.ReadByte();
+
+            return encoding.GetString(str);
         }
 
-        KV1BinaryNodeType ReadNextNodeType()
-            => (KV1BinaryNodeType)reader.ReadByte();
-
-        KV1BinaryNodeType PeekNextNodeType()
-        {
-            var value = ReadNextNodeType();
-            stream.Seek(-1, SeekOrigin.Current);
-            return value;
-        }
+        private KV1BinaryNodeType ReadNextNodeType()
+            => (KV1BinaryNodeType)_reader.ReadByte();
     }
 }

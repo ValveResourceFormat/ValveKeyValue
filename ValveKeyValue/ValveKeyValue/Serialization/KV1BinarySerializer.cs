@@ -57,7 +57,7 @@ namespace ValveKeyValue.Serialization
                     break;
 
                 case KVValueType.String:
-                    Write((string)value);
+                    Write((string)value, Encoding.UTF8);
                     break;
 
                 case KVValueType.UInt64:
@@ -78,13 +78,12 @@ namespace ValveKeyValue.Serialization
             writer.Write((byte)nodeType);
         }
 
-        void Write(string value)
+        void Write(string value, Encoding encoding = null)
         {
-            foreach (var @char in value)
-            {
-                writer.Write(@char);
-            }
+            if (encoding == null) encoding = Encoding.ASCII;
 
+            var bytes = encoding.GetBytes(value);
+            writer.Write(bytes);
             writer.Write((byte)0);
         }
 
