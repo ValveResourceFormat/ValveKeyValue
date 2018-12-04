@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using CSERLibrary.Utilities;
 using NUnit.Framework;
+using ValveKeyValue.Test.Helpers;
 
 namespace ValveKeyValue.Test
 {

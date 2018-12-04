@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace CSERLibrary.Utilities
+namespace ValveKeyValue.Test.Helpers
 {
     /// <summary>
     /// Wraps a stream for all operations except Close and Dispose, which
