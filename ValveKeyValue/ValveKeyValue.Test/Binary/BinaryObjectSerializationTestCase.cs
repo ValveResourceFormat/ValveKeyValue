@@ -12,6 +12,7 @@ namespace ValveKeyValue.Test
             var kvo = new KVObject("TestObject", new[]
             {
                 new KVObject("key", "value"),
+                new KVObject("key_utf8", "邪恶的战"), 
                 new KVObject("int", 0x10203040),
                 new KVObject("flt", 1234.5678f),
                 new KVObject("ptr", new IntPtr(0x12345678)),
@@ -26,6 +27,9 @@ namespace ValveKeyValue.Test
                     0x01, // string: key = value
                         0x6B, 0x65, 0x79, 0x00,
                         0x76, 0x61, 0x6C, 0x75, 0x65, 0x00,
+                    0x01, // string_utf8: key_utf8 = 邪恶的战
+                        0x6B, 0x65, 0x79, 0x5F, 0x75, 0x74, 0x66, 0x38, 0x00,
+                        0xE9, 0x82, 0xAA, 0xE6, 0x81, 0xB6, 0xE7, 0x9A, 0x84, 0xE6, 0x88, 0x98, 0x00,
                     0x02, // int32: int = 0x10203040
                         0x69, 0x6E, 0x74, 0x00,
                         0x40, 0x30, 0x20, 0x10,

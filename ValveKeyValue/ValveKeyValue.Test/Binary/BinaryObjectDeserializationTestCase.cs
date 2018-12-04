@@ -13,6 +13,10 @@ namespace ValveKeyValue.Test
             => Assert.That(obj.StringValue, Is.EqualTo("value"));
 
         [Test]
+        public void Utf8StringValue()
+            => Assert.That(obj.StringUtf8Value, Is.EqualTo("邪恶的战"));
+
+        [Test]
         public void TheIntegerValue()
             => Assert.That(obj.TheIntegerValue, Is.EqualTo(0x01020304));
 
@@ -48,6 +52,9 @@ namespace ValveKeyValue.Test
                     0x01, // string: key = value
                         0x6B, 0x65, 0x79, 0x00,
                         0x76, 0x61, 0x6C, 0x75, 0x65, 0x00,
+                    0x01, // string_utf8: key_utf8 = 邪恶的战
+                        0x6B, 0x65, 0x79, 0x5F, 0x75, 0x74, 0x66, 0x38, 0x00,
+                        0xE9, 0x82, 0xAA, 0xE6, 0x81, 0xB6, 0xE7, 0x9A, 0x84, 0xE6, 0x88, 0x98, 0x00,
                     0x02, // int32: int = 0x01020304
                         0x69, 0x6E, 0x74, 0x00,
                         0x04, 0x03, 0x02, 0x01,
@@ -77,6 +84,9 @@ namespace ValveKeyValue.Test
         {
             [KVProperty("key")]
             public string StringValue { get; set; }
+
+            [KVProperty("key_utf8")]
+            public string StringUtf8Value { get; set; }
 
             [KVProperty("int")]
             public int TheIntegerValue { get; set; }
