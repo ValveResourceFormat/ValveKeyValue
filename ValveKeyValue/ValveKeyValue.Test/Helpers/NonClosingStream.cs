@@ -7,6 +7,7 @@ namespace ValveKeyValue.Test.Helpers
     /// Wraps a stream for all operations except Close and Dispose, which
     /// merely flush the stream and prevent further operations from being
     /// carried out using this wrapper.
+    /// Attribution: http://www.yoda.arachsys.com/csharp/miscutil/ (Apache license)
     /// </summary>
     public sealed class NonClosingStream : Stream
     {
