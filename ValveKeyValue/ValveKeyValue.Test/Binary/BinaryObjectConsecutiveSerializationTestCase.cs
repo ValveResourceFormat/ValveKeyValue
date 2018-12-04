@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using NUnit.Framework;
-using ValveKeyValue.Test.Helpers;
 
 namespace ValveKeyValue.Test
 {
@@ -43,8 +42,8 @@ namespace ValveKeyValue.Test
 
             using (var stream = new MemoryStream())
             {
-                KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Serialize(new NonClosingStream(stream), first);
-                KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Serialize(new NonClosingStream(stream), second);
+                KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Serialize(stream, first);
+                KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Serialize(stream, second);
                 Assert.That(stream.ToArray(), Is.EqualTo(expectedData));
             }
         }

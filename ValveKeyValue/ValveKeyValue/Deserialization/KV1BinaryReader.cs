@@ -19,7 +19,7 @@ namespace ValveKeyValue.Deserialization
 
             this.stream = stream;
             this.listener = listener;
-            reader = new BinaryReader(stream);
+            reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true);
         }
 
         readonly Stream stream;
@@ -54,7 +54,6 @@ namespace ValveKeyValue.Deserialization
             if (!disposed)
             {
                 reader.Dispose();
-                stream.Dispose();
                 disposed = true;
             }
         }

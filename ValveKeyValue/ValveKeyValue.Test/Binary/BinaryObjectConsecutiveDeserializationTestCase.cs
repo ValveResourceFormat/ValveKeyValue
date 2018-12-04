@@ -4,7 +4,6 @@ using System.IO;
 using System.Text;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.Framework;
-using ValveKeyValue.Test.Helpers;
 
 namespace ValveKeyValue.Test
 {
@@ -47,9 +46,9 @@ namespace ValveKeyValue.Test
             {
                 stream.Write(data, 0, data.Length);
                 stream.Seek(0, SeekOrigin.Begin);
-                _firstObject = KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Deserialize<FirstObject>(new NonClosingStream(stream));
+                _firstObject = KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Deserialize<FirstObject>(stream);
                 Assert.That(stream.Position, Is.EqualTo(36)); // ensure we read exactly 36 bytes
-                _secondObject = KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Deserialize<SecondObject>(new NonClosingStream(stream));
+                _secondObject = KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Deserialize<SecondObject>(stream);
                 Assert.That(stream.Position, Is.EqualTo(75)); // ensure we read exactly 39 bytes
             }
         }
