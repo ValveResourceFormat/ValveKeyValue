@@ -26,7 +26,7 @@ namespace ValveKeyValue.Serialization
         {
             objectDepth++;
             Write(KV1BinaryNodeType.ChildObject);
-            Write(name);
+            WriteNullTerminatedBytes(Encoding.UTF8.GetBytes(name));
         }
 
         public void OnObjectEnd()
@@ -43,7 +43,7 @@ namespace ValveKeyValue.Serialization
         public void OnKeyValuePair(string name, KVValue value)
         {
             Write(GetNodeType(value.ValueType));
-            Write(name);
+            WriteNullTerminatedBytes(Encoding.UTF8.GetBytes(name));
 
             switch (value.ValueType)
             {
@@ -57,7 +57,7 @@ namespace ValveKeyValue.Serialization
                     break;
 
                 case KVValueType.String:
-                    Write((string)value);
+                    WriteNullTerminatedBytes(Encoding.UTF8.GetBytes((string)value));
                     break;
 
                 case KVValueType.UInt64:
@@ -78,13 +78,9 @@ namespace ValveKeyValue.Serialization
             writer.Write((byte)nodeType);
         }
 
-        void Write(string value)
+        void WriteNullTerminatedBytes(byte[] value)
         {
-            foreach (var @char in value)
-            {
-                writer.Write(@char);
-            }
-
+            writer.Write(value);
             writer.Write((byte)0);
         }
 

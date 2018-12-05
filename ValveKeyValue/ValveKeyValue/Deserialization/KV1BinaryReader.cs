@@ -19,7 +19,7 @@ namespace ValveKeyValue.Deserialization
 
             this.stream = stream;
             this.listener = listener;
-            reader = new BinaryReader(stream);
+            reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true);
         }
 
         readonly Stream stream;
@@ -54,38 +54,37 @@ namespace ValveKeyValue.Deserialization
             if (!disposed)
             {
                 reader.Dispose();
-                stream.Dispose();
                 disposed = true;
             }
         }
 
         void ReadObjectCore()
         {
-            var type = ReadNextNodeType();
-            var name = ReadNullTerminatedString();
-            ReadValue(name, type);
+            KV1BinaryNodeType type;
+
+            // Keep reading values, until we reach the terminator
+            while ((type = ReadNextNodeType()) != KV1BinaryNodeType.End)
+            {
+                ReadValue(type);
+            }
         }
 
-        void ReadValue(string name, KV1BinaryNodeType type)
+        void ReadValue(KV1BinaryNodeType type)
         {
+            var name = Encoding.UTF8.GetString(ReadNullTerminatedBytes());
             KVValue value;
 
             switch (type)
             {
                 case KV1BinaryNodeType.ChildObject:
-                    {
-                        listener.OnObjectStart(name);
-                        do
-                        {
-                            ReadObjectCore();
-                        }
-                        while (PeekNextNodeType() != KV1BinaryNodeType.End);
-                        listener.OnObjectEnd();
-                        return;
-                    }
+                    listener.OnObjectStart(name);
+                    ReadObjectCore();
+                    listener.OnObjectEnd();
+                    return;
 
                 case KV1BinaryNodeType.String:
-                    value = new KVObjectValue<string>(ReadNullTerminatedString(), KVValueType.String);
+                    // UTF8 encoding is used for string values
+                    value = new KVObjectValue<string>(Encoding.UTF8.GetString(ReadNullTerminatedBytes()), KVValueType.String);
                     break;
 
                 case KV1BinaryNodeType.WideString:
@@ -117,26 +116,21 @@ namespace ValveKeyValue.Deserialization
             listener.OnKeyValuePair(name, value);
         }
 
-        string ReadNullTerminatedString()
+        byte[] ReadNullTerminatedBytes()
         {
-            var sb = new StringBuilder();
-            byte nextByte;
-            while ((nextByte = reader.ReadByte()) != 0)
+            using (var mem = new MemoryStream())
             {
-                sb.Append((char)nextByte);
-            }
+                byte nextByte;
+                while ((nextByte = reader.ReadByte()) != 0)
+                {
+                    mem.WriteByte(nextByte);
+                }
 
-            return sb.ToString();
+                return mem.ToArray();
+            }
         }
 
         KV1BinaryNodeType ReadNextNodeType()
             => (KV1BinaryNodeType)reader.ReadByte();
-
-        KV1BinaryNodeType PeekNextNodeType()
-        {
-            var value = ReadNextNodeType();
-            stream.Seek(-1, SeekOrigin.Current);
-            return value;
-        }
     }
 }
