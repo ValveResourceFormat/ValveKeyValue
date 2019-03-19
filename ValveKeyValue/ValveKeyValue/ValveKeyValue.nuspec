@@ -6,6 +6,7 @@
 		<title>$title$</title>
 		<authors>$author$</authors>
 		<owners>$author$</owners>
+		<license type="expression">MIT</license>
 		<licenseUrl>https://raw.githubusercontent.com/SteamDatabase/ValveKeyValue/master/LICENSE</licenseUrl>
 		<projectUrl>https://github.com/SteamDatabase/ValveKeyValue</projectUrl>
 		<iconUrl>https://raw.githubusercontent.com/SteamDatabase/ValveKeyValue/master/Misc/logo.png</iconUrl>
