@@ -53,9 +53,3 @@ deploy:
   prerelease: true
   on:
     APPVEYOR_REPO_TAG: true
-- provider: NuGet
-  api_key:
-    secure: hqSxAQZqtX5Z5aWzulXmaIwPQmM87RvTurYOLmLnpHWHlQm1DfWmJn5fAUAuuLZH
-  artifact: ValveKeyValue.nupkg
-  on:
-    APPVEYOR_REPO_TAG: true
