@@ -109,7 +109,7 @@ namespace ValveKeyValue
             }
             else
             {
-                foreach (var member in reflector.GetMembers(managedObject).OrderBy(p => p.Name))
+                foreach (var member in reflector.GetMembers(managedObject).OrderBy(p => p.Name, StringComparer.InvariantCulture))
                 {
                     if (!member.MemberType.IsValueType && member.Value is null)
                     {

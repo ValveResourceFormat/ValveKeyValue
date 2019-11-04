@@ -24,7 +24,7 @@ namespace ValveKeyValue.Test
 
             var publicTypes = assembly.GetTypes()
                 .Where(t => t.GetTypeInfo().IsPublic)
-                .OrderBy(t => t.Namespace)
+                .OrderBy(t => t.Namespace, StringComparer.InvariantCulture)
                 .ThenBy(t => t.Name);
 
             foreach (var type in publicTypes)
@@ -87,7 +87,7 @@ namespace ValveKeyValue.Test
 
             var methods = type
                 .GetMethods(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-                .OrderBy(t => t.Name);
+                .OrderBy(t => t.Name, StringComparer.InvariantCulture);
 
             foreach (var method in methods)
             {
