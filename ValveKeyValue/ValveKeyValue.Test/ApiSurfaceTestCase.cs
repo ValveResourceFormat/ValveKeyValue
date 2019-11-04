@@ -25,7 +25,7 @@ namespace ValveKeyValue.Test
             var publicTypes = assembly.GetTypes()
                 .Where(t => t.GetTypeInfo().IsPublic)
                 .OrderBy(t => t.Namespace, StringComparer.InvariantCulture)
-                .ThenBy(t => t.Name);
+                .ThenBy(t => t.Name, StringComparer.InvariantCulture);
 
             foreach (var type in publicTypes)
             {
