@@ -41,5 +41,33 @@ namespace ValveKeyValue.Test
             var expected = TestDataHelper.ReadTextResource("Text.serialization_expected.vdf");
             Assert.That(text, Is.EqualTo(expected));
         }
+
+        [Test]
+        public void SerializesValuesCorrectly()
+        {
+            var dataObject = new
+            {
+                test =  new Dictionary<string, float[]>
+                {
+                    ["test"] = new[] { 1.1234f, 2.2345f, 3.54677f },
+                    ["test2"] = new[] { 1.1234f, 2.2345f, 3.54677f }
+                },
+            };
+
+            string text;
+            using (var ms = new MemoryStream())
+            {
+                KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Serialize(ms, dataObject, "test");
+
+                ms.Seek(0, SeekOrigin.Begin);
+                using (var reader = new StreamReader(ms))
+                {
+                    text = reader.ReadToEnd();
+                }
+            }
+
+            var expected = TestDataHelper.ReadTextResource("Text.dictionary_with_array_values.vdf");
+            Assert.That(text, Is.EqualTo(expected));
+        }
     }
 }
