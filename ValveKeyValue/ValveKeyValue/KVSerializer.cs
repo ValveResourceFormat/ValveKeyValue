@@ -95,7 +95,7 @@ namespace ValveKeyValue
 
             Require.NotNull(name, nameof(name));
 
-            var kvObjectTree = ObjectCopier.FromObject(data, name);
+            var kvObjectTree = ObjectCopier.FromObject(typeof(TData), data, name);
             Serialize(stream, kvObjectTree, options);
         }
 

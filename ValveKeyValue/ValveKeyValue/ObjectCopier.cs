@@ -60,10 +60,10 @@ namespace ValveKeyValue
             }
         }
 
-        public static KVObject FromObject<TObject>(TObject managedObject, string topLevelName)
-            => FromObjectCore(managedObject, topLevelName, new DefaultObjectReflector(), new HashSet<object>());
+        public static KVObject FromObject(Type objectType, object managedObject, string topLevelName)
+            => FromObjectCore(objectType, managedObject, topLevelName, new DefaultObjectReflector(), new HashSet<object>());
 
-        static KVObject FromObjectCore<TObject>(TObject managedObject, string topLevelName, IObjectReflector reflector, HashSet<object> visitedObjects)
+        static KVObject FromObjectCore(Type objectType, object managedObject, string topLevelName, IObjectReflector reflector, HashSet<object> visitedObjects)
         {
             if (managedObject == null)
             {
@@ -74,29 +74,37 @@ namespace ValveKeyValue
             Require.NotNull(reflector, nameof(reflector));
             Require.NotNull(visitedObjects, nameof(visitedObjects));
 
-            if (!typeof(TObject).IsValueType && typeof(TObject) != typeof(string) && !visitedObjects.Add(managedObject))
+            var transformedValue = ConvertObjectToValue(objectType, managedObject, reflector, visitedObjects);
+            return new KVObject(topLevelName, transformedValue);
+        }
+
+        static KVValue ConvertObjectToValue(Type objectType, object managedObject, IObjectReflector reflector, HashSet<object> visitedObjects)
+        {
+            if (!objectType.IsValueType && objectType != typeof(string) && !visitedObjects.Add(managedObject))
             {
                 throw new KeyValueException("Serialization failed - circular object reference detected.");
             }
 
-            if (typeof(IConvertible).IsAssignableFrom(typeof(TObject)))
+            if (typeof(IConvertible).IsAssignableFrom(objectType))
             {
-                  return new KVObject(topLevelName, (string)Convert.ChangeType(managedObject, typeof(string)));
+                  return (string)Convert.ChangeType(managedObject, typeof(string));
             }
 
-            var childObjects = new List<KVObject>();
+            var childObjects = new KVCollectionValue();
 
-            if (typeof(IDictionary).IsAssignableFrom(typeof(TObject)))
+            if (typeof(IDictionary).IsAssignableFrom(objectType))
             {
                 var dictionary = (IDictionary)managedObject;
                 var enumerator = dictionary.GetEnumerator();
                 while (enumerator.MoveNext())
                 {
                     var entry = enumerator.Entry;
-                    childObjects.Add(new KVObject(entry.Key.ToString(), entry.Value.ToString()));
+
+                    var childObjectValue = ConvertObjectToValue(entry.Value.GetType(), entry.Value, reflector, visitedObjects);
+                    childObjects.Add(new KVObject(entry.Key.ToString(), childObjectValue));
                 }
             }
-            else if (typeof(TObject).IsArray || typeof(IEnumerable).IsAssignableFrom(typeof(TObject)))
+            else if (objectType.IsArray || typeof(IEnumerable).IsAssignableFrom(objectType))
             {
                 var counter = 0;
                 foreach (var child in (IEnumerable)managedObject)
@@ -133,26 +141,11 @@ namespace ValveKeyValue
                 }
             }
 
-            return new KVObject(topLevelName, childObjects);
+            return childObjects;
         }
 
         static KVObject CopyObject(object @object, string name, IObjectReflector reflector, HashSet<object> visitedObjects)
-        {
-            try
-            {
-                var keyValueRepresentation = (KVObject)typeof(ObjectCopier)
-                    .GetMethod(nameof(FromObjectCore), BindingFlags.NonPublic | BindingFlags.Static)
-                    .MakeGenericMethod(@object.GetType())
-                    .Invoke(null, new[] { @object, name, reflector, visitedObjects });
-
-                return keyValueRepresentation;
-            }
-            catch (TargetInvocationException ex)
-            {
-                ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
-                return default(KVObject); // Unreachable.
-            }
-        }
+            => FromObjectCore(@object.GetType(), @object, name, reflector, visitedObjects);
 
         static void CopyObject<TObject>(KVObject kv, TObject obj, IObjectReflector reflector)
         {
