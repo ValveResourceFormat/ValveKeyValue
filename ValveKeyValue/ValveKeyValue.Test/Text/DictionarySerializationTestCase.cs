@@ -47,7 +47,7 @@ namespace ValveKeyValue.Test
         {
             var dataObject = new
             {
-                test =  new Dictionary<string, float[]>
+                test = new Dictionary<string, float[]>
                 {
                     ["test"] = new[] { 1.1234f, 2.2345f, 3.54677f },
                     ["test2"] = new[] { 1.1234f, 2.2345f, 3.54677f }
