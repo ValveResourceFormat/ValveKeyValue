@@ -10,6 +10,7 @@
     <PackageProjectUrl>https://github.com/SteamDatabase/ValveKeyValue</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
     <Version Condition="'$(APPVEYOR_BUILD_VERSION)' != ''">$(APPVEYOR_BUILD_VERSION)</Version>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
     <DebugType>full</DebugType>
