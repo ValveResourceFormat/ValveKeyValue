@@ -1,0 +1,16 @@
+﻿"test data"
+{
+	"Values"
+	{
+		"0"
+		{
+			"0"	"first"
+			"1"	"second"
+		}
+		"1"
+		{
+			"0"	"third"
+			"1"	"fourth"
+		}
+	}
+}
