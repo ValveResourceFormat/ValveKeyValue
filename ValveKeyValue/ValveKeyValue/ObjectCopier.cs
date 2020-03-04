@@ -34,7 +34,7 @@ namespace ValveKeyValue
                 }
                 else if (IsDictionary(typeof(TObject)))
                 {
-                    return (TObject)MakeDictionary(typeof(TObject), keyValueObject);
+                    return (TObject)MakeDictionary(typeof(TObject), keyValueObject, reflector);
                 }
                 else if (IsArray(keyValueObject, out enumerableValues) && ConstructTypedEnumerable(typeof(TObject), enumerableValues, reflector, out enumerable))
                 {
@@ -357,7 +357,7 @@ namespace ValveKeyValue
             return true;
         }
 
-        static object MakeDictionary(Type type, KVObject kv)
+        static object MakeDictionary(Type type, KVObject kv, IObjectReflector reflector)
         {
             var dictionary = Activator.CreateInstance(type);
             var genericArguments = type.GetGenericArguments();
@@ -365,7 +365,7 @@ namespace ValveKeyValue
             typeof(ObjectCopier)
                 .GetMethod(nameof(FillDictionary), BindingFlags.Static | BindingFlags.NonPublic)
                 .MakeGenericMethod(genericArguments)
-                .Invoke(null, new[] { dictionary, kv });
+                .Invoke(null, new[] { dictionary, kv, reflector });
 
             return dictionary;
         }
