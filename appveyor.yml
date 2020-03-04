@@ -1,5 +1,5 @@
 version: 0.2.1.{build}
-os: Visual Studio 2017
+os: Visual Studio 2019
 
 configuration: Release
 assembly_info:

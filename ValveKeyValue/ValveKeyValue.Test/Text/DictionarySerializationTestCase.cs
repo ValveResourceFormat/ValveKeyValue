@@ -45,9 +45,9 @@ namespace ValveKeyValue.Test
         [Test]
         public void SerializesValuesCorrectly()
         {
-            var dataObject = new
+            var dataObject = new DataObject
             {
-                test = new Dictionary<string, float[]>
+                Test = new Dictionary<string, float[]>
                 {
                     ["test"] = new[] { 1.1234f, 2.2345f, 3.54677f },
                     ["test2"] = new[] { 1.1234f, 2.2345f, 3.54677f }
@@ -68,6 +68,29 @@ namespace ValveKeyValue.Test
 
             var expected = TestDataHelper.ReadTextResource("Text.dictionary_with_array_values.vdf");
             Assert.That(text, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void DeserializesValuesCorrectly()
+        {
+            DataObject dataObject;
+
+            using (var rs = TestDataHelper.OpenResource("Text.dictionary_with_array_values.vdf"))
+            {
+                dataObject = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<DataObject>(rs);
+            }
+
+            Assert.That(dataObject, Is.Not.Null);
+            Assert.That(dataObject.Test, Is.Not.Null);
+            Assert.That(dataObject.Test, Has.Count.EqualTo(2));
+            Assert.That(dataObject.Test["test"], Is.EqualTo(new[] { 1.1234f, 2.2345f, 3.54677f }));
+            Assert.That(dataObject.Test["test2"], Is.EqualTo(new[] { 1.1234f, 2.2345f, 3.54677f }));
+        }
+
+        class DataObject
+        {
+            [KVProperty("test")]
+            public Dictionary<string, float[]> Test { get; set; }
         }
     }
 }
