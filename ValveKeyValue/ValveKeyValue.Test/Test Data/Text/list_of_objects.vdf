@@ -1,0 +1,21 @@
+﻿"test data"
+{
+	"Numbers"
+	{
+		"0"
+		{
+			"Name" "zero"
+			"Value" "nothing"
+		}
+		"1"
+		{
+			"Name" "one"
+			"Value" "a bit"
+		}
+		"2"
+		{
+			"Name" "two"
+			"Value" "a bit more"
+		}
+	}
+}
