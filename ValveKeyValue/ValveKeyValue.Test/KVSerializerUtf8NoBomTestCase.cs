@@ -1,0 +1,35 @@
+﻿using System;
+using System.IO;
+using NUnit.Framework;
+
+namespace ValveKeyValue.Test
+{
+    class KVSerializerUtf8NoBomTestCase
+    {
+        [TestCase]
+        public void TextSerializerDoesNotProduceUtf8Preamble()
+        {
+            var dataObject = new DataObject
+            {
+                Name = "First"
+            };
+
+            byte[] output;
+            using (var ms = new MemoryStream())
+            {
+                KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Serialize(ms, dataObject, "test");
+
+                ms.Seek(0, SeekOrigin.Begin);
+
+                output = ms.ToArray();
+            }
+
+            Assert.AreEqual((byte)'"', output[0]);
+        }
+
+        class DataObject
+        {
+            public string Name { get; set; }
+        }
+    }
+}
