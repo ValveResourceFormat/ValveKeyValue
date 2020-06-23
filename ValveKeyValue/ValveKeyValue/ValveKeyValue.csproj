@@ -3,14 +3,15 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Product>Valve KeyValue Library</Product>
     <Description>Library to parse and write Valve KeyValue formats</Description>
-    <Copyright>Copyright © SteamDatabase 2017</Copyright>
-    <Company>SteamDatabase</Company>
-    <Authors>SteamDatabase</Authors>
+    <Copyright>Copyright © SteamDB</Copyright>
+    <Company>SteamDB</Company>
+    <Authors>SteamDB</Authors>
     <RepositoryUrl>https://github.com/SteamDatabase/ValveKeyValue</RepositoryUrl>
-    <PackageProjectUrl>https://github.com/SteamDatabase/ValveKeyValue</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/SteamDatabase/ValveKeyValue</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReleaseNotes>View release notes at https://github.com/SteamDatabase/ValveKeyValue/releases</PackageReleaseNotes>
     <Version Condition="'$(APPVEYOR_BUILD_VERSION)' != ''">$(APPVEYOR_BUILD_VERSION)</Version>
-    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
     <DebugType>full</DebugType>

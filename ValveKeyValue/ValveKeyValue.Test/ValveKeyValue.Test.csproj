@@ -5,9 +5,9 @@
     <PackageId>ValveKeyValue.Test</PackageId>
     <Product>Valve KeyValue Library - Unit Tests</Product>
     <Description>Unit Tests for library to parse and write Valve KeyValue formats</Description>
-    <Authors>SteamDatabase</Authors>
-    <Company>SteamDatabase</Company>
-    <Copyright>Copyright © SteamDatabase 2017</Copyright>
+    <Authors>SteamDB</Authors>
+    <Company>SteamDB</Company>
+    <Copyright>Copyright © SteamDB</Copyright>
     <ApplicationIcon />
     <StartupObject />
   </PropertyGroup>
