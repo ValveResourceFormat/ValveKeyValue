@@ -1,0 +1,28 @@
+<Project>
+  <PropertyGroup>
+    <ProjectBaseVersion>0.3.1</ProjectBaseVersion>
+    <ProjectVersion Condition="'$(GITHUB_RUN_NUMBER)' != ''">$(ProjectBaseVersion).$(GITHUB_RUN_NUMBER)</ProjectVersion>
+    <ProjectVersion Condition="'$(GITHUB_RUN_NUMBER)' == ''">$(ProjectBaseVersion).0</ProjectVersion>
+
+    <AssemblyVersion>$(ProjectBaseVersion)</AssemblyVersion>
+    <FileVersion>$(ProjectVersion)</FileVersion>
+    <Version>$(ProjectVersion)</Version>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Deterministic>true</Deterministic>
+    <DebugType>embedded</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <NeutralLanguage>en</NeutralLanguage>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Authors>SteamDB</Authors>
+    <Copyright>Copyright © SteamDB</Copyright>
+    <RepositoryUrl>https://github.com/SteamDatabase/ValveKeyValue</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/SteamDatabase/ValveKeyValue</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+</Project>

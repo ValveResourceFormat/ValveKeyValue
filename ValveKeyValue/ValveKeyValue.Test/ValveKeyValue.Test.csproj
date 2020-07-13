@@ -5,11 +5,6 @@
     <PackageId>ValveKeyValue.Test</PackageId>
     <Product>Valve KeyValue Library - Unit Tests</Product>
     <Description>Unit Tests for library to parse and write Valve KeyValue formats</Description>
-    <Authors>SteamDB</Authors>
-    <Company>SteamDB</Company>
-    <Copyright>Copyright © SteamDB</Copyright>
-    <ApplicationIcon />
-    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Test Data\**\*.txt" />
