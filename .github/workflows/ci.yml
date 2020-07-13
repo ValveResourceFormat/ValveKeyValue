@@ -22,4 +22,22 @@ jobs:
       run: dotnet build -c Release ValveKeyValue/ValveKeyValue.sln
 
     - name: Test
-      run: dotnet test -c Release ValveKeyValue/ValveKeyValue.Test/ValveKeyValue.Test.csproj
+      run: dotnet test -c Release ValveKeyValue/ValveKeyValue.Test/ValveKeyValue.Test.csproj /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:CoverletOutput='./lcov.info' /p:Include="[ValveKeyValue*]*"
+
+    - name: Upload test coverage
+      uses: coverallsapp/github-action@v1.1.1
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        path-to-lcov: ./ValveKeyValue/ValveKeyValue.Test/lcov.info
+        flag-name: run-${{ matrix.test_number }}
+        parallel: true
+
+  finish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Coveralls Finished
+      uses: coverallsapp/github-action@v1.1.1
+      with:
+        github-token: ${{ secrets.github_token }}
+        parallel-finished: true
