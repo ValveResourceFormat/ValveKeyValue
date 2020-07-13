@@ -24,7 +24,7 @@ public class ValveKeyValue.KeyValueException
     protected object MemberwiseClone();
     protected void remove_SerializeObjectState(EventHandler`1[[System.Runtime.Serialization.SafeSerializationEventArgs]] value);
     public void set_HelpLink(string value);
-    protected void set_HResult(int value);
+    public void set_HResult(int value);
     public void set_Source(string value);
     public string ToString();
 }
