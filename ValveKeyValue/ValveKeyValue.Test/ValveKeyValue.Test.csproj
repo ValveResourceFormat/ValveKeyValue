@@ -5,6 +5,8 @@
     <PackageId>ValveKeyValue.Test</PackageId>
     <Product>Valve KeyValue Library - Unit Tests</Product>
     <Description>Unit Tests for library to parse and write Valve KeyValue formats</Description>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>../ValveKeyValue/ValveKeyValue.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Test Data\**\*.txt" />
