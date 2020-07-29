@@ -23,7 +23,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: ValveKeyValue.${{ github.event.release.tag_name }}.nupkg
-        path: 'ValveKeyValue/ValveKeyValue/bin/Release/ValveKeyValue.${{ github.event.release.tag_name }}.nupkg'
+        path: 'ValveKeyValue/ValveKeyValue/bin/Release/ValveKeyValue.*.nupkg'
 
     - name: Upload NuGet Package to GitHub Release
       uses: actions/upload-release-asset@v1
@@ -31,6 +31,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: 'ValveKeyValue/ValveKeyValue/bin/Release/ValveKeyValue.${{ github.event.release.tag_name }}.nupkg'
+        asset_path: 'ValveKeyValue/ValveKeyValue/bin/Release/ValveKeyValue.*.nupkg'
         asset_name: ValveKeyValue.${{ github.event.release.tag_name }}.nupkg
         asset_content_type: application/zip
