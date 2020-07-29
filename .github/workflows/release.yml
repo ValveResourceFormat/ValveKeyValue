@@ -17,7 +17,7 @@ jobs:
       uses: actions/setup-dotnet@v1
 
     - name: Create NuGet Package
-      run: dotnet pack --configuration Release ValveKeyValue/ValveKeyValue/ValveKeyValue.csproj /p:Version=${{ github.event.release.tag_name }}
+      run: dotnet pack --configuration Release ValveKeyValue/ValveKeyValue/ValveKeyValue.csproj
 
     - name: Upload NuGet Package as Artifact
       uses: actions/upload-artifact@v2
