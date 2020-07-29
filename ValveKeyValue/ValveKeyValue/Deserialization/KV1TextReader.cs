@@ -186,7 +186,8 @@ namespace ValveKeyValue.Deserialization
             {
                 listener.DiscardCurrentObject();
             }
-            else if (@explicit)
+            
+            if (@explicit)
             {
                 listener.OnObjectEnd();
             }

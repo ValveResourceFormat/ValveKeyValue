@@ -1,0 +1,17 @@
+"GameInfo"
+{
+	One
+	{
+		Key1 1 [$MOBILE]
+	}
+
+	Two
+	{
+		Key2 2 [$MOBILE]
+	}
+
+	Three
+	{
+		Key3 3 [$MOBILE]
+	}
+}
