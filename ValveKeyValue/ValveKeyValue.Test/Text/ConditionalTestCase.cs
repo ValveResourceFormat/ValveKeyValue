@@ -51,6 +51,15 @@ namespace ValveKeyValue.Test
             Assert.That((string)data["ui type"], Is.Null);
         }
 
+        [Test]
+        public void SupportsConditionalsWithUnderscores()
+        {
+            var conditions = new[] { "SOMETHING_WITH_UNDERSCORE" };
+            var data = ParseResource("Text.conditional.vdf", conditions);
+
+            Assert.That((string)data["underscore_condition"], Is.EqualTo("yes"));
+        }
+
         [TestCase(null)]
         [TestCase("OSX")]
         [TestCase("LINUX")]

@@ -233,7 +233,7 @@ namespace ValveKeyValue
                 return false;
             }
 
-            return char.IsLetterOrDigit((char)value);
+            return char.IsLetterOrDigit((char)value) || (char)value == '_';
         }
 
         enum KVConditionTokenType

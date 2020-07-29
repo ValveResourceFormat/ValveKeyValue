@@ -8,4 +8,6 @@
 	"ui size"				"small" [$X360 && (!$GERMAN && !$FRENCH && !$POLISH)]
 	"ui size"				"medium" [$X360 && ($GERMAN || $FRENCH)]
 	"ui size"				"large" [$X360 && $POLISH]
+	"underscore_condition"  "no" [!$SOMETHING_WITH_UNDERSCORE]
+	"underscore_condition"  "yes" [$SOMETHING_WITH_UNDERSCORE]
 }
