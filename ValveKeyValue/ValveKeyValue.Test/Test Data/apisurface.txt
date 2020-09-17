@@ -111,14 +111,14 @@ public sealed class ValveKeyValue.KVSerializerOptions
 {
     public bool Equals(object obj);
     protected void Finalize();
-    public string[] get_Conditions();
+    public System.Collections.Generic.IList`1[[string]] get_Conditions();
     public static ValveKeyValue.KVSerializerOptions get_DefaultOptions();
     public ValveKeyValue.IIncludedFileLoader get_FileLoader();
     public bool get_HasEscapeSequences();
     public int GetHashCode();
     public Type GetType();
     protected object MemberwiseClone();
-    public void set_Conditions(string[] value);
+    public void set_Conditions(System.Collections.Generic.IList`1[[string]] value);
     public void set_FileLoader(ValveKeyValue.IIncludedFileLoader value);
     public void set_HasEscapeSequences(bool value);
     public string ToString();
