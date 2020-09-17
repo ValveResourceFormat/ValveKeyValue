@@ -11,6 +11,7 @@
         Color = 6,
         UInt64 = 7,
         End = 8,
+        ProbablyBinary = 9,
         Int64 = 10,
     }
 }

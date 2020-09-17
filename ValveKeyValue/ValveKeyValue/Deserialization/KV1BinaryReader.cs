@@ -88,7 +88,7 @@ namespace ValveKeyValue.Deserialization
                     break;
 
                 case KV1BinaryNodeType.WideString:
-                    throw new NotSupportedException("Wide String is not supported.");
+                    throw new NotSupportedException("Wide String is not supported, please create an issue saying where you found it: https://github.com/SteamDatabase/ValveKeyValue/issues");
 
                 case KV1BinaryNodeType.Int32:
                 case KV1BinaryNodeType.Color:
@@ -104,6 +104,9 @@ namespace ValveKeyValue.Deserialization
                     var floatValue = BitConverter.ToSingle(reader.ReadBytes(4), 0);
                     value = new KVObjectValue<float>(floatValue, KVValueType.FloatingPoint);
                     break;
+
+                case KV1BinaryNodeType.ProbablyBinary:
+                    throw new NotSupportedException("Hit kv type 9, please create an issue saying where you found it: https://github.com/SteamDatabase/ValveKeyValue/issues");
 
                 case KV1BinaryNodeType.Int64:
                     value = new KVObjectValue<long>(reader.ReadInt64(), KVValueType.Int64);
