@@ -7,6 +7,8 @@ namespace ValveKeyValue.Deserialization
 {
     class KV1BinaryReader : IVisitingReader
     {
+        public const int BinaryMagicHeader = 0x564B4256; // VBKV
+
         public KV1BinaryReader(Stream stream, IVisitationListener listener)
         {
             Require.NotNull(stream, nameof(stream));
@@ -26,10 +28,13 @@ namespace ValveKeyValue.Deserialization
         readonly BinaryReader reader;
         readonly IVisitationListener listener;
         bool disposed;
+        KV1BinaryNodeType endMarker = KV1BinaryNodeType.End;
 
         public void ReadObject()
         {
             Require.NotDisposed(nameof(KV1TextReader), disposed);
+
+            DetectMagicHeader();
 
             try
             {
@@ -60,12 +65,13 @@ namespace ValveKeyValue.Deserialization
 
         void ReadObjectCore()
         {
-            KV1BinaryNodeType type;
+            KV1BinaryNodeType type = ReadNextNodeType();
 
             // Keep reading values, until we reach the terminator
-            while ((type = ReadNextNodeType()) != KV1BinaryNodeType.End)
+            while (type != endMarker)
             {
                 ReadValue(type);
+                type = ReadNextNodeType();
             }
         }
 
@@ -130,6 +136,27 @@ namespace ValveKeyValue.Deserialization
                 }
 
                 return mem.ToArray();
+            }
+        }
+
+        void DetectMagicHeader()
+        {
+            if (stream.Length - stream.Position < 8)
+            {
+                return;
+            }
+
+            if (reader.ReadUInt32() == BinaryMagicHeader)
+            {
+                stream.Position += 4; // Skip crc32
+
+                // There is likely to reason to handle this separately
+                // as the types do not conflict between Steam or Dota 2
+                endMarker = KV1BinaryNodeType.AlternateEnd;
+            }
+            else
+            {
+                stream.Position -= 4; // Go back as we did not detect the header
             }
         }
 

@@ -13,5 +13,6 @@
         End = 8,
         ProbablyBinary = 9,
         Int64 = 10,
+        AlternateEnd = 11,
     }
 }
