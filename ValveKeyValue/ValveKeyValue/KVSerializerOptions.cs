@@ -1,20 +1,17 @@
-﻿namespace ValveKeyValue
+﻿using System.Collections.Generic;
+using System.Runtime.InteropServices;
+
+namespace ValveKeyValue
 {
     /// <summary>
     /// Options to use when deserializing a KeyValues file.
     /// </summary>
     public sealed class KVSerializerOptions
     {
-        string[] conditions;
-
         /// <summary>
         /// Gets or sets a list of conditions to use to match conditional values.
         /// </summary>
-        public string[] Conditions
-        {
-            get { return conditions ?? new string[0]; }
-            set { conditions = value; }
-        }
+        public IList<string> Conditions { get; } = new List<string>(GetDefaultConditions());
 
         /// <summary>
         /// Gets or sets a value indicating whether gets or sets if the parser should translate escape sequences (e.g. <c>\n</c>, <c>\t</c>).
@@ -30,5 +27,26 @@
         /// Gets the default options (used when none are specified).
         /// </summary>
         public static KVSerializerOptions DefaultOptions => new KVSerializerOptions();
+
+        static IEnumerable<string> GetDefaultConditions()
+        {
+            // TODO: In the future we will want to skip this for consoles and mobile devices?
+            yield return "WIN32";
+            
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                yield return "WINDOWS";
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                yield return "LINUX";
+                yield return "POSIX";
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                yield return "OSX";
+                yield return "POSIX";
+            }
+        }
     }
 }

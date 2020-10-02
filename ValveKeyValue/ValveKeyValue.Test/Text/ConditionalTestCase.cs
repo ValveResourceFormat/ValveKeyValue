@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 
 namespace ValveKeyValue.Test
@@ -111,7 +112,15 @@ namespace ValveKeyValue.Test
             KVObject data;
             using (var stream = TestDataHelper.OpenResource(name))
             {
-                data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream, new KVSerializerOptions { Conditions = conditions });
+                var options = new KVSerializerOptions();
+                options.Conditions.Clear();
+
+                foreach (var c in conditions)
+                {
+                    options.Conditions.Add(c);
+                }
+
+                data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream, options);
             }
 
             return data;
