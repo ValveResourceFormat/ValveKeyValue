@@ -118,7 +118,6 @@ public sealed class ValveKeyValue.KVSerializerOptions
     public int GetHashCode();
     public Type GetType();
     protected object MemberwiseClone();
-    public void set_Conditions(System.Collections.Generic.IList`1[[string]] value);
     public void set_FileLoader(ValveKeyValue.IIncludedFileLoader value);
     public void set_HasEscapeSequences(bool value);
     public string ToString();
