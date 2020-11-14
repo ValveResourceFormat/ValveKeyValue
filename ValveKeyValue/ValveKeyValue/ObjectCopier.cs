@@ -124,15 +124,9 @@ namespace ValveKeyValue
                         continue;
                     }
 
-                    var name = member.Name;
-                    if (!member.IsExplicitName && name.Length > 0 && char.IsUpper(name[0]))
-                    {
-                        name = char.ToLower(name[0]) + name.Substring(1);
-                    }
-
                     if (TryConvertValueTo<string>(member.Value, out var convertedMemberValue))
                     {
-                        childObjects.Add(new KVObject(name, convertedMemberValue));
+                        childObjects.Add(new KVObject(member.Name, convertedMemberValue));
                     }
                     else
                     {
