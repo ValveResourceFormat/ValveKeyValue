@@ -164,74 +164,44 @@ namespace ValveKeyValue.Deserialization
             {
                 var next = Next();
 
-                if (next == '\\' && !escapeNext)
+                if (options.HasEscapeSequences)
                 {
-                    escapeNext = true;
-                    continue;
-                }
-                else if (escapeNext)
-                {
-                    escapeNext = false;
-
-                    if (next == '"')
+                    if (!escapeNext && next == '\\')
                     {
-                        sb.Append('"');
+                        escapeNext = true;
+                        continue;
                     }
-                    else if (options.HasEscapeSequences)
+
+                    if (escapeNext)
                     {
-                        switch (next)
+                        next = next switch
                         {
-                            case 'r':
-                                sb.Append('\r');
-                                break;
+                            'r' => '\r',
+                            'n' => '\n',
+                            't' => '\t',
+                            '\\' => '\\',
+                            '"' => '"',
+                            _ => throw new InvalidDataException($"Unknown escape sequence '\\{next}'."),
+                        };
 
-                            case 'n':
-                                sb.Append('\n');
-                                break;
-
-                            case 't':
-                                sb.Append('\t');
-                                break;
-
-                            case '\\':
-                                sb.Append('\\');
-                                break;
-
-                            default:
-                                throw new InvalidDataException($"Unknown escaped character '\\{next}'.");
-                        }
-                    }
-                    else
-                    {
-                        sb.Append('\\');
-
-                        if (next == '\\')
-                        {
-                            escapeNext = true;
-                        }
-                        else
-                        {
-                            sb.Append(next);
-                        }
+                        escapeNext = false;
                     }
                 }
-                else
-                {
-                    sb.Append(next);
-                }
+
+                sb.Append(next);
             }
 
             return sb.ToString();
         }
 
-        string ReadUntilWhitespace()
+        string ReadUntilWhitespaceOrQuote()
         {
             var sb = new StringBuilder();
 
             while (true)
             {
                 var next = Peek();
-                if (next == -1 || char.IsWhiteSpace((char)next))
+                if (next == -1 || char.IsWhiteSpace((char)next) || next == '"')
                 {
                     break;
                 }
@@ -265,7 +235,7 @@ namespace ValveKeyValue.Deserialization
             }
             else
             {
-                return ReadUntilWhitespace();
+                return ReadUntilWhitespaceOrQuote();
             }
         }
 

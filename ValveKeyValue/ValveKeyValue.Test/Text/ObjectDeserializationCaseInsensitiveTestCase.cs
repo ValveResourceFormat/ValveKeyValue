@@ -8,7 +8,8 @@ namespace ValveKeyValue.Test
         public void CanDeserializeObjectListAndPropertyName()
         {
             var text = TestDataHelper.ReadTextResource("Text.serialization_expected.vdf");
-            var actual = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<DataObject[]>(text, KVSerializerOptions.DefaultOptions);
+            var options = new KVSerializerOptions { HasEscapeSequences = true };
+            var actual = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<DataObject[]>(text, options);
             
             Assert.AreEqual("Dota 2", actual[0].Name);
             Assert.AreEqual("Dota 2 is a complex game where you get sworn at\nin Russian all the time.", actual[0].Summary);
@@ -21,7 +22,8 @@ namespace ValveKeyValue.Test
         public void CanDeserializeFromRandomlyCasedKeys()
         {
             var text = TestDataHelper.ReadTextResource("Text.random_case_object.vdf");
-            var actual = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<DataObject>(text, KVSerializerOptions.DefaultOptions);
+            var options = new KVSerializerOptions { HasEscapeSequences = true };
+            var actual = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<DataObject>(text, options);
             
             Assert.AreEqual("Dota 2", actual.Name);
             Assert.AreEqual("Dota 2 is a complex game where you get sworn at\nin Russian all the time.", actual.Summary);
