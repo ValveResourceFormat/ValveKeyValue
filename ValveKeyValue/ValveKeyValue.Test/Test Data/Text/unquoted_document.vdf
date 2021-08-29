@@ -1,6 +1,6 @@
 ﻿TestDocument
 {
-	"QuotedChild"	edge\ncase\"haha\\"
+	"QuotedChild"	edge\ncase
 
 	UnquotedChild
 	{

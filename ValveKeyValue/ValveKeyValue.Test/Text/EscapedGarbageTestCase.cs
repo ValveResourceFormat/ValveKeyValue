@@ -27,7 +27,7 @@ namespace ValveKeyValue.Test
                     () => KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream, options),
                     Throws.Exception.TypeOf<KeyValueException>()
                     .With.InnerException.TypeOf<InvalidDataException>()
-                    .With.Message.EqualTo(@"Unknown escaped character '\7'."));
+                    .With.Message.EqualTo(@"Unknown escape sequence '\7'."));
             }
         }
     }

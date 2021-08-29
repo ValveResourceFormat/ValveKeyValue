@@ -19,7 +19,7 @@ namespace ValveKeyValue.Test
         [Test]
         public void QuotedChildWithEdgeCaseValue()
         {
-            Assert.That((string)data["QuotedChild"], Is.EqualTo(@"edge\ncase\""haha\\"""));
+            Assert.That((string)data["QuotedChild"], Is.EqualTo(@"edge\ncase"));
         }
 
         [TestCase("Key1", ExpectedResult = "Value1")]
