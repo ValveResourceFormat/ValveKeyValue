@@ -280,8 +280,8 @@ namespace ValveKeyValue
         {
 #if NET5_0_OR_GREATER
             [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2091", Justification = "Analysis gets lost in compiler-rewritten IL for lambdas.")]
-            TValue valueConversionFunc(KVObject kv) => ConvertValue<TValue>(kv.Value, reflector);
 #endif
+            TValue valueConversionFunc(KVObject kv) => ConvertValue<TValue>(kv.Value, reflector);
 
             return items.ToLookup(kv => kv.Name, valueConversionFunc);
         }
@@ -435,7 +435,10 @@ namespace ValveKeyValue
             return true;
         }
 
+#if NET5_0_OR_GREATER
+
         [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2060", Justification = "Analysis cannot follow MakeGenericMethod but we should be clear by here anyway.")]
+#endif
         static object MakeDictionary(
 #if NET5_0_OR_GREATER
             [DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)]
