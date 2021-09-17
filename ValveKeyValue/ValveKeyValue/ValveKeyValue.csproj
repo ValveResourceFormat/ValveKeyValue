@@ -8,6 +8,7 @@
     <PackageTags>steam valve keyvalues keyvalue kv kv3 csgo dota2 tf2</PackageTags>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>ValveKeyValue.snk</AssemblyOriginatorKeyFile>
+    <IsTrimmable>true</IsTrimmable>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\Misc\logo.png">

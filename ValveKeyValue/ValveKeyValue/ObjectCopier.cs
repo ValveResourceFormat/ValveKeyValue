@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
@@ -12,13 +13,26 @@ namespace ValveKeyValue
     // TODO: Migrate to IVisitationListener
     static class ObjectCopier
     {
+#if NET5_0_OR_GREATER
+        public static TObject MakeObject<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TObject>(KVObject keyValueObject)
+#else
         public static TObject MakeObject<TObject>(KVObject keyValueObject)
+#endif
             => MakeObject<TObject>(keyValueObject, new DefaultObjectReflector());
 
-        public static object MakeObject(Type objectType, KVObject keyValueObject, IObjectReflector reflector)
+        public static object MakeObject(
+#if NET5_0_OR_GREATER
+            [DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)]
+#endif
+            Type objectType, KVObject keyValueObject, IObjectReflector reflector)
             => InvokeGeneric(nameof(MakeObject), objectType, new object[] { keyValueObject, reflector });
 
+#if NET5_0_OR_GREATER
+        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2062", Justification = "If the lookup value type exists at runtime then it should have enough for us to introspect.")]
+        public static TObject MakeObject<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TObject>(KVObject keyValueObject, IObjectReflector reflector)
+#else
         public static TObject MakeObject<TObject>(KVObject keyValueObject, IObjectReflector reflector)
+#endif
         {
             Require.NotNull(keyValueObject, nameof(keyValueObject));
             Require.NotNull(reflector, nameof(reflector));
@@ -60,10 +74,24 @@ namespace ValveKeyValue
             }
         }
 
-        public static KVObject FromObject(Type objectType, object managedObject, string topLevelName)
+        public static KVObject FromObject(
+#if NET5_0_OR_GREATER
+            [DynamicallyAccessedMembers(Trimming.Properties)]
+#endif
+            Type objectType,
+            object managedObject,
+            string topLevelName)
             => FromObjectCore(objectType, managedObject, topLevelName, new DefaultObjectReflector(), new HashSet<object>());
 
-        static KVObject FromObjectCore(Type objectType, object managedObject, string topLevelName, IObjectReflector reflector, HashSet<object> visitedObjects)
+        static KVObject FromObjectCore(
+#if NET5_0_OR_GREATER
+            [DynamicallyAccessedMembers(Trimming.Properties)]
+#endif
+            Type objectType,
+            object managedObject,
+            string topLevelName,
+            IObjectReflector reflector,
+            HashSet<object> visitedObjects)
         {
             if (managedObject == null)
             {
@@ -78,7 +106,17 @@ namespace ValveKeyValue
             return new KVObject(topLevelName, transformedValue);
         }
 
-        static KVValue ConvertObjectToValue(Type objectType, object managedObject, IObjectReflector reflector, HashSet<object> visitedObjects)
+#if NET5_0_OR_GREATER
+        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2072", Justification = "If the IDictionary's value object already exists at runtime then its properties will too.")]
+#endif
+        static KVValue ConvertObjectToValue(
+#if NET5_0_OR_GREATER
+            [DynamicallyAccessedMembers(Trimming.Properties)]
+#endif
+            Type objectType,
+            object managedObject,
+            IObjectReflector reflector,
+            HashSet<object> visitedObjects)
         {
             if (!objectType.IsValueType && objectType != typeof(string) && !visitedObjects.Add(managedObject))
             {
@@ -109,7 +147,7 @@ namespace ValveKeyValue
                 var counter = 0;
                 foreach (var child in (IEnumerable)managedObject)
                 {
-                    var childKVObject = CopyObject(child, counter.ToString(), reflector, visitedObjects);
+                    var childKVObject = FromObjectCore(child.GetType(), child, counter.ToString(), reflector, visitedObjects);
                     childObjects.Add(childKVObject);
 
                     counter++;
@@ -117,7 +155,7 @@ namespace ValveKeyValue
             }
             else
             {
-                foreach (var member in reflector.GetMembers(managedObject).OrderBy(p => p.Name, StringComparer.InvariantCulture))
+                foreach (var member in reflector.GetMembers(objectType, managedObject).OrderBy(p => p.Name, StringComparer.InvariantCulture))
                 {
                     if (!member.MemberType.IsValueType && member.Value is null)
                     {
@@ -130,7 +168,7 @@ namespace ValveKeyValue
                     }
                     else
                     {
-                        childObjects.Add(CopyObject(member.Value, member.Name, reflector, visitedObjects));
+                        childObjects.Add(FromObjectCore(member.Value.GetType(), member.Value, member.Name, reflector, visitedObjects));
                     }
                 }
             }
@@ -138,10 +176,12 @@ namespace ValveKeyValue
             return childObjects;
         }
 
-        static KVObject CopyObject(object @object, string name, IObjectReflector reflector, HashSet<object> visitedObjects)
-            => FromObjectCore(@object.GetType(), @object, name, reflector, visitedObjects);
-
+#if NET5_0_OR_GREATER
+        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2072", Justification = "Cannot annotate IObjectMember, but analysis performed earlier in flow should be sufficient.")]
+        static void CopyObject<[DynamicallyAccessedMembers(Trimming.Properties)] TObject>(KVObject kv, TObject obj, IObjectReflector reflector)
+#else
         static void CopyObject<TObject>(KVObject kv, TObject obj, IObjectReflector reflector)
+#endif
         {
             Require.NotNull(kv, nameof(kv));
 
@@ -153,7 +193,7 @@ namespace ValveKeyValue
 
             Require.NotNull(reflector, nameof(reflector));
 
-            var members = reflector.GetMembers(obj).ToDictionary(m => m.Name, m => m, StringComparer.OrdinalIgnoreCase);
+            var members = reflector.GetMembers(typeof(TObject), obj).ToDictionary(m => m.Name, m => m, StringComparer.OrdinalIgnoreCase);
 
             foreach (var item in kv.Children)
             {
@@ -223,11 +263,28 @@ namespace ValveKeyValue
             return true;
         }
 
-        static object MakeLookup(Type valueType, IEnumerable<KVObject> items, IObjectReflector reflector)
+        static object MakeLookup(
+#if NET5_0_OR_GREATER
+            [DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)]
+#endif
+        Type valueType,
+            IEnumerable<KVObject> items,
+            IObjectReflector reflector)
             => InvokeGeneric(nameof(MakeLookupCore), valueType, new object[] { items, reflector });
 
+#if NET5_0_OR_GREATER
+        static ILookup<string, TValue> MakeLookupCore<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TValue>(IEnumerable<KVObject> items, IObjectReflector reflector)
+#else
         static ILookup<string, TValue> MakeLookupCore<TValue>(IEnumerable<KVObject> items, IObjectReflector reflector)
-            => items.ToLookup(kv => kv.Name, kv => ConvertValue<TValue>(kv.Value, reflector));
+#endif
+        {
+#if NET5_0_OR_GREATER
+            [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2091", Justification = "Analysis gets lost in compiler-rewritten IL for lambdas.")]
+            TValue valueConversionFunc(KVObject kv) => ConvertValue<TValue>(kv.Value, reflector);
+#endif
+
+            return items.ToLookup(kv => kv.Name, valueConversionFunc);
+        }
 
         static readonly Dictionary<Type, Func<Type, object[], IObjectReflector, object>> EnumerableBuilders = new Dictionary<Type, Func<Type, object[], IObjectReflector, object>>
         {
@@ -238,7 +295,14 @@ namespace ValveKeyValue
             [typeof(ObservableCollection<>)] = (type, values, reflector) => InvokeGeneric(nameof(MakeObservableCollection), type.GetGenericArguments()[0], new object[] { values, reflector }),
         };
 
-        static bool ConstructTypedEnumerable(Type type, object[] values, IObjectReflector reflector, out object typedEnumerable)
+#if NET5_0_OR_GREATER
+        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2072", Justification = "If our T[] array exists then so much the element T.")]
+#endif
+        static bool ConstructTypedEnumerable(
+            Type type,
+            object[] values,
+            IObjectReflector reflector,
+            out object typedEnumerable)
         {
             object listObject = null;
 
@@ -290,6 +354,10 @@ namespace ValveKeyValue
             return false;
         }
 
+#if NET5_0_OR_GREATER
+        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2060", Justification = "Analysis cannot follow MakeGenericMethod. All callers validated manually.")]
+        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2111", Justification = "Analysis cannot follow MakeGenericMethod. All callers validated manually.")]
+#endif
         static object InvokeGeneric(string methodName, Type genericType, params object[] parameters)
         {
             var method = typeof(ObjectCopier)
@@ -308,18 +376,34 @@ namespace ValveKeyValue
             }
         }
 
+#if NET5_0_OR_GREATER
+        static List<TElement> MakeList<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TElement>(object[] items, IObjectReflector reflector)
+#else
         static List<TElement> MakeList<TElement>(object[] items, IObjectReflector reflector)
+#endif
         {
-            return items.Select(i => ConvertValue<TElement>(i, reflector))
-                .ToList();
+            var list = new List<TElement>(capacity: items.Length);
+            foreach (var item in items)
+            {
+                list.Add(ConvertValue<TElement>(item, reflector));
+            }
+            return list;
         }
 
+#if NET5_0_OR_GREATER
+        static Collection<TElement> MakeCollection<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TElement>(object[] items, IObjectReflector reflector)
+#else
         static Collection<TElement> MakeCollection<TElement>(object[] items, IObjectReflector reflector)
+#endif
         {
             return new Collection<TElement>(MakeList<TElement>(items, reflector));
         }
 
+#if NET5_0_OR_GREATER
+        static ObservableCollection<TElement> MakeObservableCollection<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TElement>(object[] items, IObjectReflector reflector)
+#else
         static ObservableCollection<TElement> MakeObservableCollection<TElement>(object[] items, IObjectReflector reflector)
+#endif
         {
             return new ObservableCollection<TElement>(MakeList<TElement>(items, reflector));
         }
@@ -351,7 +435,14 @@ namespace ValveKeyValue
             return true;
         }
 
-        static object MakeDictionary(Type type, KVObject kv, IObjectReflector reflector)
+        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2060", Justification = "Analysis cannot follow MakeGenericMethod but we should be clear by here anyway.")]
+        static object MakeDictionary(
+#if NET5_0_OR_GREATER
+            [DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)]
+#endif
+            Type type,
+            KVObject kv,
+            IObjectReflector reflector)
         {
             var dictionary = Activator.CreateInstance(type);
             var genericArguments = type.GetGenericArguments();
@@ -364,7 +455,11 @@ namespace ValveKeyValue
             return dictionary;
         }
 
+#if NET5_0_OR_GREATER
+        static void FillDictionary<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TKey, [DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TValue>(Dictionary<TKey, TValue> dictionary, KVObject kv, IObjectReflector reflector)
+#else
         static void FillDictionary<TKey, TValue>(Dictionary<TKey, TValue> dictionary, KVObject kv, IObjectReflector reflector)
+#endif
         {
             foreach (var item in kv.Children)
             {
@@ -375,9 +470,20 @@ namespace ValveKeyValue
             }
         }
 
-        static TValue ConvertValue<TValue>(object value, IObjectReflector reflector) => (TValue)ConvertValue(value, typeof(TValue), reflector);
+#if NET5_0_OR_GREATER
+        static TValue ConvertValue<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TValue>(object value, IObjectReflector reflector)
+#else
+        static TValue ConvertValue<TValue>(object value, IObjectReflector reflector)
+#endif
+            => (TValue)ConvertValue(value, typeof(TValue), reflector);
 
-        static object ConvertValue(object value, Type valueType, IObjectReflector reflector)
+        static object ConvertValue(
+            object value,
+#if NET5_0_OR_GREATER
+            [DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)]
+#endif
+        Type valueType,
+            IObjectReflector reflector)
         {
             if (value is KVCollectionValue collectionValue)
             {
