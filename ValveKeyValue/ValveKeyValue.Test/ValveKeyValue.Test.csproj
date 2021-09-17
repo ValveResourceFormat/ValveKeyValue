@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
     <PackageId>ValveKeyValue.Test</PackageId>
     <Product>Valve KeyValue Library - Unit Tests</Product>
     <Description>Unit Tests for library to parse and write Valve KeyValue formats</Description>
