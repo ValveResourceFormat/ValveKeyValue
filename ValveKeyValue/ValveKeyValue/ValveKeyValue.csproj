@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFrameworks>netstandard2.1;net5.0</TargetFrameworks>
     <Product>Valve KeyValue Library</Product>
     <Description>Library to parse and write Valve KeyValue formats</Description>
     <PackageReleaseNotes>View release notes at https://github.com/SteamDatabase/ValveKeyValue/releases</PackageReleaseNotes>
@@ -8,6 +8,7 @@
     <PackageTags>steam valve keyvalues keyvalue kv kv3 csgo dota2 tf2</PackageTags>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>ValveKeyValue.snk</AssemblyOriginatorKeyFile>
+    <IsTrimmable>true</IsTrimmable>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\Misc\logo.png">
