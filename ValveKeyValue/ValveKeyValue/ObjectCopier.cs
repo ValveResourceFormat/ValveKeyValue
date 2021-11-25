@@ -369,9 +369,14 @@ namespace ValveKeyValue
             foreach (var item in kv.Children)
             {
                 var key = ConvertValue<TKey>(item.Name, reflector);
-                var value = ConvertValue<TValue>(item.Value, reflector);
 
-                dictionary[key] = value;
+                if (dictionary.ContainsKey(key))
+                {
+                    continue;
+                }
+
+                var value = ConvertValue<TValue>(item.Value, reflector);
+                dictionary.Add(key, value);
             }
         }
 

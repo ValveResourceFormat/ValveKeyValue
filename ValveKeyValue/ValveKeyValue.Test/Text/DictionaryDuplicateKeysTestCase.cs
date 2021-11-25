@@ -18,9 +18,9 @@ namespace ValveKeyValue.Test
         }
 
         [Test]
-        public void LateValueOverridesEarlyValue()
+        public void FirstValueWins()
         {
-            Assert.That(data["foo"], Is.EqualTo("baz"));
+            Assert.That(data["foo"], Is.EqualTo("foo"));
         }
 
         Dictionary<string, string> data;
