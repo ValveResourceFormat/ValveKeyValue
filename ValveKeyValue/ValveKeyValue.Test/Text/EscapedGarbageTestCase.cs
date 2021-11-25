@@ -14,7 +14,7 @@ namespace ValveKeyValue.Test
                 data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream);
             }
 
-            Assert.That((string)data["key"], Is.EqualTo(@"\7"));
+            Assert.That((string)data["key"], Is.EqualTo(@"abcd\7efg"));
         }
 
         [Test]
@@ -29,6 +29,24 @@ namespace ValveKeyValue.Test
                     .With.InnerException.TypeOf<InvalidDataException>()
                     .With.Message.EqualTo(@"Unknown escape sequence '\7'."));
             }
+        }
+
+        [Test]
+        public void ReadsValueWithNullByteWhenBugCompatibilityEnabled()
+        {
+            var options = new KVSerializerOptions
+            {
+                EnableValveNullByteBugBehavior = true,
+                HasEscapeSequences = true,
+            };
+
+            KVObject data;
+            using (var stream = TestDataHelper.OpenResource("Text.escaped_garbage.vdf"))
+            {
+                data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream, options);
+            }
+
+            Assert.That((string)data["key"], Is.EqualTo("abcd"));
         }
     }
 }

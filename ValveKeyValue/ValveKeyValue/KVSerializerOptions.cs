@@ -19,6 +19,11 @@ namespace ValveKeyValue
         public bool HasEscapeSequences { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether invalid escape sequences should truncate strings rather than throwing a <see cref="InvalidDataException"/>.
+        /// </summary>
+        public bool EnableValveNullByteBugBehavior { get; set; }
+
+        /// <summary>
         /// Gets or sets a way to open any file referenced with <c>#include</c> or <c>#base</c>.
         /// </summary>
         public IIncludedFileLoader FileLoader { get; set; }
