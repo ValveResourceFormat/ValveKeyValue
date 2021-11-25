@@ -40,27 +40,15 @@ namespace ValveKeyValue.Deserialization
                 return new KVToken(KVTokenType.EndOfFile);
             }
 
-            switch (nextChar)
+            return nextChar switch
             {
-                case ObjectStart:
-                    return ReadObjectStart();
-
-                case ObjectEnd:
-                    return ReadObjectEnd();
-
-                case CommentBegin:
-                    return ReadComment();
-
-                case ConditionBegin:
-                    return ReadCondition();
-
-                case InclusionMark:
-                    return ReadInclusion();
-
-                case QuotationMark:
-                default:
-                    return ReadString();
-            }
+                ObjectStart => ReadObjectStart(),
+                ObjectEnd => ReadObjectEnd(),
+                CommentBegin => ReadComment(),
+                ConditionBegin => ReadCondition(),
+                InclusionMark => ReadInclusion(),
+                _ => ReadString(),
+            };
         }
 
         public void Dispose()
@@ -198,7 +186,7 @@ namespace ValveKeyValue.Deserialization
             // causes the text to be trimmed to the point of that null byte.
             if (options.EnableValveNullByteBugBehavior && result.IndexOf('\0') is var nullByteIndex && nullByteIndex >= 0)
             {
-                result = result.Substring(0, nullByteIndex);
+                result = result[..nullByteIndex];
             }
             return result;
         }

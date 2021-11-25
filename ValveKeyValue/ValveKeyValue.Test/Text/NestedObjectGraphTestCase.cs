@@ -45,10 +45,8 @@ namespace ValveKeyValue.Test
         [OneTimeSetUp]
         public void SetUp()
         {
-            using (var stream = TestDataHelper.OpenResource("Text.nested_object_graph.vdf"))
-            {
-                data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<ObjectGraph>(stream);
-            }
+            using var stream = TestDataHelper.OpenResource("Text.nested_object_graph.vdf");
+            data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<ObjectGraph>(stream);
         }
 
         class ObjectGraph

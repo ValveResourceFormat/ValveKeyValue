@@ -32,10 +32,8 @@ namespace ValveKeyValue.Test
                 KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Serialize(ms, dataObject, "test data");
 
                 ms.Seek(0, SeekOrigin.Begin);
-                using (var reader = new StreamReader(ms))
-                {
-                    text = reader.ReadToEnd();
-                }
+                using var reader = new StreamReader(ms);
+                text = reader.ReadToEnd();
             }
 
             var expected = TestDataHelper.ReadTextResource("Text.serialization_expected.vdf");

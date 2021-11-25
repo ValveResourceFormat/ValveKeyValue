@@ -28,13 +28,11 @@ namespace ValveKeyValue.Test
             var text = TestDataHelper.ReadTextResource("Text.invalid_conditional.vdf");
             text = text.Replace("{CONDITION}", conditional);
 
-            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(text)))
-            {
-                Assert.That(
-                    () => KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream),
-                    Throws.Exception.InstanceOf<InvalidDataException>()
-                    .With.Message.EqualTo($"Invalid conditional syntax \"{conditional}\""));
-            }
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(text));
+            Assert.That(
+                () => KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream),
+                Throws.Exception.InstanceOf<InvalidDataException>()
+                .With.Message.EqualTo($"Invalid conditional syntax \"{conditional}\""));
         }
     }
 }

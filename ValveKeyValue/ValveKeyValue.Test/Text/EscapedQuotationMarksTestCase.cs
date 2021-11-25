@@ -15,11 +15,9 @@ namespace ValveKeyValue.Test
         [OneTimeSetUp]
         public void SetUp()
         {
-            using (var stream = TestDataHelper.OpenResource("Text.escaped_quotation_marks.vdf"))
-            {
-                var options = new KVSerializerOptions { HasEscapeSequences = true };
-                data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream, options);
-            }
+            using var stream = TestDataHelper.OpenResource("Text.escaped_quotation_marks.vdf");
+            var options = new KVSerializerOptions { HasEscapeSequences = true };
+            data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream, options);
         }
     }
 }

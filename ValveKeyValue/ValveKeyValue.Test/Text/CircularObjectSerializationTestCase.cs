@@ -26,13 +26,11 @@ namespace ValveKeyValue.Test
             Assert.That(dataObject1.Other, Is.SameAs(dataObject2), "Sanity check");
             Assert.That(dataObject2.Other, Is.SameAs(dataObject1), "Sanity check");
 
-            using (var ms = new MemoryStream())
-            {
-                Assert.That(
-                    () => KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Serialize(ms, dataObject1, "test data"),
-                    Throws.Exception.InstanceOf<KeyValueException>()
-                    .With.Message.EqualTo("Serialization failed - circular object reference detected."));
-            }
+            using var ms = new MemoryStream();
+            Assert.That(
+                () => KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Serialize(ms, dataObject1, "test data"),
+                Throws.Exception.InstanceOf<KeyValueException>()
+                .With.Message.EqualTo("Serialization failed - circular object reference detected."));
         }
 
         [Test]

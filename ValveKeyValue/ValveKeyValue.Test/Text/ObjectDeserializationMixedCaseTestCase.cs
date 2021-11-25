@@ -33,10 +33,8 @@ namespace ValveKeyValue.Test
         [OneTimeSetUp]
         public void SetUp()
         {
-            using (var stream = TestDataHelper.OpenResource("Text.object_person_mixed_case.vdf"))
-            {
-                person = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<Person>(stream);
-            }
+            using var stream = TestDataHelper.OpenResource("Text.object_person_mixed_case.vdf");
+            person = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<Person>(stream);
         }
 
         class Person

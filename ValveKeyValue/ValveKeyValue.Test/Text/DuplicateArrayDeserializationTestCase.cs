@@ -38,7 +38,7 @@ namespace ValveKeyValue.Test
             Assert.That(children, Has.Length.EqualTo(2));
 
             var firstNode = children[0];
-            Assert.That(firstNode != null);
+            Assert.That(firstNode, Is.Not.Null);
 
             var firstArray = ((IEnumerable<KVObject>)firstNode).ToArray();
             Assert.That(firstArray, Has.Length.EqualTo(2));
@@ -46,7 +46,7 @@ namespace ValveKeyValue.Test
             Assert.That((string)firstArray[1]?["name"], Is.EqualTo("second"));
 
             var secondNode = children[1];
-            Assert.That(secondNode != null);
+            Assert.That(secondNode, Is.Not.Null);
 
             var secondArray = ((IEnumerable<KVObject>)secondNode).ToArray();
             Assert.That(secondArray, Has.Length.EqualTo(2));
@@ -59,10 +59,8 @@ namespace ValveKeyValue.Test
         [OneTimeSetUp]
         public void SetUp()
         {
-            using (var stream = TestDataHelper.OpenResource("Text.duplicate_lists.vdf"))
-            {
-                data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream);
-            }
+            using var stream = TestDataHelper.OpenResource("Text.duplicate_lists.vdf");
+            data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream);
         }
     }
 }

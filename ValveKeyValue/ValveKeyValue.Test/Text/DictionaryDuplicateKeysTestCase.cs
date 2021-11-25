@@ -28,10 +28,8 @@ namespace ValveKeyValue.Test
         [OneTimeSetUp]
         public void SetUp()
         {
-            using (var stream = TestDataHelper.OpenResource("Text.duplicate_keys.vdf"))
-            {
-                data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<Dictionary<string, string>>(stream);
-            }
+            using var stream = TestDataHelper.OpenResource("Text.duplicate_keys.vdf");
+            data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<Dictionary<string, string>>(stream);
         }
     }
 }

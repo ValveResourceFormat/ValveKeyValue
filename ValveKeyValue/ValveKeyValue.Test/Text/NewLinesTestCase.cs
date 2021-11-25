@@ -22,7 +22,7 @@ namespace ValveKeyValue.Test
             Assert.That(text, Does.Contain(value));
         }
 
-        string PerformNewLineTest(string value, bool hasEscapeSequences)
+        static string PerformNewLineTest(string value, bool hasEscapeSequences)
         {
             KVObject convertedKv;
             var kv = new KVObject("newLineTestCase", value);

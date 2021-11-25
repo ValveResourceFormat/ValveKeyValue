@@ -34,10 +34,8 @@ namespace ValveKeyValue.Test
         {
             var options = new KVSerializerOptions { FileLoader = new StubIncludedFileLoader() };
 
-            using (var stream = TestDataHelper.OpenResource("Text.kv_with_include.vdf"))
-            {
-                data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream, options);
-            }
+            using var stream = TestDataHelper.OpenResource("Text.kv_with_include.vdf");
+            data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream, options);
         }
 
         sealed class StubIncludedFileLoader : IIncludedFileLoader

@@ -35,10 +35,8 @@ namespace ValveKeyValue.Test
         [OneTimeSetUp]
         public void SetUp()
         {
-            using (var stream = TestDataHelper.OpenResource("Text.type_guessing.vdf"))
-            {
-                data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream);
-            }
+            using var stream = TestDataHelper.OpenResource("Text.type_guessing.vdf");
+            data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream);
         }
     }
 }

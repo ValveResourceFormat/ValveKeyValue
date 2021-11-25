@@ -174,8 +174,7 @@ namespace ValveKeyValue.Deserialization
                         stateMachine.Current));
             }
 
-            bool discard;
-            stateMachine.PopObject(out discard);
+            stateMachine.PopObject(out var discard);
 
             if (stateMachine.IsInObject)
             {
@@ -234,22 +233,18 @@ namespace ValveKeyValue.Deserialization
         {
             var mergeListener = listener.GetMergeListener();
 
-            using (var stream = OpenFileForInclude(filePath))
-            using (var reader = new KV1TextReader(new StreamReader(stream), mergeListener, options))
-            {
-                reader.ReadObject();
-            }
+            using var stream = OpenFileForInclude(filePath);
+            using var reader = new KV1TextReader(new StreamReader(stream), mergeListener, options);
+            reader.ReadObject();
         }
 
         void DoIncludeAndAppend(string filePath)
         {
             var appendListener = listener.GetAppendListener();
 
-            using (var stream = OpenFileForInclude(filePath))
-            using (var reader = new KV1TextReader(new StreamReader(stream), appendListener, options))
-            {
-                reader.ReadObject();
-            }
+            using var stream = OpenFileForInclude(filePath);
+            using var reader = new KV1TextReader(new StreamReader(stream), appendListener, options);
+            reader.ReadObject();
         }
 
         Stream OpenFileForInclude(string filePath)
@@ -276,7 +271,7 @@ namespace ValveKeyValue.Deserialization
 
             if (text.Length == HexStringLengthForUnsignedLong && text.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
             {
-                var hexadecimalString = text.Substring(2);
+                var hexadecimalString = text[2..];
                 var data = ParseHexStringAsByteArray(hexadecimalString);
 
                 if (BitConverter.IsLittleEndian)
@@ -288,8 +283,7 @@ namespace ValveKeyValue.Deserialization
                 return new KVObjectValue<ulong>(value, KVValueType.UInt64);
             }
 
-            int intValue;
-            if (int.TryParse(text, out intValue))
+            if (int.TryParse(text, out var intValue))
             {
                 return new KVObjectValue<int>(intValue, KVValueType.Int32);
             }
@@ -299,8 +293,7 @@ namespace ValveKeyValue.Deserialization
                 NumberStyles.AllowExponent |
                 NumberStyles.AllowLeadingSign;
 
-            float floatValue;
-            if (float.TryParse(text, FloatingPointNumberStyles, CultureInfo.InvariantCulture, out floatValue))
+            if (float.TryParse(text, FloatingPointNumberStyles, CultureInfo.InvariantCulture, out var floatValue))
             {
                 return new KVObjectValue<float>(floatValue, KVValueType.FloatingPoint);
             }

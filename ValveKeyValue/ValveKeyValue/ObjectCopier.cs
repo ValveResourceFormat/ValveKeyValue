@@ -25,10 +25,7 @@ namespace ValveKeyValue
 
             if (keyValueObject.Value.ValueType == KVValueType.Collection)
             {
-                object[] enumerableValues;
-                Type lookupValueType;
-                object enumerable;
-                if (IsLookupWithStringKey(typeof(TObject), out lookupValueType))
+                if (IsLookupWithStringKey(typeof(TObject), out var lookupValueType))
                 {
                     return (TObject)MakeLookup(lookupValueType, keyValueObject, reflector);
                 }
@@ -36,7 +33,7 @@ namespace ValveKeyValue
                 {
                     return (TObject)MakeDictionary(typeof(TObject), keyValueObject, reflector);
                 }
-                else if (IsArray(keyValueObject, out enumerableValues) && ConstructTypedEnumerable(typeof(TObject), enumerableValues, reflector, out enumerable))
+                else if (IsArray(keyValueObject, out var enumerableValues) && ConstructTypedEnumerable(typeof(TObject), enumerableValues, reflector, out var enumerable))
                 {
                     return (TObject)enumerable;
                 }
@@ -157,8 +154,7 @@ namespace ValveKeyValue
 
             foreach (var item in kv.Children)
             {
-                IObjectMember member;
-                if (!members.TryGetValue(item.Name, out member))
+                if (!members.TryGetValue(item.Name, out var member))
                 {
                     continue;
                 }
@@ -167,7 +163,7 @@ namespace ValveKeyValue
             }
         }
 
-        static bool IsArray(KVObject obj, out object[] values)
+        static bool IsArray(KVObject obj, out KVValue[] values)
         {
             values = null;
 
@@ -257,8 +253,7 @@ namespace ValveKeyValue
             }
             else if (type.IsConstructedGenericType)
             {
-                Func<Type, object[], IObjectReflector, object> builder;
-                if (EnumerableBuilders.TryGetValue(type.GetGenericTypeDefinition(), out builder))
+                if (EnumerableBuilders.TryGetValue(type.GetGenericTypeDefinition(), out var builder))
                 {
                     listObject = builder(type, values, reflector);
                 }
@@ -331,8 +326,7 @@ namespace ValveKeyValue
                 return false;
             }
 
-            int unused;
-            return int.TryParse(str, out unused);
+            return int.TryParse(str, out _);
         }
 
         static bool IsDictionary(Type type)
@@ -403,7 +397,7 @@ namespace ValveKeyValue
             converted = default;
             return false;
 
-            bool CanConvertValueTo(Type type)
+            static bool CanConvertValueTo(Type type)
             {
                 return
                     type == typeof(bool) ||

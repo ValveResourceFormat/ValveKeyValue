@@ -24,7 +24,7 @@ namespace ValveKeyValue.Test
                 output = ms.ToArray();
             }
 
-            Assert.AreEqual((byte)'"', output[0]);
+            Assert.That(output[0], Is.EqualTo((byte)'"'));
         }
 
         class DataObject

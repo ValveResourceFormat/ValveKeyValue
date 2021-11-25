@@ -11,11 +11,11 @@ namespace ValveKeyValue.Test
             var options = new KVSerializerOptions { HasEscapeSequences = true };
             var actual = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<DataObject[]>(text, options);
             
-            Assert.AreEqual("Dota 2", actual[0].Name);
-            Assert.AreEqual("Dota 2 is a complex game where you get sworn at\nin Russian all the time.", actual[0].Summary);
+            Assert.That(actual[0].Name, Is.EqualTo("Dota 2"));
+            Assert.That(actual[0].Summary, Is.EqualTo("Dota 2 is a complex game where you get sworn at\nin Russian all the time."));
 
-            Assert.AreEqual("Valve Software", actual[1].Developer);
-            Assert.AreEqual("Known as \"America's #1 war-themed hat simulator\", this game lets you wear stupid items while killing people.", actual[1].Summary);
+            Assert.That(actual[1].Developer, Is.EqualTo("Valve Software"));
+            Assert.That(actual[1].Summary, Is.EqualTo("Known as \"America's #1 war-themed hat simulator\", this game lets you wear stupid items while killing people."));
         }
 
         [Test]
@@ -25,9 +25,9 @@ namespace ValveKeyValue.Test
             var options = new KVSerializerOptions { HasEscapeSequences = true };
             var actual = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<DataObject>(text, options);
             
-            Assert.AreEqual("Dota 2", actual.Name);
-            Assert.AreEqual("Dota 2 is a complex game where you get sworn at\nin Russian all the time.", actual.Summary);
-            Assert.AreEqual("Valve Software", actual.Developer);
+            Assert.That(actual.Name, Is.EqualTo("Dota 2"));
+            Assert.That(actual.Summary, Is.EqualTo("Dota 2 is a complex game where you get sworn at\nin Russian all the time."));
+            Assert.That(actual.Developer, Is.EqualTo("Valve Software"));
         }
 
         class DataObject

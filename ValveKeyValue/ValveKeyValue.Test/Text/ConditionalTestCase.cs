@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 
@@ -70,7 +71,7 @@ namespace ValveKeyValue.Test
             string[] conditions;
             if (condition == null)
             {
-                conditions = new string[0];
+                conditions = Array.Empty<string>();
             }
             else
             {
@@ -105,7 +106,7 @@ namespace ValveKeyValue.Test
         }
 
         static KVObject ParseResource(string name)
-            => ParseResource(name, new string[0]);
+            => ParseResource(name, Array.Empty<string>());
 
         static KVObject ParseResource(string name, string[] conditions)
         {

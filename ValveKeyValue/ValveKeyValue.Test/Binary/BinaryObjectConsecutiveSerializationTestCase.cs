@@ -40,12 +40,10 @@ namespace ValveKeyValue.Test
                 0x08, // end document
             };
 
-            using (var stream = new MemoryStream())
-            {
-                KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Serialize(stream, first);
-                KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Serialize(stream, second);
-                Assert.That(stream.ToArray(), Is.EqualTo(expectedData));
-            }
+            using var stream = new MemoryStream();
+            KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Serialize(stream, first);
+            KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Serialize(stream, second);
+            Assert.That(stream.ToArray(), Is.EqualTo(expectedData));
         }
     }
 }

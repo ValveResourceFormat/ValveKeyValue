@@ -38,15 +38,13 @@ namespace ValveKeyValue.Test
                 0x08, // end document
             };
 
-            using (var stream = new MemoryStream())
-            {
-                stream.Write(data, 0, data.Length);
-                stream.Seek(0, SeekOrigin.Begin);
-                _firstObject = KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Deserialize<FirstObject>(stream);
-                Assert.That(stream.Position, Is.EqualTo(36)); // ensure we read exactly 36 bytes
-                _secondObject = KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Deserialize<SecondObject>(stream);
-                Assert.That(stream.Position, Is.EqualTo(75)); // ensure we read exactly 39 bytes
-            }
+            using var stream = new MemoryStream();
+            stream.Write(data, 0, data.Length);
+            stream.Seek(0, SeekOrigin.Begin);
+            _firstObject = KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Deserialize<FirstObject>(stream);
+            Assert.That(stream.Position, Is.EqualTo(36)); // ensure we read exactly 36 bytes
+            _secondObject = KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Deserialize<SecondObject>(stream);
+            Assert.That(stream.Position, Is.EqualTo(75)); // ensure we read exactly 39 bytes
         }
 
         class FirstObject

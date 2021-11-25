@@ -10,10 +10,8 @@ namespace ValveKeyValue.Test
         [TestCase("comment_singleline_singleslash_wholeline")]
         public void SingleLineComment(string resourceName)
         {
-            using (var stream = TestDataHelper.OpenResource("Text." + resourceName + ".vdf"))
-            {
-                Assert.That(() => KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream), Throws.Nothing);
-            }
+            using var stream = TestDataHelper.OpenResource("Text." + resourceName + ".vdf");
+            Assert.That(() => KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream), Throws.Nothing);
         }
     }
 }

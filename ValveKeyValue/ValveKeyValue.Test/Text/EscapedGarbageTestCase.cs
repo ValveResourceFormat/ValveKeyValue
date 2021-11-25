@@ -21,14 +21,12 @@ namespace ValveKeyValue.Test
         public void ThrowsExceptionWhenHasEscapeSequences()
         {
             var options = new KVSerializerOptions { HasEscapeSequences = true };
-            using (var stream = TestDataHelper.OpenResource("Text.escaped_garbage.vdf"))
-            {
-                Assert.That(
-                    () => KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream, options),
-                    Throws.Exception.TypeOf<KeyValueException>()
-                    .With.InnerException.TypeOf<InvalidDataException>()
-                    .With.Message.EqualTo(@"Unknown escape sequence '\7'."));
-            }
+            using var stream = TestDataHelper.OpenResource("Text.escaped_garbage.vdf");
+            Assert.That(
+                () => KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream, options),
+                Throws.Exception.TypeOf<KeyValueException>()
+                .With.InnerException.TypeOf<InvalidDataException>()
+                .With.Message.EqualTo(@"Unknown escape sequence '\7'."));
         }
 
         [Test]
