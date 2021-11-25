@@ -31,7 +31,7 @@ namespace ValveKeyValue
         /// <summary>
         /// Gets the default options (used when none are specified).
         /// </summary>
-        public static KVSerializerOptions DefaultOptions => new KVSerializerOptions();
+        public static KVSerializerOptions DefaultOptions => new();
 
         static IEnumerable<string> GetDefaultConditions()
         {

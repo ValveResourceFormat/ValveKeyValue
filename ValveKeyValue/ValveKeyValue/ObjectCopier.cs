@@ -225,7 +225,7 @@ namespace ValveKeyValue
         static ILookup<string, TValue> MakeLookupCore<TValue>(IEnumerable<KVObject> items, IObjectReflector reflector)
             => items.ToLookup(kv => kv.Name, kv => ConvertValue<TValue>(kv.Value, reflector));
 
-        static readonly Dictionary<Type, Func<Type, object[], IObjectReflector, object>> EnumerableBuilders = new Dictionary<Type, Func<Type, object[], IObjectReflector, object>>
+        static readonly Dictionary<Type, Func<Type, object[], IObjectReflector, object>> EnumerableBuilders = new()
         {
             [typeof(List<>)] = (type, values, reflector) => InvokeGeneric(nameof(MakeList), type.GetGenericArguments()[0], new object[] { values, reflector }),
             [typeof(IList<>)] = (type, values, reflector) => InvokeGeneric(nameof(MakeList), type.GetGenericArguments()[0], new object[] { values, reflector }),

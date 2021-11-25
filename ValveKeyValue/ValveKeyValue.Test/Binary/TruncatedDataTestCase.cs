@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using NUnit.Framework;
 
 namespace ValveKeyValue.Test
@@ -8,7 +9,7 @@ namespace ValveKeyValue.Test
         [Test]
         public void WhileReadingEmptyData()
         {
-            var data = new byte[0];
+            var data = Array.Empty<byte>();
 
             Assert.That(
                 () => serializer.Deserialize(data),

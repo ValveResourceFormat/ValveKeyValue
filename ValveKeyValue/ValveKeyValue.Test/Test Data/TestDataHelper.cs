@@ -29,7 +29,7 @@ namespace ValveKeyValue.Test
                 while ((line = reader.ReadLine()) != null)
                 {
                     builder.Append(line);
-                    builder.Append("\n");
+                    builder.Append('\n');
                 }
             }
 

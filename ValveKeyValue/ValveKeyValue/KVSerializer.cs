@@ -24,7 +24,7 @@ namespace ValveKeyValue
         /// <param name="format">The <see cref="KVSerializationFormat"/> to use when (de)serializing. </param>
         /// <returns>A new <see cref="KVSerializer"/> that (de)serializes with the given format.</returns>
         public static KVSerializer Create(KVSerializationFormat format)
-            => new KVSerializer(format);
+            => new(format);
 
         /// <summary>
         /// Deserializes a KeyValue object from a stream.

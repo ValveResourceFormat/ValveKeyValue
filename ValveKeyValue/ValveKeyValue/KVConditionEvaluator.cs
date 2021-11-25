@@ -271,19 +271,19 @@ namespace ValveKeyValue
             public object Value { get; }
 
             public static KVConditionToken Not
-                => new KVConditionToken(KVConditionTokenType.Negation);
+                => new(KVConditionTokenType.Negation);
 
             public static KVConditionToken Or
-                => new KVConditionToken(KVConditionTokenType.OrJoin);
+                => new(KVConditionTokenType.OrJoin);
 
             public static KVConditionToken And
-                => new KVConditionToken(KVConditionTokenType.AndJoin);
+                => new(KVConditionTokenType.AndJoin);
 
             public static KVConditionToken LeftParenthesis
-                => new KVConditionToken(KVConditionTokenType.BeginSubExpression);
+                => new(KVConditionTokenType.BeginSubExpression);
 
             public static KVConditionToken RightParenthesis
-                => new KVConditionToken(KVConditionTokenType.EndSubExpression);
+                => new(KVConditionTokenType.EndSubExpression);
         }
     }
 }
