@@ -30,7 +30,7 @@ RecursivePrint(root);
 
 return 0;
 
-void RecursivePrint(KVObject obj, int indent = 0)
+static void RecursivePrint(KVObject obj, int indent = 0)
 {
     Console.Write(new string('\t', indent));
 

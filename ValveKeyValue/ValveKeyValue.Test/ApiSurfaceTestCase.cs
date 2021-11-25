@@ -82,7 +82,7 @@ namespace ValveKeyValue.Test
                     sb.Append(";\n");
                 }
 
-                sb.Append("\n");
+                sb.Append('\n');
             }
 
             var methods = type

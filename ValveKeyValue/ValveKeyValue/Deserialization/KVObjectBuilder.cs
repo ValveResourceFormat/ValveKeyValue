@@ -24,7 +24,7 @@ namespace ValveKeyValue.Deserialization
             return MakeObject(state);
         }
 
-        readonly Stack<KVPartialState> stateStack = new Stack<KVPartialState>();
+        readonly Stack<KVPartialState> stateStack = new();
 
         public void OnKeyValuePair(string name, KVValue value)
         {
@@ -35,9 +35,11 @@ namespace ValveKeyValue.Deserialization
             }
             else
             {
-                var state = new KVPartialState();
-                state.Key = name;
-                state.Value = value;
+                var state = new KVPartialState
+                {
+                    Key = name,
+                    Value = value
+                };
 
                 StateStack.Push(state);
             }
@@ -73,8 +75,10 @@ namespace ValveKeyValue.Deserialization
 
         public void OnObjectStart(string name)
         {
-            var state = new KVPartialState();
-            state.Key = name;
+            var state = new KVPartialState
+            {
+                Key = name
+            };
             StateStack.Push(state);
         }
 

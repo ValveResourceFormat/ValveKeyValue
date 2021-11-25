@@ -45,10 +45,8 @@ namespace ValveKeyValue.Test
         [OneTimeSetUp]
         public void SetUp()
         {
-            using (var stream = TestDataHelper.OpenResource("Text.top_level_list_of_values.vdf"))
-            {
-                data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<TEnumerable>(stream);
-            }
+            using var stream = TestDataHelper.OpenResource("Text.top_level_list_of_values.vdf");
+            data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<TEnumerable>(stream);
         }
     }
 }

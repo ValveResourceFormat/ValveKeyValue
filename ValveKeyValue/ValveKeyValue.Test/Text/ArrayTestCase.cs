@@ -46,10 +46,8 @@ namespace ValveKeyValue.Test
         [OneTimeSetUp]
         public void SetUp()
         {
-            using (var stream = TestDataHelper.OpenResource("Text.list_of_values.vdf"))
-            {
-                data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<SerializedType>(stream);
-            }
+            using var stream = TestDataHelper.OpenResource("Text.list_of_values.vdf");
+            data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<SerializedType>(stream);
         }
 
         class SerializedType

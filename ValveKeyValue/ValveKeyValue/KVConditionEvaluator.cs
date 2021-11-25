@@ -17,7 +17,7 @@ namespace ValveKeyValue
             this.definedVariables = definedVariables;
         }
 
-        ICollection<string> definedVariables;
+        readonly ICollection<string> definedVariables;
 
         public bool Evalute(string expressionText)
         {
@@ -172,28 +172,28 @@ namespace ValveKeyValue
                     return KVConditionToken.Not;
 
                 case '|':
-                {
-                    var next = reader.Peek();
-                    if (next != -1 && (char)next == '|')
                     {
-                        reader.Read();
-                        return KVConditionToken.Or;
-                    }
+                        var next = reader.Peek();
+                        if (next != -1 && (char)next == '|')
+                        {
+                            reader.Read();
+                            return KVConditionToken.Or;
+                        }
 
-                    break;
-                }
+                        break;
+                    }
 
                 case '&':
-                {
-                    var next = reader.Peek();
-                    if (next != -1 && (char)next == '&')
                     {
-                        reader.Read();
-                        return KVConditionToken.And;
-                    }
+                        var next = reader.Peek();
+                        if (next != -1 && (char)next == '&')
+                        {
+                            reader.Read();
+                            return KVConditionToken.And;
+                        }
 
-                    break;
-                }
+                        break;
+                    }
 
                 case '(':
                     return KVConditionToken.LeftParenthesis;
@@ -271,19 +271,19 @@ namespace ValveKeyValue
             public object Value { get; }
 
             public static KVConditionToken Not
-                => new KVConditionToken(KVConditionTokenType.Negation);
+                => new(KVConditionTokenType.Negation);
 
             public static KVConditionToken Or
-                => new KVConditionToken(KVConditionTokenType.OrJoin);
+                => new(KVConditionTokenType.OrJoin);
 
             public static KVConditionToken And
-                => new KVConditionToken(KVConditionTokenType.AndJoin);
+                => new(KVConditionTokenType.AndJoin);
 
             public static KVConditionToken LeftParenthesis
-                => new KVConditionToken(KVConditionTokenType.BeginSubExpression);
+                => new(KVConditionTokenType.BeginSubExpression);
 
             public static KVConditionToken RightParenthesis
-                => new KVConditionToken(KVConditionTokenType.EndSubExpression);
+                => new(KVConditionTokenType.EndSubExpression);
         }
     }
 }

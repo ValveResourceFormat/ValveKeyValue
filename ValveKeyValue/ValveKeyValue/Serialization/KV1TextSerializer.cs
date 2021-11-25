@@ -13,8 +13,10 @@ namespace ValveKeyValue.Serialization
             Require.NotNull(options, nameof(options));
 
             this.options = options;
-            writer = new StreamWriter(stream, new UTF8Encoding(), bufferSize: 1024, leaveOpen: true);
-            writer.NewLine = "\n";
+            writer = new StreamWriter(stream, new UTF8Encoding(), bufferSize: 1024, leaveOpen: true)
+            {
+                NewLine = "\n"
+            };
         }
 
         readonly KVSerializerOptions options;

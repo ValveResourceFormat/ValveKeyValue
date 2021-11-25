@@ -24,7 +24,7 @@ namespace ValveKeyValue
         /// <param name="format">The <see cref="KVSerializationFormat"/> to use when (de)serializing. </param>
         /// <returns>A new <see cref="KVSerializer"/> that (de)serializes with the given format.</returns>
         public static KVSerializer Create(KVSerializationFormat format)
-            => new KVSerializer(format);
+            => new(format);
 
         /// <summary>
         /// Deserializes a KeyValue object from a stream.
@@ -69,11 +69,9 @@ namespace ValveKeyValue
         /// <param name="options">Options to use that can influence the serialization process.</param>
         public void Serialize(Stream stream, KVObject data, KVSerializerOptions options = null)
         {
-            using (var serializer = MakeSerializer(stream, options ?? KVSerializerOptions.DefaultOptions))
-            {
-                var visitor = new KVObjectVisitor(serializer);
-                visitor.Visit(data);
-            }
+            using var serializer = MakeSerializer(stream, options ?? KVSerializerOptions.DefaultOptions);
+            var visitor = new KVObjectVisitor(serializer);
+            visitor.Visit(data);
         }
 
         /// <summary>
@@ -105,17 +103,12 @@ namespace ValveKeyValue
             Require.NotNull(listener, nameof(listener));
             Require.NotNull(options, nameof(options));
 
-            switch (format)
+            return format switch
             {
-                case KVSerializationFormat.KeyValues1Text:
-                    return new KV1TextReader(new StreamReader(stream), listener, options);
-
-                case KVSerializationFormat.KeyValues1Binary:
-                    return new KV1BinaryReader(stream, listener);
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(format), format, "Invalid serialization format.");
-            }
+                KVSerializationFormat.KeyValues1Text => new KV1TextReader(new StreamReader(stream), listener, options),
+                KVSerializationFormat.KeyValues1Binary => new KV1BinaryReader(stream, listener),
+                _ => throw new ArgumentOutOfRangeException(nameof(format), format, "Invalid serialization format."),
+            };
         }
 
         IVisitationListener MakeSerializer(Stream stream, KVSerializerOptions options)
@@ -123,17 +116,12 @@ namespace ValveKeyValue
             Require.NotNull(stream, nameof(stream));
             Require.NotNull(options, nameof(options));
 
-            switch (format)
+            return format switch
             {
-                case KVSerializationFormat.KeyValues1Text:
-                    return new KV1TextSerializer(stream, options);
-
-                case KVSerializationFormat.KeyValues1Binary:
-                    return new KV1BinarySerializer(stream);
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(format), format, "Invalid serialization format.");
-            }
+                KVSerializationFormat.KeyValues1Text => new KV1TextSerializer(stream, options),
+                KVSerializationFormat.KeyValues1Binary => new KV1BinarySerializer(stream),
+                _ => throw new ArgumentOutOfRangeException(nameof(format), format, "Invalid serialization format."),
+            };
         }
     }
 }

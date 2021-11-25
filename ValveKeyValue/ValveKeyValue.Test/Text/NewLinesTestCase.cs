@@ -16,13 +16,13 @@ namespace ValveKeyValue.Test
         [TestCase(@"\r\n")]
         public void PreservesNewLines(string value)
         {
-            var text = PerformNewLineTest(value, false);
-            PerformNewLineTest(value, true);
+            var text = PerformNewLineTest(value, hasEscapeSequences: false);
+            PerformNewLineTest(value, hasEscapeSequences: true);
 
             Assert.That(text, Does.Contain(value));
         }
 
-        string PerformNewLineTest(string value, bool hasEscapeSequences)
+        static string PerformNewLineTest(string value, bool hasEscapeSequences)
         {
             KVObject convertedKv;
             var kv = new KVObject("newLineTestCase", value);

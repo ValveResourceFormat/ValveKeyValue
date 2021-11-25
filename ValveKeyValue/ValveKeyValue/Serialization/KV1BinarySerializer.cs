@@ -86,29 +86,16 @@ namespace ValveKeyValue.Serialization
 
         static KV1BinaryNodeType GetNodeType(KVValueType type)
         {
-            switch (type)
+            return type switch
             {
-                case KVValueType.FloatingPoint:
-                    return KV1BinaryNodeType.Float32;
-
-                case KVValueType.Int32:
-                    return KV1BinaryNodeType.Int32;
-
-                case KVValueType.Pointer:
-                    return KV1BinaryNodeType.Pointer;
-
-                case KVValueType.String:
-                    return KV1BinaryNodeType.String;
-
-                case KVValueType.UInt64:
-                    return KV1BinaryNodeType.UInt64;
-
-                case KVValueType.Int64:
-                    return KV1BinaryNodeType.Int64;
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(type), type, "Unsupported value type.");
-            }
+                KVValueType.FloatingPoint => KV1BinaryNodeType.Float32,
+                KVValueType.Int32 => KV1BinaryNodeType.Int32,
+                KVValueType.Pointer => KV1BinaryNodeType.Pointer,
+                KVValueType.String => KV1BinaryNodeType.String,
+                KVValueType.UInt64 => KV1BinaryNodeType.UInt64,
+                KVValueType.Int64 => KV1BinaryNodeType.Int64,
+                _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unsupported value type."),
+            };
         }
     }
 }

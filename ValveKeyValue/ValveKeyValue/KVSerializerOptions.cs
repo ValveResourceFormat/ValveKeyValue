@@ -31,13 +31,13 @@ namespace ValveKeyValue
         /// <summary>
         /// Gets the default options (used when none are specified).
         /// </summary>
-        public static KVSerializerOptions DefaultOptions => new KVSerializerOptions();
+        public static KVSerializerOptions DefaultOptions => new();
 
         static IEnumerable<string> GetDefaultConditions()
         {
             // TODO: In the future we will want to skip this for consoles and mobile devices?
             yield return "WIN32";
-            
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 yield return "WINDOWS";

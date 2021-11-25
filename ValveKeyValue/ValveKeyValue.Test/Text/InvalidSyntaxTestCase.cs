@@ -18,12 +18,10 @@ namespace ValveKeyValue.Test
         [TestCase("invalid_zerobracerepeated")]
         public void InvalidTextSyntaxThrowsKeyValueException(string resourceName)
         {
-            using (var stream = TestDataHelper.OpenResource("Text." + resourceName + ".vdf"))
-            {
-                Assert.That(
-                    () => KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream),
-                    Throws.Exception.TypeOf<KeyValueException>());
-            }
+            using var stream = TestDataHelper.OpenResource("Text." + resourceName + ".vdf");
+            Assert.That(
+                () => KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream),
+                Throws.Exception.TypeOf<KeyValueException>());
         }
     }
 }

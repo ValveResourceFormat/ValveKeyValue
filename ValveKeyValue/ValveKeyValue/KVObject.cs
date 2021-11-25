@@ -94,8 +94,7 @@ namespace ValveKeyValue
 
         KVCollectionValue GetCollectionValue()
         {
-            var collection = Value as KVCollectionValue;
-            if (collection == null)
+            if (Value is not KVCollectionValue collection)
             {
                 throw new InvalidOperationException($"This operation on a {nameof(KVObject)} can only be used when the value has children.");
             }
