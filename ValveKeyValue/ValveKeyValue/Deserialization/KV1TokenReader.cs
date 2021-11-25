@@ -181,6 +181,7 @@ namespace ValveKeyValue.Deserialization
                             't' => '\t',
                             '\\' => '\\',
                             '"' => '"',
+                            _ when options.EnableValveNullByteBugBehavior => '\0',
                             _ => throw new InvalidDataException($"Unknown escape sequence '\\{next}'."),
                         };
 
@@ -191,7 +192,15 @@ namespace ValveKeyValue.Deserialization
                 sb.Append(next);
             }
 
-            return sb.ToString();
+            var result = sb.ToString();
+
+            // Valve bug-for-bug compatibility with tier1 KeyValues/CUtlBuffer: an invalid escape sequence is a null byte which
+            // causes the text to be trimmed to the point of that null byte.
+            if (options.EnableValveNullByteBugBehavior && result.IndexOf('\0') is var nullByteIndex && nullByteIndex >= 0)
+            {
+                result = result.Substring(0, nullByteIndex);
+            }
+            return result;
         }
 
         string ReadUntilWhitespaceOrQuote()
