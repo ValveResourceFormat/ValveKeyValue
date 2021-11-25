@@ -27,7 +27,7 @@ jobs:
       run: dotnet test -c Release ValveKeyValue/ValveKeyValue.Test/ValveKeyValue.Test.csproj /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:CoverletOutput='./lcov.info' /p:Include="[ValveKeyValue*]*"
 
     - name: Upload test coverage
-      uses: coverallsapp/github-action@v1.1.1
+      uses: coverallsapp/github-action@1.1.3
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         path-to-lcov: ./ValveKeyValue/ValveKeyValue.Test/lcov.info
