@@ -2,8 +2,8 @@
 {
     enum KV1TextReaderState
     {
-       InObjectBeforeKey,
-       InObjectBetweenKeyAndValue,
-       InObjectAfterValue
+        InObjectBeforeKey,
+        InObjectBetweenKeyAndValue,
+        InObjectAfterValue
     }
 }

@@ -35,9 +35,11 @@ namespace ValveKeyValue.Deserialization
             }
             else
             {
-                var state = new KVPartialState();
-                state.Key = name;
-                state.Value = value;
+                var state = new KVPartialState
+                {
+                    Key = name,
+                    Value = value
+                };
 
                 StateStack.Push(state);
             }

@@ -17,7 +17,7 @@ namespace ValveKeyValue
             this.definedVariables = definedVariables;
         }
 
-        ICollection<string> definedVariables;
+        readonly ICollection<string> definedVariables;
 
         public bool Evalute(string expressionText)
         {
@@ -172,28 +172,28 @@ namespace ValveKeyValue
                     return KVConditionToken.Not;
 
                 case '|':
-                {
-                    var next = reader.Peek();
-                    if (next != -1 && (char)next == '|')
                     {
-                        reader.Read();
-                        return KVConditionToken.Or;
-                    }
+                        var next = reader.Peek();
+                        if (next != -1 && (char)next == '|')
+                        {
+                            reader.Read();
+                            return KVConditionToken.Or;
+                        }
 
-                    break;
-                }
+                        break;
+                    }
 
                 case '&':
-                {
-                    var next = reader.Peek();
-                    if (next != -1 && (char)next == '&')
                     {
-                        reader.Read();
-                        return KVConditionToken.And;
-                    }
+                        var next = reader.Peek();
+                        if (next != -1 && (char)next == '&')
+                        {
+                            reader.Read();
+                            return KVConditionToken.And;
+                        }
 
-                    break;
-                }
+                        break;
+                    }
 
                 case '(':
                     return KVConditionToken.LeftParenthesis;

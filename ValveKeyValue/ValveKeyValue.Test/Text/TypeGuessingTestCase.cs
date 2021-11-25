@@ -18,7 +18,7 @@ namespace ValveKeyValue.Test
         [TestCase(KVValueType.FloatingPoint, TypeCode.Single, "float_exp", 123.456f)]
         [TestCase(KVValueType.Int32, TypeCode.Int32, "int", 1234)]
         [TestCase(KVValueType.Int32, TypeCode.Int32, "negint", -1234)]
-        public void HasValueOfType<TExpected>(KVValueType expectedType, TypeCode expectedTypeCode, string key,  TExpected expectedValue)
+        public void HasValueOfType<TExpected>(KVValueType expectedType, TypeCode expectedTypeCode, string key, TExpected expectedValue)
         {
             var actualValue = data[key];
 

@@ -25,27 +25,15 @@ namespace ValveKeyValue
 
         public override TypeCode GetTypeCode()
         {
-            switch (ValueType)
+            return ValueType switch
             {
-                case KVValueType.Collection:
-                    return TypeCode.Object;
-
-                case KVValueType.FloatingPoint:
-                    return TypeCode.Single;
-
-                case KVValueType.Int32:
-                case KVValueType.Pointer:
-                    return TypeCode.Int32;
-
-                case KVValueType.String:
-                    return TypeCode.String;
-
-                case KVValueType.UInt64:
-                    return TypeCode.UInt64;
-
-                default:
-                    throw new NotImplementedException(string.Format(CultureInfo.InvariantCulture, "No known TypeCode for '{0}'", ValueType));
-            }
+                KVValueType.Collection => TypeCode.Object,
+                KVValueType.FloatingPoint => TypeCode.Single,
+                KVValueType.Int32 or KVValueType.Pointer => TypeCode.Int32,
+                KVValueType.String => TypeCode.String,
+                KVValueType.UInt64 => TypeCode.UInt64,
+                _ => throw new NotImplementedException(string.Format(CultureInfo.InvariantCulture, "No known TypeCode for '{0}'", ValueType)),
+            };
         }
 
         public override bool ToBoolean(IFormatProvider provider) => ToInt32(provider) == 1;

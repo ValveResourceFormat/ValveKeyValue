@@ -5,8 +5,8 @@ namespace ValveKeyValue.Test
 {
     class BinaryObjectConsecutiveDeserializationTestCase
     {
-        private FirstObject _firstObject;
-        private SecondObject _secondObject;
+        FirstObject _firstObject;
+        SecondObject _secondObject;
 
         [Test]
         public void TestFirstObject()

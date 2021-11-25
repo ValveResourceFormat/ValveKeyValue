@@ -37,7 +37,7 @@ namespace ValveKeyValue
         {
             // TODO: In the future we will want to skip this for consoles and mobile devices?
             yield return "WIN32";
-            
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 yield return "WINDOWS";

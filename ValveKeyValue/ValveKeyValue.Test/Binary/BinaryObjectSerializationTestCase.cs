@@ -12,7 +12,7 @@ namespace ValveKeyValue.Test
             var kvo = new KVObject("TestObject", new[]
             {
                 new KVObject("key", "value"),
-                new KVObject("key_utf8", "邪恶的战"), 
+                new KVObject("key_utf8", "邪恶的战"),
                 new KVObject("int", 0x10203040),
                 new KVObject("flt", 1234.5678f),
                 new KVObject("ptr", new IntPtr(0x12345678)),
