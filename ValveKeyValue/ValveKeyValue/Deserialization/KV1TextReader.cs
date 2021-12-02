@@ -287,6 +287,11 @@ namespace ValveKeyValue.Deserialization
                 return new KVObjectValue<int>(intValue, KVValueType.Int32);
             }
 
+            if (long.TryParse(text, out var longValue))
+            {
+                return new KVObjectValue<long>(longValue, KVValueType.Int64);
+            }
+
             const NumberStyles FloatingPointNumberStyles =
                 NumberStyles.AllowDecimalPoint |
                 NumberStyles.AllowExponent |
