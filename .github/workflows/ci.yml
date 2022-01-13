@@ -26,6 +26,9 @@ jobs:
     - name: Test
       run: dotnet test -c Release ValveKeyValue/ValveKeyValue.Test/ValveKeyValue.Test.csproj /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:CoverletOutput='./lcov.info' /p:Include="[ValveKeyValue*]*"
 
+    - name: Create nupkg
+      run: dotnet pack --configuration Release ValveKeyValue/ValveKeyValue/ValveKeyValue.csproj
+
     - name: Upload nupkg
       uses: actions/upload-artifact@v2
       if: matrix.os == 'ubuntu-latest'
