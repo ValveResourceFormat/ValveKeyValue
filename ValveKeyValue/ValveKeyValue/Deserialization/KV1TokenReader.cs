@@ -85,12 +85,34 @@ namespace ValveKeyValue.Deserialization
         {
             ReadChar(CommentBegin);
 
-            if (Peek() == (char)CommentBegin)
+            var sb = new StringBuilder();
+            var next = Next();
+            
+            // Some keyvalues implementations have a bug where only a single slash is needed for a comment
+            if (next != CommentBegin)
             {
-                Next();
+                sb.Append(next);
             }
 
-            var text = textReader.ReadLine();
+            while (true)
+            {
+                next = Next();
+
+                if (next == '\n')
+                {
+                    break;
+                }
+
+                sb.Append(next);
+            }
+
+            if (sb[^1] == '\r')
+            {
+                sb.Remove(sb.Length - 1, 1);
+            }
+
+            var text = sb.ToString();
+
             return new KVToken(KVTokenType.Comment, text);
         }
 
