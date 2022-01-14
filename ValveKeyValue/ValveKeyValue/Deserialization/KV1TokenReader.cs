@@ -28,6 +28,7 @@ namespace ValveKeyValue.Deserialization
         readonly KVSerializerOptions options;
         TextReader textReader;
         bool disposed;
+        int? peekedNext;
 
         public KVToken ReadNextToken()
         {
@@ -122,7 +123,18 @@ namespace ValveKeyValue.Deserialization
 
         char Next()
         {
-            var next = textReader.Read();
+            int next;
+
+            if (peekedNext.HasValue)
+            {
+                next = peekedNext.Value;
+                peekedNext = null;
+            }
+            else
+            {
+                next = textReader.Read();
+            }
+
             if (next == -1)
             {
                 throw new EndOfStreamException();
@@ -131,7 +143,18 @@ namespace ValveKeyValue.Deserialization
             return (char)next;
         }
 
-        int Peek() => textReader.Peek();
+        int Peek()
+        {
+            if (peekedNext.HasValue)
+            {
+                return peekedNext.Value;
+            }
+
+            var next = textReader.Read();
+            peekedNext = next;
+
+            return next;
+        }
 
         void ReadChar(char expectedChar)
         {
