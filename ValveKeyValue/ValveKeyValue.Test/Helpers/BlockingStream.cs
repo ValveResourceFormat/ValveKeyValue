@@ -41,7 +41,6 @@ internal sealed class BlockingStream : Stream
 
     public override void Flush()
     {
-        throw new NotSupportedException();
     }
 
     public override int Read(byte[] buffer, int offset, int count)
