@@ -102,7 +102,7 @@ namespace ValveKeyValue.Deserialization
                         break;
 
                     default:
-                        throw new NotImplementedException("The developer forgot to handle a KVTokenType.");
+                        throw new ArgumentOutOfRangeException(nameof(token.TokenType), token.TokenType, "Unhandled token type.");
                 }
             }
         }
@@ -140,7 +140,7 @@ namespace ValveKeyValue.Deserialization
                     break;
 
                 default:
-                    throw new InvalidOperationException();
+                    throw new InvalidOperationException($"Unhandled text reader state: {stateMachine.Current}.");
             }
         }
 
@@ -154,7 +154,7 @@ namespace ValveKeyValue.Deserialization
         {
             if (stateMachine.Current != KV1TextReaderState.InObjectBetweenKeyAndValue)
             {
-                throw new InvalidOperationException();
+                throw new InvalidOperationException($"Attempted to begin new object while in state {stateMachine.Current}.");
             }
 
             listener.OnObjectStart(stateMachine.CurrentName);
@@ -167,11 +167,7 @@ namespace ValveKeyValue.Deserialization
         {
             if (stateMachine.Current != KV1TextReaderState.InObjectBeforeKey && stateMachine.Current != KV1TextReaderState.InObjectAfterValue)
             {
-                throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        "Attempted to finalize object while in state {0}.",
-                        stateMachine.Current));
+                throw new InvalidOperationException($"Attempted to finalize object while in state {stateMachine.Current}.");
             }
 
             stateMachine.PopObject(out var discard);
@@ -215,11 +211,7 @@ namespace ValveKeyValue.Deserialization
         {
             if (stateMachine.Current != KV1TextReaderState.InObjectAfterValue)
             {
-                throw new InvalidDataException(
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        "Found conditional while in state {0}.",
-                        stateMachine.Current));
+                throw new InvalidDataException($"Found conditional while in state {stateMachine.Current}.");
             }
 
             if (!conditionEvaluator.Evalute(text))

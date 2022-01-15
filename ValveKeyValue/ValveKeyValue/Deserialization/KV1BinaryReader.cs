@@ -119,7 +119,7 @@ namespace ValveKeyValue.Deserialization
                     break;
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(type));
+                    throw new ArgumentOutOfRangeException(nameof(type), type, "Unhandled binary node type.");
             }
 
             listener.OnKeyValuePair(name, value);

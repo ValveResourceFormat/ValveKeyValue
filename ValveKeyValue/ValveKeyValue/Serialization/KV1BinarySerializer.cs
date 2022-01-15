@@ -69,7 +69,7 @@ namespace ValveKeyValue.Serialization
                     break;
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(value.ValueType), value.ValueType, "Value was of an unsupported type.");
+                    throw new ArgumentOutOfRangeException(nameof(value.ValueType), value.ValueType, "Unhandled value type.");
             }
         }
 
@@ -94,7 +94,7 @@ namespace ValveKeyValue.Serialization
                 KVValueType.String => KV1BinaryNodeType.String,
                 KVValueType.UInt64 => KV1BinaryNodeType.UInt64,
                 KVValueType.Int64 => KV1BinaryNodeType.Int64,
-                _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unsupported value type."),
+                _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unhandled value type."),
             };
         }
     }

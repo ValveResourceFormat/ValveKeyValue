@@ -32,7 +32,7 @@ namespace ValveKeyValue
                 KVValueType.Int32 or KVValueType.Pointer => TypeCode.Int32,
                 KVValueType.String => TypeCode.String,
                 KVValueType.UInt64 => TypeCode.UInt64,
-                _ => throw new NotImplementedException(string.Format(CultureInfo.InvariantCulture, "No known TypeCode for '{0}'", ValueType)),
+                _ => throw new NotImplementedException($"No known TypeCode for '{ValueType}'."),
             };
         }
 
@@ -44,7 +44,7 @@ namespace ValveKeyValue
 
         public override DateTime ToDateTime(IFormatProvider provider)
         {
-            throw new InvalidCastException();
+            throw new InvalidCastException("Casting to DateTime is not supported.");
         }
 
         public override decimal ToDecimal(IFormatProvider provider) => (decimal)Convert.ChangeType(value, typeof(decimal), provider);
