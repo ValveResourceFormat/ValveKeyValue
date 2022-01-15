@@ -138,7 +138,7 @@ namespace ValveKeyValue.Deserialization
             var next = Next();
             if (next != expectedChar)
             {
-                throw MakeSyntaxException();
+                throw new InvalidDataException($"The syntax is incorrect, expected '{expectedChar}' but got '{next}'.");
             }
         }
 
@@ -245,10 +245,5 @@ namespace ValveKeyValue.Deserialization
         }
 
         bool IsEndOfFile(int value) => value == -1;
-
-        static InvalidDataException MakeSyntaxException()
-        {
-            return new InvalidDataException("The syntax is incorrect.");
-        }
     }
 }
