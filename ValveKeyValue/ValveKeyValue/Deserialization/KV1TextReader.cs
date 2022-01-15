@@ -274,7 +274,7 @@ namespace ValveKeyValue.Deserialization
                 return new KVObjectValue<ulong>(value, KVValueType.UInt64);
             }
 
-            if (int.TryParse(text, out var intValue))
+            if (int.TryParse(text, NumberStyles.Number, CultureInfo.InvariantCulture, out var intValue))
             {
                 return new KVObjectValue<int>(intValue, KVValueType.Int32);
             }

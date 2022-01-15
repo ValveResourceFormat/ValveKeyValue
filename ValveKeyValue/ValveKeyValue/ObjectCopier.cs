@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
@@ -173,7 +174,7 @@ namespace ValveKeyValue
             }
 
             var items = obj.Children
-                .Select(i => new { Index = int.Parse(i.Name), i.Value })
+                .Select(i => new { Index = int.Parse(i.Name, NumberStyles.Number, CultureInfo.InvariantCulture), i.Value })
                 .OrderBy(i => i.Index)
                 .ToArray();
 
@@ -326,7 +327,7 @@ namespace ValveKeyValue
                 return false;
             }
 
-            return int.TryParse(str, out _);
+            return int.TryParse(str, NumberStyles.Number, CultureInfo.InvariantCulture, out _);
         }
 
         static bool IsDictionary(Type type)
