@@ -12,7 +12,7 @@ namespace ValveKeyValue.Test
             var text = new StringBuilder();
             text.AppendLine(@"""test_kv""");
             text.AppendLine("{");
-            text.AppendLine("// this is a comment that contains a carriage retutrn: \r [$INVALID] which should continue parsing");
+            text.AppendLine("// this is a comment that contains a carriage return: \r [$INVALID] which should continue parsing");
             text.AppendLine(@"""test""	""hello""");
             text.AppendLine("}");
 
