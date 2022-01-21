@@ -28,6 +28,7 @@ namespace ValveKeyValue.Deserialization
         readonly KVSerializerOptions options;
         TextReader textReader;
         bool disposed;
+        int? peekedNext;
 
         public KVToken ReadNextToken()
         {
@@ -84,12 +85,34 @@ namespace ValveKeyValue.Deserialization
         {
             ReadChar(CommentBegin);
 
-            if (Peek() == (char)CommentBegin)
+            var sb = new StringBuilder();
+            var next = Next();
+            
+            // Some keyvalues implementations have a bug where only a single slash is needed for a comment
+            if (next != CommentBegin)
             {
-                Next();
+                sb.Append(next);
             }
 
-            var text = textReader.ReadLine();
+            while (true)
+            {
+                next = Next();
+
+                if (next == '\n')
+                {
+                    break;
+                }
+
+                sb.Append(next);
+            }
+
+            if (sb[^1] == '\r')
+            {
+                sb.Remove(sb.Length - 1, 1);
+            }
+
+            var text = sb.ToString();
+
             return new KVToken(KVTokenType.Comment, text);
         }
 
@@ -122,7 +145,18 @@ namespace ValveKeyValue.Deserialization
 
         char Next()
         {
-            var next = textReader.Read();
+            int next;
+
+            if (peekedNext.HasValue)
+            {
+                next = peekedNext.Value;
+                peekedNext = null;
+            }
+            else
+            {
+                next = textReader.Read();
+            }
+
             if (next == -1)
             {
                 throw new EndOfStreamException();
@@ -131,7 +165,18 @@ namespace ValveKeyValue.Deserialization
             return (char)next;
         }
 
-        int Peek() => textReader.Peek();
+        int Peek()
+        {
+            if (peekedNext.HasValue)
+            {
+                return peekedNext.Value;
+            }
+
+            var next = textReader.Read();
+            peekedNext = next;
+
+            return next;
+        }
 
         void ReadChar(char expectedChar)
         {
