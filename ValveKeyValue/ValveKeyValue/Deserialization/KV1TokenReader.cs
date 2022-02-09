@@ -106,7 +106,7 @@ namespace ValveKeyValue.Deserialization
                 sb.Append(next);
             }
 
-            if (sb[^1] == '\r')
+            if (sb.Length > 0 && sb[^1] == '\r')
             {
                 sb.Remove(sb.Length - 1, 1);
             }
