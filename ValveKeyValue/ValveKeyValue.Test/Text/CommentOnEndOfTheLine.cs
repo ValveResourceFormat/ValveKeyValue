@@ -10,11 +10,11 @@ namespace ValveKeyValue.Test
         public void CanHandleCommentOnEndOfTheLine()
         {
             var text = new StringBuilder();
-            text.AppendLine(@"""test_kv""");
-            text.AppendLine("{");
-            text.AppendLine("//");
-            text.AppendLine(@"""test""	""hello""");
-            text.AppendLine("}");
+            text.Append(@"""test_kv""" + "\n");
+            text.Append("{" + "\n");
+            text.Append("//" + "\n");
+            text.Append(@"""test""	""hello""" + "\n");
+            text.Append("}" + "\n");
 
             var data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(text.ToString());
 
