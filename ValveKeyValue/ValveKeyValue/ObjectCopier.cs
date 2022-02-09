@@ -391,7 +391,7 @@ namespace ValveKeyValue
         {
             if (CanConvertValueTo(typeof(TValue)) && value is IConvertible)
             {
-                converted = (TValue)Convert.ChangeType(value, typeof(TValue));
+                converted = (TValue)Convert.ChangeType(value, typeof(TValue), CultureInfo.InvariantCulture);
                 return true;
             }
 
