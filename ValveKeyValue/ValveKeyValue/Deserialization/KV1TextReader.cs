@@ -276,11 +276,7 @@ namespace ValveKeyValue.Deserialization
 
             const NumberStyles IntegerNumberStyles =
                 NumberStyles.AllowLeadingWhite |
-                NumberStyles.AllowTrailingWhite |
-                NumberStyles.AllowLeadingSign |
-                NumberStyles.AllowTrailingSign |
-                NumberStyles.AllowDecimalPoint |
-                NumberStyles.AllowThousands;
+                NumberStyles.AllowLeadingSign;
 
             if (int.TryParse(text, IntegerNumberStyles, CultureInfo.InvariantCulture, out var intValue))
             {
@@ -288,6 +284,7 @@ namespace ValveKeyValue.Deserialization
             }
 
             const NumberStyles FloatingPointNumberStyles =
+                NumberStyles.AllowLeadingWhite |
                 NumberStyles.AllowDecimalPoint |
                 NumberStyles.AllowExponent |
                 NumberStyles.AllowLeadingSign;
