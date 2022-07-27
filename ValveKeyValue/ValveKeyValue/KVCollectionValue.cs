@@ -5,14 +5,14 @@ using System.Linq;
 
 namespace ValveKeyValue
 {
-    class KVCollectionValue : KVValue, IEnumerable<KVObject>
+    public class KVCollectionValue : KVValue, IEnumerable<KVObject>
     {
         public KVCollectionValue()
         {
             children = new List<KVObject>();
         }
 
-        readonly List<KVObject> children;
+        public readonly List<KVObject> children;
 
         public override KVValueType ValueType => KVValueType.Collection;
 
