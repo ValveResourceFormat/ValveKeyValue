@@ -6,6 +6,7 @@
         InObjectBeforeKey,
         InObjectBetweenKeyAndValue,
         InObjectBeforeValue,
-        InObjectAfterValue
+        InObjectAfterValue,
+        InArray,
     }
 }

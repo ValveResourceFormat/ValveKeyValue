@@ -43,6 +43,24 @@ namespace ValveKeyValue.Deserialization
             }
         }
 
+        public void OnArrayValue(KVValue value)
+        {
+            if (StateStack.Count > 0)
+            {
+                var state = StateStack.Peek();
+                state.Children.Add(value);
+            }
+            else
+            {
+                var state = new KVPartialState
+                {
+                    Value = value
+                };
+
+                StateStack.Push(state);
+            }
+        }
+
         public void OnObjectEnd()
         {
             if (StateStack.Count <= 1)

@@ -36,6 +36,8 @@ namespace ValveKeyValue.Serialization.KeyValues1
         public void OnKeyValuePair(string name, KVValue value)
             => WriteKeyValuePair(name, value);
 
+        public void OnArrayValue(KVValue value) => throw new NotImplementedException();
+
         public void DiscardCurrentObject()
         {
             throw new NotSupportedException("Discard not supported when writing.");

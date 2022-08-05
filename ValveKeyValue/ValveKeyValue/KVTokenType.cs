@@ -16,11 +16,12 @@ namespace ValveKeyValue
         Identifier,
         Assignment,
         CommentBlock,
+        ArrayStart,
+        ArrayEnd,
 
         SEEK_VALUE,
         PROP_NAME,
         VALUE_STRUCT,
-        VALUE_ARRAY,
         VALUE_STRING_MULTI,
         VALUE_NUMBER,
         VALUE_FLAGGED,

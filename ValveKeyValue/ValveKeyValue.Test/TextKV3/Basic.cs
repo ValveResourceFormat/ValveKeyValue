@@ -53,5 +53,14 @@ namespace ValveKeyValue.Test.TextKV3
                 Assert.That((string)data["two"], Is.EqualTo("2"));
             });
         }
+
+        [Test]
+        public void DeserializesArray()
+        {
+            using var stream = TestDataHelper.OpenResource("TextKV3.array.kv3");
+            var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
+
+            Assert.True(false);
+        }
     }
 }
