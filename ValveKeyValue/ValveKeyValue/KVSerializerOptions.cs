@@ -14,7 +14,7 @@ namespace ValveKeyValue
         public IList<string> Conditions { get; } = new List<string>(GetDefaultConditions());
 
         /// <summary>
-        /// Gets or sets a value indicating whether gets or sets if the parser should translate escape sequences (e.g. <c>\n</c>, <c>\t</c>).
+        /// Gets or sets a value indicating whether the parser should translate escape sequences (e.g. <c>\n</c>, <c>\t</c>).
         /// </summary>
         public bool HasEscapeSequences { get; set; }
 
