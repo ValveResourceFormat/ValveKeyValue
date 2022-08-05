@@ -7,16 +7,12 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         public KV3TextReaderStateMachine()
         {
             states = new Stack<KVPartialState<KV3TextReaderState>>();
-            includedPathsToMerge = new List<string>();
-            includedPathsToAppend = new List<string>();
 
             PushObject();
             Push(KV3TextReaderState.Header);
         }
 
         readonly Stack<KVPartialState<KV3TextReaderState>> states;
-        readonly IList<string> includedPathsToMerge;
-        readonly IList<string> includedPathsToAppend;
 
         public KV3TextReaderState Current => CurrentObject.States.Peek();
 
@@ -45,14 +41,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         public void AddItem(KVObject item) => CurrentObject.Items.Add(item);
 
         public void SetDiscardCurrent() => CurrentObject.Discard = true;
-
-        public IEnumerable<string> ItemsForMerging => includedPathsToMerge;
-
-        public void AddItemForMerging(string item) => includedPathsToMerge.Add(item);
-
-        public IEnumerable<string> ItemsForAppending => includedPathsToAppend;
-
-        public void AddItemForAppending(string item) => includedPathsToAppend.Add(item);
 
         KVPartialState<KV3TextReaderState> CurrentObject => states.Peek();
     }

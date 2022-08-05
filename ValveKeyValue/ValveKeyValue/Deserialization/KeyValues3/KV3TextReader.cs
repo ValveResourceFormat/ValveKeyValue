@@ -92,24 +92,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                     case KVTokenType.Comment:
                         break;
 
-                    case KVTokenType.IncludeAndMerge:
-                        if (!stateMachine.IsAtStart)
-                        {
-                            throw new KeyValueException("Inclusions are only valid at the beginning of a file.");
-                        }
-
-                        stateMachine.AddItemForMerging(token.Value);
-                        break;
-
-                    case KVTokenType.IncludeAndAppend:
-                        if (!stateMachine.IsAtStart)
-                        {
-                            throw new KeyValueException("Inclusions are only valid at the beginning of a file.");
-                        }
-
-                        stateMachine.AddItemForAppending(token.Value);
-                        break;
-
                     default:
                         throw new ArgumentOutOfRangeException(nameof(token.TokenType), token.TokenType, "Unhandled token type.");
                 }
@@ -204,16 +186,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             {
                 throw new InvalidOperationException("Inconsistent state - at end of file whilst inside an object.");
             }
-
-            foreach (var includedForMerge in stateMachine.ItemsForMerging)
-            {
-                DoIncludeAndMerge(includedForMerge);
-            }
-
-            foreach (var includedDocument in stateMachine.ItemsForAppending)
-            {
-                DoIncludeAndAppend(includedDocument);
-            }
         }
 
         void HandleCondition(string text)
@@ -227,40 +199,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             {
                 stateMachine.SetDiscardCurrent();
             }
-        }
-
-        void DoIncludeAndMerge(string filePath)
-        {
-            var mergeListener = listener.GetMergeListener();
-
-            using var stream = OpenFileForInclude(filePath);
-            using var reader = new KV3TextReader(new StreamReader(stream), mergeListener, options);
-            reader.ReadObject();
-        }
-
-        void DoIncludeAndAppend(string filePath)
-        {
-            var appendListener = listener.GetAppendListener();
-
-            using var stream = OpenFileForInclude(filePath);
-            using var reader = new KV3TextReader(new StreamReader(stream), appendListener, options);
-            reader.ReadObject();
-        }
-
-        Stream OpenFileForInclude(string filePath)
-        {
-            if (options.FileLoader == null)
-            {
-                throw new KeyValueException("Inclusions requirer a FileLoader to be provided in KVSerializerOptions.");
-            }
-
-            var stream = options.FileLoader.OpenFile(filePath);
-            if (stream == null)
-            {
-                throw new KeyValueException("IIncludedFileLoader returned null for included file path.");
-            }
-
-            return stream;
         }
 
         static KVValue ParseValue(string text)
