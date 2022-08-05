@@ -2,9 +2,8 @@
 {
     enum KV3TextReaderState
     {
-        Header,
         InObjectBeforeKey,
-        InObjectBetweenKeyAndValue,
+        InObjectAfterKey,
         InObjectBeforeValue,
         InObjectAfterValue,
         InArray,

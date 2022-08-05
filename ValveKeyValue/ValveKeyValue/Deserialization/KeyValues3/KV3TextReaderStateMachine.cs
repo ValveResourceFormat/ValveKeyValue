@@ -8,8 +8,11 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         {
             states = new Stack<KVPartialState<KV3TextReaderState>>();
 
+            // TODO: Get rid of this, kv3 has no root
+            // Bare values such as 'null' can be root
             PushObject();
-            Push(KV3TextReaderState.Header);
+            SetName("root");
+            Push(KV3TextReaderState.InObjectAfterKey);
         }
 
         readonly Stack<KVPartialState<KV3TextReaderState>> states;
