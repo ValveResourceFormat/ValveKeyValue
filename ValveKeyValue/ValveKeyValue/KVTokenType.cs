@@ -13,6 +13,7 @@ namespace ValveKeyValue
 
         // KeyValues3
         Header,
+        Identifier,
         Assignment,
         CommentBlock,
 

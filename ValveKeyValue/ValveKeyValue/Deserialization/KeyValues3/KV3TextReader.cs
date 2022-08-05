@@ -59,6 +59,10 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                         stateMachine.Push(KV3TextReaderState.InObjectBeforeValue);
                         break;
 
+                    case KVTokenType.Identifier:
+                        ReadIdentifier(token.Value);
+                        break;
+
                     case KVTokenType.String:
                         ReadText(token.Value);
                         break;
@@ -101,6 +105,26 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             }
         }
 
+        void ReadIdentifier(string text)
+        {
+            switch (stateMachine.Current)
+            {
+                case KV3TextReaderState.InObjectBeforeKey:
+                    SetObjectKey(text);
+                    break;
+
+                case KV3TextReaderState.InObjectBeforeValue:
+                    if (text.EndsWith(":") || text.EndsWith("+"))
+                    {
+                        // TODO: Parse flag like resource: then read as string
+                    }
+                    break;
+
+                default:
+                    throw new InvalidOperationException($"Unhandled text reader state: {stateMachine.Current}.");
+            }
+        }
+
         void ReadText(string text)
         {
             switch (stateMachine.Current)
@@ -109,10 +133,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 case KV3TextReaderState.InObjectAfterValue:
                     FinalizeCurrentObject(@explicit: false);
                     stateMachine.PushObject();
-                    SetObjectKey(text);
-                    break;
-
-                case KV3TextReaderState.InObjectBeforeKey:
                     SetObjectKey(text);
                     break;
 
