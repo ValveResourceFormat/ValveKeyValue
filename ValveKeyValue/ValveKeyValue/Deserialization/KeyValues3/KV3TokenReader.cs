@@ -12,10 +12,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         const char QuotationMark = '"';
         const char ObjectStart = '{';
         const char ObjectEnd = '}';
-        const char CommentBegin = '/'; // Although Valve uses the double-slash convention, the KV spec allows for single-slash comments.
-        const char ConditionBegin = '[';
-        const char ConditionEnd = ']';
-        const char InclusionMark = '#';
+        const char CommentBegin = '/';
         const char Assignment = '=';
 
         public KV3TokenReader(TextReader textReader, KVSerializerOptions options)
@@ -49,8 +46,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 ObjectStart => ReadObjectStart(),
                 ObjectEnd => ReadObjectEnd(),
                 CommentBegin => ReadComment(),
-                ConditionBegin => ReadCondition(),
-                InclusionMark => ReadInclusion(),
                 Assignment => ReadAssignment(),
                 _ => ReadString(),
             };
@@ -162,33 +157,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             var text = sb.ToString();
 
             return new KVToken(KVTokenType.Comment, text);
-        }
-
-        KVToken ReadCondition()
-        {
-            ReadChar(ConditionBegin);
-            var text = ReadUntil(ConditionEnd);
-            ReadChar(ConditionEnd);
-
-            return new KVToken(KVTokenType.Condition, text);
-        }
-
-        KVToken ReadInclusion()
-        {
-            ReadChar(InclusionMark);
-            var term = ReadUntil(new[] { ' ', '\t' });
-            var value = ReadStringRaw();
-
-            if (string.Equals(term, "include", StringComparison.Ordinal))
-            {
-                return new KVToken(KVTokenType.IncludeAndAppend, value);
-            }
-            else if (string.Equals(term, "base", StringComparison.Ordinal))
-            {
-                return new KVToken(KVTokenType.IncludeAndMerge, value);
-            }
-
-            throw new InvalidDataException("Unrecognized term after '#' symbol.");
         }
 
         char Next()

@@ -24,10 +24,9 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         public void Push(KV3TextReaderState state) => CurrentObject.States.Push(state);
 
-        public void PopObject(out bool discard)
+        public void PopObject()
         {
-            var state = states.Pop();
-            discard = state.Discard;
+            states.Pop();
         }
 
         public string CurrentName => CurrentObject.Key;
@@ -39,8 +38,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         public void SetValue(KVValue value) => CurrentObject.Value = value;
 
         public void AddItem(KVObject item) => CurrentObject.Items.Add(item);
-
-        public void SetDiscardCurrent() => CurrentObject.Discard = true;
 
         KVPartialState<KV3TextReaderState> CurrentObject => states.Peek();
     }
