@@ -39,5 +39,19 @@ namespace ValveKeyValue.Test.TextKV3
 
             Assert.That((string)data["multiLineStringValue"], Is.EqualTo("First line of a multi-line string literal.\r\nSecond line of a multi-line string literal."));
         }
+
+        [Test]
+        public void DeserializesComments()
+        {
+            using var stream = TestDataHelper.OpenResource("TextKV3.comments.kv3");
+            var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That((string)data["foo"], Is.EqualTo("bar"));
+                Assert.That((string)data["one"], Is.EqualTo("1"));
+                Assert.That((string)data["two"], Is.EqualTo("2"));
+            });
+        }
     }
 }

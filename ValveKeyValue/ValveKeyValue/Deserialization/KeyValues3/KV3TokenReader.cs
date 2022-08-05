@@ -137,29 +137,57 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
             var sb = new StringBuilder();
             var next = Next();
+            var isMultiline = false;
 
             // TODO: Read /* */ comments
-            // Some keyvalues implementations have a bug where only a single slash is needed for a comment
-            if (next != CommentBegin)
+            if (next == '*')
             {
-                sb.Append(next);
+                isMultiline = true;
+            }
+            else if (next != CommentBegin)
+            {
+                // TODO: Return identifier?
+                throw new InvalidDataException("The syntax is incorrect, or is it?");
             }
 
-            while (true)
+            if (isMultiline)
             {
-                next = Next();
-
-                if (next == '\n')
+                while (true)
                 {
-                    break;
+                    next = Next();
+
+                    if (next == '*')
+                    {
+                        var nextNext = Peek();
+
+                        if (nextNext == '/')
+                        {
+                            Next();
+                            break;
+                        }
+                    }
+
+                    sb.Append(next);
+                }
+            }
+            else
+            {
+                while (true)
+                {
+                    next = Next();
+
+                    if (next == '\n')
+                    {
+                        break;
+                    }
+
+                    sb.Append(next);
                 }
 
-                sb.Append(next);
-            }
-
-            if (sb.Length > 0 && sb[^1] == '\r')
-            {
-                sb.Remove(sb.Length - 1, 1);
+                if (sb.Length > 0 && sb[^1] == '\r')
+                {
+                    sb.Remove(sb.Length - 1, 1);
+                }
             }
 
             var text = sb.ToString();
