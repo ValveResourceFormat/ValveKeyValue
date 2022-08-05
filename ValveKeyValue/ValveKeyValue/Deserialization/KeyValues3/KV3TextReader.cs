@@ -31,6 +31,8 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         {
             Require.NotDisposed(nameof(KV3TextReader), disposed);
 
+            // TODO: Read header here as it's always expected, instead of using the tokenizer.
+
             while (stateMachine.IsInObject)
             {
                 KVToken token;
@@ -56,7 +58,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                         break;
 
                     case KVTokenType.Assignment:
-                        stateMachine.Push(KV3TextReaderState.InObjectBeforeValue);
+                        ReadAssignment();
                         break;
 
                     case KVTokenType.Identifier:
@@ -73,6 +75,14 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
                     case KVTokenType.ObjectEnd:
                         FinalizeCurrentObject(@explicit: true);
+                        break;
+
+                    case KVTokenType.ArrayStart:
+                        BeginNewArray();
+                        break;
+
+                    case KVTokenType.ArrayEnd:
+                        FinalizeCurrentArray();
                         break;
 
                     case KVTokenType.EndOfFile:
@@ -105,10 +115,24 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             }
         }
 
+        void ReadAssignment()
+        {
+            if (stateMachine.Current != KV3TextReaderState.InObjectBetweenKeyAndValue)
+            {
+                throw new InvalidOperationException($"Attempted to assign while in state {stateMachine.Current}.");
+            }
+
+            stateMachine.Push(KV3TextReaderState.InObjectBeforeValue);
+        }
+
         void ReadIdentifier(string text)
         {
             switch (stateMachine.Current)
             {
+                case KV3TextReaderState.InArray:
+                    new KVObjectValue<string>(text, KVValueType.String);
+                    break;
+
                 // If we're after a value when we find more text, then we must be starting a new key/value pair.
                 case KV3TextReaderState.InObjectAfterValue:
                     FinalizeCurrentObject(@explicit: false);
@@ -128,16 +152,23 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                     break;
 
                 default:
-                    throw new InvalidOperationException($"Unhandled text reader state: {stateMachine.Current}.");
+                    throw new InvalidOperationException($"Unhandled identifier reader state: {stateMachine.Current}.");
             }
         }
 
         void ReadText(string text)
         {
+            KVValue value;
+
             switch (stateMachine.Current)
             {
+                case KV3TextReaderState.InArray:
+                    value = new KVObjectValue<string>(text, KVValueType.String);
+                    listener.OnArrayValue(value);
+                    break;
+
                 case KV3TextReaderState.InObjectBeforeValue:
-                    var value = ParseValue(text);
+                    value = new KVObjectValue<string>(text, KVValueType.String);
                     var name = stateMachine.CurrentName;
                     listener.OnKeyValuePair(name, value);
 
@@ -146,6 +177,32 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
                 default:
                     throw new InvalidOperationException($"Unhandled text reader state: {stateMachine.Current}.");
+            }
+        }
+
+        void BeginNewArray()
+        {
+            if (stateMachine.Current != KV3TextReaderState.InObjectBeforeValue)
+            {
+                throw new InvalidOperationException($"Attempted to begin new array while in state {stateMachine.Current}.");
+            }
+
+            stateMachine.PushObject();
+            stateMachine.Push(KV3TextReaderState.InArray);
+        }
+
+        void FinalizeCurrentArray()
+        {
+            if (stateMachine.Current != KV3TextReaderState.InArray)
+            {
+                throw new InvalidOperationException($"Attempted to finalize array while in state {stateMachine.Current}.");
+            }
+
+            stateMachine.PopObject();
+
+            if (stateMachine.IsInObject)
+            {
+                stateMachine.Push(KV3TextReaderState.InObjectAfterValue);
             }
         }
 

@@ -74,6 +74,8 @@ namespace ValveKeyValue.Serialization.KeyValues1
             }
         }
 
+        public void OnArrayValue(KVValue value) => throw new NotImplementedException();
+
         void Write(KV1BinaryNodeType nodeType)
         {
             writer.Write((byte)nodeType);
