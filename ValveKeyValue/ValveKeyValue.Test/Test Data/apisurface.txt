@@ -178,6 +178,7 @@ public sealed enum ValveKeyValue.KVSerializationFormat
 {
     KeyValues1Text = 0;
     KeyValues1Binary = 1;
+    KeyValues3Text = 2;
 
     public int CompareTo(object target);
     public bool Equals(object obj);

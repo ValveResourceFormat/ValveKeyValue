@@ -67,11 +67,11 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         {
             SwallowWhitespace();
 
-            if (Peek() == '"')
+            if (Peek() == QuotationMark)
             {
                 return new KVToken(KVTokenType.String, ReadQuotedStringRaw());
             }
-            
+
             return new KVToken(KVTokenType.Identifier, ReadUntilWhitespaceOrQuote());
         }
 
@@ -138,6 +138,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             var sb = new StringBuilder();
             var next = Next();
 
+            // TODO: Read /* */ comments
             // Some keyvalues implementations have a bug where only a single slash is needed for a comment
             if (next != CommentBegin)
             {
@@ -210,55 +211,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             }
         }
 
-        string ReadUntil(params char[] terminators)
-        {
-            var sb = new StringBuilder();
-            var escapeNext = false;
-
-            var integerTerminators = new HashSet<int>(terminators.Select(t => (int)t));
-            while (!integerTerminators.Contains(Peek()) || escapeNext)
-            {
-                var next = Next();
-
-                if (options.HasEscapeSequences)
-                {
-                    if (!escapeNext && next == '\\')
-                    {
-                        escapeNext = true;
-                        continue;
-                    }
-
-                    if (escapeNext)
-                    {
-                        next = next switch
-                        {
-                            'r' => '\r',
-                            'n' => '\n',
-                            't' => '\t',
-                            '\\' => '\\',
-                            '"' => '"',
-                            _ when options.EnableValveNullByteBugBehavior => '\0',
-                            _ => throw new InvalidDataException($"Unknown escape sequence '\\{next}'."),
-                        };
-
-                        escapeNext = false;
-                    }
-                }
-
-                sb.Append(next);
-            }
-
-            var result = sb.ToString();
-
-            // Valve bug-for-bug compatibility with tier1 KeyValues/CUtlBuffer: an invalid escape sequence is a null byte which
-            // causes the text to be trimmed to the point of that null byte.
-            if (options.EnableValveNullByteBugBehavior && result.IndexOf('\0') is var nullByteIndex && nullByteIndex >= 0)
-            {
-                result = result[..nullByteIndex];
-            }
-            return result;
-        }
-
         // TODO: Read until delimeter: "{}[]=, \t\n'\":+;"
         string ReadUntilWhitespaceOrQuote()
         {
@@ -295,9 +247,70 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         string ReadQuotedStringRaw()
         {
             ReadChar(QuotationMark);
-            var text = ReadUntil(QuotationMark);
+
+            var isMultiline = false;
+
+            var sb = new StringBuilder();
+
+            // Is there another quote mark?
+            // TODO: Peek() for more than one character
+            if (Peek() == QuotationMark)
+            {
+                Next();
+
+                // If the next character is not another quote, it's an empty string
+                if (Peek() == QuotationMark)
+                {
+                    isMultiline = true;
+
+                    Next();
+
+                    if (Peek() == '\r')
+                    {
+                        Next();
+                    }
+
+                    if (Peek() == '\n')
+                    {
+                        Next();
+                    }
+                }
+                else
+                {
+                    return string.Empty;
+                }
+            }
+
+            // TODO: Single quoted strings may not have new lines
+            var integerTerminators = new HashSet<int>
+            {
+                QuotationMark,
+            };
+
+            while (!integerTerminators.Contains(Peek()))
+            {
+                sb.Append(Next());
+            }
+
             ReadChar(QuotationMark);
-            return text;
+
+            if (isMultiline)
+            {
+                ReadChar(QuotationMark);
+                ReadChar(QuotationMark);
+            }
+
+            if (sb.Length > 0 && sb[^1] == '\n')
+            {
+                sb.Remove(sb.Length - 1, 1);
+            }
+
+            if (sb.Length > 0 && sb[^1] == '\r')
+            {
+                sb.Remove(sb.Length - 1, 1);
+            }
+
+            return sb.ToString();
         }
 
         bool IsEndOfFile(int value) => value == -1;
