@@ -2,7 +2,7 @@
 
 namespace ValveKeyValue.Test.TextKV3
 {
-    class BasicTest
+    class BasicKV3TestCases
     {
         [Test]
         public void DeserializesHeaderAndValue()
