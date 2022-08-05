@@ -49,7 +49,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 ArrayEnd => ReadArrayEnd(),
                 CommentBegin => ReadComment(),
                 Assignment => ReadAssignment(),
-                _ => ReadStringOrIdentifier(), // TODO: This should read identifiers, strings should only be read as values, keys can't be quoted
+                _ => ReadStringOrIdentifier(), // TODO: This should read identifiers, strings should only be read as values
                 // TODO: #[] byte array
             };
         }
@@ -182,10 +182,10 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
             if (encodingType.Equals("text", StringComparison.OrdinalIgnoreCase) && encoding != Encoding.Text)
             {
-                throw new InvalidDataException($"Unrecognized format specifier, expected '{Encoding.Text}' but got '{format}'.");
+                throw new InvalidDataException($"Unrecognized format specifier, expected '{Encoding.Text}' but got '{encoding}'.");
             }
 
-            if (encodingType.Equals("generic", StringComparison.OrdinalIgnoreCase) && format != Format.Generic)
+            if (formatType.Equals("generic", StringComparison.OrdinalIgnoreCase) && format != Format.Generic)
             {
                 throw new InvalidDataException($"Unrecognized encoding specifier, expected '{Format.Generic}' but got '{format}'.");
             }
