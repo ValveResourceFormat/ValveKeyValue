@@ -109,6 +109,13 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         {
             switch (stateMachine.Current)
             {
+                // If we're after a value when we find more text, then we must be starting a new key/value pair.
+                case KV3TextReaderState.InObjectAfterValue:
+                    FinalizeCurrentObject(@explicit: false);
+                    stateMachine.PushObject();
+                    SetObjectKey(text);
+                    break;
+
                 case KV3TextReaderState.InObjectBeforeKey:
                     SetObjectKey(text);
                     break;
@@ -129,13 +136,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         {
             switch (stateMachine.Current)
             {
-                // If we're after a value when we find more text, then we must be starting a new key/value pair.
-                case KV3TextReaderState.InObjectAfterValue:
-                    FinalizeCurrentObject(@explicit: false);
-                    stateMachine.PushObject();
-                    SetObjectKey(text);
-                    break;
-
                 case KV3TextReaderState.InObjectBeforeValue:
                     var value = ParseValue(text);
                     var name = stateMachine.CurrentName;
