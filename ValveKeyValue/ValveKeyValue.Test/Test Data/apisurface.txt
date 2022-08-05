@@ -296,3 +296,28 @@ public sealed enum ValveKeyValue.KVValueType
     public string ToString(string format, IFormatProvider provider);
 }
 
+public class ValveKeyValue.KeyValues3.Encoding
+{
+    public bool Equals(object obj);
+    protected void Finalize();
+    public static Guid get_BinaryBlockCompressed();
+    public static Guid get_BinaryBlockLZ4();
+    public static Guid get_BinaryBlockUncompressed();
+    public static Guid get_Text();
+    public int GetHashCode();
+    public Type GetType();
+    protected object MemberwiseClone();
+    public string ToString();
+}
+
+public class ValveKeyValue.KeyValues3.Format
+{
+    public bool Equals(object obj);
+    protected void Finalize();
+    public static Guid get_Generic();
+    public int GetHashCode();
+    public Type GetType();
+    protected object MemberwiseClone();
+    public string ToString();
+}
+
