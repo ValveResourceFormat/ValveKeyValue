@@ -16,7 +16,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             this.listener = listener;
             this.options = options;
 
-            conditionEvaluator = new KVConditionEvaluator(options.Conditions);
             tokenReader = new KV3TokenReader(textReader, options);
             stateMachine = new KV3TextReaderStateMachine();
         }
@@ -24,7 +23,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         readonly IParsingVisitationListener listener;
         readonly KVSerializerOptions options;
 
-        readonly KVConditionEvaluator conditionEvaluator;
         readonly KV3TokenReader tokenReader;
         readonly KV3TextReaderStateMachine stateMachine;
         bool disposed;
@@ -71,10 +69,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
                     case KVTokenType.ObjectEnd:
                         FinalizeCurrentObject(@explicit: true);
-                        break;
-
-                    case KVTokenType.Condition:
-                        HandleCondition(token.Value);
                         break;
 
                     case KVTokenType.EndOfFile:
@@ -161,17 +155,13 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 throw new InvalidOperationException($"Attempted to finalize object while in state {stateMachine.Current}.");
             }
 
-            stateMachine.PopObject(out var discard);
+            stateMachine.PopObject();
 
             if (stateMachine.IsInObject)
             {
                 stateMachine.Push(KV3TextReaderState.InObjectAfterValue);
             }
 
-            if (discard)
-            {
-                listener.DiscardCurrentObject();
-            }
             if (@explicit)
             {
                 listener.OnObjectEnd();
@@ -185,19 +175,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             if (stateMachine.IsInObject)
             {
                 throw new InvalidOperationException("Inconsistent state - at end of file whilst inside an object.");
-            }
-        }
-
-        void HandleCondition(string text)
-        {
-            if (stateMachine.Current != KV3TextReaderState.InObjectAfterValue)
-            {
-                throw new InvalidDataException($"Found conditional while in state {stateMachine.Current}.");
-            }
-
-            if (!conditionEvaluator.Evalute(text))
-            {
-                stateMachine.SetDiscardCurrent();
             }
         }
 
