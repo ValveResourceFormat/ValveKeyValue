@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
+using ValveKeyValue.KeyValues3;
+using Encoding = ValveKeyValue.KeyValues3.Encoding;
 
 namespace ValveKeyValue.Deserialization.KeyValues3
 {
     class KV3TokenReader : IDisposable
     {
-        const char HeaderStart = '<';
         const char QuotationMark = '"';
         const char ObjectStart = '{';
         const char ObjectEnd = '}';
@@ -44,7 +43,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
             return nextChar switch
             {
-                HeaderStart => ReadHeader(),
                 ObjectStart => ReadObjectStart(),
                 ObjectEnd => ReadObjectEnd(),
                 ArrayStart => ReadArrayStart(),
@@ -76,7 +74,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 return new KVToken(KVTokenType.String, ReadQuotedStringRaw());
             }
 
-            return new KVToken(KVTokenType.Identifier, ReadUntilWhitespaceOrQuote());
+            return new KVToken(KVTokenType.Identifier, ReadUntilWhitespaceOrDelimeter(QuotationMark));
         }
 
         KVToken ReadAssignment()
@@ -109,42 +107,90 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             return new KVToken(KVTokenType.ObjectEnd);
         }
 
-        KVToken ReadHeader()
+        public KVToken ReadHeader()
         {
-            ReadChar('<');
-            ReadChar('!');
-            ReadChar('-');
-            ReadChar('-');
+            var str = ReadUntilWhitespaceOrDelimeter((char)0);
 
-            var sb = new StringBuilder();
-            bool ended;
-
-            while (true)
+            if (str != "<!--")
             {
-                var next = Next();
-
-                if (next == '\n')
-                {
-                    throw new InvalidDataException("Found new line while parsing header.");
-                }
-
-                if (next == '>' && sb.Length >= 2 && sb[^1] == '-' && sb[^2] == '-')
-                {
-                    ended = true;
-                    break;
-                }
-
-                sb.Append(next);
+                throw new InvalidDataException($"The header is incorrect, expected '<!--' but got '{str}'.");
             }
 
-            if (!ended)
+            SwallowWhitespace();
+            str = ReadUntilWhitespaceOrDelimeter((char)0);
+
+            if (str != "kv3")
             {
-                throw new InvalidDataException("Did not find header comment ending.");
+                throw new InvalidDataException($"The header is incorrect, expected 'kv3' but got '{str}'.");
             }
 
-            var text = sb.ToString();
+            SwallowWhitespace();
+            str = ReadUntil(':');
 
-            return new KVToken(KVTokenType.Header, text);
+            if (str != "encoding")
+            {
+                throw new InvalidDataException($"The header is incorrect, expected 'encoding' but got '{str}'.");
+            }
+
+            ReadChar(':');
+            var encodingType = ReadUntil(':');
+            ReadChar(':');
+
+            str = ReadUntil('{');
+
+            if (str != "version")
+            {
+                throw new InvalidDataException($"The header is incorrect, expected 'version' but got '{str}'.");
+            }
+
+            ReadChar('{');
+            var encoding = new Guid(ReadUntil('}'));
+            ReadChar('}');
+
+            SwallowWhitespace();
+
+            str = ReadUntil(':');
+
+            if (str != "format")
+            {
+                throw new InvalidDataException($"The header is incorrect, expected 'format' but got '{str}'.");
+            }
+
+            ReadChar(':');
+            var formatType = ReadUntil(':');
+            ReadChar(':');
+
+            str = ReadUntil('{');
+
+            if (str != "version")
+            {
+                throw new InvalidDataException($"The header is incorrect, expected 'version' but got '{str}'.");
+            }
+
+            ReadChar('{');
+            var format = new Guid(ReadUntil('}'));
+            ReadChar('}');
+
+            SwallowWhitespace();
+
+            str = ReadUntilWhitespaceOrDelimeter((char)0);
+
+            if (str != "-->")
+            {
+                throw new InvalidDataException($"The header is incorrect, expected '-->' but got '{str}'.");
+            }
+
+            if (encodingType.Equals("text", StringComparison.OrdinalIgnoreCase) && encoding != Encoding.Text)
+            {
+                throw new InvalidDataException($"Unrecognized format specifier, expected '{Encoding.Text}' but got '{format}'.");
+            }
+
+            if (encodingType.Equals("generic", StringComparison.OrdinalIgnoreCase) && format != Format.Generic)
+            {
+                throw new InvalidDataException($"Unrecognized encoding specifier, expected '{Format.Generic}' but got '{format}'.");
+            }
+
+            return new KVToken(KVTokenType.Header, string.Empty);
         }
 
         KVToken ReadComment()
@@ -255,15 +301,34 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             }
         }
 
-        // TODO: Read until delimeter: "{}[]=, \t\n'\":+;"
-        string ReadUntilWhitespaceOrQuote()
+        string ReadUntil(char delimeter)
         {
             var sb = new StringBuilder();
 
             while (true)
             {
                 var next = Peek();
-                if (next == -1 || char.IsWhiteSpace((char)next) || next == '"')
+
+                if (next == delimeter)
+                {
+                    break;
+                }
+
+                sb.Append(Next());
+            }
+
+            return sb.ToString();
+        }
+
+        // TODO: Read until delimeter: "{}[]=, \t\n'\":+;"
+        string ReadUntilWhitespaceOrDelimeter(char delimeter)
+        {
+            var sb = new StringBuilder();
+
+            while (true)
+            {
+                var next = Peek();
+                if (next == -1 || char.IsWhiteSpace((char)next) || next == delimeter)
                 {
                     break;
                 }
@@ -329,7 +394,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             {
                 var next = Next();
 
-                if (next == '\n')
+                if (!isMultiline && next == '\n')
                 {
                     throw new InvalidDataException("Found new line while parsing literal string.");
                 }

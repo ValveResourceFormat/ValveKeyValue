@@ -31,7 +31,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         {
             Require.NotDisposed(nameof(KV3TextReader), disposed);
 
-            // TODO: Read header here as it's always expected, instead of using the tokenizer.
+            tokenReader.ReadHeader();
 
             while (stateMachine.IsInObject)
             {
@@ -52,11 +52,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
                 switch (token.TokenType)
                 {
-                    case KVTokenType.Header:
-                        // TODO: Actually parse out the header
-                        stateMachine.SetName("root"); // TODO: Get rid of this
-                        break;
-
                     case KVTokenType.Assignment:
                         ReadAssignment();
                         break;
@@ -117,7 +112,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         void ReadAssignment()
         {
-            if (stateMachine.Current != KV3TextReaderState.InObjectBetweenKeyAndValue)
+            if (stateMachine.Current != KV3TextReaderState.InObjectAfterKey)
             {
                 throw new InvalidOperationException($"Attempted to assign while in state {stateMachine.Current}.");
             }
@@ -209,12 +204,12 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         void SetObjectKey(string name)
         {
             stateMachine.SetName(name);
-            stateMachine.Push(KV3TextReaderState.InObjectBetweenKeyAndValue);
+            stateMachine.Push(KV3TextReaderState.InObjectAfterKey);
         }
 
         void BeginNewObject()
         {
-            if (stateMachine.Current != KV3TextReaderState.Header && stateMachine.Current != KV3TextReaderState.InObjectBetweenKeyAndValue)
+            if (stateMachine.Current != KV3TextReaderState.InObjectAfterKey)
             {
                 throw new InvalidOperationException($"Attempted to begin new object while in state {stateMachine.Current}.");
             }
