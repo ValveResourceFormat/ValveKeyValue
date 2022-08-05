@@ -2,6 +2,8 @@ using System.Diagnostics.CodeAnalysis;
 using ValveKeyValue.Abstraction;
 using ValveKeyValue.Deserialization;
 using ValveKeyValue.Deserialization.KeyValues1;
+using ValveKeyValue.Deserialization.KeyValues3;
+using ValveKeyValue.Serialization;
 using ValveKeyValue.Serialization.KeyValues1;
 
 namespace ValveKeyValue
@@ -113,6 +115,7 @@ namespace ValveKeyValue
             {
                 KVSerializationFormat.KeyValues1Text => new KV1TextReader(new StreamReader(stream, null, true, -1, leaveOpen: true), listener, options),
                 KVSerializationFormat.KeyValues1Binary => new KV1BinaryReader(stream, listener, options.StringTable),
+                KVSerializationFormat.KeyValues3Text => new KV3TextReader(new StreamReader(stream, null, true, -1, leaveOpen: true), listener, options),
                 _ => throw new ArgumentOutOfRangeException(nameof(format), format, "Invalid serialization format."),
             };
         }
