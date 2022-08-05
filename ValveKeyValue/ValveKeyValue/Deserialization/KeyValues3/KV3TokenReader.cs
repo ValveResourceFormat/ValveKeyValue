@@ -12,6 +12,8 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         const char QuotationMark = '"';
         const char ObjectStart = '{';
         const char ObjectEnd = '}';
+        const char ArrayStart = '[';
+        const char ArrayEnd = ']';
         const char CommentBegin = '/';
         const char Assignment = '=';
 
@@ -45,6 +47,8 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 HeaderStart => ReadHeader(),
                 ObjectStart => ReadObjectStart(),
                 ObjectEnd => ReadObjectEnd(),
+                ArrayStart => ReadArrayStart(),
+                ArrayEnd => ReadArrayEnd(),
                 CommentBegin => ReadComment(),
                 Assignment => ReadAssignment(),
                 _ => ReadStringOrIdentifier(), // TODO: This should read identifiers, strings should only be read as values, keys can't be quoted
@@ -75,16 +79,28 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             return new KVToken(KVTokenType.Identifier, ReadUntilWhitespaceOrQuote());
         }
 
-        KVToken ReadObjectStart()
-        {
-            ReadChar(ObjectStart);
-            return new KVToken(KVTokenType.ObjectStart);
-        }
-
         KVToken ReadAssignment()
         {
             ReadChar(Assignment);
             return new KVToken(KVTokenType.Assignment);
+        }
+
+        KVToken ReadArrayStart()
+        {
+            ReadChar(ArrayStart);
+            return new KVToken(KVTokenType.ArrayStart);
+        }
+
+        KVToken ReadArrayEnd()
+        {
+            ReadChar(ArrayEnd);
+            return new KVToken(KVTokenType.ArrayEnd);
+        }
+
+        KVToken ReadObjectStart()
+        {
+            ReadChar(ObjectStart);
+            return new KVToken(KVTokenType.ObjectStart);
         }
 
         KVToken ReadObjectEnd()
@@ -309,15 +325,16 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 }
             }
 
-            // TODO: Single quoted strings may not have new lines
-            var integerTerminators = new HashSet<int>
+            while (Peek() != QuotationMark)
             {
-                QuotationMark,
-            };
+                var next = Next();
 
-            while (!integerTerminators.Contains(Peek()))
-            {
-                sb.Append(Next());
+                if (next == '\n')
+                {
+                    throw new InvalidDataException("Found new line while parsing literal string.");
+                }
+
+                sb.Append(next);
             }
 
             ReadChar(QuotationMark);
