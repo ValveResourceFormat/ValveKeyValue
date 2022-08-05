@@ -47,7 +47,8 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 ObjectEnd => ReadObjectEnd(),
                 CommentBegin => ReadComment(),
                 Assignment => ReadAssignment(),
-                _ => ReadString(),
+                _ => ReadStringOrIdentifier(), // TODO: This should read identifiers, strings should only be read as values, keys can't be quoted
+                // TODO: #[] byte array
             };
         }
 
@@ -62,10 +63,16 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             }
         }
 
-        KVToken ReadString()
+        KVToken ReadStringOrIdentifier()
         {
-            var text = ReadStringRaw();
-            return new KVToken(KVTokenType.String, text);
+            SwallowWhitespace();
+
+            if (Peek() == '"')
+            {
+                return new KVToken(KVTokenType.String, ReadQuotedStringRaw());
+            }
+            
+            return new KVToken(KVTokenType.Identifier, ReadUntilWhitespaceOrQuote());
         }
 
         KVToken ReadObjectStart()
@@ -252,6 +259,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             return result;
         }
 
+        // TODO: Read until delimeter: "{}[]=, \t\n'\":+;"
         string ReadUntilWhitespaceOrQuote()
         {
             var sb = new StringBuilder();
@@ -282,19 +290,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         {
             var next = Peek();
             return !IsEndOfFile(next) && char.IsWhiteSpace((char)next);
-        }
-
-        string ReadStringRaw()
-        {
-            SwallowWhitespace();
-            if (Peek() == '"')
-            {
-                return ReadQuotedStringRaw();
-            }
-            else
-            {
-                return ReadUntilWhitespaceOrQuote();
-            }
         }
 
         string ReadQuotedStringRaw()
