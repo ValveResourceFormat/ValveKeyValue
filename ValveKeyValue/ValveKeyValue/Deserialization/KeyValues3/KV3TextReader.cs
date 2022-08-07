@@ -140,10 +140,21 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                     break;
 
                 case KV3TextReaderState.InObjectBeforeValue:
-                    if (text.EndsWith(":") || text.EndsWith("+"))
+                    if (text.EndsWith(":", StringComparison.Ordinal) || text.EndsWith("+", StringComparison.Ordinal))
                     {
                         // TODO: Parse flag like resource: then read as string
                     }
+
+                    KVValue value = ParseValue(text);
+
+                    if (value != null)
+                    {
+                        var name = stateMachine.CurrentName;
+                        listener.OnKeyValuePair(name, value);
+
+                        stateMachine.Push(KV3TextReaderState.InObjectAfterValue);
+                    }
+
                     break;
 
                 default:
@@ -252,42 +263,46 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         static KVValue ParseValue(string text)
         {
-            // "0x" + 2 digits per byte. Long is 8 bytes, so s + 16 = 18.
-            // Expressed this way for readability, rather than using a magic value.
-            const int HexStringLengthForUnsignedLong = 2 + (sizeof(long) * 2);
-
-            if (text.Length == HexStringLengthForUnsignedLong && text.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+            if (text.Equals("false", StringComparison.Ordinal))
             {
-                var hexadecimalString = text[2..];
-                var data = ParseHexStringAsByteArray(hexadecimalString);
+                return new KVObjectValue<bool>(false, KVValueType.Boolean);
+            }
+            else if (text.Equals("true", StringComparison.Ordinal))
+            {
+                return new KVObjectValue<bool>(true, KVValueType.Boolean);
+            }
+            else if (text.Equals("null", StringComparison.Ordinal))
+            {
+                // TODO: Null is not a string
+                // TODO: KVObjectValue does not accept null
+                //value = new KVObjectValue<string>(null, KVValueType.Null);
+                return new KVObjectValue<string>(string.Empty, KVValueType.Null);
+            }
+            else if (char.IsDigit(text[0]) || text[0] == '-' || text[0] == '+')
+            {
+                // TODO: Due to Valve's string to int/double conversion functions, it is possible to have 0x hex values (as well as prefixed with minus like -0x)
 
-                if (BitConverter.IsLittleEndian)
+                const NumberStyles IntegerNumberStyles = NumberStyles.AllowLeadingSign;
+
+                if (text[0] == '-' && long.TryParse(text, IntegerNumberStyles, CultureInfo.InvariantCulture, out var intValue))
                 {
-                    Array.Reverse(data);
+                    return new KVObjectValue<long>(intValue, KVValueType.Int64);
+                }
+                else if (ulong.TryParse(text, IntegerNumberStyles, CultureInfo.InvariantCulture, out var uintValue))
+                {
+                    return new KVObjectValue<ulong>(uintValue, KVValueType.UInt64);
                 }
 
-                var value = BitConverter.ToUInt64(data, 0);
-                return new KVObjectValue<ulong>(value, KVValueType.UInt64);
-            }
+                const NumberStyles FloatingPointNumberStyles =
+                    NumberStyles.AllowDecimalPoint |
+                    NumberStyles.AllowExponent |
+                    NumberStyles.AllowLeadingSign;
 
-            const NumberStyles IntegerNumberStyles =
-                NumberStyles.AllowLeadingWhite |
-                NumberStyles.AllowLeadingSign;
-
-            if (int.TryParse(text, IntegerNumberStyles, CultureInfo.InvariantCulture, out var intValue))
-            {
-                return new KVObjectValue<int>(intValue, KVValueType.Int32);
-            }
-
-            const NumberStyles FloatingPointNumberStyles =
-                NumberStyles.AllowLeadingWhite |
-                NumberStyles.AllowDecimalPoint |
-                NumberStyles.AllowExponent |
-                NumberStyles.AllowLeadingSign;
-
-            if (float.TryParse(text, FloatingPointNumberStyles, CultureInfo.InvariantCulture, out var floatValue))
-            {
-                return new KVObjectValue<float>(floatValue, KVValueType.FloatingPoint);
+                // TODO: 
+                if (double.TryParse(text, FloatingPointNumberStyles, CultureInfo.InvariantCulture, out var floatValue))
+                {
+                    return new KVObjectValue<double>(floatValue, KVValueType.FloatingPoint);
+                }
             }
 
             return new KVObjectValue<string>(text, KVValueType.String);
