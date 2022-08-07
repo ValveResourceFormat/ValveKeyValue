@@ -83,7 +83,7 @@ namespace ValveKeyValue.Test.TextKV3
                 Assert.That((int)data["intValue"], Is.EqualTo(128));
 
                 Assert.That(data["doubleValue"].ValueType, Is.EqualTo(KVValueType.FloatingPoint));
-                Assert.That((double)data["doubleValue"], Is.EqualTo(64.000000));
+                Assert.That((double)data["doubleValue"], Is.EqualTo(64.123));
 
                 Assert.That(data["negativeIntValue"].ValueType, Is.EqualTo(KVValueType.Int64));
                 Assert.That((long)data["negativeIntValue"], Is.EqualTo(-1337));
