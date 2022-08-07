@@ -109,6 +109,13 @@ namespace ValveKeyValue
                 description.Append(": ");
                 description.Append(Value.ToString());
 
+                if (Value.ValueType != KVValueType.String)
+                {
+                    description.Append(" (");
+                    description.Append(Value.ValueType);
+                    description.Append(")");
+                }
+
                 return description.ToString();
             }
         }
