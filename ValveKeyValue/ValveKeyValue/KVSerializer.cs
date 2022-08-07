@@ -4,6 +4,7 @@ using ValveKeyValue.Deserialization.KeyValues1;
 using ValveKeyValue.Deserialization.KeyValues3;
 using ValveKeyValue.Serialization;
 using ValveKeyValue.Serialization.KeyValues1;
+using ValveKeyValue.Serialization.KeyValues3;
 
 namespace ValveKeyValue
 {
@@ -132,6 +133,7 @@ namespace ValveKeyValue
             {
                 KVSerializationFormat.KeyValues1Text => new KV1TextSerializer(stream, options),
                 KVSerializationFormat.KeyValues1Binary => new KV1BinarySerializer(stream, options.StringTable),
+                KVSerializationFormat.KeyValues3Text => new KV3TextSerializer(stream),
                 _ => throw new ArgumentOutOfRangeException(nameof(format), format, "Invalid serialization format."),
             };
             ;

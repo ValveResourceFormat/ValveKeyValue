@@ -7,13 +7,17 @@
 	doubleValue = 64.123
 	negativeIntValue = -1337
 	negativeDoubleValue = -0.1337
-	plusIntValue = +1337
-	plusDoubleValue = +0.1337
+	plusIntValue = 1337
+	plusDoubleValue = 0.1337
 	stringValue = "hello world"
 	negativeMaxInt = -9223372036854775807
 	positiveMaxInt = 18446744073709551615
 	doubleMaxValue = 62147483647.1337
 	doubleNegativeMaxValue = -62147483647.1337
-	doubleExponent = 1.23456E+2
-	intWithStringSuffix = 123foobar
+	doubleExponent = 123.456
+	intWithStringSuffix = "123foobar"
+	multiLineString = """
+hello
+world
+"""
 }
