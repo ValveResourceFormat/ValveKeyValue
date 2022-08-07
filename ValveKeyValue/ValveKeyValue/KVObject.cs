@@ -100,6 +100,17 @@ namespace ValveKeyValue
             return collection;
         }
 
-        string DebuggerDescription => $"{Name}: {Value}";
+        string DebuggerDescription
+        {
+            get
+            {
+                if (Value.ValueType == KVValueType.String)
+                {
+                    return $"{Name}: {Value}";
+                }
+
+                return $"{Name}: {Value} ({Value.ValueType})";
+            }
+        }
     }
 }
