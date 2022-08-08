@@ -143,6 +143,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 case KV3TextReaderState.InObjectBeforeValue:
                     if (text.EndsWith(":", StringComparison.Ordinal) || text.EndsWith("+", StringComparison.Ordinal))
                     {
+                        // TODO: There can be multiple flags on a single value, panorama+subclass:"thing" or something
                         var flag = ParseFlag(text[..^1]);
 
 
@@ -283,7 +284,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 //value = new KVObjectValue<string>(null, KVValueType.Null);
                 return new KVObjectValue<string>(string.Empty, KVValueType.Null);
             }
-            else if (char.IsDigit(text[0]) || text[0] == '-' || text[0] == '+')
+            else if (text.Length > 0 && (char.IsDigit(text[0]) || text[0] == '-' || text[0] == '+'))
             {
                 // TODO: Due to Valve's string to int/double conversion functions, it is possible to have 0x hex values (as well as prefixed with minus like -0x)
 

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using ValveKeyValue.KeyValues3;
 using Encoding = ValveKeyValue.KeyValues3.Encoding;
@@ -23,9 +25,14 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
             this.textReader = textReader;
             this.options = options;
+
+            // TODO: Valve doesn't terminate on \r
+            var terminators = "{}[]=, \t\n\r'\":+;".ToCharArray();
+            integerTerminators = new HashSet<int>(terminators.Select(t => (int)t));
         }
 
         readonly KVSerializerOptions options;
+        readonly HashSet<int> integerTerminators;
         TextReader textReader;
         bool disposed;
         int? peekedNext;
@@ -74,7 +81,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 return new KVToken(KVTokenType.String, ReadQuotedStringRaw());
             }
 
-            return new KVToken(KVTokenType.Identifier, ReadUntilWhitespaceOrDelimeter(QuotationMark));
+            return new KVToken(KVTokenType.Identifier, ReadToken());
         }
 
         KVToken ReadAssignment()
@@ -109,7 +116,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         public KVToken ReadHeader()
         {
-            var str = ReadUntilWhitespaceOrDelimeter((char)0);
+            var str = ReadToken();
 
             if (str != "<!--")
             {
@@ -117,7 +124,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             }
 
             SwallowWhitespace();
-            str = ReadUntilWhitespaceOrDelimeter((char)0);
+            str = ReadToken();
 
             if (str != "kv3")
             {
@@ -125,7 +132,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             }
 
             SwallowWhitespace();
-            str = ReadUntil(':');
+            str = ReadToken();
 
             if (str != "encoding")
             {
@@ -133,10 +140,10 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             }
 
             ReadChar(':');
-            var encodingType = ReadUntil(':');
+            var encodingType = ReadToken();
             ReadChar(':');
 
-            str = ReadUntil('{');
+            str = ReadToken();
 
             if (str != "version")
             {
@@ -144,12 +151,12 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             }
 
             ReadChar('{');
-            var encoding = new Guid(ReadUntil('}'));
+            var encoding = new Guid(ReadToken());
             ReadChar('}');
 
             SwallowWhitespace();
 
-            str = ReadUntil(':');
+            str = ReadToken();
 
             if (str != "format")
             {
@@ -157,10 +164,10 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             }
 
             ReadChar(':');
-            var formatType = ReadUntil(':');
+            var formatType = ReadToken();
             ReadChar(':');
 
-            str = ReadUntil('{');
+            str = ReadToken();
 
             if (str != "version")
             {
@@ -168,12 +175,12 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             }
 
             ReadChar('{');
-            var format = new Guid(ReadUntil('}'));
+            var format = new Guid(ReadToken());
             ReadChar('}');
 
             SwallowWhitespace();
 
-            str = ReadUntilWhitespaceOrDelimeter((char)0);
+            str = ReadToken();
 
             if (str != "-->")
             {
@@ -301,7 +308,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             }
         }
 
-        string ReadUntil(char delimeter)
+        string ReadToken()
         {
             var sb = new StringBuilder();
 
@@ -309,26 +316,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             {
                 var next = Peek();
 
-                if (next == delimeter)
-                {
-                    break;
-                }
-
-                sb.Append(Next());
-            }
-
-            return sb.ToString();
-        }
-
-        // TODO: Read until delimeter: "{}[]=, \t\n'\":+;"
-        string ReadUntilWhitespaceOrDelimeter(char delimeter)
-        {
-            var sb = new StringBuilder();
-
-            while (true)
-            {
-                var next = Peek();
-                if (next == -1 || char.IsWhiteSpace((char)next) || next == delimeter)
+                if (next == -1 || integerTerminators.Contains(next))
                 {
                     break;
                 }
