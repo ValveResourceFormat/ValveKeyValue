@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.IO;
 using ValveKeyValue.Abstraction;
+using ValveKeyValue.KeyValues3;
 
 namespace ValveKeyValue.Deserialization.KeyValues3
 {
@@ -142,7 +143,11 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 case KV3TextReaderState.InObjectBeforeValue:
                     if (text.EndsWith(":", StringComparison.Ordinal) || text.EndsWith("+", StringComparison.Ordinal))
                     {
-                        // TODO: Parse flag like resource: then read as string
+                        var flag = ParseFlag(text[..^1]);
+
+
+                        // Keep the InObjectBeforeValue state
+                        break;
                     }
 
                     KVValue value = ParseValue(text);
@@ -320,6 +325,19 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             }
 
             return data;
+        }
+
+        static KVFlag ParseFlag(string flag)
+        {
+            return flag switch
+            {
+                "resource" => KVFlag.Resource,
+                "resource_name" => KVFlag.ResourceName,
+                "panorama" => KVFlag.Panorama,
+                "soundevent" => KVFlag.SoundEvent,
+                "subclass" => KVFlag.SubClass,
+                _ => throw new InvalidDataException($"Unknown flag '{flag}'"),
+            };
         }
     }
 }
