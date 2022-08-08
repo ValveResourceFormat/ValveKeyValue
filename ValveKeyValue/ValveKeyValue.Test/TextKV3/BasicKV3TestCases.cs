@@ -19,7 +19,12 @@ namespace ValveKeyValue.Test.TextKV3
             using var stream = TestDataHelper.OpenResource("TextKV3.flagged_value.kv3");
             var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
 
-            Assert.That((string)data["foo"], Is.EqualTo("bar"));
+            Assert.Multiple(() =>
+            {
+                Assert.That((string)data["foo"], Is.EqualTo("bar"));
+                Assert.That((string)data["bar"], Is.EqualTo("foo"));
+                Assert.That((long)data["flaggedNumber"], Is.EqualTo(-1234));
+            });
         }
 
         [Test]
