@@ -125,8 +125,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             {
                 throw new InvalidOperationException($"Attempted to assign while in state {stateMachine.Current}.");
             }
-
-            stateMachine.Push(KV3TextReaderState.InObjectBeforeValue);
         }
 
         void ReadComma()
@@ -139,7 +137,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         void ReadFlag(string text)
         {
-            if (stateMachine.Current != KV3TextReaderState.InArray && stateMachine.Current != KV3TextReaderState.InObjectBeforeValue)
+            if (stateMachine.Current != KV3TextReaderState.InArray && stateMachine.Current != KV3TextReaderState.InObjectAfterKey)
             {
                 throw new InvalidOperationException($"Attempted to read flag while in state {stateMachine.Current}.");
             }
@@ -166,7 +164,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                     SetObjectKey(text);
                     break;
 
-                case KV3TextReaderState.InObjectBeforeValue:
+                case KV3TextReaderState.InObjectAfterKey:
                     KVValue value = ParseValue(text);
 
                     if (value != null)
@@ -205,7 +203,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                     SetObjectKey(text);
                     break;
 
-                case KV3TextReaderState.InObjectBeforeValue:
+                case KV3TextReaderState.InObjectAfterKey:
                     {
                         var name = stateMachine.CurrentName;
                         var value = ParseValue(text);
@@ -222,7 +220,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         void BeginNewArray()
         {
-            if (stateMachine.Current != KV3TextReaderState.InObjectBeforeValue)
+            if (stateMachine.Current != KV3TextReaderState.InObjectAfterKey)
             {
                 throw new InvalidOperationException($"Attempted to begin new array while in state {stateMachine.Current}.");
             }
