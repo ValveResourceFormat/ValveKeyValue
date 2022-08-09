@@ -5,7 +5,7 @@
         None = 0,
         Resource = 1,
         ResourceName = 2,
-        // TODO: We don't know what 4 was
+        MultilineString = 4,
         Panorama = 8,
         SoundEvent = 16,
         SubClass = 32,
