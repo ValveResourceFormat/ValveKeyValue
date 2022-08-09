@@ -66,15 +66,15 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                         break;
 
                     case KVTokenType.Identifier:
-                        ReadIdentifier(token.Value);
+                        ReadText(token.Value);
                         break;
 
                     case KVTokenType.String:
                         ReadText(token.Value);
                         break;
 
-                    case KVTokenType.BinaryBlobStart:
-                        BeginBinaryBlob();
+                    case KVTokenType.BinaryBlob:
+                        ReadBinaryBlob(token.Value);
                         break;
 
                     case KVTokenType.ObjectStart:
@@ -149,51 +149,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             var flag = ParseFlag(text);
         }
 
-        void ReadIdentifier(string text)
-        {
-            switch (stateMachine.Current)
-            {
-                case KV3TextReaderState.InBinaryBlob:
-                    {
-                        var value = ParseHexCharacter(text);
-                        break;
-                    }
-
-                case KV3TextReaderState.InArray:
-                    new KVObjectValue<string>(text, KVValueType.String);
-                    break;
-
-                // If we're after a value when we find more text, then we must be starting a new key/value pair.
-                case KV3TextReaderState.InObjectAfterValue:
-                    FinalizeCurrentObject(@explicit: false);
-                    stateMachine.PushObject();
-                    SetObjectKey(text);
-                    break;
-
-                case KV3TextReaderState.InObjectBeforeKey:
-                    SetObjectKey(text);
-                    break;
-
-                case KV3TextReaderState.InObjectAfterKey:
-                    {
-                        KVValue value = ParseValue(text);
-
-                        if (value != null)
-                        {
-                            var name = stateMachine.CurrentName;
-                            listener.OnKeyValuePair(name, value);
-
-                            stateMachine.Push(KV3TextReaderState.InObjectAfterValue);
-                        }
-
-                        break;
-                    }
-
-                default:
-                    throw new InvalidOperationException($"Unhandled identifier reader state: {stateMachine.Current}.");
-            }
-        }
-
         void ReadText(string text)
         {
             switch (stateMachine.Current)
@@ -205,12 +160,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                         break;
                     }
 
-                case KV3TextReaderState.InObjectAfterValue:
-                    FinalizeCurrentObject(@explicit: false);
-                    stateMachine.PushObject();
-                    SetObjectKey(text);
-                    break;
-
                 case KV3TextReaderState.InObjectBeforeKey:
                     SetObjectKey(text);
                     break;
@@ -221,7 +170,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                         var value = ParseValue(text);
                         listener.OnKeyValuePair(name, value);
 
-                        stateMachine.Push(KV3TextReaderState.InObjectAfterValue);
+                        stateMachine.Push(KV3TextReaderState.InObjectBeforeKey);
                         break;
                     }
 
@@ -230,15 +179,32 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             }
         }
 
-        void BeginBinaryBlob()
+        void ReadBinaryBlob(string text)
         {
-            if (stateMachine.Current != KV3TextReaderState.InArray && stateMachine.Current != KV3TextReaderState.InObjectAfterKey)
-            {
-                throw new InvalidOperationException($"Attempted to begin new binary blob while in state {stateMachine.Current}.");
-            }
+            var bytes = Utils.ParseHexStringAsByteArray(text);
+            //var value = new KVObjectValue<byte[]>(bytes, KVValueType.BinaryBlob);
+            var value = new KVObjectValue<byte>(0x00, KVValueType.BinaryBlob); // TODO: wrong
 
-            stateMachine.PushObject();
-            stateMachine.Push(KV3TextReaderState.InBinaryBlob);
+            switch (stateMachine.Current)
+            {
+                case KV3TextReaderState.InArray:
+                    {
+                        listener.OnArrayValue(value);
+                        break;
+                    }
+
+                case KV3TextReaderState.InObjectAfterKey:
+                    {
+                        var name = stateMachine.CurrentName;
+                        listener.OnKeyValuePair(name, value);
+
+                        stateMachine.Push(KV3TextReaderState.InObjectBeforeKey);
+                        break;
+                    }
+
+                default:
+                    throw new InvalidOperationException($"Unhandled text reader state: {stateMachine.Current}.");
+            }
         }
 
         void BeginNewArray()
@@ -249,21 +215,22 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             }
 
             stateMachine.PushObject();
+            stateMachine.SetArrayCurrent();
             stateMachine.Push(KV3TextReaderState.InArray);
         }
 
         void FinalizeCurrentArray()
         {
-            if (stateMachine.Current != KV3TextReaderState.InArray && stateMachine.Current != KV3TextReaderState.InBinaryBlob)
+            if (stateMachine.Current != KV3TextReaderState.InArray)
             {
                 throw new InvalidOperationException($"Attempted to finalize array while in state {stateMachine.Current}.");
             }
 
             stateMachine.PopObject();
 
-            if (stateMachine.IsInObject)
+            if (stateMachine.IsInObject && !stateMachine.IsInArray)
             {
-                stateMachine.Push(KV3TextReaderState.InObjectAfterValue);
+                stateMachine.Push(KV3TextReaderState.InObjectBeforeKey);
             }
         }
 
@@ -288,7 +255,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         void FinalizeCurrentObject(bool @explicit)
         {
-            if (stateMachine.Current != KV3TextReaderState.InObjectBeforeKey && stateMachine.Current != KV3TextReaderState.InObjectAfterValue)
+            if (stateMachine.Current != KV3TextReaderState.InObjectBeforeKey)
             {
                 throw new InvalidOperationException($"Attempted to finalize object while in state {stateMachine.Current}.");
             }
@@ -297,7 +264,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
             if (stateMachine.IsInObject)
             {
-                stateMachine.Push(KV3TextReaderState.InObjectAfterValue);
+                stateMachine.Push(KV3TextReaderState.InObjectBeforeKey);
             }
 
             if (@explicit)

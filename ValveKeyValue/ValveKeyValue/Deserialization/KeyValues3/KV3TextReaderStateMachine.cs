@@ -21,7 +21,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         public bool IsInObject => states.Count > 0;
 
-        public bool IsAtStart => states.Count == 1 && CurrentObject.States.Count == 1 && Current == KV3TextReaderState.InObjectBeforeKey;
+        public bool IsInArray => states.Count > 0 && CurrentObject.IsArray;
 
         public void PushObject() => states.Push(new KVPartialState<KV3TextReaderState>());
 
@@ -34,13 +34,9 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         public string CurrentName => CurrentObject.Key;
 
-        public void Pop() => CurrentObject.States.Pop();
-
         public void SetName(string name) => CurrentObject.Key = name;
 
-        public void SetValue(KVValue value) => CurrentObject.Value = value;
-
-        public void AddItem(KVObject item) => CurrentObject.Items.Add(item);
+        public void SetArrayCurrent() => CurrentObject.IsArray = true;
 
         KVPartialState<KV3TextReaderState> CurrentObject => states.Peek();
     }

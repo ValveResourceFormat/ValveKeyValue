@@ -53,7 +53,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             {
                 ObjectStart => ReadObjectStart(),
                 ObjectEnd => ReadObjectEnd(),
-                BinaryBlobMarker => ReadBinaryArrayStart(),
+                BinaryBlobMarker => ReadBinaryBlob(),
                 ArrayStart => ReadArrayStart(),
                 ArrayEnd => ReadArrayEnd(),
                 CommentBegin => ReadComment(),
@@ -109,11 +109,31 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             return new KVToken(KVTokenType.Comma);
         }
 
-        KVToken ReadBinaryArrayStart()
+        KVToken ReadBinaryBlob()
         {
             ReadChar(BinaryBlobMarker);
             ReadChar(ArrayStart); // TODO: Strictly speaking Valve allows bare # without [ to be read as literal value (but what would that be?)
-            return new KVToken(KVTokenType.BinaryBlobStart);
+
+            var sb = new StringBuilder();
+
+            while (true)
+            {
+                var next = Next();
+
+                if (char.IsWhiteSpace(next))
+                {
+                    continue;
+                }
+
+                if (next == ArrayEnd)
+                {
+                    break;
+                }
+
+                sb.Append(next);
+            }
+
+            return new KVToken(KVTokenType.BinaryBlob, sb.ToString());
         }
 
         KVToken ReadArrayStart()
