@@ -12,6 +12,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
     {
         const char ObjectStart = '{';
         const char ObjectEnd = '}';
+        const char BinaryArrayMarker = '#';
         const char ArrayStart = '[';
         const char ArrayEnd = ']';
         const char CommentBegin = '/';
@@ -26,7 +27,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             this.textReader = textReader;
             this.options = options;
 
-            // TODO: Valve doesn't terminate on \r
             // Dota 2 binary from 2017 used "+" as a terminate (for flagged values), but then they changed it to "|"
             var terminators = "{}[]=, \t\n\r'\":|;".ToCharArray();
             integerTerminators = new HashSet<int>(terminators.Select(t => (int)t));
@@ -53,13 +53,13 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             {
                 ObjectStart => ReadObjectStart(),
                 ObjectEnd => ReadObjectEnd(),
+                BinaryArrayMarker when Peek() == ArrayStart => ReadBinaryArrayStart(),
                 ArrayStart => ReadArrayStart(),
                 ArrayEnd => ReadArrayEnd(),
                 CommentBegin => ReadComment(),
                 Assignment => ReadAssignment(),
                 Comma => ReadComma(),
                 _ => ReadStringOrIdentifier(),
-                // TODO: #[] byte array
             };
         }
 
@@ -107,6 +107,13 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         {
             ReadChar(Comma);
             return new KVToken(KVTokenType.Comma);
+        }
+
+        KVToken ReadBinaryArrayStart()
+        {
+            ReadChar(BinaryArrayMarker);
+            ReadChar(ArrayStart);
+            return new KVToken(KVTokenType.BinaryArrayStart);
         }
 
         KVToken ReadArrayStart()
