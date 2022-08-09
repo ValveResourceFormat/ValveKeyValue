@@ -4,7 +4,7 @@
 	/* multi
 	line
 	comment */
-	foo = "bar"
-	one = /* comment in between */ "1" /* comment after */
+	foo = "bar" // comment after
+	one = /* comment in between */ /* another comment in between */ "1" /* comment after */
 	two /* comment in between */ = "2" /* comment after */
 }
