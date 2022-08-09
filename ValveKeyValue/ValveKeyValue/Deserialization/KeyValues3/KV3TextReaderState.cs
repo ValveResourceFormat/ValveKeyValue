@@ -6,5 +6,6 @@
         InObjectAfterKey,
         InObjectAfterValue,
         InArray,
+        InBinaryBlob,
     }
 }

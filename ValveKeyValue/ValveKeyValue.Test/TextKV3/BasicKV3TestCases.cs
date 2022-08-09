@@ -75,6 +75,15 @@ namespace ValveKeyValue.Test.TextKV3
         }
 
         [Test]
+        public void DeserializesBinaryBlob()
+        {
+            using var stream = TestDataHelper.OpenResource("TextKV3.binary_blob.kv3");
+            var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
+
+            Assert.True(false);
+        }
+
+        [Test]
         public void DeserializesNestedObject()
         {
             using var stream = TestDataHelper.OpenResource("TextKV3.object.kv3");
