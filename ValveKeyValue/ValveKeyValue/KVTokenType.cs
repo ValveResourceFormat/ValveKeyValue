@@ -20,6 +20,6 @@ namespace ValveKeyValue
         CommentBlock,
         ArrayStart,
         ArrayEnd,
-        BinaryBlobStart,
+        BinaryBlob,
     }
 }
