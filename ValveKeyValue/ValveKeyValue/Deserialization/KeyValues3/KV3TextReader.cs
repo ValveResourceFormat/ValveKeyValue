@@ -57,6 +57,14 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                         ReadAssignment();
                         break;
 
+                    case KVTokenType.Comma:
+                        ReadComma();
+                        break;
+
+                    case KVTokenType.Flag:
+                        ReadFlag(token.Value);
+                        break;
+
                     case KVTokenType.Identifier:
                         ReadIdentifier(token.Value);
                         break;
@@ -121,6 +129,24 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             stateMachine.Push(KV3TextReaderState.InObjectBeforeValue);
         }
 
+        void ReadComma()
+        {
+            if (stateMachine.Current != KV3TextReaderState.InArray)
+            {
+                throw new InvalidOperationException($"Attempted to have a comma character while in state {stateMachine.Current}.");
+            }
+        }
+
+        void ReadFlag(string text)
+        {
+            if (stateMachine.Current != KV3TextReaderState.InArray && stateMachine.Current != KV3TextReaderState.InObjectBeforeValue)
+            {
+                throw new InvalidOperationException($"Attempted to read flag while in state {stateMachine.Current}.");
+            }
+
+            var flag = ParseFlag(text);
+        }
+
         void ReadIdentifier(string text)
         {
             switch (stateMachine.Current)
@@ -141,16 +167,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                     break;
 
                 case KV3TextReaderState.InObjectBeforeValue:
-                    if (text.EndsWith(":", StringComparison.Ordinal) || text.EndsWith("+", StringComparison.Ordinal))
-                    {
-                        // TODO: There can be multiple flags on a single value, panorama+subclass:"thing" or something
-                        var flag = ParseFlag(text[..^1]);
-
-
-                        // Keep the InObjectBeforeValue state
-                        break;
-                    }
-
                     KVValue value = ParseValue(text);
 
                     if (value != null)
@@ -170,17 +186,15 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         void ReadText(string text)
         {
-            KVValue value;
+            var value = ParseValue(text);
 
             switch (stateMachine.Current)
             {
                 case KV3TextReaderState.InArray:
-                    value = new KVObjectValue<string>(text, KVValueType.String);
                     listener.OnArrayValue(value);
                     break;
 
                 case KV3TextReaderState.InObjectBeforeValue:
-                    value = new KVObjectValue<string>(text, KVValueType.String);
                     var name = stateMachine.CurrentName;
                     listener.OnKeyValuePair(name, value);
 
@@ -284,7 +298,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 //value = new KVObjectValue<string>(null, KVValueType.Null);
                 return new KVObjectValue<string>(string.Empty, KVValueType.Null);
             }
-            else if (text.Length > 0 && (char.IsDigit(text[0]) || text[0] == '-' || text[0] == '+'))
+            else if (text.Length > 0 && ((text[0] >= '0' && text[0] <= '9') || text[0] == '-' || text[0] == '+'))
             {
                 // TODO: Due to Valve's string to int/double conversion functions, it is possible to have 0x hex values (as well as prefixed with minus like -0x)
 
@@ -330,7 +344,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         static KVFlag ParseFlag(string flag)
         {
-            return flag switch
+            return flag.ToLowerInvariant() switch
             {
                 "resource" => KVFlag.Resource,
                 "resource_name" => KVFlag.ResourceName,

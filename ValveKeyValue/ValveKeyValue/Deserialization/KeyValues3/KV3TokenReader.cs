@@ -10,13 +10,13 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 {
     class KV3TokenReader : IDisposable
     {
-        const char QuotationMark = '"'; // TODO: Support single quotes 'abc'
         const char ObjectStart = '{';
         const char ObjectEnd = '}';
         const char ArrayStart = '[';
         const char ArrayEnd = ']';
         const char CommentBegin = '/';
         const char Assignment = '=';
+        const char Comma = ',';
 
         public KV3TokenReader(TextReader textReader, KVSerializerOptions options)
         {
@@ -27,7 +27,8 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             this.options = options;
 
             // TODO: Valve doesn't terminate on \r
-            var terminators = "{}[]=, \t\n\r'\":+;".ToCharArray();
+            // Dota 2 binary from 2017 used "+" as a terminate (for flagged values), but then they changed it to "|"
+            var terminators = "{}[]=, \t\n\r'\":|;".ToCharArray();
             integerTerminators = new HashSet<int>(terminators.Select(t => (int)t));
         }
 
@@ -56,7 +57,8 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 ArrayEnd => ReadArrayEnd(),
                 CommentBegin => ReadComment(),
                 Assignment => ReadAssignment(),
-                _ => ReadStringOrIdentifier(), // TODO: This should read identifiers, strings should only be read as values
+                Comma => ReadComma(),
+                _ => ReadStringOrIdentifier(),
                 // TODO: #[] byte array
             };
         }
@@ -76,18 +78,35 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         {
             SwallowWhitespace();
 
-            if (Peek() == QuotationMark)
+            var token = ReadToken();
+            var type = KVTokenType.String;
+
+            if (IsIdentifier(token))
             {
-                return new KVToken(KVTokenType.String, ReadQuotedStringRaw());
+                type = KVTokenType.Identifier;
+
+                var next = Peek();
+
+                if (next == ':' || next == '|')
+                {
+                    Next();
+                    type = KVTokenType.Flag;
+                }
             }
 
-            return new KVToken(KVTokenType.Identifier, ReadToken());
+            return new KVToken(type, token);
         }
 
         KVToken ReadAssignment()
         {
             ReadChar(Assignment);
             return new KVToken(KVTokenType.Assignment);
+        }
+
+        KVToken ReadComma()
+        {
+            ReadChar(Comma);
+            return new KVToken(KVTokenType.Comma);
         }
 
         KVToken ReadArrayStart()
@@ -308,15 +327,54 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             }
         }
 
+        bool IsIdentifier(string text)
+        {
+            for (var i = 0; i < text.Length; i++)
+            {
+                var c = text[i];
+
+                if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
+                {
+                    continue;
+                }
+
+                if (c >= '0' && c <= '9')
+                {
+                    continue;
+                }
+
+                if (c == '_' || c == ':' || c == '.')
+                {
+                    continue;
+                }
+
+                return false;
+            }
+
+            return true;
+        }
+
         string ReadToken()
         {
+            // TODO: while true
+            // swallow whitespace
+            // swallow comments
+            // swallow whitespace
+
+            var next = Peek();
+
+            if (next == '"' || next == '\'')
+            {
+                return ReadQuotedStringRaw((char)next);
+            }
+
             var sb = new StringBuilder();
 
             while (true)
             {
-                var next = Peek();
+                next = Peek();
 
-                if (next == -1 || integerTerminators.Contains(next))
+                if (next <= ' ' || integerTerminators.Contains(next))
                 {
                     break;
                 }
@@ -341,9 +399,9 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             return !IsEndOfFile(next) && char.IsWhiteSpace((char)next);
         }
 
-        string ReadQuotedStringRaw()
+        string ReadQuotedStringRaw(char quotationMark)
         {
-            ReadChar(QuotationMark);
+            ReadChar(quotationMark);
 
             var isMultiline = false;
 
@@ -351,12 +409,12 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
             // Is there another quote mark?
             // TODO: Peek() for more than one character
-            if (Peek() == QuotationMark)
+            if (quotationMark == '"' && Peek() == '"')
             {
                 Next();
 
                 // If the next character is not another quote, it's an empty string
-                if (Peek() == QuotationMark)
+                if (Peek() == '"')
                 {
                     isMultiline = true;
 
@@ -378,7 +436,9 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 }
             }
 
-            while (Peek() != QuotationMark)
+            // TODO: Figure out '\' character
+
+            while (Peek() != quotationMark)
             {
                 var next = Next();
 
@@ -390,22 +450,22 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 sb.Append(next);
             }
 
-            ReadChar(QuotationMark);
+            ReadChar(quotationMark);
 
             if (isMultiline)
             {
-                ReadChar(QuotationMark);
-                ReadChar(QuotationMark);
-            }
+                ReadChar('"');
+                ReadChar('"');
 
-            if (sb.Length > 0 && sb[^1] == '\n')
-            {
-                sb.Remove(sb.Length - 1, 1);
-            }
+                if (sb.Length > 0 && sb[^1] == '\n')
+                {
+                    sb.Remove(sb.Length - 1, 1);
+                }
 
-            if (sb.Length > 0 && sb[^1] == '\r')
-            {
-                sb.Remove(sb.Length - 1, 1);
+                if (sb.Length > 0 && sb[^1] == '\r')
+                {
+                    sb.Remove(sb.Length - 1, 1);
+                }
             }
 
             return sb.ToString();

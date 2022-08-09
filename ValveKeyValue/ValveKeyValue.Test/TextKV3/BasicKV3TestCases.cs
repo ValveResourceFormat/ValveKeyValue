@@ -23,6 +23,7 @@ namespace ValveKeyValue.Test.TextKV3
             {
                 Assert.That((string)data["foo"], Is.EqualTo("bar"));
                 Assert.That((string)data["bar"], Is.EqualTo("foo"));
+                Assert.That((string)data["multipleFlags"], Is.EqualTo("cool value"));
                 Assert.That((long)data["flaggedNumber"], Is.EqualTo(-1234));
             });
         }
@@ -123,6 +124,12 @@ namespace ValveKeyValue.Test.TextKV3
                 // TODO: Should this throw instead because strings need to be quoted? Or should it parse until it hits a non number like 123?
                 Assert.That(data["intWithStringSuffix"].ValueType, Is.EqualTo(KVValueType.String));
                 Assert.That((string)data["intWithStringSuffix"], Is.EqualTo("123foobar"));
+
+                Assert.That(data["singleQuotes"].ValueType, Is.EqualTo(KVValueType.String));
+                Assert.That((string)data["singleQuotes"], Is.EqualTo("string"));
+
+                Assert.That(data["singleQuotesWithQuotesInside"].ValueType, Is.EqualTo(KVValueType.String));
+                Assert.That((string)data["singleQuotesWithQuotesInside"], Is.EqualTo("string is \"pretty\" cool"));
             });
         }
     }

@@ -16,4 +16,6 @@
 	doubleNegativeMaxValue = -62147483647.1337
 	doubleExponent = 1.23456E+2
 	intWithStringSuffix = 123foobar
+	singleQuotes = 'string'
+	singleQuotesWithQuotesInside = 'string is "pretty" cool'
 }
