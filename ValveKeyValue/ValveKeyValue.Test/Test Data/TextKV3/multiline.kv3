@@ -4,4 +4,10 @@
 First line of a multi-line string literal.
 Second line of a multi-line string literal.
 """
+	multiLineWithQuotesInside = """
+hmm this """is awkward
+\""" yes
+"""
+	singleQuotesButWithNewLineAnyway = "hello
+valve"
 }

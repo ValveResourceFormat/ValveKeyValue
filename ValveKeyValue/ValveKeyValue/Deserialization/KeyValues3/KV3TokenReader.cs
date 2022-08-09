@@ -363,11 +363,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         string ReadToken()
         {
-            // TODO: while true
-            // swallow whitespace
-            // swallow comments
-            // swallow whitespace
-
             var next = Peek();
 
             if (next == '"' || next == '\'')
@@ -432,37 +427,69 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                         Next();
                     }
 
-                    if (Peek() == '\n')
-                    {
-                        Next();
-                    }
+                    ReadChar('\n');
                 }
                 else
                 {
                     return string.Empty;
                 }
             }
-
-            // TODO: Figure out '\' character
-
-            while (Peek() != quotationMark)
-            {
-                var next = Next();
-
-                if (!isMultiline && next == '\n')
-                {
-                    throw new InvalidDataException("Found new line while parsing literal string.");
-                }
-
-                sb.Append(next);
-            }
-
-            ReadChar(quotationMark);
-
             if (isMultiline)
             {
-                ReadChar('"');
-                ReadChar('"');
+                var escapeNext = false;
+
+                // Scan until \n"""
+                while (true)
+                {
+                    var next = Next();
+
+                    if (next == '\\')
+                    {
+                        // TODO: Is valve keeping the \ character in the string?
+                        escapeNext = true;
+                    }
+
+                    if (!escapeNext && next == '\n')
+                    {
+                        sb.Append(next);
+
+                        next = Next();
+
+                        // TODO: This is absolutely terrible
+                        if (next == '"')
+                        {
+                            next = Next();
+
+                            if (next == '"')
+                            {
+                                next = Next();
+
+                                if (next == '"')
+                                {
+                                    break;
+                                }
+                                else
+                                {
+                                    sb.Append(next);
+                                }
+                            }
+                            else
+                            {
+                                sb.Append(next);
+                            }
+                        }
+                        else
+                        {
+                            sb.Append(next);
+                        }
+                    }
+                    else
+                    {
+                        escapeNext = false;
+
+                        sb.Append(next);
+                    }
+                }
 
                 if (sb.Length > 0 && sb[^1] == '\n')
                 {
@@ -473,6 +500,17 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 {
                     sb.Remove(sb.Length - 1, 1);
                 }
+            }
+            else
+            {
+                // TODO: Figure out '\' character escapes, does Valve actually unescape anything?
+                while (Peek() != quotationMark)
+                {
+                    var next = Next();
+                    sb.Append(next);
+                }
+
+                ReadChar(quotationMark);
             }
 
             return sb.ToString();

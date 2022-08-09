@@ -122,36 +122,34 @@ namespace ValveKeyValue.Serialization.KeyValues3
             if (isMultiline)
             {
                 writer.Write("\"\"\"\n");
-            }
-            else
-            {
-                writer.Write('"');
-            }
 
-            foreach (var @char in text)
-            {
-                switch (@char)
-                {
-                    case '"':
-                        writer.Write("\\\"");
-                        break;
+                text = text.Replace("\"\"\"", "\\\"\"\"");
 
-                    case '\\':
-                        writer.Write("\\");
-                        break;
-
-                    default:
-                        writer.Write(@char);
-                        break;
-                }
-            }
-
-            if (isMultiline)
-            {
+                writer.Write(text);
                 writer.Write("\n\"\"\"");
             }
             else
             {
+                writer.Write('"');
+
+                foreach (var @char in text)
+                {
+                    switch (@char)
+                    {
+                        case '"':
+                            writer.Write("\\\"");
+                            break;
+
+                        case '\\':
+                            writer.Write("\\");
+                            break;
+
+                        default:
+                            writer.Write(@char);
+                            break;
+                    }
+                }
+
                 writer.Write('"');
             }
         }
