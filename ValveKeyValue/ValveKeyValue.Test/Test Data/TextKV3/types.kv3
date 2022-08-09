@@ -18,4 +18,11 @@
 	intWithStringSuffix = 123foobar
 	singleQuotes = 'string'
 	singleQuotesWithQuotesInside = 'string is "pretty" cool'
+	key_with._various.separators = "test"
+	"quoted key with : {} terminators" = "test quoted key"
+	"""
+this is a multi
+line
+key
+""" = "multi line key parsed"
 }
