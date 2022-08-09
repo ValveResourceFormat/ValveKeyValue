@@ -10,7 +10,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 {
     class KV3TokenReader : IDisposable
     {
-        const char QuotationMark = '"';
+        const char QuotationMark = '"'; // TODO: Support single quotes 'abc'
         const char ObjectStart = '{';
         const char ObjectEnd = '}';
         const char ArrayStart = '[';
@@ -126,7 +126,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             SwallowWhitespace();
             str = ReadToken();
 
-            if (str != "kv3")
+            if (!str.Equals("kv3", StringComparison.OrdinalIgnoreCase))
             {
                 throw new InvalidDataException($"The header is incorrect, expected 'kv3' but got '{str}'.");
             }
@@ -134,7 +134,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             SwallowWhitespace();
             str = ReadToken();
 
-            if (str != "encoding")
+            if (!str.Equals("encoding", StringComparison.OrdinalIgnoreCase))
             {
                 throw new InvalidDataException($"The header is incorrect, expected 'encoding' but got '{str}'.");
             }
@@ -145,7 +145,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
             str = ReadToken();
 
-            if (str != "version")
+            if (!str.Equals("version", StringComparison.OrdinalIgnoreCase))
             {
                 throw new InvalidDataException($"The header is incorrect, expected 'version' but got '{str}'.");
             }
@@ -158,7 +158,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
             str = ReadToken();
 
-            if (str != "format")
+            if (!str.Equals("format", StringComparison.OrdinalIgnoreCase))
             {
                 throw new InvalidDataException($"The header is incorrect, expected 'format' but got '{str}'.");
             }
@@ -169,7 +169,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
             str = ReadToken();
 
-            if (str != "version")
+            if (!str.Equals("version", StringComparison.OrdinalIgnoreCase))
             {
                 throw new InvalidDataException($"The header is incorrect, expected 'version' but got '{str}'.");
             }
