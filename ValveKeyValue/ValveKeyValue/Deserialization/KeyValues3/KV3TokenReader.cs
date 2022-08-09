@@ -12,7 +12,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
     {
         const char ObjectStart = '{';
         const char ObjectEnd = '}';
-        const char BinaryArrayMarker = '#';
+        const char BinaryBlobMarker = '#';
         const char ArrayStart = '[';
         const char ArrayEnd = ']';
         const char CommentBegin = '/';
@@ -53,7 +53,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             {
                 ObjectStart => ReadObjectStart(),
                 ObjectEnd => ReadObjectEnd(),
-                BinaryArrayMarker when Peek() == ArrayStart => ReadBinaryArrayStart(),
+                BinaryBlobMarker => ReadBinaryArrayStart(),
                 ArrayStart => ReadArrayStart(),
                 ArrayEnd => ReadArrayEnd(),
                 CommentBegin => ReadComment(),
@@ -111,9 +111,9 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         KVToken ReadBinaryArrayStart()
         {
-            ReadChar(BinaryArrayMarker);
-            ReadChar(ArrayStart);
-            return new KVToken(KVTokenType.BinaryArrayStart);
+            ReadChar(BinaryBlobMarker);
+            ReadChar(ArrayStart); // TODO: Strictly speaking Valve allows bare # without [ to be read as literal value (but what would that be?)
+            return new KVToken(KVTokenType.BinaryBlobStart);
         }
 
         KVToken ReadArrayStart()
