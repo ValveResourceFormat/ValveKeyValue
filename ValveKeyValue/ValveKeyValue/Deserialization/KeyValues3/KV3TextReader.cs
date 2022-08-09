@@ -194,6 +194,16 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                     listener.OnArrayValue(value);
                     break;
 
+                case KV3TextReaderState.InObjectAfterValue:
+                    FinalizeCurrentObject(@explicit: false);
+                    stateMachine.PushObject();
+                    SetObjectKey(text);
+                    break;
+
+                case KV3TextReaderState.InObjectBeforeKey:
+                    SetObjectKey(text);
+                    break;
+
                 case KV3TextReaderState.InObjectBeforeValue:
                     var name = stateMachine.CurrentName;
                     listener.OnKeyValuePair(name, value);

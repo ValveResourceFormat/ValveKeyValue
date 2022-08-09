@@ -130,6 +130,15 @@ namespace ValveKeyValue.Test.TextKV3
 
                 Assert.That(data["singleQuotesWithQuotesInside"].ValueType, Is.EqualTo(KVValueType.String));
                 Assert.That((string)data["singleQuotesWithQuotesInside"], Is.EqualTo("string is \"pretty\" cool"));
+
+                Assert.That(data["key_with._various.separators"].ValueType, Is.EqualTo(KVValueType.String));
+                Assert.That((string)data["key_with._various.separators"], Is.EqualTo("test"));
+
+                Assert.That(data["quoted key with : {} terminators"].ValueType, Is.EqualTo(KVValueType.String));
+                Assert.That((string)data["quoted key with : {} terminators"], Is.EqualTo("test quoted key"));
+
+                Assert.That(data["this is a multi\nline\nkey"].ValueType, Is.EqualTo(KVValueType.String));
+                Assert.That((string)data["this is a multi\nline\nkey"], Is.EqualTo("multi line key parsed"));
             });
         }
     }

@@ -343,7 +343,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                     continue;
                 }
 
-                if (c == '_' || c == ':' || c == '.')
+                if (c == '_' || c == '.')
                 {
                     continue;
                 }
