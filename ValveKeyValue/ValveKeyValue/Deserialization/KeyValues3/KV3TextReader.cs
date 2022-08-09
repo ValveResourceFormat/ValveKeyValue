@@ -73,6 +73,10 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                         ReadText(token.Value);
                         break;
 
+                    case KVTokenType.BinaryBlobStart:
+                        BeginBinaryBlob();
+                        break;
+
                     case KVTokenType.ObjectStart:
                         BeginNewObject();
                         break;
@@ -149,6 +153,12 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         {
             switch (stateMachine.Current)
             {
+                case KV3TextReaderState.InBinaryBlob:
+                    {
+                        var value = ParseHexCharacter(text);
+                        break;
+                    }
+
                 case KV3TextReaderState.InArray:
                     new KVObjectValue<string>(text, KVValueType.String);
                     break;
@@ -165,17 +175,19 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                     break;
 
                 case KV3TextReaderState.InObjectAfterKey:
-                    KVValue value = ParseValue(text);
-
-                    if (value != null)
                     {
-                        var name = stateMachine.CurrentName;
-                        listener.OnKeyValuePair(name, value);
+                        KVValue value = ParseValue(text);
 
-                        stateMachine.Push(KV3TextReaderState.InObjectAfterValue);
+                        if (value != null)
+                        {
+                            var name = stateMachine.CurrentName;
+                            listener.OnKeyValuePair(name, value);
+
+                            stateMachine.Push(KV3TextReaderState.InObjectAfterValue);
+                        }
+
+                        break;
                     }
-
-                    break;
 
                 default:
                     throw new InvalidOperationException($"Unhandled identifier reader state: {stateMachine.Current}.");
@@ -218,9 +230,20 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             }
         }
 
+        void BeginBinaryBlob()
+        {
+            if (stateMachine.Current != KV3TextReaderState.InArray && stateMachine.Current != KV3TextReaderState.InObjectAfterKey)
+            {
+                throw new InvalidOperationException($"Attempted to begin new binary blob while in state {stateMachine.Current}.");
+            }
+
+            stateMachine.PushObject();
+            stateMachine.Push(KV3TextReaderState.InBinaryBlob);
+        }
+
         void BeginNewArray()
         {
-            if (stateMachine.Current != KV3TextReaderState.InObjectAfterKey)
+            if (stateMachine.Current != KV3TextReaderState.InArray && stateMachine.Current != KV3TextReaderState.InObjectAfterKey)
             {
                 throw new InvalidOperationException($"Attempted to begin new array while in state {stateMachine.Current}.");
             }
@@ -231,7 +254,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         void FinalizeCurrentArray()
         {
-            if (stateMachine.Current != KV3TextReaderState.InArray)
+            if (stateMachine.Current != KV3TextReaderState.InArray && stateMachine.Current != KV3TextReaderState.InBinaryBlob)
             {
                 throw new InvalidOperationException($"Attempted to finalize array while in state {stateMachine.Current}.");
             }
@@ -340,18 +363,14 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             return new KVObjectValue<string>(text, KVValueType.String);
         }
 
-        static byte[] ParseHexStringAsByteArray(string hexadecimalRepresentation)
+        static byte ParseHexCharacter(string hexadecimalRepresentation)
         {
-            Require.NotNull(hexadecimalRepresentation, nameof(hexadecimalRepresentation));
-
-            var data = new byte[hexadecimalRepresentation.Length / 2];
-            for (var i = 0; i < data.Length; i++)
+            if (hexadecimalRepresentation.Length != 2)
             {
-                var currentByteText = hexadecimalRepresentation.Substring(i * 2, 2);
-                data[i] = byte.Parse(currentByteText, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+                throw new InvalidDataException("Expected hex byte (eg. 00-FF)");
             }
 
-            return data;
+            return byte.Parse(hexadecimalRepresentation, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
         }
 
         static KVFlag ParseFlag(string flag)
