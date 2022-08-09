@@ -70,6 +70,15 @@ namespace ValveKeyValue.Test.TextKV3
         }
 
         [Test]
+        public void DeserializesNestedObject()
+        {
+            using var stream = TestDataHelper.OpenResource("TextKV3.object.kv3");
+            var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
+
+            Assert.That((string)data["a"]["b"]["c"], Is.EqualTo("d"));
+        }
+
+        [Test]
         public void DeserializesBasicTypes()
         {
             using var stream = TestDataHelper.OpenResource("TextKV3.types.kv3");

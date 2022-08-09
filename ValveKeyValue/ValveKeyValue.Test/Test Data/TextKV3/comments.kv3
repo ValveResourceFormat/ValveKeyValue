@@ -5,6 +5,6 @@
 	line
 	comment */
 	foo = "bar"
-	one = /* comment in between */ "1"
-	two /* comment in between */ = "2"
+	one = /* comment in between */ "1" /* comment after */
+	two /* comment in between */ = "2" /* comment after */
 }

@@ -73,8 +73,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
         {
             WriteIndentation();
 
-            // TODO: We need to quote keys when they contain terminators such as a dot
-            writer.Write(name);
+            WriteKey(name);
             writer.Write(" = ");
 
             switch (value.ValueType)
@@ -154,6 +153,62 @@ namespace ValveKeyValue.Serialization.KeyValues3
             else
             {
                 writer.Write('"');
+            }
+        }
+
+        void WriteKey(string key)
+        {
+            var escaped = false;
+            var sb = new StringBuilder(key.Length + 2);
+            sb.Append('"');
+
+            foreach (var @char in key)
+            {
+                switch (@char)
+                {
+                    case '\t':
+                        escaped = true;
+                        sb.Append('\\');
+                        sb.Append('t');
+                        break;
+
+                    case '\n':
+                        escaped = true;
+                        sb.Append('\\');
+                        sb.Append('n');
+                        break;
+
+                    case ' ':
+                        escaped = true;
+                        sb.Append(' ');
+                        break;
+
+                    case '"':
+                        escaped = true;
+                        sb.Append('\\');
+                        sb.Append('"');
+                        break;
+
+                    case '\'':
+                        escaped = true;
+                        sb.Append('\\');
+                        sb.Append('\'');
+                        break;
+
+                    default:
+                        sb.Append(@char);
+                        break;
+                }
+            }
+
+            if (escaped)
+            {
+                sb.Append('"');
+                writer.Write(sb.ToString());
+            }
+            else
+            {
+                writer.Write(key);
             }
         }
 
