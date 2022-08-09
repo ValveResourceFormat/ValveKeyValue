@@ -186,13 +186,14 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         void ReadText(string text)
         {
-            var value = ParseValue(text);
-
             switch (stateMachine.Current)
             {
                 case KV3TextReaderState.InArray:
-                    listener.OnArrayValue(value);
-                    break;
+                    {
+                        var value = ParseValue(text);
+                        listener.OnArrayValue(value);
+                        break;
+                    }
 
                 case KV3TextReaderState.InObjectAfterValue:
                     FinalizeCurrentObject(@explicit: false);
@@ -205,11 +206,14 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                     break;
 
                 case KV3TextReaderState.InObjectBeforeValue:
-                    var name = stateMachine.CurrentName;
-                    listener.OnKeyValuePair(name, value);
+                    {
+                        var name = stateMachine.CurrentName;
+                        var value = ParseValue(text);
+                        listener.OnKeyValuePair(name, value);
 
-                    stateMachine.Push(KV3TextReaderState.InObjectAfterValue);
-                    break;
+                        stateMachine.Push(KV3TextReaderState.InObjectAfterValue);
+                        break;
+                    }
 
                 default:
                     throw new InvalidOperationException($"Unhandled text reader state: {stateMachine.Current}.");
