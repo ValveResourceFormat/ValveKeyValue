@@ -42,6 +42,23 @@ namespace ValveKeyValue
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="KVObject"/> class.
+        /// </summary>
+        /// <param name="name">Name of this object.</param>
+        /// <param name="items">Child items of this object.</param>
+        public KVObject(string name, IEnumerable<KVValue> items)
+        {
+            Require.NotNull(name, nameof(name));
+            Require.NotNull(items, nameof(items));
+
+            Name = name;
+            var value = new KVArrayValue();
+            value.AddRange(items);
+
+            Value = value;
+        }
+
+        /// <summary>
         /// Gets the name of this object.
         /// </summary>
         public string Name { get; }
@@ -89,6 +106,11 @@ namespace ValveKeyValue
         /// Gets the children of this <see cref="KVObject"/>.
         /// </summary>
         public IEnumerable<KVObject> Children => (Value as KVCollectionValue) ?? Enumerable.Empty<KVObject>();
+
+        /// <summary>
+        /// Gets the children of this <see cref="KVObject"/>.
+        /// </summary>
+        public IEnumerable<KVValue> ChildrenValues => (Value as KVArrayValue) ?? Enumerable.Empty<KVValue>();
 
         KVCollectionValue GetCollectionValue()
         {

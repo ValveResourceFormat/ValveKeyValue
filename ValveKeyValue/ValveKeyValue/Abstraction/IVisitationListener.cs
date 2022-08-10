@@ -8,6 +8,10 @@ namespace ValveKeyValue.Abstraction
 
         void OnKeyValuePair(string name, KVValue value);
 
+        void OnArrayStart(string name);
+
         void OnArrayValue(KVValue value);
+
+        void OnArrayEnd();
     }
 }
