@@ -1,5 +1,8 @@
-﻿namespace ValveKeyValue.KeyValues3
+﻿using System;
+
+namespace ValveKeyValue
 {
+    [Flags]
     public enum KVFlag
     {
         None = 0,

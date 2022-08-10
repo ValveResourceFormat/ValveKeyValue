@@ -5,4 +5,15 @@
 	uppercase = RESOURCE:"foo"
 	flaggedNumber = panorama:-1234
 	multipleFlags = resource:resource_name|subclass:"cool value"
+	soundEvent = soundEvent:"event sound"
+	noFlags = 5
+
+	flaggedObject = panorama:{
+		1 = soundEvent:"test1"
+		2 = "test2"
+		3 = subclass:[
+			"test3"
+		]
+		4 = resource_name:"test4"
+	}
 }
