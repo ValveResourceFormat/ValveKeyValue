@@ -16,7 +16,7 @@ namespace ValveKeyValue
         /// <param name="value">Value of this object.</param>
         public KVObject(string name, KVValue value)
         {
-            ArgumentNullException.ThrowIfNull(name);
+            //ArgumentNullException.ThrowIfNull(name);  // Objects in an array will not have a name
             ArgumentNullException.ThrowIfNull(value);
 
             Name = name;
@@ -30,7 +30,7 @@ namespace ValveKeyValue
         /// <param name="items">Child items of this object.</param>
         public KVObject(string name, IEnumerable<KVObject> items)
         {
-            ArgumentNullException.ThrowIfNull(name);
+            ArgumentNullException.ThrowIfNull(name); // Objects in an array will not have a name
             ArgumentNullException.ThrowIfNull(items);
 
             Name = name;
@@ -47,8 +47,8 @@ namespace ValveKeyValue
         /// <param name="items">Child items of this object.</param>
         public KVObject(string name, IEnumerable<KVValue> items)
         {
-            Require.NotNull(name, nameof(name));
-            Require.NotNull(items, nameof(items));
+            //ArgumentNullException.ThrowIfNull(name); // Objects in an array will not have a name
+            ArgumentNullException.ThrowIfNull(items);
 
             Name = name;
             var value = new KVArrayValue();
