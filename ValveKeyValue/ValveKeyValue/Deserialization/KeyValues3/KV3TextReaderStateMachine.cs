@@ -36,6 +36,17 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         public void SetName(string name) => CurrentObject.Key = name;
 
+        public void SetFlag(KVFlag flag) => CurrentObject.Flag |= flag;
+
+        public KVFlag GetAndResetFlag()
+        {
+            var flag = CurrentObject.Flag;
+
+            CurrentObject.Flag = KVFlag.None;
+
+            return flag;
+        }
+
         public void SetArrayCurrent() => CurrentObject.IsArray = true;
 
         KVPartialState<KV3TextReaderState> CurrentObject => states.Peek();
