@@ -76,6 +76,21 @@ namespace ValveKeyValue.Deserialization
             parentState.Items.Add(completedObject);
         }
 
+        public void OnArrayEnd()
+        {
+            if (StateStack.Count <= 1)
+            {
+                return;
+            }
+
+            var state = StateStack.Pop();
+
+            var completedObject = MakeArray(state);
+
+            var parentState = StateStack.Peek();
+            parentState.Items.Add(completedObject);
+        }
+
         public void DiscardCurrentObject()
         {
             var state = StateStack.Peek();
@@ -94,6 +109,16 @@ namespace ValveKeyValue.Deserialization
             var state = new KVPartialState
             {
                 Key = name
+            };
+            StateStack.Push(state);
+        }
+
+        public void OnArrayStart(string name)
+        {
+            var state = new KVPartialState
+            {
+                Key = name,
+                IsArray = true,
             };
             StateStack.Push(state);
         }
@@ -133,6 +158,11 @@ namespace ValveKeyValue.Deserialization
                 return null;
             }
 
+            if (state.IsArray)
+            {
+                throw new InvalidCastException("Tried to make an object ouf of an array.");
+            }
+
             KVObject @object;
 
             if (state.Value != null)
@@ -142,6 +172,32 @@ namespace ValveKeyValue.Deserialization
             else
             {
                 @object = new KVObject(state.Key, state.Items);
+            }
+
+            return @object;
+        }
+
+        KVObject MakeArray(KVPartialState state)
+        {
+            if (state.Discard)
+            {
+                return null;
+            }
+
+            if (!state.IsArray)
+            {
+                throw new InvalidCastException("Tried to make an array out of an object.");
+            }
+
+            KVObject @object;
+
+            if (state.Value != null)
+            {
+                @object = new KVObject(state.Key, state.Value);
+            }
+            else
+            {
+                @object = new KVObject(state.Key, state.Children);
             }
 
             return @object;
