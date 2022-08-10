@@ -266,7 +266,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
             stateMachine.PopObject();
 
-            if (stateMachine.IsInObject)
+            if (stateMachine.IsInObject && !stateMachine.IsInArray)
             {
                 stateMachine.Push(KV3TextReaderState.InObjectBeforeKey);
             }
