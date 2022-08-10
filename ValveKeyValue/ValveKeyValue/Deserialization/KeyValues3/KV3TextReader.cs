@@ -2,7 +2,6 @@
 using System.Globalization;
 using System.IO;
 using ValveKeyValue.Abstraction;
-using ValveKeyValue.KeyValues3;
 
 namespace ValveKeyValue.Deserialization.KeyValues3
 {
@@ -147,6 +146,8 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             }
 
             var flag = ParseFlag(text);
+
+            stateMachine.SetFlag(flag);
         }
 
         void ReadText(string text)
@@ -156,6 +157,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 case KV3TextReaderState.InArray:
                     {
                         var value = ParseValue(text);
+                        value.Flag = stateMachine.GetAndResetFlag();
                         listener.OnArrayValue(value);
                         break;
                     }
@@ -168,6 +170,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                     {
                         var name = stateMachine.CurrentName;
                         var value = ParseValue(text);
+                        value.Flag = stateMachine.GetAndResetFlag();
                         listener.OnKeyValuePair(name, value);
 
                         stateMachine.Push(KV3TextReaderState.InObjectBeforeKey);
@@ -184,6 +187,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             var bytes = Utils.ParseHexStringAsByteArray(text);
             //var value = new KVObjectValue<byte[]>(bytes, KVValueType.BinaryBlob);
             var value = new KVObjectValue<byte>(0x00, KVValueType.BinaryBlob); // TODO: wrong
+            value.Flag = stateMachine.GetAndResetFlag();
 
             switch (stateMachine.Current)
             {

@@ -21,10 +21,31 @@ namespace ValveKeyValue.Test.TextKV3
 
             Assert.Multiple(() =>
             {
+                Assert.That(data["foo"].Flag, Is.EqualTo(KVFlag.Resource));
                 Assert.That((string)data["foo"], Is.EqualTo("bar"));
+
+                Assert.That(data["bar"].Flag, Is.EqualTo(KVFlag.Resource));
                 Assert.That((string)data["bar"], Is.EqualTo("foo"));
+
+                Assert.That(data["multipleFlags"].Flag, Is.EqualTo(KVFlag.Resource | KVFlag.ResourceName | KVFlag.SubClass));
                 Assert.That((string)data["multipleFlags"], Is.EqualTo("cool value"));
+
+                Assert.That(data["flaggedNumber"].Flag, Is.EqualTo(KVFlag.Panorama));
                 Assert.That((long)data["flaggedNumber"], Is.EqualTo(-1234));
+
+                Assert.That(data["soundEvent"].Flag, Is.EqualTo(KVFlag.SoundEvent));
+                Assert.That((string)data["soundEvent"], Is.EqualTo("event sound"));
+
+                Assert.That(data["noFlags"].Flag, Is.EqualTo(KVFlag.None));
+                Assert.That((long)data["noFlags"], Is.EqualTo(5));
+
+                /* TODO
+                Assert.That(data["flaggedObject"].Flag, Is.EqualTo(KVFlag.Panorama));
+                Assert.That(data["flaggedObject"]["1"].Flag, Is.EqualTo(KVFlag.SoundEvent));
+                Assert.That(data["flaggedObject"]["2"].Flag, Is.EqualTo(KVFlag.None));
+                Assert.That(data["flaggedObject"]["3"].Flag, Is.EqualTo(KVFlag.SubClass));
+                Assert.That(data["flaggedObject"]["4"].Flag, Is.EqualTo(KVFlag.ResourceName));
+                */
             });
         }
 
