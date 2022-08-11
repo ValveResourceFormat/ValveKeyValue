@@ -23,6 +23,11 @@
 		#[
 			11 FF
 		],
-		resource:"hello.world"
+		resource:"hello.world",
+		"""
+multiline
+string
+""",
+		-69.420
 	]
 }
