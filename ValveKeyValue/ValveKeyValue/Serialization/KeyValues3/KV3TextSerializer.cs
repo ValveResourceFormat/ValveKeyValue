@@ -64,6 +64,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
             indentation--;
             WriteIndentation();
             writer.Write(']');
+            // TODO: Write comma if we're in an array
             writer.WriteLine();
         }
 
@@ -94,6 +95,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
             indentation--;
             WriteIndentation();
             writer.Write('}');
+            // TODO: Write comma if we're in an array
             writer.WriteLine();
         }
 
