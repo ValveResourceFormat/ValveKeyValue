@@ -7,21 +7,18 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 {
     sealed class KV3TextReader : IVisitingReader
     {
-        public KV3TextReader(TextReader textReader, IParsingVisitationListener listener, KVSerializerOptions options)
+        public KV3TextReader(TextReader textReader, IParsingVisitationListener listener)
         {
             Require.NotNull(textReader, nameof(textReader));
             Require.NotNull(listener, nameof(listener));
-            Require.NotNull(options, nameof(options));
 
             this.listener = listener;
-            this.options = options;
 
-            tokenReader = new KV3TokenReader(textReader, options);
+            tokenReader = new KV3TokenReader(textReader);
             stateMachine = new KV3TextReaderStateMachine();
         }
 
         readonly IParsingVisitationListener listener;
-        readonly KVSerializerOptions options;
 
         readonly KV3TokenReader tokenReader;
         readonly KV3TextReaderStateMachine stateMachine;

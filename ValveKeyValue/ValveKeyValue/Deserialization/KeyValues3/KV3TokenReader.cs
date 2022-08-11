@@ -8,7 +8,7 @@ using Encoding = ValveKeyValue.KeyValues3.Encoding;
 
 namespace ValveKeyValue.Deserialization.KeyValues3
 {
-    class KV3TokenReader : IDisposable
+    class KV3TokenReader : KVTokenReader
     {
         const char ObjectStart = '{';
         const char ObjectEnd = '}';
@@ -19,24 +19,14 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         const char Assignment = '=';
         const char Comma = ',';
 
-        public KV3TokenReader(TextReader textReader, KVSerializerOptions options)
+        public KV3TokenReader(TextReader textReader) : base(textReader)
         {
-            Require.NotNull(textReader, nameof(textReader));
-            Require.NotNull(options, nameof(options));
-
-            this.textReader = textReader;
-            this.options = options;
-
             // Dota 2 binary from 2017 used "+" as a terminate (for flagged values), but then they changed it to "|"
             var terminators = "{}[]=, \t\n\r'\":|;".ToCharArray();
             integerTerminators = new HashSet<int>(terminators.Select(t => (int)t));
         }
 
-        readonly KVSerializerOptions options;
         readonly HashSet<int> integerTerminators;
-        TextReader textReader;
-        bool disposed;
-        int? peekedNext;
 
         public KVToken ReadNextToken()
         {
@@ -61,17 +51,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 Comma => ReadComma(),
                 _ => ReadStringOrIdentifier(),
             };
-        }
-
-        public void Dispose()
-        {
-            if (!disposed)
-            {
-                textReader.Dispose();
-                textReader = null;
-
-                disposed = true;
-            }
         }
 
         KVToken ReadAssignment()
@@ -309,50 +288,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             return new KVToken(KVTokenType.Comment, text);
         }
 
-        char Next()
-        {
-            int next;
-
-            if (peekedNext.HasValue)
-            {
-                next = peekedNext.Value;
-                peekedNext = null;
-            }
-            else
-            {
-                next = textReader.Read();
-            }
-
-            if (IsEndOfFile(next))
-            {
-                throw new EndOfStreamException();
-            }
-
-            return (char)next;
-        }
-
-        int Peek()
-        {
-            if (peekedNext.HasValue)
-            {
-                return peekedNext.Value;
-            }
-
-            var next = textReader.Read();
-            peekedNext = next;
-
-            return next;
-        }
-
-        void ReadChar(char expectedChar)
-        {
-            var next = Next();
-            if (next != expectedChar)
-            {
-                throw new InvalidDataException($"The syntax is incorrect, expected '{expectedChar}' but got '{next}'.");
-            }
-        }
-
         bool IsIdentifier(string text)
         {
             for (var i = 0; i < text.Length; i++)
@@ -404,20 +339,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             }
 
             return sb.ToString();
-        }
-
-        void SwallowWhitespace()
-        {
-            while (PeekWhitespace())
-            {
-                Next();
-            }
-        }
-
-        bool PeekWhitespace()
-        {
-            var next = Peek();
-            return !IsEndOfFile(next) && char.IsWhiteSpace((char)next);
         }
 
         string ReadQuotedStringRaw(char quotationMark)
@@ -512,7 +433,5 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
             return sb.ToString();
         }
-
-        bool IsEndOfFile(int value) => value == -1;
     }
 }
