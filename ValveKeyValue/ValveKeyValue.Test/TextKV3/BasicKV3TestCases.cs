@@ -39,13 +39,11 @@ namespace ValveKeyValue.Test.TextKV3
                 Assert.That(data["noFlags"].Flag, Is.EqualTo(KVFlag.None));
                 Assert.That((long)data["noFlags"], Is.EqualTo(5));
 
-                /* TODO
                 Assert.That(data["flaggedObject"].Flag, Is.EqualTo(KVFlag.Panorama));
                 Assert.That(data["flaggedObject"]["1"].Flag, Is.EqualTo(KVFlag.SoundEvent));
                 Assert.That(data["flaggedObject"]["2"].Flag, Is.EqualTo(KVFlag.None));
                 Assert.That(data["flaggedObject"]["3"].Flag, Is.EqualTo(KVFlag.SubClass));
                 Assert.That(data["flaggedObject"]["4"].Flag, Is.EqualTo(KVFlag.ResourceName));
-                */
             });
         }
 

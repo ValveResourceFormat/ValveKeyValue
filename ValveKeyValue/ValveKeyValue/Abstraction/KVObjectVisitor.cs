@@ -21,7 +21,7 @@ namespace ValveKeyValue.Abstraction
             switch (value.ValueType)
             {
                 case KVValueType.Collection:
-                    listener.OnObjectStart(name);
+                    listener.OnObjectStart(name, value.Flag);
                     VisitValue((IEnumerable<KVObject>)value);
                     listener.OnObjectEnd();
                     break;

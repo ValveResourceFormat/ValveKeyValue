@@ -96,7 +96,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             switch (type)
             {
                 case KV1BinaryNodeType.ChildObject:
-                    listener.OnObjectStart(name);
+                    listener.OnObjectStart(name, KVFlag.None);
                     ReadObjectCore();
                     listener.OnObjectEnd();
                     return;

@@ -24,7 +24,7 @@ namespace ValveKeyValue.Serialization.KeyValues1
             writer.Dispose();
         }
 
-        public void OnObjectStart(string name)
+        public void OnObjectStart(string name, KVFlag flag)
         {
             objectDepth++;
             Write(KV1BinaryNodeType.ChildObject);
@@ -75,7 +75,7 @@ namespace ValveKeyValue.Serialization.KeyValues1
             }
         }
 
-        public void OnArrayStart(string name) => throw new NotImplementedException();
+        public void OnArrayStart(string name, KVFlag flag) => throw new NotImplementedException();
         public void OnArrayValue(KVValue value) => throw new NotImplementedException();
         public void OnArrayEnd() => throw new NotImplementedException();
 
