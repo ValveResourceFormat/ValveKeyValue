@@ -181,6 +181,9 @@ namespace ValveKeyValue.Test.TextKV3
 
                 Assert.That(data["this is a multi\nline\nkey"].ValueType, Is.EqualTo(KVValueType.String));
                 Assert.That((string)data["this is a multi\nline\nkey"], Is.EqualTo("multi line key parsed"));
+
+                Assert.That(data["empty.string"].ValueType, Is.EqualTo(KVValueType.String));
+                Assert.That((string)data["empty.string"], Is.EqualTo(string.Empty));
             });
         }
     }

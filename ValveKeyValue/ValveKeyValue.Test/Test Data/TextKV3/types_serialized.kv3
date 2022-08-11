@@ -21,6 +21,7 @@
 	key_with._various.separators = "test"
 	"quoted key with : {} terminators" = "test quoted key"
 	"this is a multi\nline\nkey" = "multi line key parsed"
+	empty.string = ""
 	multiLineString = """
 hello
 world
