@@ -52,8 +52,6 @@ namespace ValveKeyValue.Test.TextKV3
                 text = reader.ReadToEnd();
             }
 
-            System.Console.WriteLine(text);
-
             Assert.That(text, Is.EqualTo(expected));
         }
     }
