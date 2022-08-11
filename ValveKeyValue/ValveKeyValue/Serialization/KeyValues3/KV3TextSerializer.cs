@@ -29,7 +29,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
         }
 
         public void OnObjectStart(string name, KVFlag flag)
-            => WriteStartObject(name);
+            => WriteStartObject(name, flag);
 
         public void OnObjectEnd()
             => WriteEndObject();
@@ -37,27 +37,53 @@ namespace ValveKeyValue.Serialization.KeyValues3
         public void OnKeyValuePair(string name, KVValue value)
             => WriteKeyValuePair(name, value);
 
-        public void OnArrayStart(string name, KVFlag flag) => throw new NotImplementedException();
-        public void OnArrayValue(KVValue value) => throw new NotImplementedException();
-        public void OnArrayEnd() => throw new NotImplementedException();
+        public void OnArrayStart(string name, KVFlag flag)
+        {
+            WriteIndentation();
+
+            WriteKey(name);
+            WriteFlag(flag);
+
+            writer.Write('[');
+            indentation++;
+            WriteLine();
+        }
+
+        public void OnArrayValue(KVValue value)
+        {
+            WriteIndentation();
+
+            WriteValue(value);
+
+            writer.Write(',');
+            writer.WriteLine(); // TODO: If short, no line?
+        }
+
+        public void OnArrayEnd()
+        {
+            indentation--;
+            WriteIndentation();
+            writer.Write(']');
+            writer.WriteLine();
+        }
 
         public void DiscardCurrentObject()
         {
             throw new NotSupportedException("Discard not supported when writing.");
         }
 
-        void WriteStartObject(string name)
+        void WriteStartObject(string name, KVFlag flag)
         {
             WriteIndentation();
 
             // TODO: Dumb hack, we should not have a root name
             if (indentation != 0 && name != "root")
             {
-                WriteText(name);
-                WriteLine();
+                WriteKey(name);
             }
 
-            WriteIndentation();
+            WriteFlag(flag);
+
             writer.Write('{');
             indentation++;
             WriteLine();
@@ -76,7 +102,15 @@ namespace ValveKeyValue.Serialization.KeyValues3
             WriteIndentation();
 
             WriteKey(name);
-            writer.Write(" = ");
+
+            WriteValue(value);
+
+            WriteLine();
+        }
+
+        void WriteValue(KVValue value)
+        {
+            WriteFlag(value.Flag);
 
             switch (value.ValueType)
             {
@@ -102,8 +136,6 @@ namespace ValveKeyValue.Serialization.KeyValues3
                     WriteText(value.ToString(null));
                     break;
             }
-
-            WriteLine();
         }
 
         void WriteIndentation()
@@ -158,6 +190,11 @@ namespace ValveKeyValue.Serialization.KeyValues3
 
         void WriteKey(string key)
         {
+            if (key == null)
+            {
+                return;
+            }
+
             var escaped = false;
             var sb = new StringBuilder(key.Length + 2);
             sb.Append('"');
@@ -210,11 +247,69 @@ namespace ValveKeyValue.Serialization.KeyValues3
             {
                 writer.Write(key);
             }
+
+            writer.Write(" = ");
+        }
+
+        void WriteFlag(KVFlag kvFlag)
+        {
+            if (kvFlag == KVFlag.None)
+            {
+                return;
+            }
+
+            var flags = (int)kvFlag;
+            var i = 0;
+            var currentFlag = -1;
+            var more = false;
+
+            while (i < flags)
+            {
+                var flag = (1 << ++currentFlag);
+
+                i += flag;
+
+                if ((flag & flags) == 0)
+                {
+                    continue;
+                }
+
+                var serialized = SerializeFlagName((KVFlag)flag);
+
+                if (serialized == null)
+                {
+                    continue;
+                }
+
+                if (more)
+                {
+                    writer.Write('|');
+                }
+
+                writer.Write(serialized);
+
+                more = true;
+            }
+
+            writer.Write(':');
         }
 
         void WriteLine()
         {
             writer.WriteLine();
+        }
+
+        string SerializeFlagName(KVFlag flag)
+        {
+            return flag switch
+            {
+                KVFlag.Resource => "resource",
+                KVFlag.ResourceName => "resource_name",
+                KVFlag.Panorama => "panorama",
+                KVFlag.SoundEvent => "soundevent",
+                KVFlag.SubClass => "subclass",
+                _ => null,
+            };
         }
     }
 }

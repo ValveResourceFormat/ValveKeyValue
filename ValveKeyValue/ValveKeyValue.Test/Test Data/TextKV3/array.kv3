@@ -13,6 +13,7 @@
 		1,
 		true,
 		false,
+		null,
 		{
 			foo = "bar"
 		},

@@ -13,10 +13,10 @@ namespace ValveKeyValue.Abstraction
 
         public void Visit(KVObject @object)
         {
-            VisitObject(@object.Name, @object.Value);
+            VisitObject(@object.Name, @object.Value, false);
         }
 
-        void VisitObject(string name, KVValue value)
+        void VisitObject(string name, KVValue value, bool isArray)
         {
             switch (value.ValueType)
             {
@@ -24,6 +24,16 @@ namespace ValveKeyValue.Abstraction
                     listener.OnObjectStart(name, value.Flag);
                     VisitValue((IEnumerable<KVObject>)value);
                     listener.OnObjectEnd();
+                    break;
+
+                case KVValueType.BinaryBlob:
+                    // TODO: write binary blobs
+                    break;
+
+                case KVValueType.Array:
+                    listener.OnArrayStart(name, value.Flag);
+                    VisitArray((IEnumerable<KVValue>)value);
+                    listener.OnArrayEnd();
                     break;
 
                 case KVValueType.FloatingPoint:
@@ -34,6 +44,11 @@ namespace ValveKeyValue.Abstraction
                 case KVValueType.Int64:
                 case KVValueType.Boolean:
                 case KVValueType.Null:
+                    if (isArray)
+                    {
+                        listener.OnArrayValue(value);
+                        break;
+                    }
                     listener.OnKeyValuePair(name, value);
                     break;
 
@@ -46,7 +61,15 @@ namespace ValveKeyValue.Abstraction
         {
             foreach (var item in collection)
             {
-                VisitObject(item.Name, item.Value);
+                VisitObject(item.Name, item.Value, false);
+            }
+        }
+
+        void VisitArray(IEnumerable<KVValue> collection)
+        {
+            foreach (var item in collection)
+            {
+                VisitObject(null, item, true);
             }
         }
     }

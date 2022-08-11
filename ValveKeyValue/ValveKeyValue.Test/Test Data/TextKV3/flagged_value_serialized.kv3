@@ -1,0 +1,19 @@
+<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
+{
+	foo = resource:"bar"
+	bar = resource:"foo"
+	uppercase = resource:"foo"
+	flaggedNumber = panorama:-1234
+	multipleFlags = resource|resource_name|subclass:"cool value"
+	soundEvent = soundevent:"event sound"
+	noFlags = 5
+	flaggedObject = panorama:{
+		1 = soundevent:"test1"
+		2 = "test2"
+		3 = subclass:[
+			"test3",
+		]
+		4 = resource_name:"test4"
+	}
+	test = "success"
+}
