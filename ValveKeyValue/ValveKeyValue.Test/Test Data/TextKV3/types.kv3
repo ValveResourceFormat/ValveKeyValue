@@ -25,4 +25,5 @@ this is a multi
 line
 key
 """ = "multi line key parsed"
+	empty.string = ""
 }

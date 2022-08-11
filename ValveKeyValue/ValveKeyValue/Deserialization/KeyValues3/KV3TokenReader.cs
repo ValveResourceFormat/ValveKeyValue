@@ -74,6 +74,42 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             }
         }
 
+        KVToken ReadAssignment()
+        {
+            ReadChar(Assignment);
+            return new KVToken(KVTokenType.Assignment);
+        }
+
+        KVToken ReadComma()
+        {
+            ReadChar(Comma);
+            return new KVToken(KVTokenType.Comma);
+        }
+
+        KVToken ReadArrayStart()
+        {
+            ReadChar(ArrayStart);
+            return new KVToken(KVTokenType.ArrayStart);
+        }
+
+        KVToken ReadArrayEnd()
+        {
+            ReadChar(ArrayEnd);
+            return new KVToken(KVTokenType.ArrayEnd);
+        }
+
+        KVToken ReadObjectStart()
+        {
+            ReadChar(ObjectStart);
+            return new KVToken(KVTokenType.ObjectStart);
+        }
+
+        KVToken ReadObjectEnd()
+        {
+            ReadChar(ObjectEnd);
+            return new KVToken(KVTokenType.ObjectEnd);
+        }
+
         KVToken ReadStringOrIdentifier()
         {
             SwallowWhitespace();
@@ -95,18 +131,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             }
 
             return new KVToken(type, token);
-        }
-
-        KVToken ReadAssignment()
-        {
-            ReadChar(Assignment);
-            return new KVToken(KVTokenType.Assignment);
-        }
-
-        KVToken ReadComma()
-        {
-            ReadChar(Comma);
-            return new KVToken(KVTokenType.Comma);
         }
 
         KVToken ReadBinaryBlob()
@@ -134,30 +158,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             }
 
             return new KVToken(KVTokenType.BinaryBlob, sb.ToString());
-        }
-
-        KVToken ReadArrayStart()
-        {
-            ReadChar(ArrayStart);
-            return new KVToken(KVTokenType.ArrayStart);
-        }
-
-        KVToken ReadArrayEnd()
-        {
-            ReadChar(ArrayEnd);
-            return new KVToken(KVTokenType.ArrayEnd);
-        }
-
-        KVToken ReadObjectStart()
-        {
-            ReadChar(ObjectStart);
-            return new KVToken(KVTokenType.ObjectStart);
-        }
-
-        KVToken ReadObjectEnd()
-        {
-            ReadChar(ObjectEnd);
-            return new KVToken(KVTokenType.ObjectEnd);
         }
 
         public KVToken ReadHeader()
@@ -254,7 +254,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             var next = Next();
             var isMultiline = false;
 
-            // TODO: Read /* */ comments
             if (next == '*')
             {
                 isMultiline = true;
@@ -324,7 +323,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 next = textReader.Read();
             }
 
-            if (next == -1)
+            if (IsEndOfFile(next))
             {
                 throw new EndOfStreamException();
             }
@@ -454,6 +453,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                     return string.Empty;
                 }
             }
+
             if (isMultiline)
             {
                 var escapeNext = false;
@@ -471,37 +471,19 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
                     if (!escapeNext && next == '\n')
                     {
+                        var a = Next();
+                        var b = Next();
+                        var c = Next();
+
+                        if (a == '"' && b == '"' && c == '"')
+                        {
+                            break;
+                        }
+
                         sb.Append(next);
-
-                        next = Next();
-
-                        // TODO: This is absolutely terrible
-                        if (next == '"')
-                        {
-                            next = Next();
-
-                            if (next == '"')
-                            {
-                                next = Next();
-
-                                if (next == '"')
-                                {
-                                    break;
-                                }
-                                else
-                                {
-                                    sb.Append(next);
-                                }
-                            }
-                            else
-                            {
-                                sb.Append(next);
-                            }
-                        }
-                        else
-                        {
-                            sb.Append(next);
-                        }
+                        sb.Append(a);
+                        sb.Append(b);
+                        sb.Append(c);
                     }
                     else
                     {
@@ -509,11 +491,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
                         sb.Append(next);
                     }
-                }
-
-                if (sb.Length > 0 && sb[^1] == '\n')
-                {
-                    sb.Remove(sb.Length - 1, 1);
                 }
 
                 if (sb.Length > 0 && sb[^1] == '\r')
