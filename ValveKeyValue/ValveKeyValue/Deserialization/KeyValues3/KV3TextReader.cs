@@ -218,7 +218,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 throw new InvalidOperationException($"Attempted to begin new array while in state {stateMachine.Current}.");
             }
 
-            listener.OnArrayStart(stateMachine.CurrentName);
+            listener.OnArrayStart(stateMachine.CurrentName, stateMachine.GetAndResetFlag());
 
             stateMachine.PushObject();
             stateMachine.SetArrayCurrent();
@@ -244,6 +244,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         void SetObjectKey(string name)
         {
+            stateMachine.GetAndResetFlag();
             stateMachine.SetName(name);
             stateMachine.Push(KV3TextReaderState.InObjectAfterKey);
         }
@@ -255,7 +256,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 throw new InvalidOperationException($"Attempted to begin new object while in state {stateMachine.Current}.");
             }
 
-            listener.OnObjectStart(stateMachine.CurrentName);
+            listener.OnObjectStart(stateMachine.CurrentName, stateMachine.GetAndResetFlag());
 
             stateMachine.PushObject();
             stateMachine.Push(KV3TextReaderState.InObjectBeforeKey);
