@@ -33,7 +33,7 @@ namespace ValveKeyValue.Test.TextKV3
         public void SerializesArray()
         {
             using var stream = TestDataHelper.OpenResource("TextKV3.array.kv3");
-            var expected = TestDataHelper.ReadTextResource("TextKV3.array.kv3");
+            var expected = TestDataHelper.ReadTextResource("TextKV3.array_serialized.kv3");
 
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
             var data = kv.Deserialize(stream);
