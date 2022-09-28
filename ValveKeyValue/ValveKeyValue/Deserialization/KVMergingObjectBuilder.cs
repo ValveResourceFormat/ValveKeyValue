@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 
 namespace ValveKeyValue.Deserialization
 {
@@ -16,6 +16,12 @@ namespace ValveKeyValue.Deserialization
         protected override void FinalizeState()
         {
             base.FinalizeState();
+
+			if (StateStack.Count <= 0)
+			{
+				// This will occur if a #base file does not exist.
+				return;
+			}
 
             var stateEntry = StateStack.Peek();
             var originalStateEntry = originalBuilder.StateStack.Peek();
