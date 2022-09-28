@@ -10,14 +10,14 @@ namespace ValveKeyValue.Deserialization
 
         public KVObject GetObject()
         {
+			foreach (var associatedBuilder in associatedBuilders)
+            {
+                associatedBuilder.FinalizeState();
+            }
+
             if (stateStack.Count != 1)
             {
                 throw new KeyValueException($"Builder is not in a fully completed state (stack count is {stateStack.Count}).");
-            }
-
-            foreach (var associatedBuilder in associatedBuilders)
-            {
-                associatedBuilder.FinalizeState();
             }
 
             var state = stateStack.Peek();

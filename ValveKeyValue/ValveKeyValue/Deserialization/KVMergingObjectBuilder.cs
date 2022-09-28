@@ -24,7 +24,20 @@ namespace ValveKeyValue.Deserialization
 			}
 
             var stateEntry = StateStack.Peek();
-            var originalStateEntry = originalBuilder.StateStack.Peek();
+
+			KVPartialState originalStateEntry;
+			if (originalBuilder.StateStack.Count <= 0)
+			{
+				// This will occur if a file consists only of #base or #include directives.
+
+				originalStateEntry = new KVPartialState();
+				originalStateEntry.Key = stateEntry.Key;
+				originalBuilder.StateStack.Push(originalStateEntry);
+			}
+			else
+			{
+				originalStateEntry = originalBuilder.StateStack.Peek();
+			}
 
             Merge(from: stateEntry, into: originalStateEntry);
         }
