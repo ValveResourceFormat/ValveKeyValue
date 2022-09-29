@@ -242,7 +242,7 @@ namespace ValveKeyValue.Deserialization
         {
             if (options.FileLoader == null)
             {
-                throw new KeyValueException("Inclusions requirer a FileLoader to be provided in KVSerializerOptions.");
+                throw new KeyValueException("Inclusions require a FileLoader to be provided in KVSerializerOptions.");
             }
 
             var stream = options.FileLoader.OpenFile(filePath);
