@@ -1,0 +1,7 @@
+﻿#base "kv_base_nested_once.vdf"
+
+"test case"
+{
+	"foo"	"bar"
+	"bar"	"baz"
+}
