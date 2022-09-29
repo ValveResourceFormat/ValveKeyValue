@@ -209,11 +209,6 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
         void HandleCondition(string text)
         {
-            if (stateMachine.Current != KV1TextReaderState.InObjectAfterValue)
-            {
-                throw new InvalidDataException($"Found conditional while in state {stateMachine.Current}.");
-            }
-
             if (!conditionEvaluator.Evalute(text))
             {
                 stateMachine.SetDiscardCurrent();
