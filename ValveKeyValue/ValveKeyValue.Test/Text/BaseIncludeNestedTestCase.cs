@@ -51,6 +51,10 @@ namespace ValveKeyValue.Test
                 {
                     return TestDataHelper.OpenResource("Text.kv_base_nested_twice.vdf");
                 }
+                else if (filePath == "file_does_not_exist.vdf")
+                {
+                    return Stream.Null;
+                }
                 else
                 {
                     throw new InvalidDataException($"Received an unexpected base or include: {filePath}");
