@@ -17,6 +17,7 @@ namespace ValveKeyValue.Deserialization
 
             foreach (var associatedBuilder in associatedBuilders)
             {
+                associatedBuilder.GetObject(); // Recurses through #base and #include directives, finalizing them all
                 associatedBuilder.FinalizeState();
             }
 
