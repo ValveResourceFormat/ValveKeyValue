@@ -55,7 +55,7 @@ namespace ValveKeyValue
             else
             {
                 // TODO: For nullable types this typeof is not that useful
-                throw new NotSupportedException($"Convering to {typeof(TObject).Name} is not supported. (key = {keyValueObject.Name})");
+                throw new NotSupportedException($"Convering to {typeof(TObject).Name} is not supported. (key = {keyValueObject.Name}, type = {keyValueObject.Value.ValueType})");
             }
         }
 
