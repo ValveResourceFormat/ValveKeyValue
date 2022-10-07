@@ -54,7 +54,8 @@ namespace ValveKeyValue
             }
             else
             {
-                throw new NotSupportedException(typeof(TObject).Name);
+                // TODO: For nullable types this typeof is not that useful
+                throw new NotSupportedException($"Convering to {typeof(TObject).Name} is not supported. (key = {keyValueObject.Name})");
             }
         }
 
@@ -404,7 +405,7 @@ namespace ValveKeyValue
                     type == typeof(bool) ||
                     type == typeof(byte) ||
                     type == typeof(char) ||
-                    type == typeof(DateTime) ||
+                    // type == typeof(DateTime) || // TODO: Casting to DateTime (from int32) is not supported
                     type == typeof(decimal) ||
                     type == typeof(double) ||
                     type == typeof(float) ||
