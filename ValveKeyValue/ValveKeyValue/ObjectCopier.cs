@@ -48,7 +48,7 @@ namespace ValveKeyValue
                 CopyObject(keyValueObject, typedObject, reflector);
                 return typedObject;
             }
-            else if (TryConvertValueTo<TObject>(keyValueObject.Value, out var converted))
+            else if (TryConvertValueTo<TObject>(keyValueObject.Name, keyValueObject.Value, out var converted))
             {
                 return converted;
             }
@@ -84,7 +84,7 @@ namespace ValveKeyValue
                 throw new KeyValueException("Serialization failed - circular object reference detected.");
             }
 
-            if (TryConvertValueTo<string>(managedObject, out var convertedString))
+            if (TryConvertValueTo<string>(string.Empty, managedObject, out var convertedString))
             {
                 return convertedString;
             }
@@ -123,7 +123,7 @@ namespace ValveKeyValue
                         continue;
                     }
 
-                    if (TryConvertValueTo<string>(member.Value, out var convertedMemberValue))
+                    if (TryConvertValueTo<string>(member.Name, member.Value, out var convertedMemberValue))
                     {
                         childObjects.Add(new KVObject(member.Name, convertedMemberValue));
                     }
@@ -388,11 +388,19 @@ namespace ValveKeyValue
             return Convert.ChangeType(value, valueType);
         }
 
-        static bool TryConvertValueTo<TValue>(object value, out TValue converted)
+        static bool TryConvertValueTo<TValue>(string name, object value, out TValue converted)
         {
             if (CanConvertValueTo(typeof(TValue)) && value is IConvertible)
             {
-                converted = (TValue)Convert.ChangeType(value, typeof(TValue), CultureInfo.InvariantCulture);
+                try
+                {
+                    converted = (TValue)Convert.ChangeType(value, typeof(TValue), CultureInfo.InvariantCulture);
+                }
+                catch (Exception e)
+                {
+                    throw new NotSupportedException($"Conversion to {typeof(TValue)} failed. (key = {name}, object type = {value.GetType()})", e);
+                }
+
                 return true;
             }
 
