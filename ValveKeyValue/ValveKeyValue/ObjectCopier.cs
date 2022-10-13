@@ -84,9 +84,10 @@ namespace ValveKeyValue
                 throw new KeyValueException("Serialization failed - circular object reference detected.");
             }
 
-            if (TryConvertValueTo<string>(string.Empty, managedObject, out var convertedString))
+            if (CanConvertValueTo(objectType) && managedObject is IConvertible)
             {
-                return convertedString;
+                var converter = typeof(KVValue).GetMethod("op_Implicit", new[] { objectType });
+                return (KVValue)converter.Invoke(null, new[] { managedObject });
             }
 
             var childObjects = new KVCollectionValue();
@@ -399,26 +400,26 @@ namespace ValveKeyValue
 
             converted = default;
             return false;
+        }
 
-            static bool CanConvertValueTo(Type type)
-            {
-                return
-                    type == typeof(bool) ||
-                    type == typeof(byte) ||
-                    type == typeof(char) ||
-                    // type == typeof(DateTime) || // TODO: Casting to DateTime (from int32) is not supported
-                    type == typeof(decimal) ||
-                    type == typeof(double) ||
-                    type == typeof(float) ||
-                    type == typeof(int) ||
-                    type == typeof(long) ||
-                    type == typeof(uint) ||
-                    type == typeof(ulong) ||
-                    type == typeof(ushort) ||
-                    type == typeof(sbyte) ||
-                    type == typeof(short) ||
-                    type == typeof(string);
-            }
+        static bool CanConvertValueTo(Type type)
+        {
+            return
+                type == typeof(bool) ||
+                type == typeof(byte) ||
+                type == typeof(char) ||
+                // type == typeof(DateTime) || // TODO: Casting to DateTime (from int32) is not supported
+                type == typeof(decimal) ||
+                type == typeof(double) ||
+                type == typeof(float) ||
+                type == typeof(int) ||
+                type == typeof(long) ||
+                type == typeof(uint) ||
+                type == typeof(ulong) ||
+                type == typeof(ushort) ||
+                type == typeof(sbyte) ||
+                type == typeof(short) ||
+                type == typeof(string);
         }
     }
 }
