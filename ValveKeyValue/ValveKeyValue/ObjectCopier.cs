@@ -84,7 +84,7 @@ namespace ValveKeyValue
                 throw new KeyValueException("Serialization failed - circular object reference detected.");
             }
 
-            if (CanConvertValueTo(objectType) && managedObject is IConvertible)
+            if ((CanConvertValueTo(objectType) && managedObject is IConvertible) || objectType == typeof(IntPtr))
             {
                 var converter = typeof(KVValue).GetMethod("op_Implicit", new[] { objectType });
                 return (KVValue)converter.Invoke(null, new[] { managedObject });
