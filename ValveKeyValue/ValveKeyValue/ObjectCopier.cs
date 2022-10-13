@@ -123,14 +123,7 @@ namespace ValveKeyValue
                         continue;
                     }
 
-                    if (TryConvertValueTo<string>(member.Name, member.Value, out var convertedMemberValue))
-                    {
-                        childObjects.Add(new KVObject(member.Name, convertedMemberValue));
-                    }
-                    else
-                    {
-                        childObjects.Add(CopyObject(member.Value, member.Name, reflector, visitedObjects));
-                    }
+                    childObjects.Add(CopyObject(member.Value, member.Name, reflector, visitedObjects));
                 }
             }
 
