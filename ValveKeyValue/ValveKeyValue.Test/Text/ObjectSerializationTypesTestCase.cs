@@ -16,7 +16,6 @@ namespace ValveKeyValue.Test
                     VString = "Test String",
                     VInt = 0x10203040,
                     VFloat = 1234.5678f,
-                    //VPointer = new IntPtr(0x12345678),
                     VLong = 0x0102030405060708,
                     VULong = 0x8877665544332211u,
                 },
@@ -43,7 +42,14 @@ namespace ValveKeyValue.Test
             public long VLong { get; set; }
             public ulong VULong { get; set; }
             public float VFloat { get; set; }
-            //public IntPtr VPointer { get; set; }
+            public SomeEnum VEnum { get; set; }
+        }
+
+        enum SomeEnum
+        {
+            One = 1,
+            Two = 2,
+            Leet = 1337,
         }
     }
 }
