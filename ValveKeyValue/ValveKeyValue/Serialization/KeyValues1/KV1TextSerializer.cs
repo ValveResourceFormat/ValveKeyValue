@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using ValveKeyValue.Abstraction;
@@ -66,7 +67,7 @@ namespace ValveKeyValue.Serialization.KeyValues1
             WriteIndentation();
             WriteText(name);
             writer.Write('\t');
-            WriteText(value.ToString(null));
+            WriteText(value.ToString(CultureInfo.InvariantCulture));
             WriteLine();
         }
 
