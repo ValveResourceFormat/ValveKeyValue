@@ -84,10 +84,10 @@ namespace ValveKeyValue
                 throw new KeyValueException("Serialization failed - circular object reference detected.");
             }
 
-            if ((CanConvertValueTo(objectType) && managedObject is IConvertible) || objectType == typeof(IntPtr))
+            var attemptedKvValue = ConvertToKVValue(managedObject, objectType);
+            if (attemptedKvValue != null)
             {
-                var converter = typeof(KVValue).GetMethod("op_Implicit", new[] { objectType });
-                return (KVValue)converter.Invoke(null, new[] { managedObject });
+                return attemptedKvValue;
             }
 
             var childObjects = new KVCollectionValue();
@@ -420,6 +420,37 @@ namespace ValveKeyValue
                 type == typeof(sbyte) ||
                 type == typeof(short) ||
                 type == typeof(string);
+        }
+
+        static KVValue ConvertToKVValue(object value, Type type)
+        {
+            if (type == typeof(IntPtr))
+            {
+                return (KVValue)(IntPtr)value;
+            }
+
+            return Type.GetTypeCode(type) switch
+            {
+                TypeCode.Boolean => throw new NotImplementedException(),
+                TypeCode.Byte => throw new NotImplementedException(),
+                TypeCode.Char => throw new NotImplementedException(),
+                //TypeCode.DateTime => throw new NotImplementedException(),
+                //TypeCode.DBNull => throw new NotImplementedException(),
+                TypeCode.Decimal => throw new NotImplementedException(),
+                TypeCode.Double => throw new NotImplementedException(),
+                //TypeCode.Empty => throw new NotImplementedException(),
+                TypeCode.Int16 => throw new NotImplementedException(),
+                TypeCode.Int32 => (KVValue)(int)value,
+                TypeCode.Int64 => (KVValue)(long)value,
+                //TypeCode.Object => throw new NotImplementedException(),
+                TypeCode.SByte => throw new NotImplementedException(),
+                TypeCode.Single => (KVValue)(float)value,
+                TypeCode.String => (KVValue)(string)value,
+                TypeCode.UInt16 => throw new NotImplementedException(),
+                TypeCode.UInt32 => throw new NotImplementedException(),
+                TypeCode.UInt64 => (KVValue)(ulong)value,
+                _ => null,
+            };
         }
     }
 }

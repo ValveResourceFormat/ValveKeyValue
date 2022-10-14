@@ -18,6 +18,7 @@ namespace ValveKeyValue.Test
                     VFloat = 1234.5678f,
                     VLong = 0x0102030405060708,
                     VULong = 0x8877665544332211u,
+                    VEnum = SomeEnum.Leet,
                 },
             };
 
