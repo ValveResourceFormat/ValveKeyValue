@@ -34,6 +34,10 @@ namespace ValveKeyValue.Test
 
             var expected = TestDataHelper.ReadTextResource("Text.serialization_types_expected.vdf");
             Assert.That(text, Is.EqualTo(expected));
+
+            // TODO: Deserializing enums does not work yet
+            //var deserialized = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<DataObject[]>(text);
+            //Assert.That(deserialized, Is.EqualTo(dataObject));
         }
 
         class DataObject
