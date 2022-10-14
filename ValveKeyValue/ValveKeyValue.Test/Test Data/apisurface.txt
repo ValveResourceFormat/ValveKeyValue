@@ -149,6 +149,7 @@ public class ValveKeyValue.KVValue
     public static uint op_Explicit(ValveKeyValue.KVValue value);
     public static ulong op_Explicit(ValveKeyValue.KVValue value);
     public static ushort op_Explicit(ValveKeyValue.KVValue value);
+    public static IntPtr op_Explicit(ValveKeyValue.KVValue value);
     public static ValveKeyValue.KVValue op_Implicit(string value);
     public static ValveKeyValue.KVValue op_Implicit(int value);
     public static ValveKeyValue.KVValue op_Implicit(IntPtr value);
