@@ -1,4 +1,4 @@
-﻿namespace ValveKeyValue
+﻿namespace ValveKeyValue.KeyValues1
 {
     enum KV1BinaryNodeType : byte
     {

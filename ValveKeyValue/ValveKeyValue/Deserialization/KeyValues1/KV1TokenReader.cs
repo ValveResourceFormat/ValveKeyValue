@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace ValveKeyValue.Deserialization
+namespace ValveKeyValue.Deserialization.KeyValues1
 {
     class KV1TokenReader : IDisposable
     {
@@ -87,7 +87,7 @@ namespace ValveKeyValue.Deserialization
 
             var sb = new StringBuilder();
             var next = Next();
-            
+
             // Some keyvalues implementations have a bug where only a single slash is needed for a comment
             if (next != CommentBegin)
             {

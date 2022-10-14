@@ -2,8 +2,9 @@
 using System.IO;
 using System.Text;
 using ValveKeyValue.Abstraction;
+using ValveKeyValue.KeyValues1;
 
-namespace ValveKeyValue.Deserialization
+namespace ValveKeyValue.Deserialization.KeyValues1
 {
     class KV1BinaryReader : IVisitingReader
     {

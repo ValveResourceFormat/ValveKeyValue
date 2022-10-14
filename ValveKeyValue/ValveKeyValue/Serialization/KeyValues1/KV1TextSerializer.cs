@@ -3,7 +3,7 @@ using System.IO;
 using System.Text;
 using ValveKeyValue.Abstraction;
 
-namespace ValveKeyValue.Serialization
+namespace ValveKeyValue.Serialization.KeyValues1
 {
     sealed class KV1TextSerializer : IVisitationListener, IDisposable
     {

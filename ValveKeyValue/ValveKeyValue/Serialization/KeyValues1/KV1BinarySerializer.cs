@@ -2,8 +2,9 @@
 using System.IO;
 using System.Text;
 using ValveKeyValue.Abstraction;
+using ValveKeyValue.KeyValues1;
 
-namespace ValveKeyValue.Serialization
+namespace ValveKeyValue.Serialization.KeyValues1
 {
     sealed class KV1BinarySerializer : IVisitationListener, IDisposable
     {

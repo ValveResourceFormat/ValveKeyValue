@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ValveKeyValue.Deserialization
+namespace ValveKeyValue.Deserialization.KeyValues1
 {
     class KV1TextReaderStateMachine
     {

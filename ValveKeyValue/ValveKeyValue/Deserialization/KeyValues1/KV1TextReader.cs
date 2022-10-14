@@ -3,7 +3,7 @@ using System.Globalization;
 using System.IO;
 using ValveKeyValue.Abstraction;
 
-namespace ValveKeyValue.Deserialization
+namespace ValveKeyValue.Deserialization.KeyValues1
 {
     sealed class KV1TextReader : IVisitingReader
     {
@@ -258,7 +258,7 @@ namespace ValveKeyValue.Deserialization
         {
             // "0x" + 2 digits per byte. Long is 8 bytes, so s + 16 = 18.
             // Expressed this way for readability, rather than using a magic value.
-            const int HexStringLengthForUnsignedLong = 2 + (sizeof(long) * 2);
+            const int HexStringLengthForUnsignedLong = 2 + sizeof(long) * 2;
 
             if (text.Length == HexStringLengthForUnsignedLong && text.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
             {
