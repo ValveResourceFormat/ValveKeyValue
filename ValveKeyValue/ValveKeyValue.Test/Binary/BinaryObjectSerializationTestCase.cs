@@ -51,8 +51,11 @@ namespace ValveKeyValue.Test
 
             using var ms = new MemoryStream();
             KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Serialize(ms, kvo);
-
             Assert.That(ms.ToArray(), Is.EqualTo(expectedData));
+
+            ms.Seek(0, SeekOrigin.Begin);
+            var deserialized = KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Deserialize(ms);
+            Assert.That(deserialized, Is.EqualTo(kvo));
         }
     }
 }

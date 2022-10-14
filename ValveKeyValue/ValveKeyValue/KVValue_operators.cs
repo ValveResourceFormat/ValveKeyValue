@@ -187,5 +187,14 @@ namespace ValveKeyValue
         {
             return value.ToUInt16(null);
         }
+
+        /// <summary>
+        /// Converts a <see cref="KVValue"/> to a <see cref="IntPtr"/>.
+        /// </summary>
+        /// <param name="value">The <see cref="KVValue"/> to convert.</param>
+        public static explicit operator IntPtr(KVValue value)
+        {
+            return new IntPtr(value.ToInt32(null));
+        }
     }
 }

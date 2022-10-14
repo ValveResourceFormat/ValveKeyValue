@@ -384,6 +384,12 @@ namespace ValveKeyValue
 
         static bool TryConvertValueTo<TValue>(string name, object value, out TValue converted)
         {
+            if (typeof(TValue) == typeof(IntPtr))
+            {
+                converted = (TValue)(object)(IntPtr)(KVValue)value;
+                return true;
+            }
+
             if (CanConvertValueTo(typeof(TValue)) && value is IConvertible)
             {
                 try
