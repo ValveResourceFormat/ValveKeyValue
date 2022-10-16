@@ -437,23 +437,23 @@ namespace ValveKeyValue
 
             return Type.GetTypeCode(type) switch
             {
-                TypeCode.Boolean => throw new NotImplementedException(),
-                TypeCode.Byte => throw new NotImplementedException(),
-                TypeCode.Char => throw new NotImplementedException(),
-                //TypeCode.DateTime => throw new NotImplementedException(),
+                //TypeCode.Boolean => throw new NotImplementedException("Converting to boolean is not yet supported"),
+                //TypeCode.Byte => throw new NotImplementedException("Converting to byte is not yet supported"),
+                //TypeCode.Char => throw new NotImplementedException("Converting to char is not yet supported"),
+                //TypeCode.DateTime => throw new NotImplementedException(), // Datetime are not supported
                 //TypeCode.DBNull => throw new NotImplementedException(),
-                TypeCode.Decimal => throw new NotImplementedException(),
-                TypeCode.Double => throw new NotImplementedException(),
-                //TypeCode.Empty => throw new NotImplementedException(),
-                TypeCode.Int16 => throw new NotImplementedException(),
+                //TypeCode.Decimal => throw new NotImplementedException("Converting to decimal is not yet supported"),
+                //TypeCode.Double => throw new NotImplementedException("Converting to double is not yet supported"),
+                //TypeCode.Empty => throw new NotImplementedException(), // No type
+                TypeCode.Int16 => (KVValue)(int)(short)value, // There is no int16 kv type
                 TypeCode.Int32 => (KVValue)(int)value,
                 TypeCode.Int64 => (KVValue)(long)value,
-                //TypeCode.Object => throw new NotImplementedException(),
-                TypeCode.SByte => throw new NotImplementedException(),
+                //TypeCode.Object => throw new NotImplementedException(), // Objects are handled separately
+                //TypeCode.SByte => throw new NotImplementedException("Converting to sbyte is not yet supported"),
                 TypeCode.Single => (KVValue)(float)value,
                 TypeCode.String => (KVValue)(string)value,
-                TypeCode.UInt16 => throw new NotImplementedException(),
-                TypeCode.UInt32 => throw new NotImplementedException(),
+                TypeCode.UInt16 => (KVValue)(ulong)(ushort)value, // There is no uint16 kv type
+                TypeCode.UInt32 => (KVValue)(ulong)(uint)value, // There is no uint32 kv type
                 TypeCode.UInt64 => (KVValue)(ulong)value,
                 _ => null,
             };
