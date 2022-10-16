@@ -16,6 +16,9 @@ namespace ValveKeyValue.Test
             public IntPtr ptr { get; set; } = new IntPtr(0x12345678);
             public ulong lng { get; set; } = 0x8877665544332211u;
             public long i64 { get; set; } = 0x0102030405060708;
+            public short i16 { get; set; } = short.MaxValue;
+            public ushort u16 { get; set; } = ushort.MaxValue;
+            public uint u32 { get; set; } = uint.MaxValue;
         }
 
         [Test]
@@ -28,6 +31,9 @@ namespace ValveKeyValue.Test
                     0x03, // float32: flt = 1234.5678f
                         0x66, 0x6C, 0x74, 0x00,
                         0x2B, 0x52, 0x9A, 0x44,
+                    0x02, // int32, i16 = 32767
+                        0x69, 0x31, 0x36, 0x00,
+                        0xFF, 0x7F, 0x00, 0x00,
                     0x0A, // int64, i64 = 0x0102030405070809
                         0x69, 0x36, 0x34, 0x00,
                         0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01,
@@ -46,6 +52,14 @@ namespace ValveKeyValue.Test
                     0x04, // pointer: ptr = 0x12345678
                         0x70, 0x74, 0x72, 0x00,
                         0x78, 0x56, 0x34, 0x12,
+                    0x07, // uint64: u16 = 65535
+                        0x75, 0x31, 0x36, 0x00,
+                        0xFF, 0xFF, 0x00, 0x00,
+                        0x00, 0x00, 0x00, 0x00,
+                    0x07, // uint64: u32 = 4294967295
+                        0x75, 0x33, 0x32, 0x00,
+                        0xFF, 0xFF, 0xFF, 0xFF,
+                        0x00, 0x00, 0x00, 0x00,
                     0x08, // end object
                 0x08, // end document
             };
@@ -54,6 +68,7 @@ namespace ValveKeyValue.Test
 
             using var ms = new MemoryStream();
             KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Serialize(ms, kvo, "TestObject");
+
             Assert.That(ms.ToArray(), Is.EqualTo(expectedData));
 
             ms.Seek(0, SeekOrigin.Begin);
