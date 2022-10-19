@@ -30,7 +30,7 @@ jobs:
       run: dotnet pack --configuration Release ValveKeyValue/ValveKeyValue/ValveKeyValue.csproj
 
     - name: Upload nupkg
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       if: matrix.os == 'ubuntu-latest'
       with:
         name: nupkg
