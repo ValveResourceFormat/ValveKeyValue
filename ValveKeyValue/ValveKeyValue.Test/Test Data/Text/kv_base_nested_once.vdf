@@ -1,0 +1,6 @@
+﻿#base "kv_base_nested_twice.vdf"
+
+"test case"
+{
+	"aaa"	"bbb"
+}

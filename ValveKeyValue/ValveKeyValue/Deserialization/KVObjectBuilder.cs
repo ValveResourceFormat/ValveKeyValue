@@ -104,6 +104,10 @@ namespace ValveKeyValue.Deserialization
 
         protected virtual void FinalizeState()
         {
+            foreach (var associatedBuilder in associatedBuilders)
+            {
+                associatedBuilder.FinalizeState();
+            }
         }
 
         KVObject MakeObject(KVPartialState state)
