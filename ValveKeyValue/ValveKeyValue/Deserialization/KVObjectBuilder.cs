@@ -17,7 +17,6 @@ namespace ValveKeyValue.Deserialization
 
             foreach (var associatedBuilder in associatedBuilders)
             {
-                associatedBuilder.GetObject(); // Recurses through #base and #include directives, finalizing them all.
                 associatedBuilder.FinalizeState();
             }
 
@@ -105,6 +104,10 @@ namespace ValveKeyValue.Deserialization
 
         protected virtual void FinalizeState()
         {
+            foreach (var associatedBuilder in associatedBuilders)
+            {
+                associatedBuilder.FinalizeState();
+            }
         }
 
         KVObject MakeObject(KVPartialState state)
