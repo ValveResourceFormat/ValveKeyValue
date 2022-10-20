@@ -17,10 +17,7 @@ namespace ValveKeyValue.Deserialization
 
             foreach (var associatedBuilder in associatedBuilders)
             {
-                if (associatedBuilder.stateStack.Count > 0) // The #base or #include file may be empty.
-                {
-                    associatedBuilder.GetObject(); // Recurses through #base and #include directives, finalizing them all.
-                }
+                associatedBuilder.GetObject(); // Recurses through #base and #include directives, finalizing them all.
                 associatedBuilder.FinalizeState();
             }
 

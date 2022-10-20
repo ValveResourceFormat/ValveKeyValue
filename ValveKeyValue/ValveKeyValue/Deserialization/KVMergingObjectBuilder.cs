@@ -17,12 +17,6 @@ namespace ValveKeyValue.Deserialization
         {
             base.FinalizeState();
 
-            if (StateStack.Count <= 0)
-            {
-                // This will occur if a #base file does not exist.
-				return;
-            }
-
             var stateEntry = StateStack.Peek();
             var originalStateEntry = originalBuilder.StateStack.Peek();
 

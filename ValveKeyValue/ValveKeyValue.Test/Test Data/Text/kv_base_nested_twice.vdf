@@ -1,6 +1,4 @@
-﻿#base "file_does_not_exist.vdf"
-
-"test case"
+﻿"test case"
 {
 	"ccc"	"ddd"
 }
