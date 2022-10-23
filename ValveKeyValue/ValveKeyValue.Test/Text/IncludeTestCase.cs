@@ -48,7 +48,7 @@ namespace ValveKeyValue.Test
                 }
                 else if (filePath == "this_file_does_not_exist.vdf")
                 {
-                    return Stream.Null;
+                    return null;
                 }
                 else
                 {
