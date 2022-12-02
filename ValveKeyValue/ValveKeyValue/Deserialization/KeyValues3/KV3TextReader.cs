@@ -181,10 +181,11 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         void ReadBinaryBlob(string text)
         {
-            var bytes = Utils.ParseHexStringAsByteArray(text);
-            //var value = new KVObjectValue<byte[]>(bytes, KVValueType.BinaryBlob);
-            var value = new KVObjectValue<byte>(0x00, KVValueType.BinaryBlob); // TODO: wrong
-            value.Flag = stateMachine.GetAndResetFlag();
+            var bytes = Utils.ParseHexStringAsByteArrayNoReverse(text);
+            var value = new KVBinaryBlob(bytes)
+            {
+                Flag = stateMachine.GetAndResetFlag()
+            };
 
             switch (stateMachine.Current)
             {

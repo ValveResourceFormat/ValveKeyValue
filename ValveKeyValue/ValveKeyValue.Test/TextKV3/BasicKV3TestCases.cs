@@ -90,7 +90,12 @@ namespace ValveKeyValue.Test.TextKV3
             using var stream = TestDataHelper.OpenResource("TextKV3.array.kv3");
             var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
 
-            Assert.True(false);
+            Assert.That(data["arrayValue"].ValueType, Is.EqualTo(KVValueType.Array));
+            Assert.That(data["arrayOnSingleLine"].ValueType, Is.EqualTo(KVValueType.Array));
+            Assert.That(data["arrayNoSpace"].ValueType, Is.EqualTo(KVValueType.Array));
+            Assert.That(data["arrayMixedTypes"].ValueType, Is.EqualTo(KVValueType.Array));
+
+            // TODO: Test all the children values
         }
 
         [Test]
@@ -99,7 +104,12 @@ namespace ValveKeyValue.Test.TextKV3
             using var stream = TestDataHelper.OpenResource("TextKV3.binary_blob.kv3");
             var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
 
-            Assert.True(false);
+            Assert.That(data["array"].ValueType, Is.EqualTo(KVValueType.BinaryBlob));
+            Assert.That(((KVBinaryBlob)data["array"]).Bytes, Is.EqualTo(new byte[]
+            {
+                0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+                0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xFF
+            }));
         }
 
         [Test]

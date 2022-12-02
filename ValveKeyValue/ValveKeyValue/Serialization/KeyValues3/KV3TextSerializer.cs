@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Text;
 using ValveKeyValue.Abstraction;
@@ -142,6 +144,9 @@ namespace ValveKeyValue.Serialization.KeyValues3
 
             switch (value.ValueType)
             {
+                case KVValueType.BinaryBlob:
+                    WriteBinaryBlob((KVBinaryBlob)value);
+                    break;
                 case KVValueType.Boolean:
                     if ((bool)value)
                     {
@@ -164,6 +169,49 @@ namespace ValveKeyValue.Serialization.KeyValues3
                     WriteText(value.ToString(null));
                     break;
             }
+        }
+
+        void WriteBinaryBlob(KVBinaryBlob value)
+        {
+            // TODO: Verify this against Valve
+            if (value.Bytes.Length > 32)
+            {
+                writer.WriteLine();
+                WriteIndentation();
+            }
+
+            writer.Write('#');
+            writer.Write('[');
+            writer.WriteLine();
+            indentation++;
+            WriteIndentation();
+
+            var count = 0;
+
+            foreach (var oneByte in value.Bytes)
+            {
+                writer.Write(oneByte.ToString("X2"));
+
+                if (++count % 32 == 0)
+                {
+                    writer.WriteLine();
+                    WriteIndentation();
+                }
+                else if (count != value.Bytes.Length)
+                {
+                    writer.Write(' ');
+                }
+            }
+
+            indentation--;
+
+            if (count % 32 != 0)
+            {
+                writer.WriteLine();
+                WriteIndentation();
+            }
+
+            writer.Write(']');
         }
 
         void WriteIndentation()
