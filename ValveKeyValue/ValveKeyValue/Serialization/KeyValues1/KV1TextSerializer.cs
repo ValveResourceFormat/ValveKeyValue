@@ -1,6 +1,5 @@
 using System.Globalization;
 using System.Text;
-using System.Xml.Linq;
 using ValveKeyValue.Abstraction;
 
 namespace ValveKeyValue.Serialization.KeyValues1
