@@ -39,11 +39,7 @@ namespace ValveKeyValue.Test
             Assert.That(rootObject, Is.Not.Null);
             Assert.That(rootObject.Numbers, Is.Not.Null);
             Assert.That(rootObject.Numbers, Is.InstanceOf<TDictionary>());
-
-#pragma warning disable NUnit2022 // Missing property required for constraint - False-positive: https://github.com/nunit/nunit.analyzers/issues/407
             Assert.That(rootObject.Numbers, Has.Count.EqualTo(3));
-#pragma warning restore NUnit2022 
-
             Assert.That(rootObject.Numbers["0"], Is.Not.Null);
             Assert.That(rootObject.Numbers["0"].Name, Is.EqualTo("zero"));
             Assert.That(rootObject.Numbers["0"].Value, Is.EqualTo("nothing"));

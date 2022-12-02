@@ -12,7 +12,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ValveKeyValue", "ValveKeyVa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ValveKeyValue.Test", "ValveKeyValue.Test\ValveKeyValue.Test.csproj", "{E3170459-D16B-428A-88BC-975F0C5DF9B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValveKeyValue.Console", "ValveKeyValue.Console\ValveKeyValue.Console.csproj", "{233C7C8F-892F-4DA8-9577-BD67E2511BA0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ValveKeyValue.Console", "ValveKeyValue.Console\ValveKeyValue.Console.csproj", "{233C7C8F-892F-4DA8-9577-BD67E2511BA0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

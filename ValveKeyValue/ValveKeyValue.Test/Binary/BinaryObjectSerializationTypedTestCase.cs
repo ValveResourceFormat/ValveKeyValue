@@ -8,6 +8,7 @@ namespace ValveKeyValue.Test
     {
         class TestObject
         {
+#pragma warning disable IDE1006 // Naming Styles
             public string key { get; set; } = "value";
             public string key_utf8 { get; set; } = "邪恶的战";
             [KVProperty("int")]
@@ -19,6 +20,7 @@ namespace ValveKeyValue.Test
             public short i16 { get; set; } = short.MaxValue;
             public ushort u16 { get; set; } = ushort.MaxValue;
             public uint u32 { get; set; } = uint.MaxValue;
+#pragma warning restore IDE1006 // Naming Styles
         }
 
         [Test]
