@@ -34,10 +34,11 @@
 			"2"	"3"
 			"3"	"7"
 		}
-		"7"	"hello.world"
-		"8"	"multiline
+		"7"	"11 FF"
+		"8"	"hello.world"
+		"9"	"multiline
 string"
-		"9"	"-69.42"
+		"10"	"-69.42"
 	}
 	"test"	"success"
 }

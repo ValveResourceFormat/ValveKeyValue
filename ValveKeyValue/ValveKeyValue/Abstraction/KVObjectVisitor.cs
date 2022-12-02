@@ -26,16 +26,13 @@ namespace ValveKeyValue.Abstraction
                     listener.OnObjectEnd();
                     break;
 
-                case KVValueType.BinaryBlob:
-                    // TODO: write binary blobs
-                    break;
-
                 case KVValueType.Array:
                     listener.OnArrayStart(name, value.Flag);
                     VisitArray((IEnumerable<KVValue>)value);
                     listener.OnArrayEnd();
                     break;
 
+                case KVValueType.BinaryBlob: // TODO: Should binary blobs have their own method?
                 case KVValueType.FloatingPoint:
                 case KVValueType.Int32:
                 case KVValueType.Pointer:
