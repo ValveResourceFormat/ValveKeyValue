@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using ValveKeyValue.Abstraction;
@@ -22,6 +23,9 @@ namespace ValveKeyValue.Serialization.KeyValues3
 
         readonly TextWriter writer;
         int indentation = 0;
+        Stack<bool> inArray = new();
+
+        bool IsInArray => inArray.Count > 0 && inArray.Peek();
 
         public void Dispose()
         {
@@ -29,16 +33,26 @@ namespace ValveKeyValue.Serialization.KeyValues3
         }
 
         public void OnObjectStart(string name, KVFlag flag)
-            => WriteStartObject(name, flag);
+        {
+            inArray.Push(false);
+
+            WriteStartObject(name, flag);
+        }
 
         public void OnObjectEnd()
-            => WriteEndObject();
+        {
+            inArray.Pop();
+
+            WriteEndObject();
+        }
 
         public void OnKeyValuePair(string name, KVValue value)
             => WriteKeyValuePair(name, value);
 
         public void OnArrayStart(string name, KVFlag flag)
         {
+            inArray.Push(true);
+
             WriteIndentation();
 
             WriteKey(name);
@@ -61,10 +75,17 @@ namespace ValveKeyValue.Serialization.KeyValues3
 
         public void OnArrayEnd()
         {
+            inArray.Pop();
+
             indentation--;
             WriteIndentation();
             writer.Write(']');
-            // TODO: Write comma if we're in an array
+
+            if (IsInArray)
+            {
+                writer.Write(',');
+            }
+
             writer.WriteLine();
         }
 
@@ -95,7 +116,12 @@ namespace ValveKeyValue.Serialization.KeyValues3
             indentation--;
             WriteIndentation();
             writer.Write('}');
-            // TODO: Write comma if we're in an array
+
+            if (IsInArray)
+            {
+                writer.Write(',');
+            }
+
             writer.WriteLine();
         }
 
