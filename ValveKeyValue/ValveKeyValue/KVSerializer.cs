@@ -2,7 +2,6 @@ using ValveKeyValue.Abstraction;
 using ValveKeyValue.Deserialization;
 using ValveKeyValue.Deserialization.KeyValues1;
 using ValveKeyValue.Deserialization.KeyValues3;
-using ValveKeyValue.Serialization;
 using ValveKeyValue.Serialization.KeyValues1;
 using ValveKeyValue.Serialization.KeyValues3;
 
