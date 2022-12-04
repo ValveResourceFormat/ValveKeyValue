@@ -54,6 +54,27 @@ namespace ValveKeyValue.Test.TextKV3
         }
 
         [Test]
+        public void SerializesNestedArray()
+        {
+            var expected = TestDataHelper.ReadTextResource("TextKV3.array_nested.kv3");
+
+            var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
+            var data = kv.Deserialize(expected);
+
+            string text;
+            using (var ms = new MemoryStream())
+            {
+                kv.Serialize(ms, data);
+
+                ms.Seek(0, SeekOrigin.Begin);
+                using var reader = new StreamReader(ms);
+                text = reader.ReadToEnd();
+            }
+
+            Assert.That(text, Is.EqualTo(expected));
+        }
+
+        [Test]
         public void SerializesFlags()
         {
             using var stream = TestDataHelper.OpenResource("TextKV3.flagged_value.kv3");
