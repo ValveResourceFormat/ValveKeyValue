@@ -95,6 +95,12 @@ namespace ValveKeyValue.Test.TextKV3
             Assert.That(data["arrayNoSpace"].ValueType, Is.EqualTo(KVValueType.Array));
             Assert.That(data["arrayMixedTypes"].ValueType, Is.EqualTo(KVValueType.Array));
 
+            var arrayValue = (KVArrayValue)data["arrayValue"];
+
+            Assert.That(arrayValue.Count, Is.EqualTo(2));
+            Assert.That(arrayValue[0].ToString(), Is.EqualTo("a"));
+            Assert.That(arrayValue[1].ToString(), Is.EqualTo("b"));
+
             // TODO: Test all the children values
         }
 
