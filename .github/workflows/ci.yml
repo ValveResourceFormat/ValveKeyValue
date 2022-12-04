@@ -2,6 +2,10 @@ name: CI
 
 on: [push, pull_request]
 
+permissions:
+  actions: write
+  contents: write
+
 jobs:
   build:
     name: .NET on ${{ matrix.os }}
