@@ -5,7 +5,7 @@
 [![Coverage Status](https://img.shields.io/codecov/c/github/SteamDatabase/ValveKeyValue/master?label=Coverage&style=flat-square)](https://app.codecov.io/gh/SteamDatabase/ValveKeyValue)
 
 This library aims to be fully compatible with Valve's various implementations of
-KeyValues format parsing (believe us, it's not consistent).
+KeyValues format parsing (believe us, it's not consistent, but it aims to be one day ).
 
 # KeyValues1
 
