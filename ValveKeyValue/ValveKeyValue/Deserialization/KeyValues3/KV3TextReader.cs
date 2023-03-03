@@ -28,7 +28,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         {
             Require.NotDisposed(nameof(KV3TextReader), disposed);
 
-            tokenReader.ReadHeader();
+            var file = tokenReader.ReadHeader();
 
             while (stateMachine.IsInObject)
             {
