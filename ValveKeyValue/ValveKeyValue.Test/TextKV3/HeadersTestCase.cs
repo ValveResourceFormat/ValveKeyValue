@@ -71,7 +71,7 @@ namespace ValveKeyValue.Test.TextKV3
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(value));
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
 
-            Assert.Pass();
+            Assert.That(() => true);
         }
     }
 }
