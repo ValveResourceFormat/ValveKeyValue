@@ -30,8 +30,13 @@ namespace ValveKeyValue.Test
                 Assert.That((string)data["15"], Is.EqualTo("-12.34   	"));
                 Assert.That((string)data["16"], Is.EqualTo("0"));
                 Assert.That((string)data["17"], Is.EqualTo("2147483647"));
-                //Assert.That((string)data["18"], Is.EqualTo("2147483648"));
+                Assert.That((string)data["18"], Is.EqualTo("2147483648"));
                 Assert.That((string)data["19"], Is.EqualTo("123456789"));
+                Assert.That((string)data["20"], Is.EqualTo("-9223372036854775808"));
+                Assert.That((string)data["21"], Is.EqualTo("9223372036854775807"));
+                Assert.That((string)data["22"], Is.EqualTo("18446744073709551615"));
+                Assert.That((string)data["23"], Is.EqualTo("4294967295"));
+                Assert.That((string)data["24"], Is.EqualTo("-2147483648"));
 
                 Assert.That(data["0"].ValueType, Is.EqualTo(KVValueType.String));
                 Assert.That(data["1"].ValueType, Is.EqualTo(KVValueType.String));
@@ -51,8 +56,13 @@ namespace ValveKeyValue.Test
                 Assert.That(data["15"].ValueType, Is.EqualTo(KVValueType.String));
                 Assert.That(data["16"].ValueType, Is.EqualTo(KVValueType.Int32));
                 Assert.That(data["17"].ValueType, Is.EqualTo(KVValueType.Int32));
-                Assert.That(data["18"].ValueType, Is.EqualTo(KVValueType.FloatingPoint)); // TODO: this is a bug
+                Assert.That(data["18"].ValueType, Is.EqualTo(KVValueType.String));
                 Assert.That(data["19"].ValueType, Is.EqualTo(KVValueType.Int32));
+                Assert.That(data["20"].ValueType, Is.EqualTo(KVValueType.String));
+                Assert.That(data["21"].ValueType, Is.EqualTo(KVValueType.String));
+                Assert.That(data["22"].ValueType, Is.EqualTo(KVValueType.String));
+                Assert.That(data["23"].ValueType, Is.EqualTo(KVValueType.String));
+                Assert.That(data["24"].ValueType, Is.EqualTo(KVValueType.Int32));
             });
         }
     }

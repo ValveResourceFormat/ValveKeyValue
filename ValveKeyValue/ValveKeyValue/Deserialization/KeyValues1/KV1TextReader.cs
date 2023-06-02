@@ -283,6 +283,18 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                 return new KVObjectValue<int>(intValue, KVValueType.Int32);
             }
 
+            if (!text.Contains('.', StringComparison.InvariantCulture))
+            {
+                // Do not parse >32bit integers as floats.
+                // TODO: This is a silly a fix until we figure out how to proceed with this issue.
+                // See https://github.com/SteamDatabase/ValveKeyValue/pull/47
+
+                // Valve uses strtol() and strtod() and assigns the float type if strtod() ending pointer
+                // is further than the one returned by strtol().
+
+                return new KVObjectValue<string>(text, KVValueType.String);
+            }
+
             const NumberStyles FloatingPointNumberStyles =
                 NumberStyles.AllowLeadingWhite |
                 NumberStyles.AllowDecimalPoint |
