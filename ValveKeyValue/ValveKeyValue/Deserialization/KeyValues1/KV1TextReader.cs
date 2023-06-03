@@ -256,44 +256,6 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
         static KVValue ParseValue(string text)
         {
-            // "0x" + 2 digits per byte. Long is 8 bytes, so s + 16 = 18.
-            // Expressed this way for readability, rather than using a magic value.
-            const int HexStringLengthForUnsignedLong = 2 + sizeof(long) * 2;
-
-            if (text.Length == HexStringLengthForUnsignedLong && text.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
-            {
-                var hexadecimalString = text[2..];
-                var data = ParseHexStringAsByteArray(hexadecimalString);
-
-                if (BitConverter.IsLittleEndian)
-                {
-                    Array.Reverse(data);
-                }
-
-                var value = BitConverter.ToUInt64(data, 0);
-                return new KVObjectValue<ulong>(value, KVValueType.UInt64);
-            }
-
-            const NumberStyles IntegerNumberStyles =
-                NumberStyles.AllowLeadingWhite |
-                NumberStyles.AllowLeadingSign;
-
-            if (int.TryParse(text, IntegerNumberStyles, CultureInfo.InvariantCulture, out var intValue))
-            {
-                return new KVObjectValue<int>(intValue, KVValueType.Int32);
-            }
-
-            const NumberStyles FloatingPointNumberStyles =
-                NumberStyles.AllowLeadingWhite |
-                NumberStyles.AllowDecimalPoint |
-                NumberStyles.AllowExponent |
-                NumberStyles.AllowLeadingSign;
-
-            if (float.TryParse(text, FloatingPointNumberStyles, CultureInfo.InvariantCulture, out var floatValue))
-            {
-                return new KVObjectValue<float>(floatValue, KVValueType.FloatingPoint);
-            }
-
             return new KVObjectValue<string>(text, KVValueType.String);
         }
 
