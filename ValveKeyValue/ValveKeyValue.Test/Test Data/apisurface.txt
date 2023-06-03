@@ -113,12 +113,14 @@ public sealed class ValveKeyValue.KVSerializerOptions
     protected void Finalize();
     public System.Collections.Generic.IList`1[[string]] get_Conditions();
     public static ValveKeyValue.KVSerializerOptions get_DefaultOptions();
+    public bool get_DisableTypeGuessing();
     public bool get_EnableValveNullByteBugBehavior();
     public ValveKeyValue.IIncludedFileLoader get_FileLoader();
     public bool get_HasEscapeSequences();
     public int GetHashCode();
     public Type GetType();
     protected object MemberwiseClone();
+    public void set_DisableTypeGuessing(bool value);
     public void set_EnableValveNullByteBugBehavior(bool value);
     public void set_FileLoader(ValveKeyValue.IIncludedFileLoader value);
     public void set_HasEscapeSequences(bool value);

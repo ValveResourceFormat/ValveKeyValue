@@ -29,6 +29,15 @@ namespace ValveKeyValue
         public IIncludedFileLoader FileLoader { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether type-guessing should be disabled or not.
+        /// </summary>
+        /// <remarks>
+        /// Valve's Source Engine uses type-guessing when parsing text KeyValue files.
+        /// See https://github.com/SteamDatabase/ValveKeyValue/issues/53 for more information.
+        /// </remarks>
+        public bool DisableTypeGuessing { get; set; }
+
+        /// <summary>
         /// Gets the default options (used when none are specified).
         /// </summary>
         public static KVSerializerOptions DefaultOptions => new();
