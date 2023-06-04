@@ -311,11 +311,12 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             return data;
         }
 
-        // The string may begin with an arbitrary amount of white space (as determined by isspace(3)) followed by a single optional ‘+’ or ‘-’ sign.  If base is zero or 16, the
-        // string may then include a “0x” prefix, and the number will be read in base 16; otherwise, a zero base is taken as 10 (decimal) unless the next character is ‘0’, in which
-        // case it is taken as 8 (octal).
-        // The remainder of the string is converted to a long, long long, intmax_t or quad_t value in the obvious manner, stopping at the first character which is not a valid digit
-        // in the given base.
+        // The string may begin with an arbitrary amount of white space (as determined by isspace(3)) followed by a single optional
+        // ‘+’ or ‘-’ sign.  If base is zero or 16, the string may then include a “0x” prefix, and the number will be read in base 16;
+        // otherwise, a zero base is taken as 10 (decimal) unless the next character is ‘0’, in which case it is taken as 8 (octal).
+        // The remainder of the string is converted to a long, long long, intmax_t or quad_t value in the obvious manner, stopping at
+        // the first character which is not a valid digit in the given base.
+        // - man(3) page for strtol
         static bool IsStrToLBase10Compatible(string str)
         {
             var index = 0;
