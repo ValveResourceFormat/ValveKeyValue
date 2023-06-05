@@ -4,6 +4,7 @@
     <LangVersion>10.0</LangVersion>
     <Product>Valve KeyValue Library</Product>
     <Description>Library to parse and write Valve KeyValue formats</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReleaseNotes>View release notes at https://github.com/SteamDatabase/ValveKeyValue/releases</PackageReleaseNotes>
     <PackageIcon>logo.png</PackageIcon>
     <PackageTags>steam valve keyvalues keyvalue kv kv3 csgo dota2 tf2</PackageTags>
@@ -11,9 +12,7 @@
     <AssemblyOriginatorKeyFile>ValveKeyValue.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="..\..\Misc\logo.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+    <None Include="..\..\Misc\logo.png" Pack="true" PackagePath="\"/>
   </ItemGroup>
 </Project>
