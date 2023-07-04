@@ -26,4 +26,10 @@ line
 key
 """ = "multi line key parsed"
 	empty.string = ""
+	1 = "one"
+	a = "alpha"
+	22 = "two"
+	a3 = "three"
+	bb = "bravo"
+	"" = "empty key"
 }

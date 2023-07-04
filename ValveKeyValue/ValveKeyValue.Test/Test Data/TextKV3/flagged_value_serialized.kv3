@@ -8,12 +8,12 @@
 	soundEvent = soundevent:"event sound"
 	noFlags = 5
 	flaggedObject = panorama:{
-		1 = soundevent:"test1"
-		2 = "test2"
-		3 = subclass:[
+		"1" = soundevent:"test1"
+		"2" = "test2"
+		"3" = subclass:[
 			"test3",
 		]
-		4 = resource_name:"test4"
+		"4" = resource_name:"test4"
 	}
 	test = "success"
 }

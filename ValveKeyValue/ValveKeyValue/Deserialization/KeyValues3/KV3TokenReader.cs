@@ -308,6 +308,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                     continue;
                 }
 
+                // TODO: Disallow : because it's a token terminator?
                 if (c == '_' || c == ':' || c == '.')
                 {
                     continue;
