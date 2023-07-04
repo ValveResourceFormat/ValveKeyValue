@@ -269,9 +269,15 @@ namespace ValveKeyValue.Serialization.KeyValues3
                 return;
             }
 
-            var escaped = false;
+            var escaped = key.Length == 0; // Quote empty strings
             var sb = new StringBuilder(key.Length + 2);
             sb.Append('"');
+
+            if (key.Length > 0 && key[0] >= '0' && key[0] <= '9')
+            {
+                // Quote when first character is a digit
+                escaped = true;
+            }
 
             foreach (var @char in key)
             {
@@ -289,11 +295,6 @@ namespace ValveKeyValue.Serialization.KeyValues3
                         sb.Append('n');
                         break;
 
-                    case ' ':
-                        escaped = true;
-                        sb.Append(' ');
-                        break;
-
                     case '"':
                         escaped = true;
                         sb.Append('\\');
@@ -307,6 +308,12 @@ namespace ValveKeyValue.Serialization.KeyValues3
                         break;
 
                     default:
+                        // TODO: Use char.IsAscii* functions from newer .NET
+                        if (@char != '.' && @char != '_' && !((@char >= 'A' && @char <= 'Z') || (@char >= 'a' && @char <= 'z') || (@char >= '0' && @char <= '9')))
+                        {
+                            escaped = true;
+                        }
+
                         sb.Append(@char);
                         break;
                 }
