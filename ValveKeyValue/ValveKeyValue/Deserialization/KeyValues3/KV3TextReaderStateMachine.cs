@@ -36,7 +36,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         public void SetName(string name) => CurrentObject.Key = name;
 
-        public void SetFlag(KVFlag flag) => CurrentObject.Flag |= flag;
+        public void SetFlag(KVFlag flag) => CurrentObject.Flag = flag;
 
         public KVFlag GetAndResetFlag()
         {
