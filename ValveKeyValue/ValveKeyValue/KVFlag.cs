@@ -2,15 +2,13 @@
 
 namespace ValveKeyValue
 {
-    [Flags]
     public enum KVFlag
     {
         None = 0,
         Resource = 1,
         ResourceName = 2,
-        MultilineString = 4,
-        Panorama = 8,
-        SoundEvent = 16,
-        SubClass = 32,
+        Panorama = 3,
+        SoundEvent = 4,
+        SubClass = 5,
     }
 }
