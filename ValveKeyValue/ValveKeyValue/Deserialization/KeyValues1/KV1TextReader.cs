@@ -27,7 +27,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         readonly KV1TextReaderStateMachine stateMachine;
         bool disposed;
 
-        public void ReadObject()
+        public KVHeader ReadHeader()
         {
             Require.NotDisposed(nameof(KV1TextReader), disposed);
 
@@ -103,6 +103,8 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                         throw new ArgumentOutOfRangeException(nameof(token.TokenType), token.TokenType, "Unhandled token type.");
                 }
             }
+
+            return new KVHeader();
         }
 
         public void Dispose()
@@ -224,7 +226,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
             using var stream = OpenFileForInclude(filePath);
             using var reader = new KV1TextReader(new StreamReader(stream), mergeListener, options);
-            reader.ReadObject();
+            reader.ReadHeader();
         }
 
         void DoIncludeAndAppend(string filePath)
@@ -233,7 +235,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
             using var stream = OpenFileForInclude(filePath);
             using var reader = new KV1TextReader(new StreamReader(stream), appendListener, options);
-            reader.ReadObject();
+            reader.ReadHeader();
         }
 
         Stream OpenFileForInclude(string filePath)

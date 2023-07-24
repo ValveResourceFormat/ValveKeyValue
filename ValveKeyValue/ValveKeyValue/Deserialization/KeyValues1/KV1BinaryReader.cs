@@ -32,7 +32,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         bool disposed;
         KV1BinaryNodeType endMarker = KV1BinaryNodeType.End;
 
-        public void ReadObject()
+        public KVHeader ReadHeader()
         {
             Require.NotDisposed(nameof(KV1TextReader), disposed);
 
@@ -54,6 +54,8 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             {
                 throw new KeyValueException("Error while parsing binary KeyValues.", ex);
             }
+
+            return new KVHeader();
         }
 
         public void Dispose()

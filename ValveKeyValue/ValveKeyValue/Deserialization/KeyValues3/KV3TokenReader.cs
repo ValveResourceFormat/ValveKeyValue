@@ -139,7 +139,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             return new KVToken(KVTokenType.BinaryBlob, sb.ToString());
         }
 
-        public KVFile ReadHeader()
+        public KVHeader ReadHeader()
         {
             var str = ReadToken();
 
@@ -222,7 +222,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 throw new InvalidDataException($"Unrecognized encoding specifier, expected '{Format.Generic}' but got '{format}'.");
             }
 
-            return new KVFile
+            return new KVHeader
             {
                 Encoding = encoding,
                 Format = format,
