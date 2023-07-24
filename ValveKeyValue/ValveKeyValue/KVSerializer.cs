@@ -38,13 +38,12 @@ namespace ValveKeyValue
             Require.NotNull(stream, nameof(stream));
             var builder = new KVObjectBuilder();
 
-            using (var reader = MakeReader(stream, builder, options ?? KVSerializerOptions.DefaultOptions))
-            {
-                reader.ReadObject();
-            }
+            using var reader = MakeReader(stream, builder, options ?? KVSerializerOptions.DefaultOptions);
 
+            var header = reader.ReadHeader();
             var root = builder.GetObject();
-            return new KVDocument(root.Name, root.Value);
+
+            return new KVDocument(header, root.Name, root.Value); // TODO
         }
 
         /// <summary>

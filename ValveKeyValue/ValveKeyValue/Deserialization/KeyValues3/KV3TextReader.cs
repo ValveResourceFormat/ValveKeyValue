@@ -24,11 +24,11 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         readonly KV3TextReaderStateMachine stateMachine;
         bool disposed;
 
-        public void ReadObject()
+        public KVHeader ReadHeader()
         {
             Require.NotDisposed(nameof(KV3TextReader), disposed);
 
-            var file = tokenReader.ReadHeader();
+            var header = tokenReader.ReadHeader();
 
             while (stateMachine.IsInObject)
             {
@@ -108,6 +108,8 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                         throw new ArgumentOutOfRangeException(nameof(token.TokenType), token.TokenType, "Unhandled token type.");
                 }
             }
+
+            return header;
         }
 
         public void Dispose()

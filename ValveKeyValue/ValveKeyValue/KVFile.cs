@@ -2,10 +2,13 @@
 
 namespace ValveKeyValue
 {
-    public class KVFile
+    public class KVFile : KVObject
     {
-        public Guid Encoding { get; set; }
-        public Guid Format { get; set; }
-        public KVObject Root { get; set; }
+        public KVHeader Header { get; }
+
+        public KVFile(KVHeader header, string name, KVValue value) : base(name, value)
+        {
+            Header = header;
+        }
     }
 }
