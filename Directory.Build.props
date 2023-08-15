@@ -18,11 +18,11 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup>
-    <Authors>SteamDB</Authors>
-    <Copyright>Copyright © SteamDB</Copyright>
-    <RepositoryUrl>https://github.com/SteamDatabase/ValveKeyValue</RepositoryUrl>
+    <Authors>ValveKeyValue Contributors</Authors>
+    <Copyright>Copyright © ValveKeyValue Contributors</Copyright>
+    <RepositoryUrl>https://github.com/ValveResourceFormat/ValveKeyValue</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageProjectUrl>https://github.com/SteamDatabase/ValveKeyValue</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/ValveResourceFormat/ValveKeyValue</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 </Project>

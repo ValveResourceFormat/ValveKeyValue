@@ -1,8 +1,8 @@
 # Valve's KeyValue for .NET
 
-[![Build Status (GitHub)](https://img.shields.io/github/actions/workflow/status/SteamDatabase/ValveKeyValue/ci.yml?label=Build&style=flat-square&branch=master)](https://github.com/SteamDatabase/ValveKeyValue/actions)
+[![Build Status (GitHub)](https://img.shields.io/github/actions/workflow/status/ValveResourceFormat/ValveKeyValue/ci.yml?label=Build&style=flat-square&branch=master)](https://github.com/ValveResourceFormat/ValveKeyValue/actions)
 [![NuGet](https://img.shields.io/nuget/v/ValveKeyValue.svg?label=NuGet&style=flat-square)](https://www.nuget.org/packages/ValveKeyValue/)
-[![Coverage Status](https://img.shields.io/codecov/c/github/SteamDatabase/ValveKeyValue/master?label=Coverage&style=flat-square)](https://app.codecov.io/gh/SteamDatabase/ValveKeyValue)
+[![Coverage Status](https://img.shields.io/codecov/c/github/ValveResourceFormat/ValveKeyValue/master?label=Coverage&style=flat-square)](https://app.codecov.io/gh/ValveResourceFormat/ValveKeyValue)
 
 This library aims to be fully compatible with Valve's various implementations of
 KeyValues format parsing (believe us, it's not consistent).
