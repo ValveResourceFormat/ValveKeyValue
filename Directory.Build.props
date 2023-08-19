@@ -22,7 +22,7 @@
     <Copyright>Copyright © ValveKeyValue Contributors</Copyright>
     <RepositoryUrl>https://github.com/ValveResourceFormat/ValveKeyValue</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageProjectUrl>https://github.com/ValveResourceFormat/ValveKeyValue</PackageProjectUrl>
+    <PackageProjectUrl>https://valveresourceformat.github.io/</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 </Project>
