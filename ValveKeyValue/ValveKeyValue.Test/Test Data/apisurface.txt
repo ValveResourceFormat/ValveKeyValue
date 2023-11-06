@@ -152,6 +152,7 @@ public class ValveKeyValue.KVValue
     public static IntPtr op_Explicit(ValveKeyValue.KVValue value);
     public static ValveKeyValue.KVValue op_Implicit(string value);
     public static ValveKeyValue.KVValue op_Implicit(int value);
+    public static ValveKeyValue.KVValue op_Implicit(bool value);
     public static ValveKeyValue.KVValue op_Implicit(IntPtr value);
     public static ValveKeyValue.KVValue op_Implicit(ulong value);
     public static ValveKeyValue.KVValue op_Implicit(float value);
