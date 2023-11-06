@@ -27,8 +27,8 @@ Console.WriteLine(data["some key"]);
 ```cs
 public class SimpleObject
 {
-	public string Name { get; set; }
-	public string Value { get; set; }
+    public string Name { get; set; }
+    public string Value { get; set; }
 }
 
 var stream = File.OpenRead("file.vdf"); // or any other Stream
@@ -72,23 +72,23 @@ Essentially the same text, just change `KeyValues1Text` to `KeyValues1Binary`.
 ```cs
 class DataObject
 {
-	public string Name { get; set; }
+    public string Name { get; set; }
 
-	public string Developer { get; set; }
+    public string Developer { get; set; }
 
-	[KVProperty("description")]
-	public string Summary { get; set; }
+    [KVProperty("description")]
+    public string Summary { get; set; }
 
-	[KVIgnore]
-	public string ExtraData { get; set; }
+    [KVIgnore]
+    public string ExtraData { get; set; }
 }
 
 var data = new DataObject
 {
-	Developer = "Valve Software",
-	Name = "Dota 2",
-	Summary = "Dota 2 is a complex game.",
-	ExtraData = "This will not be serialized."
+    Developer = "Valve Software",
+    Name = "Dota 2",
+    Summary = "Dota 2 is a complex game.",
+    ExtraData = "This will not be serialized."
 };
 
 using var stream = File.OpenWrite("file.vdf");
