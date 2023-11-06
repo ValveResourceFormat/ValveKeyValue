@@ -1,0 +1,6 @@
+"object"
+{
+	"test1_false"   "0"
+	"test2_true"    "1"
+	"test3_oob"     "2"
+}

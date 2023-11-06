@@ -35,7 +35,7 @@ namespace ValveKeyValue
             };
         }
 
-        public override bool ToBoolean(IFormatProvider provider) => ToInt32(provider) == 1;
+        public override bool ToBoolean(IFormatProvider provider) => ToInt32(provider) != 0;
 
         public override byte ToByte(IFormatProvider provider) => (byte)Convert.ChangeType(value, typeof(byte), provider);
 

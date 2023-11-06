@@ -437,7 +437,7 @@ namespace ValveKeyValue
 
             return Type.GetTypeCode(type) switch
             {
-                //TypeCode.Boolean => throw new NotImplementedException("Converting to boolean is not yet supported"),
+                TypeCode.Boolean => (KVValue)(bool)value,
                 //TypeCode.Byte => throw new NotImplementedException("Converting to byte is not yet supported"),
                 //TypeCode.Char => throw new NotImplementedException("Converting to char is not yet supported"),
                 //TypeCode.DateTime => throw new NotImplementedException(), // Datetime are not supported
