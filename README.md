@@ -65,7 +65,7 @@ var data = kv.Deserialize(stream, options);
 
 ## Deserializing binary
 
-Essentially the same text, just change `KeyValues1Text` to `KeyValues1Binary`.
+Essentially the same as text, just change `KeyValues1Text` to `KeyValues1Binary`.
 
 ## Serializing to text
 
@@ -99,4 +99,4 @@ kv.Serialize(stream, data, "root object name");
 
 ## Serializing to binary
 
-Essentially the same text, just change `KeyValues1Text` to `KeyValues1Binary`.
+Essentially the same as text, just change `KeyValues1Text` to `KeyValues1Binary`.
