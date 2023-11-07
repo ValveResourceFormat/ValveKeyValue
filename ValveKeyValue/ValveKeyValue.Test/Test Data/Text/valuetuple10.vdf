@@ -1,0 +1,16 @@
+"root"
+{
+	"Item1"	"1"
+	"Item2"	"2"
+	"Item3"	"3"
+	"Item4"	"4"
+	"Item5"	"5"
+	"Item6"	"6"
+	"Item7"	"7"
+	"Rest"
+	{
+		"Item1"	"8"
+		"Item2"	"9"
+		"Item3"	"10"
+	}
+}
