@@ -30,10 +30,23 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         bool disposed;
         int? peekedNext;
 
+        int lineOffset;
+        int columnOffset;
+
+        public int Line => lineOffset + 1;
+        public int Column => columnOffset + 1;
+
+        public int PreviousTokenStartLine { get; private set; }
+        public int PreviousTokenStartColumn { get; private set; }
+        public string PreviousTokenPosition => $"line {PreviousTokenStartLine}, column {PreviousTokenStartColumn}";
+
         public KVToken ReadNextToken()
         {
             Require.NotDisposed(nameof(KV1TokenReader), disposed);
             SwallowWhitespace();
+
+            PreviousTokenStartLine = Line;
+            PreviousTokenStartColumn = Column;
 
             var nextChar = Peek();
             if (IsEndOfFile(nextChar))
@@ -140,7 +153,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                 return new KVToken(KVTokenType.IncludeAndMerge, value);
             }
 
-            throw new InvalidDataException("Unrecognized term after '#' symbol.");
+            throw new InvalidDataException($"Unrecognized term after '#' symbol (line {Line}, column {Column})");
         }
 
         char Next()
@@ -160,6 +173,16 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             if (next == -1)
             {
                 throw new EndOfStreamException();
+            }
+
+            if (next is '\n')
+            {
+                lineOffset++;
+                columnOffset = 0;
+            }
+            else
+            {
+                columnOffset++;
             }
 
             return (char)next;
@@ -183,7 +206,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             var next = Next();
             if (next != expectedChar)
             {
-                throw new InvalidDataException($"The syntax is incorrect, expected '{expectedChar}' but got '{next}'.");
+                throw new InvalidDataException($"The syntax is incorrect, expected '{expectedChar}' but got '{next}' at line {Line}, column {Column}.");
             }
         }
 
@@ -215,7 +238,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                             '\\' => '\\',
                             '"' => '"',
                             _ when options.EnableValveNullByteBugBehavior => '\0',
-                            _ => throw new InvalidDataException($"Unknown escape sequence '\\{next}'."),
+                            _ => throw new InvalidDataException($"Unknown escape sequence '\\{next}' at line {Line}, column {Column - 2}."),
                         };
 
                         escapeNext = false;
