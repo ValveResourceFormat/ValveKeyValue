@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace ValveKeyValue
@@ -8,17 +9,35 @@ namespace ValveKeyValue
         IEnumerable<IObjectMember> IObjectReflector.GetMembers(object @object)
         {
             Require.NotNull(@object, nameof(@object));
-            var properties = @object.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
-            foreach (var property in properties)
+            var objectType = @object.GetType();
+
+            if (IsValueTupleType(objectType))
             {
-                if (property.GetCustomAttribute<KVIgnoreAttribute>() != null)
-                {
-                    continue;
-                }
+                var fields = objectType.GetFields(BindingFlags.Instance | BindingFlags.Public);
 
-                yield return new PropertyMember(property, @object);
+                foreach (var field in fields)
+                {
+                    yield return new FieldMember(field, @object);
+                }
+            }
+            else
+            {
+                var properties = objectType.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+                foreach (var property in properties)
+                {
+                    if (property.GetCustomAttribute<KVIgnoreAttribute>() != null)
+                    {
+                        continue;
+                    }
+
+                    yield return new PropertyMember(property, @object);
+                }
             }
         }
+
+        static bool IsValueTupleType(Type type)
+            => type.IsGenericType && type.FullName.StartsWith("System.ValueTuple`");
     }
 }
