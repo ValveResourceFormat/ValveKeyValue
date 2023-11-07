@@ -232,10 +232,16 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                     {
                         next = next switch
                         {
-                            'r' => '\r',
                             'n' => '\n',
                             't' => '\t',
+                            'v' => '\v',
+                            'b' => '\b',
+                            'r' => '\r',
+                            'f' => '\f',
+                            'a' => '\a',
                             '\\' => '\\',
+                            '?' => '?',
+                            '\'' => '\'',
                             '"' => '"',
                             _ when options.EnableValveNullByteBugBehavior => '\0',
                             _ => throw new InvalidDataException($"Unknown escape sequence '\\{next}' at line {Line}, column {Column - 2}."),
