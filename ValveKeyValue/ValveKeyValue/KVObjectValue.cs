@@ -41,10 +41,7 @@ namespace ValveKeyValue
 
         public override char ToChar(IFormatProvider provider) => (char)Convert.ChangeType(value, typeof(char), provider);
 
-        public override DateTime ToDateTime(IFormatProvider provider)
-        {
-            throw new InvalidCastException("Casting to DateTime is not supported.");
-        }
+        public override DateTime ToDateTime(IFormatProvider provider) => throw new InvalidCastException("Casting to DateTime is not supported.");
 
         public override decimal ToDecimal(IFormatProvider provider) => (decimal)Convert.ChangeType(value, typeof(decimal), provider);
 
