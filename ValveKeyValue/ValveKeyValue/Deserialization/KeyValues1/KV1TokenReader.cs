@@ -36,10 +36,17 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         public int Line => lineOffset + 1;
         public int Column => columnOffset + 1;
 
+        public int PreviousTokenStartLine { get; private set; }
+        public int PreviousTokenStartColumn { get; private set; }
+        public string PreviousTokenPosition => $"line {PreviousTokenStartLine}, column {PreviousTokenStartColumn}";
+
         public KVToken ReadNextToken()
         {
             Require.NotDisposed(nameof(KV1TokenReader), disposed);
             SwallowWhitespace();
+
+            PreviousTokenStartLine = Line;
+            PreviousTokenStartColumn = Column;
 
             var nextChar = Peek();
             if (IsEndOfFile(nextChar))

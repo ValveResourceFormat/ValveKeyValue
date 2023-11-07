@@ -86,7 +86,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                     case KVTokenType.IncludeAndMerge:
                         if (!stateMachine.IsAtStart)
                         {
-                            throw new KeyValueException("Inclusions are only valid at the beginning of a file.");
+                            throw new KeyValueException($"Inclusions are only valid at the beginning of a file, but found one at {tokenReader.PreviousTokenPosition}.");
                         }
 
                         stateMachine.AddItemForMerging(token.Value);
@@ -95,7 +95,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                     case KVTokenType.IncludeAndAppend:
                         if (!stateMachine.IsAtStart)
                         {
-                            throw new KeyValueException("Inclusions are only valid at the beginning of a file.");
+                            throw new KeyValueException($"Inclusions are only valid at the beginning of a file, but found one at {tokenReader.PreviousTokenPosition}.");
                         }
 
                         stateMachine.AddItemForAppending(token.Value);
@@ -140,7 +140,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                     break;
 
                 default:
-                    throw new InvalidOperationException($"Unhandled text reader state: {stateMachine.Current}.");
+                    throw new InvalidOperationException($"Unhandled text reader state: {stateMachine.Current} at {tokenReader.PreviousTokenPosition}.");
             }
         }
 
@@ -154,7 +154,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         {
             if (stateMachine.Current != KV1TextReaderState.InObjectBetweenKeyAndValue)
             {
-                throw new InvalidOperationException($"Attempted to begin new object while in state {stateMachine.Current}.");
+                throw new InvalidOperationException($"Attempted to begin new object while in state {stateMachine.Current} at {tokenReader.PreviousTokenPosition}.");
             }
 
             listener.OnObjectStart(stateMachine.CurrentName);
@@ -167,7 +167,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         {
             if (stateMachine.Current != KV1TextReaderState.InObjectBeforeKey && stateMachine.Current != KV1TextReaderState.InObjectAfterValue)
             {
-                throw new InvalidOperationException($"Attempted to finalize object while in state {stateMachine.Current}.");
+                throw new InvalidOperationException($"Attempted to finalize object while in state {stateMachine.Current} at {tokenReader.PreviousTokenPosition}.");
             }
 
             stateMachine.PopObject(out var discard);
