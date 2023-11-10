@@ -217,6 +217,41 @@ namespace ValveKeyValue.Test
             Assert.That(() => (ulong)kv.Value, Throws.Exception.TypeOf<FormatException>().Or.TypeOf<OverflowException>());
         }
 
+        [TestCase("3.5", 3.5f)]
+        [TestCase("0", 0f)]
+        [TestCase("1", 1f)]
+        [TestCase("1.7976931348623157", 1.7976931348623157f)]
+        [TestCase("-98765432.109", -98765432.109f)]
+        public void FloatSuccess(string value, float expected)
+        {
+            var kv = new KVObject("aaa", value);
+            Assert.That((float)kv.Value, Is.EqualTo(expected));
+        }
+
+        [TestCase("3.5", 3.5D)]
+        [TestCase("0", 0D)]
+        [TestCase("1", 1D)]
+        [TestCase("1.7976931348623157", 1.7976931348623157D)]
+        [TestCase("-98765432.109", -98765432.109D)]
+        public void DoubleSuccess(string value, double expected)
+        {
+            var kv = new KVObject("aaa", value);
+            Assert.That((double)kv.Value, Is.EqualTo(expected));
+        }
+
+        [TestCase]
+        public void DecimalSuccess()
+        {
+            var kv = new KVObject("aaa", "79228162514264337593543950335");
+            Assert.That((decimal)kv.Value, Is.EqualTo(79228162514264337593543950335m));
+
+            kv = new KVObject("aaa", "1500000");
+            Assert.That((decimal)kv.Value, Is.EqualTo(1.5E6m));
+
+            kv = new KVObject("aaa", "-1500000");
+            Assert.That((decimal)kv.Value, Is.EqualTo(-1.5E6m));
+        }
+
         static IEnumerable CommonFailures
         {
             get
