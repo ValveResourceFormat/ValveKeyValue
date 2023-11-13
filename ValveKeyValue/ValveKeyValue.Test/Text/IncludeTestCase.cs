@@ -42,8 +42,18 @@ namespace ValveKeyValue.Test
         {
             Stream IIncludedFileLoader.OpenFile(string filePath)
             {
-                Assert.That(filePath, Is.EqualTo("file.vdf"));
-                return TestDataHelper.OpenResource("Text.kv_included.vdf");
+                if (filePath == "file.vdf")
+                {
+                    return TestDataHelper.OpenResource("Text.kv_included.vdf");
+                }
+                else if (filePath == "this_file_does_not_exist.vdf")
+                {
+                    return null;
+                }
+                else
+                {
+                    throw new InvalidDataException($"Received an unexpected base or include: {filePath}");
+                } 
             }
         }
     }

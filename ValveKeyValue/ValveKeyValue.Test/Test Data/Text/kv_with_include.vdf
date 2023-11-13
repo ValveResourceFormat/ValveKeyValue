@@ -1,4 +1,5 @@
 ﻿#include "file.vdf"
+#include "this_file_does_not_exist.vdf"
 
 "test case"
 {

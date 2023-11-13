@@ -1,4 +1,5 @@
 ﻿#base "file.vdf"
+#base "this_file_does_not_exist.vdf"
 
 "test case"
 {
