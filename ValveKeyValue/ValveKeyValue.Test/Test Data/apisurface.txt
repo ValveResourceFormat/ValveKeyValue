@@ -87,9 +87,9 @@ public sealed enum ValveKeyValue.KVSerializationFormat
     public bool HasFlag(Enum flag);
     protected object MemberwiseClone();
     public string ToString();
-    public string ToString(string format, IFormatProvider provider);
-    public string ToString(string format);
     public string ToString(IFormatProvider provider);
+    public string ToString(string format);
+    public string ToString(string format, IFormatProvider provider);
 }
 
 public class ValveKeyValue.KVSerializer
@@ -150,13 +150,13 @@ public class ValveKeyValue.KVValue
     public static ulong op_Explicit(ValveKeyValue.KVValue value);
     public static ushort op_Explicit(ValveKeyValue.KVValue value);
     public static IntPtr op_Explicit(ValveKeyValue.KVValue value);
-    public static ValveKeyValue.KVValue op_Implicit(string value);
-    public static ValveKeyValue.KVValue op_Implicit(int value);
     public static ValveKeyValue.KVValue op_Implicit(bool value);
-    public static ValveKeyValue.KVValue op_Implicit(IntPtr value);
-    public static ValveKeyValue.KVValue op_Implicit(ulong value);
     public static ValveKeyValue.KVValue op_Implicit(float value);
+    public static ValveKeyValue.KVValue op_Implicit(int value);
+    public static ValveKeyValue.KVValue op_Implicit(IntPtr value);
     public static ValveKeyValue.KVValue op_Implicit(long value);
+    public static ValveKeyValue.KVValue op_Implicit(string value);
+    public static ValveKeyValue.KVValue op_Implicit(ulong value);
     public bool ToBoolean(IFormatProvider provider);
     public byte ToByte(IFormatProvider provider);
     public char ToChar(IFormatProvider provider);
@@ -168,8 +168,8 @@ public class ValveKeyValue.KVValue
     public long ToInt64(IFormatProvider provider);
     public sbyte ToSByte(IFormatProvider provider);
     public float ToSingle(IFormatProvider provider);
-    public string ToString(IFormatProvider provider);
     public string ToString();
+    public string ToString(IFormatProvider provider);
     public object ToType(Type conversionType, IFormatProvider provider);
     public ushort ToUInt16(IFormatProvider provider);
     public uint ToUInt32(IFormatProvider provider);
@@ -195,8 +195,8 @@ public sealed enum ValveKeyValue.KVValueType
     public bool HasFlag(Enum flag);
     protected object MemberwiseClone();
     public string ToString();
-    public string ToString(string format, IFormatProvider provider);
-    public string ToString(string format);
     public string ToString(IFormatProvider provider);
+    public string ToString(string format);
+    public string ToString(string format, IFormatProvider provider);
 }
 

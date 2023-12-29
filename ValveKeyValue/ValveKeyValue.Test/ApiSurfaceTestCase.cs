@@ -87,15 +87,12 @@ namespace ValveKeyValue.Test
 
             var methods = type
                 .GetMethods(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-                .OrderBy(t => t.Name, StringComparer.InvariantCulture);
+                .Where(t => !t.IsPrivate && !t.IsAssembly && !t.IsFamilyAndAssembly)
+                .OrderBy(t => t.Name, StringComparer.InvariantCulture)
+                .ThenBy(t => string.Join(", ", t.GetParameters().Select(GetParameterAsString)), StringComparer.InvariantCulture);
 
             foreach (var method in methods)
             {
-                if (method.IsPrivate || method.IsAssembly || method.IsFamilyAndAssembly)
-                {
-                    continue;
-                }
-
                 sb.Append("    ");
 
                 if (method.IsPublic)
