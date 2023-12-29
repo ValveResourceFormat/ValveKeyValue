@@ -9,12 +9,7 @@ namespace ValveKeyValue.Test
         public static Stream OpenResource(string name)
         {
             var resourceName = "ValveKeyValue.Test.Test_Data." + name;
-            var stream = typeof(TestDataHelper).GetTypeInfo().Assembly.GetManifestResourceStream(resourceName);
-            if (stream == null)
-            {
-                throw new FileNotFoundException("Embedded Resource not found.", resourceName);
-            }
-
+            var stream = typeof(TestDataHelper).GetTypeInfo().Assembly.GetManifestResourceStream(resourceName) ?? throw new FileNotFoundException("Embedded Resource not found.", resourceName);
             return stream;
         }
 

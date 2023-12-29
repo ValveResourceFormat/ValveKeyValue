@@ -75,9 +75,11 @@ namespace ValveKeyValue.Test
 
         class SerializedType
         {
+#pragma warning disable IDE1006 // Naming Styles
             public bool test1_false { get; set; }
             public bool test2_true { get; set; }
             public bool test3_oob { get; set; }
+#pragma warning restore IDE1006
         }
     }
 }
