@@ -1,5 +1,3 @@
-﻿using System;
-
 namespace ValveKeyValue.KeyValues3
 {
     public class Encoding

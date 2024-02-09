@@ -1,0 +1,3 @@
+# Keep intended line endings to test parser
+*.kv3 eol=lf
+*_crlf.kv3 eol=crlf

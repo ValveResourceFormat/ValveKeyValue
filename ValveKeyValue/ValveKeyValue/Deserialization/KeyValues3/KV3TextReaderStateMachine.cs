@@ -1,5 +1,3 @@
-﻿using System.Collections.Generic;
-
 namespace ValveKeyValue.Deserialization.KeyValues3
 {
     class KV3TextReaderStateMachine

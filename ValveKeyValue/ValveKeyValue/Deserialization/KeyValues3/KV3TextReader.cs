@@ -1,6 +1,4 @@
-﻿using System;
 using System.Globalization;
-using System.IO;
 using ValveKeyValue.Abstraction;
 
 namespace ValveKeyValue.Deserialization.KeyValues3
@@ -183,7 +181,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         void ReadBinaryBlob(string text)
         {
-            var bytes = Utils.ParseHexStringAsByteArrayNoReverse(text);
+            var bytes = HexStringHelper.ParseHexStringAsByteArray(text);
             var value = new KVBinaryBlob(bytes)
             {
                 Flag = stateMachine.GetAndResetFlag()

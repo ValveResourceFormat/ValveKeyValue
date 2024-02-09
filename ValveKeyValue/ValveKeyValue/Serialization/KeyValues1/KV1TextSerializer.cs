@@ -21,7 +21,7 @@ namespace ValveKeyValue.Serialization.KeyValues1
         readonly KVSerializerOptions options;
         readonly TextWriter writer;
         int indentation = 0;
-        Stack<int> arrayCount = new();
+        readonly Stack<int> arrayCount = new();
 
         public void Dispose()
         {
