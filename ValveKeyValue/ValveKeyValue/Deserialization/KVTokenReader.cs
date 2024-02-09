@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace ValveKeyValue.Deserialization.KeyValues1
+namespace ValveKeyValue.Deserialization
 {
     class KVTokenReader : IDisposable
     {
