@@ -6,7 +6,7 @@ using System.Text;
 
 namespace ValveKeyValue.Deserialization.KeyValues1
 {
-    class KV1TokenReader : IDisposable
+    class KV1TokenReader : KVTokenReader
     {
         const char QuotationMark = '"';
         const char ObjectStart = '{';
@@ -16,29 +16,14 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         const char ConditionEnd = ']';
         const char InclusionMark = '#';
 
-        public KV1TokenReader(TextReader textReader, KVSerializerOptions options)
+        public KV1TokenReader(TextReader textReader, KVSerializerOptions options) : base(textReader)
         {
-            Require.NotNull(textReader, nameof(textReader));
             Require.NotNull(options, nameof(options));
 
-            this.textReader = textReader;
             this.options = options;
         }
 
         readonly KVSerializerOptions options;
-        TextReader textReader;
-        bool disposed;
-        int? peekedNext;
-
-        int lineOffset;
-        int columnOffset;
-
-        public int Line => lineOffset + 1;
-        public int Column => columnOffset + 1;
-
-        public int PreviousTokenStartLine { get; private set; }
-        public int PreviousTokenStartColumn { get; private set; }
-        public string PreviousTokenPosition => $"line {PreviousTokenStartLine}, column {PreviousTokenStartColumn}";
 
         public KVToken ReadNextToken()
         {
@@ -63,17 +48,6 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                 InclusionMark => ReadInclusion(),
                 _ => ReadString(),
             };
-        }
-
-        public void Dispose()
-        {
-            if (!disposed)
-            {
-                textReader.Dispose();
-                textReader = null;
-
-                disposed = true;
-            }
         }
 
         KVToken ReadString()
@@ -156,60 +130,6 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             throw new InvalidDataException($"Unrecognized term after '#' symbol (line {Line}, column {Column})");
         }
 
-        char Next()
-        {
-            int next;
-
-            if (peekedNext.HasValue)
-            {
-                next = peekedNext.Value;
-                peekedNext = null;
-            }
-            else
-            {
-                next = textReader.Read();
-            }
-
-            if (next == -1)
-            {
-                throw new EndOfStreamException();
-            }
-
-            if (next is '\n')
-            {
-                lineOffset++;
-                columnOffset = 0;
-            }
-            else
-            {
-                columnOffset++;
-            }
-
-            return (char)next;
-        }
-
-        int Peek()
-        {
-            if (peekedNext.HasValue)
-            {
-                return peekedNext.Value;
-            }
-
-            var next = textReader.Read();
-            peekedNext = next;
-
-            return next;
-        }
-
-        void ReadChar(char expectedChar)
-        {
-            var next = Next();
-            if (next != expectedChar)
-            {
-                throw new InvalidDataException($"The syntax is incorrect, expected '{expectedChar}' but got '{next}' at line {Line}, column {Column}.");
-            }
-        }
-
         string ReadUntil(params char[] terminators)
         {
             var sb = new StringBuilder();
@@ -283,20 +203,6 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             return sb.ToString();
         }
 
-        void SwallowWhitespace()
-        {
-            while (PeekWhitespace())
-            {
-                Next();
-            }
-        }
-
-        bool PeekWhitespace()
-        {
-            var next = Peek();
-            return !IsEndOfFile(next) && char.IsWhiteSpace((char)next);
-        }
-
         string ReadStringRaw()
         {
             SwallowWhitespace();
@@ -317,7 +223,5 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             ReadChar(QuotationMark);
             return text;
         }
-
-        bool IsEndOfFile(int value) => value == -1;
     }
 }
