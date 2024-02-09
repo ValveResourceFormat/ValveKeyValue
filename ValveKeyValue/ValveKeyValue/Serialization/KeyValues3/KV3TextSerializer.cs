@@ -1,6 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Text;
 using ValveKeyValue.Abstraction;
 
@@ -23,7 +20,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
 
         readonly TextWriter writer;
         int indentation = 0;
-        Stack<bool> inArray = new();
+        readonly Stack<bool> inArray = new();
 
         bool IsInArray => inArray.Count > 0 && inArray.Peek();
 
@@ -171,8 +168,10 @@ namespace ValveKeyValue.Serialization.KeyValues3
 
         void WriteBinaryBlob(KVBinaryBlob value)
         {
+            var bytes = value.Bytes.Span;
+
             // TODO: Verify this against Valve
-            if (value.Bytes.Length > 32)
+            if (bytes.Length > 32)
             {
                 writer.WriteLine();
                 WriteIndentation();
@@ -184,18 +183,20 @@ namespace ValveKeyValue.Serialization.KeyValues3
             indentation++;
             WriteIndentation();
 
-            var count = 0;
+            var i = 0;
 
-            foreach (var oneByte in value.Bytes)
+            for (; i < bytes.Length; i++)
             {
-                writer.Write(oneByte.ToString("X2"));
+                var b = bytes[i];
+                writer.Write(HexStringHelper.HexToCharUpper(b >> 4));
+                writer.Write(HexStringHelper.HexToCharUpper(b));
 
-                if (++count % 32 == 0)
+                if (i > 0 && i % 32 == 0)
                 {
                     writer.WriteLine();
                     WriteIndentation();
                 }
-                else if (count != value.Bytes.Length)
+                else if (i != bytes.Length - 1)
                 {
                     writer.Write(' ');
                 }
@@ -203,7 +204,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
 
             indentation--;
 
-            if (count % 32 != 0)
+            if (i % 32 != 0)
             {
                 writer.WriteLine();
                 WriteIndentation();

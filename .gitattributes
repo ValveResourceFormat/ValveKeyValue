@@ -1,6 +1,2 @@
 * text=auto
 *.cs     diff=csharp
-
-# Keep intended line endings to test parser
-*_crlf.kv3 eol=crlf
-*_lf.kv3 eol=lf

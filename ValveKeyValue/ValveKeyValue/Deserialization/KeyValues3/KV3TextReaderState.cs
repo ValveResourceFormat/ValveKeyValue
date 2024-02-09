@@ -1,4 +1,4 @@
-﻿namespace ValveKeyValue.Deserialization.KeyValues3
+namespace ValveKeyValue.Deserialization.KeyValues3
 {
     enum KV3TextReaderState
     {

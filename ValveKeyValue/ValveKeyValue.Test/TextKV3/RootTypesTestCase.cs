@@ -1,5 +1,3 @@
-﻿using NUnit.Framework;
-
 namespace ValveKeyValue.Test.TextKV3
 {
     class RootTypesTestCase
@@ -86,7 +84,7 @@ namespace ValveKeyValue.Test.TextKV3
             {
                 Assert.That(data.Name, Is.EqualTo("root"));
                 Assert.That(data.Value.ValueType, Is.EqualTo(KVValueType.BinaryBlob));
-                Assert.That(((KVBinaryBlob)data.Value).Bytes, Is.EqualTo(new byte[]
+                Assert.That(((KVBinaryBlob)data.Value).Bytes.ToArray(), Is.EqualTo(new byte[]
                 {
                     0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
                     0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xFF
