@@ -259,7 +259,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             if (text.Length == HexStringLengthForUnsignedLong && text.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
             {
                 var hexadecimalString = text[2..];
-                var data = ParseHexStringAsByteArray(hexadecimalString);
+                var data = HexStringHelper.ParseHexStringAsByteArray(hexadecimalString);
 
                 if (BitConverter.IsLittleEndian)
                 {
@@ -291,20 +291,6 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             }
 
             return new KVObjectValue<string>(text, KVValueType.String);
-        }
-
-        static byte[] ParseHexStringAsByteArray(string hexadecimalRepresentation)
-        {
-            Require.NotNull(hexadecimalRepresentation, nameof(hexadecimalRepresentation));
-
-            var data = new byte[hexadecimalRepresentation.Length / 2];
-            for (var i = 0; i < data.Length; i++)
-            {
-                var currentByteText = hexadecimalRepresentation.Substring(i * 2, 2);
-                data[i] = byte.Parse(currentByteText, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-            }
-
-            return data;
         }
 
         // The string may begin with an arbitrary amount of white space (as determined by isspace(3)) followed by a single optional
