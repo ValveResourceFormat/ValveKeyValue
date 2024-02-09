@@ -1,4 +1,4 @@
-﻿namespace ValveKeyValue.Abstraction
+namespace ValveKeyValue.Abstraction
 {
     interface IParsingVisitationListener : IVisitationListener
     {

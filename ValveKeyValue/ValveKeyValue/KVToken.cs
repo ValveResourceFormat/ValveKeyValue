@@ -1,4 +1,4 @@
-﻿namespace ValveKeyValue
+namespace ValveKeyValue
 {
     class KVToken
     {

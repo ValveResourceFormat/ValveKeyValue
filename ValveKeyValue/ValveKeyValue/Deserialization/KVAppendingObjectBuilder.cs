@@ -1,4 +1,4 @@
-﻿namespace ValveKeyValue.Deserialization
+namespace ValveKeyValue.Deserialization
 {
     sealed class KVAppendingObjectBuilder : KVObjectBuilder
     {

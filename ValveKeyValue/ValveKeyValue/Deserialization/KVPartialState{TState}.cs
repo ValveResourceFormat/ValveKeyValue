@@ -1,4 +1,4 @@
-﻿namespace ValveKeyValue.Deserialization
+namespace ValveKeyValue.Deserialization
 {
     class KVPartialState<TState> : KVPartialState
     {

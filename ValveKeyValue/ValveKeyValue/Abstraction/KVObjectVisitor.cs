@@ -1,4 +1,4 @@
-﻿namespace ValveKeyValue.Abstraction
+namespace ValveKeyValue.Abstraction
 {
     sealed class KVObjectVisitor
     {

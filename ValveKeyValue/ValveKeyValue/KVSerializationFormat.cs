@@ -1,4 +1,4 @@
-﻿namespace ValveKeyValue
+namespace ValveKeyValue
 {
     /// <summary>
     /// Represents the type of (de)serialization to use.

@@ -1,4 +1,4 @@
-﻿namespace ValveKeyValue.Test
+namespace ValveKeyValue.Test
 {
     [TestFixtureSource(typeof(TestFixtureSources), nameof(TestFixtureSources.SupportedEnumerableTypesForDeserialization))]
     class ArrayWithEmptyKeyTestCase<TEnumerable>

@@ -1,4 +1,4 @@
-﻿using ValveKeyValue.Abstraction;
+using ValveKeyValue.Abstraction;
 using ValveKeyValue.Deserialization;
 using ValveKeyValue.Deserialization.KeyValues1;
 using ValveKeyValue.Serialization.KeyValues1;

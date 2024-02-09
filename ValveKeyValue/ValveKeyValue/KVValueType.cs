@@ -1,4 +1,4 @@
-﻿namespace ValveKeyValue
+namespace ValveKeyValue
 {
     /// <summary>
     /// Represents the type of a given <see cref="KVValue"/>

@@ -1,4 +1,4 @@
-﻿namespace ValveKeyValue.Test
+namespace ValveKeyValue.Test
 {
     interface IKVTextReader
     {

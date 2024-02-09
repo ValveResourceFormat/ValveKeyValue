@@ -1,4 +1,4 @@
-﻿namespace ValveKeyValue
+namespace ValveKeyValue
 {
     /// <summary>
     /// This attribute is used to tell the deserializer to map a given property to a particular

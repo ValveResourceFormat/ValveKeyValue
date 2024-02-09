@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using ValveKeyValue.Abstraction;
 
 namespace ValveKeyValue.Deserialization.KeyValues1

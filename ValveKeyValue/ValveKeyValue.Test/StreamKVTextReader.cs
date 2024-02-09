@@ -1,4 +1,4 @@
-﻿namespace ValveKeyValue.Test
+namespace ValveKeyValue.Test
 {
     sealed class StreamKVTextReader : IKVTextReader
     {
