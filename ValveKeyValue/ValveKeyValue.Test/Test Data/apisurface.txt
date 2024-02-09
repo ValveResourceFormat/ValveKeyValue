@@ -178,13 +178,17 @@ public class ValveKeyValue.KVValue
 
 public sealed enum ValveKeyValue.KVValueType
 {
-    Collection = 0;
-    String = 1;
-    Int32 = 2;
-    UInt64 = 3;
-    FloatingPoint = 4;
-    Pointer = 5;
-    Int64 = 6;
+    Null = 0;
+    Collection = 1;
+    Array = 2;
+    BinaryBlob = 3;
+    String = 4;
+    Int32 = 5;
+    UInt64 = 6;
+    FloatingPoint = 7;
+    Pointer = 8;
+    Int64 = 9;
+    Boolean = 10;
 
     public int CompareTo(object target);
     public bool Equals(object obj);
