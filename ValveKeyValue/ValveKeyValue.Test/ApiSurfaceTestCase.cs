@@ -1,9 +1,7 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using NUnit.Framework;
 
 namespace ValveKeyValue.Test
 {

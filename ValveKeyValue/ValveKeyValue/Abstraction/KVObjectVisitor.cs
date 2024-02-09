@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace ValveKeyValue.Abstraction
+﻿namespace ValveKeyValue.Abstraction
 {
     sealed class KVObjectVisitor
     {

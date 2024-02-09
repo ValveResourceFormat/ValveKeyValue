@@ -1,7 +1,4 @@
-﻿using System;
-using NUnit.Framework;
-
-namespace ValveKeyValue.Test
+﻿namespace ValveKeyValue.Test
 {
     class BinaryWithMarkerTestCase
     {

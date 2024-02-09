@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace ValveKeyValue.Deserialization
+﻿namespace ValveKeyValue.Deserialization
 {
     class KVPartialState<TState> : KVPartialState
     {

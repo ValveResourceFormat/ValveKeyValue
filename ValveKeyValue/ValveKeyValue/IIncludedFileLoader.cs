@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-namespace ValveKeyValue
+﻿namespace ValveKeyValue
 {
     /// <summary>
     /// Provides a way to open any file referenced with <c>#include</c> or <c>#base</c>.

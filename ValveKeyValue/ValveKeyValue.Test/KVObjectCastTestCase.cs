@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using NUnit.Framework;
+﻿using System.Collections;
 
 namespace ValveKeyValue.Test
 {

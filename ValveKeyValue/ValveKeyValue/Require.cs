@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ValveKeyValue
+﻿namespace ValveKeyValue
 {
     static class Require
     {

@@ -1,6 +1,4 @@
-﻿using NUnit.Framework;
-
-namespace ValveKeyValue.Test
+﻿namespace ValveKeyValue.Test
 {
     [TestFixture(typeof(StreamKVTextReader))]
     [TestFixture(typeof(StringKVTextReader))]

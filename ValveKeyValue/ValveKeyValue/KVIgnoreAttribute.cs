@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ValveKeyValue
+﻿namespace ValveKeyValue
 {
     /// <summary>
     /// This attribute is used to tell the deserializer to ignore a given property.

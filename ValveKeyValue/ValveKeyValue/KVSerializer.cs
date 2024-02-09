@@ -1,9 +1,6 @@
-﻿using System;
-using System.IO;
-using ValveKeyValue.Abstraction;
+﻿using ValveKeyValue.Abstraction;
 using ValveKeyValue.Deserialization;
 using ValveKeyValue.Deserialization.KeyValues1;
-using ValveKeyValue.Serialization;
 using ValveKeyValue.Serialization.KeyValues1;
 
 namespace ValveKeyValue

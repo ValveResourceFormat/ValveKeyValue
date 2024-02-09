@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using NUnit.Framework;
-
-namespace ValveKeyValue.Test
+﻿namespace ValveKeyValue.Test
 {
     [TestFixtureSource(typeof(TestFixtureSources), nameof(TestFixtureSources.SupportedEnumerableTypesForDeserialization))]
     class ArrayWithEmptyKeyTestCase<TEnumerable>

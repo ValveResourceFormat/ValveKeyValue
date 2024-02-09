@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using NUnit.Framework;
+﻿using System.Text;
 
 namespace ValveKeyValue.Test
 {

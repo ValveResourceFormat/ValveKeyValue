@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ValveKeyValue
+﻿namespace ValveKeyValue
 {
     /// <summary>
     /// Container type for value of a KeyValues object.

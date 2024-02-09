@@ -8,6 +8,7 @@
     <FileVersion>$(ProjectVersion)</FileVersion>
     <Version>$(ProjectVersion)</Version>
   </PropertyGroup>
+
   <PropertyGroup>
     <Deterministic>true</Deterministic>
     <DebugType>embedded</DebugType>
@@ -17,6 +18,7 @@
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
+
   <PropertyGroup>
     <Authors>ValveKeyValue Contributors</Authors>
     <Copyright>Copyright © ValveKeyValue Contributors</Copyright>
@@ -25,4 +27,10 @@
     <PackageProjectUrl>https://valveresourceformat.github.io/</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Using Include="System" />
+    <Using Include="System.IO" />
+    <Using Include="System.Collections.Generic" />
+  </ItemGroup>
 </Project>

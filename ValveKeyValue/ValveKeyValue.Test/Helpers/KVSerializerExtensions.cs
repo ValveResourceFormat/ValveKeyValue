@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-namespace ValveKeyValue.Test
+﻿namespace ValveKeyValue.Test
 {
     static class KVSerializerExtensions
     {

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace ValveKeyValue
+﻿namespace ValveKeyValue
 {
     interface IObjectReflector
     {

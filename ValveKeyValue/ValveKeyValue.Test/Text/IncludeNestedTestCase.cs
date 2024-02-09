@@ -1,6 +1,4 @@
-﻿using System.IO;
-using System.Linq;
-using NUnit.Framework;
+﻿using System.Linq;
 
 namespace ValveKeyValue.Test
 {

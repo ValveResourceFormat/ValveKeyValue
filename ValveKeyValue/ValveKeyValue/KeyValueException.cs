@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ValveKeyValue
+﻿namespace ValveKeyValue
 {
     /// <summary>
     /// General KeyValue exception type.
