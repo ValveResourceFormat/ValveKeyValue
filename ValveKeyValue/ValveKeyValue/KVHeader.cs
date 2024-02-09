@@ -1,5 +1,3 @@
-﻿using System;
-
 namespace ValveKeyValue
 {
     public class KVHeader

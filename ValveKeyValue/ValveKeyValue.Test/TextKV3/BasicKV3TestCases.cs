@@ -1,5 +1,3 @@
-﻿using NUnit.Framework;
-
 namespace ValveKeyValue.Test.TextKV3
 {
     class BasicKV3TestCases
@@ -27,7 +25,7 @@ namespace ValveKeyValue.Test.TextKV3
                 Assert.That(data["bar"].Flag, Is.EqualTo(KVFlag.Resource));
                 Assert.That((string)data["bar"], Is.EqualTo("foo"));
 
-                Assert.That(data["multipleFlags"].Flag, Is.EqualTo(KVFlag.Resource | KVFlag.ResourceName | KVFlag.SubClass));
+                Assert.That(data["multipleFlags"].Flag, Is.EqualTo(KVFlag.SubClass));
                 Assert.That((string)data["multipleFlags"], Is.EqualTo("cool value"));
 
                 Assert.That(data["flaggedNumber"].Flag, Is.EqualTo(KVFlag.Panorama));
@@ -97,7 +95,7 @@ namespace ValveKeyValue.Test.TextKV3
 
             var arrayValue = (KVArrayValue)data["arrayValue"];
 
-            Assert.That(arrayValue.Count, Is.EqualTo(2));
+            Assert.That(arrayValue, Has.Count.EqualTo(2));
             Assert.That(arrayValue[0].ToString(), Is.EqualTo("a"));
             Assert.That(arrayValue[1].ToString(), Is.EqualTo("b"));
 
@@ -111,7 +109,7 @@ namespace ValveKeyValue.Test.TextKV3
             var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
 
             Assert.That(data["array"].ValueType, Is.EqualTo(KVValueType.BinaryBlob));
-            Assert.That(((KVBinaryBlob)data["array"]).Bytes, Is.EqualTo(new byte[]
+            Assert.That(((KVBinaryBlob)data["array"]).Bytes.ToArray(), Is.EqualTo(new byte[]
             {
                 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
                 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xFF

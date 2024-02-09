@@ -1,6 +1,3 @@
-﻿using System.IO;
-using NUnit.Framework;
-
 namespace ValveKeyValue.Test.TextKV3
 {
     class SerializationTestCase
