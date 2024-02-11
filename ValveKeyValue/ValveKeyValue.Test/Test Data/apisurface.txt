@@ -29,6 +29,23 @@ public class ValveKeyValue.KeyValueException
     public string ToString();
 }
 
+public class ValveKeyValue.KVFile
+{
+    public void Add(ValveKeyValue.KVObject value);
+    public bool Equals(object obj);
+    protected void Finalize();
+    public System.Collections.Generic.IEnumerable`1[[ValveKeyValue.KVObject]] get_Children();
+    public ValveKeyValue.KVValue get_Item(string key);
+    public string get_Name();
+    public ValveKeyValue.KVValue get_Value();
+    public System.Collections.Generic.IEnumerator`1[[ValveKeyValue.KVObject]] GetEnumerator();
+    public int GetHashCode();
+    public Type GetType();
+    protected object MemberwiseClone();
+    public void set_Item(string key, ValveKeyValue.KVValue value);
+    public string ToString();
+}
+
 public sealed class ValveKeyValue.KVIgnoreAttribute
 {
     public bool Equals(object obj);
@@ -95,7 +112,7 @@ public sealed enum ValveKeyValue.KVSerializationFormat
 public class ValveKeyValue.KVSerializer
 {
     public static ValveKeyValue.KVSerializer Create(ValveKeyValue.KVSerializationFormat format);
-    public ValveKeyValue.KVObject Deserialize(System.IO.Stream stream, ValveKeyValue.KVSerializerOptions options);
+    public ValveKeyValue.KVFile Deserialize(System.IO.Stream stream, ValveKeyValue.KVSerializerOptions options);
     public ValveKeyValue.TObject Deserialize<ValveKeyValue.TObject>(System.IO.Stream stream, ValveKeyValue.KVSerializerOptions options);
     public bool Equals(object obj);
     protected void Finalize();

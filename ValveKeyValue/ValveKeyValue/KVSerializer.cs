@@ -30,8 +30,8 @@ namespace ValveKeyValue
         /// </summary>
         /// <param name="stream">The stream to deserialize from.</param>
         /// <param name="options">Options to use that can influence the deserialization process.</param>
-        /// <returns>A <see cref="KVObject"/> representing the KeyValues structure encoded in the stream.</returns>
-        public KVObject Deserialize(Stream stream, KVSerializerOptions options = null)
+        /// <returns>A <see cref="KVFile"/> representing the KeyValues structure encoded in the stream.</returns>
+        public KVFile Deserialize(Stream stream, KVSerializerOptions options = null)
         {
             Require.NotNull(stream, nameof(stream));
             var builder = new KVObjectBuilder();
@@ -41,7 +41,8 @@ namespace ValveKeyValue
                 reader.ReadObject();
             }
 
-            return builder.GetObject();
+            var root = builder.GetObject();
+            return new KVFile(root.Name, root.Value);
         }
 
         /// <summary>
