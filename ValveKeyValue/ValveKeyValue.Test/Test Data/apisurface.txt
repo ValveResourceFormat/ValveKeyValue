@@ -29,7 +29,7 @@ public class ValveKeyValue.KeyValueException
     public string ToString();
 }
 
-public class ValveKeyValue.KVFile
+public class ValveKeyValue.KVDocument
 {
     public void Add(ValveKeyValue.KVObject value);
     public bool Equals(object obj);
@@ -112,14 +112,14 @@ public sealed enum ValveKeyValue.KVSerializationFormat
 public class ValveKeyValue.KVSerializer
 {
     public static ValveKeyValue.KVSerializer Create(ValveKeyValue.KVSerializationFormat format);
-    public ValveKeyValue.KVFile Deserialize(System.IO.Stream stream, ValveKeyValue.KVSerializerOptions options);
+    public ValveKeyValue.KVDocument Deserialize(System.IO.Stream stream, ValveKeyValue.KVSerializerOptions options);
     public ValveKeyValue.TObject Deserialize<ValveKeyValue.TObject>(System.IO.Stream stream, ValveKeyValue.KVSerializerOptions options);
     public bool Equals(object obj);
     protected void Finalize();
     public int GetHashCode();
     public Type GetType();
     protected object MemberwiseClone();
-    public void Serialize(System.IO.Stream stream, ValveKeyValue.KVFile data, ValveKeyValue.KVSerializerOptions options);
+    public void Serialize(System.IO.Stream stream, ValveKeyValue.KVDocument data, ValveKeyValue.KVSerializerOptions options);
     public void Serialize(System.IO.Stream stream, ValveKeyValue.KVObject data, ValveKeyValue.KVSerializerOptions options);
     public void Serialize<ValveKeyValue.TData>(System.IO.Stream stream, ValveKeyValue.TData data, string name, ValveKeyValue.KVSerializerOptions options);
     public string ToString();
