@@ -119,6 +119,7 @@ public class ValveKeyValue.KVSerializer
     public int GetHashCode();
     public Type GetType();
     protected object MemberwiseClone();
+    public void Serialize(System.IO.Stream stream, ValveKeyValue.KVFile data, ValveKeyValue.KVSerializerOptions options);
     public void Serialize(System.IO.Stream stream, ValveKeyValue.KVObject data, ValveKeyValue.KVSerializerOptions options);
     public void Serialize<ValveKeyValue.TData>(System.IO.Stream stream, ValveKeyValue.TData data, string name, ValveKeyValue.KVSerializerOptions options);
     public string ToString();
