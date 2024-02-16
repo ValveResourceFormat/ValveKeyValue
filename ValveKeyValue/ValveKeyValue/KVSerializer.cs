@@ -81,7 +81,7 @@ namespace ValveKeyValue
         /// <param name="data">The data to serialize.</param>
         /// <param name="options">Options to use that can influence the serialization process.</param>
         public void Serialize(Stream stream, KVDocument data, KVSerializerOptions options = null) =>
-            Serialize(stream, data, options);
+            Serialize(stream, (KVObject)data, options);
 
         /// <summary>
         /// Serializes a KeyValue object into stream in plain text..
