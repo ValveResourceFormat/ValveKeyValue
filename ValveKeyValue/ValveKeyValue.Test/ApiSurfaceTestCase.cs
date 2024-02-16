@@ -142,41 +142,55 @@ namespace ValveKeyValue.Test
                 return false;
             }
 
-            var baseMethod = baseType.GetMethod(method.Name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            if (baseMethod == null)
-            {
-                return false;
-            }
+            var baseMethods = baseType.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
-            if (baseMethod.DeclaringType == method.DeclaringType)
+            foreach (var baseMethod in baseMethods)
             {
-                return false;
-            }
-
-            var methodDefinition = method.GetBaseDefinition();
-            var baseMethodDefinition = baseMethod.GetBaseDefinition();
-
-            if (methodDefinition.DeclaringType == baseMethodDefinition.DeclaringType)
-            {
-                return false;
-            }
-
-            var methodParameters = method.GetParameters();
-            var baseMethodParameters = baseMethod.GetParameters();
-            if (methodParameters.Length != baseMethodParameters.Length)
-            {
-                return false;
-            }
-
-            for (int i = 0; i < methodParameters.Length; i++)
-            {
-                if (methodParameters[i].ParameterType != baseMethodParameters[i].ParameterType)
+                if (baseMethod.Name != method.Name)
                 {
-                    return false;
+                    continue;
                 }
+
+                if (baseMethod.DeclaringType == method.DeclaringType)
+                {
+                    continue;
+                }
+
+                var methodDefinition = method.GetBaseDefinition();
+                var baseMethodDefinition = baseMethod.GetBaseDefinition();
+
+                if (methodDefinition.DeclaringType == baseMethodDefinition.DeclaringType)
+                {
+                    continue;
+                }
+
+                var methodParameters = method.GetParameters();
+                var baseMethodParameters = baseMethod.GetParameters();
+                if (methodParameters.Length != baseMethodParameters.Length)
+                {
+                    continue;
+                }
+
+                var hasMatchingParameters = true;
+
+                for (int i = 0; i < methodParameters.Length; i++)
+                {
+                    if (methodParameters[i].ParameterType != baseMethodParameters[i].ParameterType)
+                    {
+                        hasMatchingParameters = false;
+                        break;
+                    }
+                }
+
+                if (!hasMatchingParameters)
+                {
+                    continue;
+                }
+
+                return true;
             }
 
-            return true;
+            return false;
         }
 
         static string GetTypeAsString(Type type)

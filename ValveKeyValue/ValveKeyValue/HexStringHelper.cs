@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Runtime.CompilerServices;
 
 namespace ValveKeyValue
 {
@@ -16,6 +17,20 @@ namespace ValveKeyValue
             }
 
             return data;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static char HexToCharUpper(int value)
+        {
+            value &= 0xF;
+            value += '0';
+
+            if (value > '9')
+            {
+                value += ('A' - ('9' + 1));
+            }
+
+            return (char)value;
         }
     }
 }
