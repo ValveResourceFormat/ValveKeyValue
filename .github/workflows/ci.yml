@@ -69,3 +69,6 @@ jobs:
         files: artifacts/nupkg/*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Publish to NuGet Gallery
+      run: dotnet nuget push artifacts/nupkg/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
