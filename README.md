@@ -1,4 +1,4 @@
-# Valve's KeyValue for .NET
+<h1><img src="./Misc/logo.png" width="64" align="center"> Valve's KeyValue for .NET</h1>
 
 [![Build Status (GitHub)](https://img.shields.io/github/actions/workflow/status/ValveResourceFormat/ValveKeyValue/ci.yml?label=Build&style=flat-square&branch=master)](https://github.com/ValveResourceFormat/ValveKeyValue/actions)
 [![NuGet](https://img.shields.io/nuget/v/ValveKeyValue.svg?label=NuGet&style=flat-square)](https://www.nuget.org/packages/ValveKeyValue/)
