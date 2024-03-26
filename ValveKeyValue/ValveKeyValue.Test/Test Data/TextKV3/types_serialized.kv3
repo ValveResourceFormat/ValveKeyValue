@@ -1,0 +1,35 @@
+<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
+{
+	boolFalseValue = false
+	boolTrueValue = true
+	nullValue = null
+	intValue = 128
+	doubleValue = 64.123
+	negativeIntValue = -1337
+	negativeDoubleValue = -0.1337
+	plusIntValue = 1337
+	plusDoubleValue = 0.1337
+	stringValue = "hello world"
+	negativeMaxInt = -9223372036854775807
+	positiveMaxInt = 18446744073709551615
+	doubleMaxValue = 62147483647.1337
+	doubleNegativeMaxValue = -62147483647.1337
+	doubleExponent = 123.456
+	intWithStringSuffix = "123foobar"
+	singleQuotes = "string"
+	singleQuotesWithQuotesInside = "string is \"pretty\" cool"
+	key_with._various.separators = "test"
+	"quoted key with : {} terminators" = "test quoted key"
+	"this is a multi\nline\nkey" = "multi line key parsed"
+	empty.string = ""
+	"1" = "one"
+	a = "alpha"
+	"22" = "two"
+	a3 = "three"
+	bb = "bravo"
+	"" = "empty key"
+	multiLineString = """
+hello
+world
+"""
+}

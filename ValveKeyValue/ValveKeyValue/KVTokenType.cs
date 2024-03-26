@@ -9,6 +9,17 @@ namespace ValveKeyValue
         Comment,
         Condition,
         IncludeAndAppend,
-        IncludeAndMerge
+        IncludeAndMerge,
+
+        // KeyValues3
+        Header,
+        Identifier,
+        Flag,
+        Assignment,
+        Comma,
+        CommentBlock,
+        ArrayStart,
+        ArrayEnd,
+        BinaryBlob,
     }
 }
