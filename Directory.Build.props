@@ -11,6 +11,7 @@
 
   <PropertyGroup>
     <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
     <DebugType>embedded</DebugType>
     <DebugSymbols>true</DebugSymbols>
     <NeutralLanguage>en</NeutralLanguage>
