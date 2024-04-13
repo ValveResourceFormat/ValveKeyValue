@@ -1,0 +1,21 @@
+"root"
+{
+	"foo"	"bar"
+	"bar"	"foo"
+	"uppercase"	"foo"
+	"flaggedNumber"	"-1234"
+	"multipleFlags"	"cool value"
+	"soundEvent"	"event sound"
+	"noFlags"	"5"
+	"flaggedObject"
+	{
+		"1"	"test1"
+		"2"	"test2"
+		"3"
+		{
+			"0"	"test3"
+		}
+		"4"	"test4"
+	}
+	"test"	"success"
+}

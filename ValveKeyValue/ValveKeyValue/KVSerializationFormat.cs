@@ -13,6 +13,11 @@ namespace ValveKeyValue
         /// <summary>
         /// KeyValues 1 binary format. Used occasionally in Steam.
         /// </summary>
-        KeyValues1Binary
+        KeyValues1Binary,
+
+        /// <summary>
+        /// KeyValues 3 textual format. Used in the Source 2 engine.
+        /// </summary>
+        KeyValues3Text,
     }
 }
