@@ -15,6 +15,7 @@ namespace ValveKeyValue.Test
                     VLong = 0x0102030405060708,
                     VULong = 0x8877665544332211u,
                     VEnum = SomeEnum.Leet,
+                    VFlags = SomeFlags.Foo | SomeFlags.Bar,
                 },
             };
 
@@ -44,6 +45,7 @@ namespace ValveKeyValue.Test
             public ulong VULong { get; set; }
             public float VFloat { get; set; }
             public SomeEnum VEnum { get; set; }
+            public SomeFlags VFlags { get; set; }
         }
 
         enum SomeEnum
@@ -51,6 +53,13 @@ namespace ValveKeyValue.Test
             One = 1,
             Two = 2,
             Leet = 1337,
+        }
+
+        [Flags]
+        enum SomeFlags
+        {
+            Foo = 1 << 1,
+            Bar = 1 << 3,
         }
     }
 }
