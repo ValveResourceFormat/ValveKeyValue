@@ -58,6 +58,9 @@ jobs:
       with:
         path: artifacts
 
+    - name: Rename nupkg
+      run: mv artifacts/nupkg/ValveKeyValue.*.nupkg artifacts/ValveKeyValue.nupkg
+
     - name: Display artifacts folder structure
       run: ls -Rl
       working-directory: artifacts
@@ -66,9 +69,9 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         draft: true
-        files: artifacts/nupkg/*
+        files: artifacts/ValveKeyValue.nupkg
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Publish to NuGet Gallery
-      run: dotnet nuget push artifacts/nupkg/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+      run: dotnet nuget push artifacts/ValveKeyValue.nupkg --api-key "${{ secrets.NUGET_API_KEY }}" --source "https://api.nuget.org/v3/index.json"
