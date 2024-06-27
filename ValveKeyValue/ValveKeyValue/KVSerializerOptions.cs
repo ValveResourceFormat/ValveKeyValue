@@ -32,6 +32,11 @@ namespace ValveKeyValue
         /// </summary>
         public static KVSerializerOptions DefaultOptions => new();
 
+        /// <summary>
+        /// If KV1 is serialized using a string pool for the keys, provide the string pool here.
+        /// </summary>
+        public string[] StringPool;
+
         static IEnumerable<string> GetDefaultConditions()
         {
             // TODO: In the future we will want to skip this for consoles and mobile devices?

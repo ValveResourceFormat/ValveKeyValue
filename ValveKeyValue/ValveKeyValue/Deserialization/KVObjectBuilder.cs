@@ -6,6 +6,8 @@ namespace ValveKeyValue.Deserialization
     {
         readonly IList<KVObjectBuilder> associatedBuilders = new List<KVObjectBuilder>();
 
+        public string[] StringPool { get; set; }
+
         public KVObject GetObject()
         {
             if (stateStack.Count != 1)
