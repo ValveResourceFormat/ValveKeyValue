@@ -34,7 +34,10 @@ namespace ValveKeyValue
         public KVDocument Deserialize(Stream stream, KVSerializerOptions options = null)
         {
             Require.NotNull(stream, nameof(stream));
-            var builder = new KVObjectBuilder();
+            var builder = new KVObjectBuilder
+            {
+                StringPool = options?.StringPool
+            };
 
             using (var reader = MakeReader(stream, builder, options ?? KVSerializerOptions.DefaultOptions))
             {
