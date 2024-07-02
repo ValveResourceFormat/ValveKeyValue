@@ -1,14 +1,42 @@
-﻿namespace ValveKeyValue
+﻿using System.Linq;
+
+namespace ValveKeyValue
 {
     public sealed class StringTable
     {
-        public StringTable(Memory<string> values)
+        public StringTable()
+            : this(new List<string>(), writable: true)
         {
-            this.lookup = values;
         }
 
-        readonly Memory<string> lookup;
-        Dictionary<string, int> reverse;
+        public StringTable(int capacity)
+            : this(new List<string>(capacity), writable: true)
+        {
+        }
+
+        public StringTable(IList<string> values)
+            : this(values, writable: !values.IsReadOnly)
+        {
+        }
+
+        StringTable(IList<string> values, bool writable)
+        {
+            this.lookup = values;
+            this.writable = writable;
+
+            reverse = new Dictionary<string, int>(capacity: lookup.Count, StringComparer.Ordinal);
+
+            for (var i = 0; i < lookup.Count; i++)
+            {
+                var value = lookup[i];
+                reverse[value] = i;
+            }
+        }
+
+
+        readonly IList<string> lookup;
+        readonly bool writable;
+        readonly Dictionary<string, int> reverse;
 
         public string this[int index]
         {
@@ -19,43 +47,37 @@
                     throw new ArgumentOutOfRangeException(nameof(index), "Index must be non-negative.");
                 }
 
-                if (index >= lookup.Length)
+                if (index >= lookup.Count)
                 {
                     throw new ArgumentOutOfRangeException(nameof(index), index, "Index must be less than the number of strings in the table.");
                 }
 
-                return lookup.Span[index];
+                return lookup[index];
             }
         }
-
-        public int this[string value]
+        
+        public void Add(string value)
         {
-            get
+            if (!writable)
             {
-                if (reverse is null)
-                {
-                    throw new InvalidOperationException("String table has not been prepared for serialization.");
-                }
-
-                return reverse[value];
+                throw new InvalidOperationException("Unable to add to read-only string table.");
             }
+
+            lookup.Add(value);
+            reverse.TryAdd(value, lookup.Count - 1);
         }
 
-        public void PrepareForSerialization()
+        public int GetOrAdd(string value)
         {
-            if (reverse is not null)
+            if (!reverse.TryGetValue(value, out var index))
             {
-                return;
+                Add(value);
+                index = lookup.Count - 1;
             }
 
-            reverse = new Dictionary<string, int>(capacity: lookup.Length, StringComparer.Ordinal);
-            var span = lookup.Span;
-
-            for (var i = 0; i < span.Length; i++)
-            {
-                var value = span[i];
-                reverse[value] = i;
-            }
+            return index;
         }
+
+        public string[] ToArray() => lookup.ToArray();
     }
 }
