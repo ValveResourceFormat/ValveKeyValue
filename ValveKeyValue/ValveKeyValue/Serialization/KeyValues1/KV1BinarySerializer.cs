@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Text;
 using ValveKeyValue.Abstraction;
 using ValveKeyValue.KeyValues1;
@@ -6,14 +7,16 @@ namespace ValveKeyValue.Serialization.KeyValues1
 {
     sealed class KV1BinarySerializer : IVisitationListener, IDisposable
     {
-        public KV1BinarySerializer(Stream stream)
+        public KV1BinarySerializer(Stream stream, StringTable stringTable)
         {
             Require.NotNull(stream, nameof(stream));
 
             writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true);
+            this.stringTable = stringTable;
         }
 
         readonly BinaryWriter writer;
+        readonly StringTable stringTable;
         int objectDepth;
 
         public void Dispose()
@@ -25,7 +28,7 @@ namespace ValveKeyValue.Serialization.KeyValues1
         {
             objectDepth++;
             Write(KV1BinaryNodeType.ChildObject);
-            WriteNullTerminatedBytes(Encoding.UTF8.GetBytes(name));
+            WriteKeyForNextValue(name);
         }
 
         public void OnObjectEnd()
@@ -42,7 +45,7 @@ namespace ValveKeyValue.Serialization.KeyValues1
         public void OnKeyValuePair(string name, KVValue value)
         {
             Write(GetNodeType(value.ValueType));
-            WriteNullTerminatedBytes(Encoding.UTF8.GetBytes(name));
+            WriteKeyForNextValue(name);
 
             switch (value.ValueType)
             {
@@ -81,6 +84,18 @@ namespace ValveKeyValue.Serialization.KeyValues1
         {
             writer.Write(value);
             writer.Write((byte)0);
+        }
+
+        void WriteKeyForNextValue(string name)
+        {
+            if (stringTable is not null)
+            {
+                writer.Write(stringTable.GetOrAdd(name));
+            }
+            else
+            {
+                WriteNullTerminatedBytes(Encoding.UTF8.GetBytes(name));
+            }
         }
 
         static KV1BinaryNodeType GetNodeType(KVValueType type)
