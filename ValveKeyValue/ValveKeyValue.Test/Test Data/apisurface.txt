@@ -299,14 +299,15 @@ public sealed enum ValveKeyValue.KVValueType
 
 public sealed class ValveKeyValue.StringTable
 {
+    public void Add(string value);
     public bool Equals(object obj);
     protected void Finalize();
     public string get_Item(int index);
-    public int get_Item(string value);
     public int GetHashCode();
+    public int GetOrAdd(string value);
     public Type GetType();
     protected object MemberwiseClone();
-    public void PrepareForSerialization();
+    public string[] ToArray();
     public string ToString();
 }
 
