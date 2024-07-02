@@ -302,9 +302,9 @@ public sealed class ValveKeyValue.StringTable
     public bool Equals(object obj);
     protected void Finalize();
     public string get_Item(int index);
+    public int get_Item(string value);
     public int GetHashCode();
     public Type GetType();
-    public int IndexOf(string value);
     protected object MemberwiseClone();
     public void PrepareForSerialization();
     public string ToString();

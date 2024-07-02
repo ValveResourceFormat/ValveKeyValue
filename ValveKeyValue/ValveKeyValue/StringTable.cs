@@ -28,14 +28,17 @@
             }
         }
 
-        public int IndexOf(string value)
+        public int this[string value]
         {
-            if (reverse is null)
+            get
             {
-                throw new InvalidOperationException("String table has not been prepared for serialization.");
-            }
+                if (reverse is null)
+                {
+                    throw new InvalidOperationException("String table has not been prepared for serialization.");
+                }
 
-            return reverse[value];
+                return reverse[value];
+            }
         }
 
         public void PrepareForSerialization()

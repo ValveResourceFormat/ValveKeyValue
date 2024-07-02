@@ -90,7 +90,7 @@ namespace ValveKeyValue.Serialization.KeyValues1
         {
             if (stringTable is not null)
             {
-                writer.Write(stringTable.IndexOf(name));
+                writer.Write(stringTable[name]);
             }
             else
             {
