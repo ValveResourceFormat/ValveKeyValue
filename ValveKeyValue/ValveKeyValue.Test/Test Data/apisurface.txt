@@ -207,12 +207,14 @@ public sealed class ValveKeyValue.KVSerializerOptions
     public bool get_EnableValveNullByteBugBehavior();
     public ValveKeyValue.IIncludedFileLoader get_FileLoader();
     public bool get_HasEscapeSequences();
+    public ValveKeyValue.StringTable get_StringTable();
     public int GetHashCode();
     public Type GetType();
     protected object MemberwiseClone();
     public void set_EnableValveNullByteBugBehavior(bool value);
     public void set_FileLoader(ValveKeyValue.IIncludedFileLoader value);
     public void set_HasEscapeSequences(bool value);
+    public void set_StringTable(ValveKeyValue.StringTable value);
     public string ToString();
 }
 
@@ -293,5 +295,18 @@ public sealed enum ValveKeyValue.KVValueType
     public string ToString(IFormatProvider provider);
     public string ToString(string format);
     public string ToString(string format, IFormatProvider provider);
+}
+
+public sealed class ValveKeyValue.StringTable
+{
+    public bool Equals(object obj);
+    protected void Finalize();
+    public string get_Item(int index);
+    public int GetHashCode();
+    public Type GetType();
+    public int IndexOf(string value);
+    protected object MemberwiseClone();
+    public void PrepareForSerialization();
+    public string ToString();
 }
 

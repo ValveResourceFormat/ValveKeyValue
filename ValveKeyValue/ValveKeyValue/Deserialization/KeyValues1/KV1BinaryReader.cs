@@ -8,7 +8,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
     {
         public const int BinaryMagicHeader = 0x564B4256; // VBKV
 
-        public KV1BinaryReader(Stream stream, IVisitationListener listener)
+        public KV1BinaryReader(Stream stream, IVisitationListener listener, StringTable stringTable)
         {
             Require.NotNull(stream, nameof(stream));
             Require.NotNull(listener, nameof(listener));
@@ -20,12 +20,14 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
             this.stream = stream;
             this.listener = listener;
+            this.stringTable = stringTable;
             reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true);
         }
 
         readonly Stream stream;
         readonly BinaryReader reader;
         readonly IVisitationListener listener;
+        readonly StringTable stringTable;
         bool disposed;
         KV1BinaryNodeType endMarker = KV1BinaryNodeType.End;
 
@@ -74,9 +76,20 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             }
         }
 
+        string ReadKeyForNextValue()
+        {
+            if (stringTable is not null)
+            {
+                var index = reader.ReadInt32();
+                return stringTable[index];
+            }
+
+            return Encoding.UTF8.GetString(ReadNullTerminatedBytes());
+        }
+
         void ReadValue(KV1BinaryNodeType type)
         {
-            var name = Encoding.UTF8.GetString(ReadNullTerminatedBytes());
+            var name = ReadKeyForNextValue();
             KVValue value;
 
             switch (type)
