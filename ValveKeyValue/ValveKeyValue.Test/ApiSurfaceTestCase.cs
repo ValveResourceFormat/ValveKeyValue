@@ -83,6 +83,37 @@ namespace ValveKeyValue.Test
                 sb.Append('\n');
             }
 
+            var constructors = type
+                .GetConstructors(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                .Where(t => !t.IsPrivate && !t.IsAssembly && !t.IsFamilyAndAssembly)
+                .OrderBy(t => t.Name, StringComparer.InvariantCulture)
+                .ThenBy(t => string.Join(", ", t.GetParameters().Select(GetParameterAsString)), StringComparer.InvariantCulture);
+
+            foreach (var constructor in constructors)
+            {
+                sb.Append("    ");
+
+                if (constructor.IsPublic)
+                {
+                    sb.Append("public");
+                }
+                else
+                {
+                    sb.Append("protected");
+                }
+
+                if (constructor.IsStatic)
+                {
+                    sb.Append(" static");
+                }
+
+                sb.Append(' ');
+                sb.Append(constructor.Name);
+                sb.Append('(');
+                sb.Append(string.Join(", ", constructor.GetParameters().Select(GetParameterAsString)));
+                sb.Append(");\n");
+            }
+
             var methods = type
                 .GetMethods(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
                 .Where(t => !t.IsPrivate && !t.IsAssembly && !t.IsFamilyAndAssembly)
