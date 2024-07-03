@@ -5,6 +5,9 @@ public interface ValveKeyValue.IIncludedFileLoader
 
 public class ValveKeyValue.KeyValueException
 {
+    public .ctor();
+    public .ctor(string message);
+    public .ctor(string message, Exception inner);
     protected void add_SerializeObjectState(EventHandler`1[[System.Runtime.Serialization.SafeSerializationEventArgs]] value);
     public bool Equals(object obj);
     protected void Finalize();
@@ -31,6 +34,7 @@ public class ValveKeyValue.KeyValueException
 
 public class ValveKeyValue.KVArrayValue
 {
+    public .ctor();
     public void Add(ValveKeyValue.KVValue value);
     public void AddRange(System.Collections.Generic.IEnumerable`1[[ValveKeyValue.KVValue]] values);
     public void Clear();
@@ -74,6 +78,8 @@ public class ValveKeyValue.KVArrayValue
 
 public class ValveKeyValue.KVBinaryBlob
 {
+    public .ctor(byte[] value);
+    public .ctor(Memory`1[[byte]] value);
     public bool Equals(object obj);
     protected void Finalize();
     public Memory`1[[byte]] get_Bytes();
@@ -104,6 +110,7 @@ public class ValveKeyValue.KVBinaryBlob
 
 public class ValveKeyValue.KVDocument
 {
+    public .ctor(string name, ValveKeyValue.KVValue value);
     public void Add(ValveKeyValue.KVObject value);
     public bool Equals(object obj);
     protected void Finalize();
@@ -121,6 +128,7 @@ public class ValveKeyValue.KVDocument
 
 public sealed class ValveKeyValue.KVIgnoreAttribute
 {
+    public .ctor();
     public bool Equals(object obj);
     protected void Finalize();
     public object get_TypeId();
@@ -134,6 +142,8 @@ public sealed class ValveKeyValue.KVIgnoreAttribute
 
 public class ValveKeyValue.KVObject
 {
+    public .ctor(string name, System.Collections.Generic.IEnumerable`1[[ValveKeyValue.KVObject]] items);
+    public .ctor(string name, ValveKeyValue.KVValue value);
     public void Add(ValveKeyValue.KVObject value);
     public bool Equals(object obj);
     protected void Finalize();
@@ -151,6 +161,7 @@ public class ValveKeyValue.KVObject
 
 public sealed class ValveKeyValue.KVPropertyAttribute
 {
+    public .ctor(string propertyName);
     public bool Equals(object obj);
     protected void Finalize();
     public string get_PropertyName();
@@ -200,6 +211,7 @@ public class ValveKeyValue.KVSerializer
 
 public sealed class ValveKeyValue.KVSerializerOptions
 {
+    public .ctor();
     public bool Equals(object obj);
     protected void Finalize();
     public System.Collections.Generic.IList`1[[string]] get_Conditions();
@@ -220,6 +232,7 @@ public sealed class ValveKeyValue.KVSerializerOptions
 
 public class ValveKeyValue.KVValue
 {
+    protected .ctor();
     public bool Equals(object obj);
     protected void Finalize();
     public ValveKeyValue.KVValue get_Item(string key);
@@ -299,6 +312,9 @@ public sealed enum ValveKeyValue.KVValueType
 
 public sealed class ValveKeyValue.StringTable
 {
+    public .ctor();
+    public .ctor(int capacity);
+    public .ctor(System.Collections.Generic.IList`1[[string]] values);
     public void Add(string value);
     public bool Equals(object obj);
     protected void Finalize();
