@@ -70,18 +70,24 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             ReadChar(CommentBegin);
 
             var sb = new StringBuilder();
-            var next = Next();
 
             // Some keyvalues implementations have a bug where only a single slash is needed for a comment
+            // If the file ends with a single slash then we have an empty comment, bail out
+            if (!TryGetNext(out var next))
+            {
+                return new KVToken(KVTokenType.Comment, string.Empty);
+            }
+
+            // If the next character is not a slash, then we have a comment that starts with a single slash
+            // Otherwise pretend the comment is a double-slash and ignore this new second slash.
             if (next != CommentBegin)
             {
                 sb.Append(next);
             }
 
-            while (true)
+            // Be more permissive here than in other places, as comments can be the last token in a file.
+            while (TryGetNext(out next))
             {
-                next = Next();
-
                 if (next == '\n')
                 {
                     break;

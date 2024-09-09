@@ -34,26 +34,29 @@ namespace ValveKeyValue.Deserialization
             }
         }
 
-        protected char Next()
+        protected char Next() => TryGetNext(out var next) ? next : throw new EndOfStreamException();
+
+        protected bool TryGetNext(out char next)
         {
-            int next;
+            int nextValue;
 
             if (peekedNext.HasValue)
             {
-                next = peekedNext.Value;
+                nextValue = peekedNext.Value;
                 peekedNext = null;
             }
             else
             {
-                next = textReader.Read();
+                nextValue = textReader.Read();
             }
 
-            if (next == -1)
+            if (nextValue == -1)
             {
-                throw new EndOfStreamException();
+                next = default;
+                return false;
             }
 
-            if (next is '\n')
+            if (nextValue is '\n')
             {
                 lineOffset++;
                 columnOffset = 0;
@@ -63,7 +66,8 @@ namespace ValveKeyValue.Deserialization
                 columnOffset++;
             }
 
-            return (char)next;
+            next = (char)nextValue;
+            return true;
         }
 
         protected int Peek()
