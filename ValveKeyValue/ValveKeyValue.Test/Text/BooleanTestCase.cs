@@ -35,11 +35,11 @@ namespace ValveKeyValue.Test
         [Test]
         public void DynamicSerialization()
         {
-            var data = new KVObject("object", new[]
-            {
+            var data = new KVObject("object",
+            [
                 new KVObject("test1_false", false),
                 new KVObject("test2_true", true),
-            });
+            ]);
 
             var expected = TestDataHelper.ReadTextResource("Text.boolean_serialization.vdf");
 

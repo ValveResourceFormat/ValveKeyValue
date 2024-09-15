@@ -281,7 +281,7 @@ namespace ValveKeyValue.Test
         {
             var kv = new KVObject(
                 "aaa",
-                new[] { new KVObject("bbb", "ccc") });
+                [new KVObject("bbb", "ccc")]);
 
             Assert.That(
                 () => Convert.ChangeType(kv.Value, type),
@@ -293,7 +293,7 @@ namespace ValveKeyValue.Test
         {
             var kv = new KVObject(
                 "aaa",
-                new[] { new KVObject("bbb", "ccc") });
+                [new KVObject("bbb", "ccc")]);
 
             return Convert.ChangeType(kv.Value, type);
         }

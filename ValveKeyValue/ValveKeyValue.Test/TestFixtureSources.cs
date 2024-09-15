@@ -23,7 +23,7 @@ namespace ValveKeyValue.Test
         {
             var data = new TestFixtureAttribute
             {
-                TypeArgs = new[] { genericType }
+                TypeArgs = [genericType]
             };
             var parameters = new TestFixtureParameters(data);
             return parameters;
