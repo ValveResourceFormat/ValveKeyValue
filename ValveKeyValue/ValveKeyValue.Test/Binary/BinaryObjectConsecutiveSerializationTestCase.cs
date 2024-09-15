@@ -38,6 +38,7 @@ namespace ValveKeyValue.Test
             KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Serialize(stream, first);
             KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Serialize(stream, second);
             Assert.That(stream.ToArray(), Is.EqualTo(expectedData));
+            Assert.That(stream.CanRead, Is.True);
         }
     }
 }

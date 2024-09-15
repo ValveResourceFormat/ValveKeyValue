@@ -103,4 +103,22 @@ internal class StreamsTestCase
 
         Assert.That(stream.CanRead, Is.True);
     }
+
+    [Test]
+    public void LeavesStreamOpenAfterDeserializeBinary()
+    {
+        var data = new byte[]
+        {
+            0x00, // object: TestObject
+                0x54, 0x00,
+                0x08, // end object
+            0x08, // end document
+        };
+
+        using var stream = new MemoryStream(data);
+
+        KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Deserialize(stream);
+
+        Assert.That(stream.CanRead, Is.True);
+    }
 }

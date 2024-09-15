@@ -29,6 +29,7 @@ namespace ValveKeyValue.Test
             {
                 KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Serialize(ms, kv);
 
+                Assert.That(ms.CanRead, Is.True);
                 ms.Seek(0, SeekOrigin.Begin);
                 using var reader = new StreamReader(ms);
                 text = reader.ReadToEnd();
