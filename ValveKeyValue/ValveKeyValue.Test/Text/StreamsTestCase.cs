@@ -93,4 +93,14 @@ internal class StreamsTestCase
 
         Assert.That(data["test"].ToInt32(CultureInfo.InvariantCulture), Is.EqualTo(1337));
     }
+
+    [Test]
+    public void LeavesStreamOpenAfterDeserialize()
+    {
+        using var stream = TestDataHelper.OpenResource("Text.object_person.vdf");
+
+        KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream);
+
+        Assert.That(stream.CanRead, Is.True);
+    }
 }

@@ -114,7 +114,7 @@ namespace ValveKeyValue
 
             return format switch
             {
-                KVSerializationFormat.KeyValues1Text => new KV1TextReader(new StreamReader(stream), listener, options),
+                KVSerializationFormat.KeyValues1Text => new KV1TextReader(new StreamReader(stream, null, true, -1, leaveOpen: true), listener, options),
                 KVSerializationFormat.KeyValues1Binary => new KV1BinaryReader(stream, listener, options.StringTable),
                 _ => throw new ArgumentOutOfRangeException(nameof(format), format, "Invalid serialization format."),
             };
