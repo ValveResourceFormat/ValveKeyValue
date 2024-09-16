@@ -20,6 +20,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             this.options = options;
         }
 
+        readonly StringBuilder sb = new();
         readonly KVSerializerOptions options;
 
         public KVToken ReadNextToken()
@@ -69,8 +70,6 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         {
             ReadChar(CommentBegin);
 
-            var sb = new StringBuilder();
-
             // Some keyvalues implementations have a bug where only a single slash is needed for a comment
             // If the file ends with a single slash then we have an empty comment, bail out
             if (!TryGetNext(out var next))
@@ -102,6 +101,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             }
 
             var text = sb.ToString();
+            sb.Clear();
 
             return new KVToken(KVTokenType.Comment, text);
         }
@@ -135,7 +135,6 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
         string ReadUntil(params char[] terminators)
         {
-            var sb = new StringBuilder();
             var escapeNext = false;
 
             var integerTerminators = new HashSet<int>(terminators.Select(t => (int)t));
@@ -178,6 +177,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             }
 
             var result = sb.ToString();
+            sb.Clear();
 
             // Valve bug-for-bug compatibility with tier1 KeyValues/CUtlBuffer: an invalid escape sequence is a null byte which
             // causes the text to be trimmed to the point of that null byte.
@@ -190,8 +190,6 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
         string ReadUntilWhitespaceOrQuote()
         {
-            var sb = new StringBuilder();
-
             while (true)
             {
                 var next = Peek();
@@ -203,7 +201,10 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                 sb.Append(Next());
             }
 
-            return sb.ToString();
+            var result = sb.ToString();
+            sb.Clear();
+
+            return result;
         }
 
         string ReadStringRaw()
