@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Text;
 
 namespace ValveKeyValue.Deserialization.KeyValues1
@@ -109,7 +108,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         KVToken ReadCondition()
         {
             ReadChar(ConditionBegin);
-            var text = ReadUntil(ConditionEnd);
+            var text = ReadUntil(static (c) => c == ConditionEnd);
             ReadChar(ConditionEnd);
 
             return new KVToken(KVTokenType.Condition, text);
@@ -118,7 +117,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         KVToken ReadInclusion()
         {
             ReadChar(InclusionMark);
-            var term = ReadUntil(new[] { ' ', '\t' });
+            var term = ReadUntil(static c => c is ' ' or '\t');
             var value = ReadStringRaw();
 
             if (string.Equals(term, "include", StringComparison.Ordinal))
@@ -133,12 +132,11 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             throw new InvalidDataException($"Unrecognized term after '#' symbol (line {Line}, column {Column})");
         }
 
-        string ReadUntil(params char[] terminators)
+        string ReadUntil(Func<int, bool> isTerminator)
         {
             var escapeNext = false;
 
-            var integerTerminators = new HashSet<int>(terminators.Select(t => (int)t));
-            while (!integerTerminators.Contains(Peek()) || escapeNext)
+            while (escapeNext || !isTerminator(Peek()))
             {
                 var next = Next();
 
@@ -223,7 +221,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         string ReadQuotedStringRaw()
         {
             ReadChar(QuotationMark);
-            var text = ReadUntil(QuotationMark);
+            var text = ReadUntil(static (c) => c == QuotationMark);
             ReadChar(QuotationMark);
             return text;
         }
