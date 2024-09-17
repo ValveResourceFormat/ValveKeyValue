@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Text;
 
 namespace ValveKeyValue.Deserialization.KeyValues1
@@ -20,6 +19,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             this.options = options;
         }
 
+        readonly StringBuilder sb = new();
         readonly KVSerializerOptions options;
 
         public KVToken ReadNextToken()
@@ -69,8 +69,6 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         {
             ReadChar(CommentBegin);
 
-            var sb = new StringBuilder();
-
             // Some keyvalues implementations have a bug where only a single slash is needed for a comment
             // If the file ends with a single slash then we have an empty comment, bail out
             if (!TryGetNext(out var next))
@@ -102,6 +100,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             }
 
             var text = sb.ToString();
+            sb.Clear();
 
             return new KVToken(KVTokenType.Comment, text);
         }
@@ -109,7 +108,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         KVToken ReadCondition()
         {
             ReadChar(ConditionBegin);
-            var text = ReadUntil(ConditionEnd);
+            var text = ReadUntil(static (c) => c == ConditionEnd);
             ReadChar(ConditionEnd);
 
             return new KVToken(KVTokenType.Condition, text);
@@ -118,7 +117,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         KVToken ReadInclusion()
         {
             ReadChar(InclusionMark);
-            var term = ReadUntil(new[] { ' ', '\t' });
+            var term = ReadUntil(static c => c is ' ' or '\t');
             var value = ReadStringRaw();
 
             if (string.Equals(term, "include", StringComparison.Ordinal))
@@ -133,13 +132,11 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             throw new InvalidDataException($"Unrecognized term after '#' symbol (line {Line}, column {Column})");
         }
 
-        string ReadUntil(params char[] terminators)
+        string ReadUntil(Func<int, bool> isTerminator)
         {
-            var sb = new StringBuilder();
             var escapeNext = false;
 
-            var integerTerminators = new HashSet<int>(terminators.Select(t => (int)t));
-            while (!integerTerminators.Contains(Peek()) || escapeNext)
+            while (escapeNext || !isTerminator(Peek()))
             {
                 var next = Next();
 
@@ -178,6 +175,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             }
 
             var result = sb.ToString();
+            sb.Clear();
 
             // Valve bug-for-bug compatibility with tier1 KeyValues/CUtlBuffer: an invalid escape sequence is a null byte which
             // causes the text to be trimmed to the point of that null byte.
@@ -190,8 +188,6 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
         string ReadUntilWhitespaceOrQuote()
         {
-            var sb = new StringBuilder();
-
             while (true)
             {
                 var next = Peek();
@@ -203,7 +199,10 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                 sb.Append(Next());
             }
 
-            return sb.ToString();
+            var result = sb.ToString();
+            sb.Clear();
+
+            return result;
         }
 
         string ReadStringRaw()
@@ -222,7 +221,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         string ReadQuotedStringRaw()
         {
             ReadChar(QuotationMark);
-            var text = ReadUntil(QuotationMark);
+            var text = ReadUntil(static (c) => c == QuotationMark);
             ReadChar(QuotationMark);
             return text;
         }
