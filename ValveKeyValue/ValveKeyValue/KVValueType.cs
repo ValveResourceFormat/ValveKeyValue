@@ -26,29 +26,24 @@ namespace ValveKeyValue
         BinaryBlob,
 
         /// <summary>
+        /// This <see cref="KVValue"/> is represented by a <see cref="bool"/>.
+        /// </summary>
+        Boolean,
+
+        /// <summary>
         /// This <see cref="KVValue"/> is represented by a <see cref="string"/>.
         /// </summary>
         String,
 
         /// <summary>
-        /// This <see cref="KVValue"/> is represented by a <see cref="int"/>
+        /// This <see cref="KVValue"/> is represented by a <see cref="short"/>.
+        /// </summary>
+        Int16,
+
+        /// <summary>
+        /// This <see cref="KVValue"/> is represented by a <see cref="int"/>.
         /// </summary>
         Int32,
-
-        /// <summary>
-        /// This <see cref="KVValue"/> is represented by a <see cref="ulong"/>
-        /// </summary>
-        UInt64,
-
-        /// <summary>
-        /// This <see cref="KVValue"/> is represented by a <see cref="float"/>
-        /// </summary>
-        FloatingPoint,
-
-        /// <summary>
-        /// This <see cref="KVValue"/> is represented by a <see cref="int"/>, but represents a pointer.
-        /// </summary>
-        Pointer,
 
         /// <summary>
         /// This <see cref="KVValue"/> is represented by a <see cref="long"/>.
@@ -56,8 +51,33 @@ namespace ValveKeyValue
         Int64,
 
         /// <summary>
-        /// This <see cref="KVValue"/> is represented by a <see cref="bool"/>.
+        /// This <see cref="KVValue"/> is represented by a <see cref="ushort"/>.
         /// </summary>
-        Boolean,
+        UInt16,
+
+        /// <summary>
+        /// This <see cref="KVValue"/> is represented by a <see cref="uint"/>.
+        /// </summary>
+        UInt32,
+
+        /// <summary>
+        /// This <see cref="KVValue"/> is represented by a <see cref="ulong"/>.
+        /// </summary>
+        UInt64,
+
+        /// <summary>
+        /// This <see cref="KVValue"/> is represented by a <see cref="float"/>.
+        /// </summary>
+        FloatingPoint,
+
+        /// <summary>
+        /// This <see cref="KVValue"/> is represented by a <see cref="double"/>.
+        /// </summary>
+        FloatingPoint64,
+
+        /// <summary>
+        /// This <see cref="KVValue"/> is represented by a <see cref="int"/>, but represents a pointer.
+        /// </summary>
+        Pointer,
     }
 }

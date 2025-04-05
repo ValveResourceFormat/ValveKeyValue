@@ -288,13 +288,17 @@ public sealed enum ValveKeyValue.KVValueType
     Collection = 1;
     Array = 2;
     BinaryBlob = 3;
-    String = 4;
-    Int32 = 5;
-    UInt64 = 6;
-    FloatingPoint = 7;
-    Pointer = 8;
-    Int64 = 9;
-    Boolean = 10;
+    Boolean = 4;
+    String = 5;
+    Int16 = 6;
+    Int32 = 7;
+    Int64 = 8;
+    UInt16 = 9;
+    UInt32 = 10;
+    UInt64 = 11;
+    FloatingPoint = 12;
+    FloatingPoint64 = 13;
+    Pointer = 14;
 
     public int CompareTo(object target);
     public bool Equals(object obj);
