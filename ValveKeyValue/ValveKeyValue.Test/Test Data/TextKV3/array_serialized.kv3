@@ -1,0 +1,42 @@
+<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
+{
+	arrayValue = [
+		"a",
+		"b",
+	]
+	arrayOnSingleLine = [
+		16.7551,
+		20.3763,
+		19.6448,
+	]
+	arrayNoSpace = [
+		1.3763,
+		19.6448,
+	]
+	arrayMixedTypes = [
+		"a",
+		1,
+		true,
+		false,
+		null,
+		{
+			foo = "bar"
+		},
+		[
+			1,
+			3,
+			3,
+			7,
+		],
+		#[
+			11 FF
+		],
+		resource:"hello.world",
+		"""
+multiline
+string
+""",
+		-69.42,
+	]
+	test = "success"
+}

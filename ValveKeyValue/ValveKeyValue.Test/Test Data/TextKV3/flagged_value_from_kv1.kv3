@@ -1,0 +1,20 @@
+<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
+{
+	foo = "bar"
+	bar = "foo"
+	uppercase = "foo"
+	flaggedNumber = "-1234"
+	multipleFlags = "cool value"
+	soundEvent = "event sound"
+	noFlags = "5"
+	flaggedObject = {
+		"1" = "test1"
+		"2" = "test2"
+		"3" = {
+			"0" = "test3"
+		}
+		"4" = "test4"
+	}
+	test = "success"
+	test = "success"
+}

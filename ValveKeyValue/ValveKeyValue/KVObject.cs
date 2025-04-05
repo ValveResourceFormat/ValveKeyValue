@@ -17,7 +17,7 @@ namespace ValveKeyValue
         /// <param name="value">Value of this object.</param>
         public KVObject(string name, KVValue value)
         {
-            Require.NotNull(name, nameof(name));
+            //Require.NotNull(name, nameof(name)); // Objects in an array will not have a name
             Require.NotNull(value, nameof(value));
 
             Name = name;
@@ -31,11 +31,28 @@ namespace ValveKeyValue
         /// <param name="items">Child items of this object.</param>
         public KVObject(string name, IEnumerable<KVObject> items)
         {
-            Require.NotNull(name, nameof(name));
+            //Require.NotNull(name, nameof(name)); // Objects in an array will not have a name
             Require.NotNull(items, nameof(items));
 
             Name = name;
             var value = new KVCollectionValue();
+            value.AddRange(items);
+
+            Value = value;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KVObject"/> class.
+        /// </summary>
+        /// <param name="name">Name of this object.</param>
+        /// <param name="items">Child items of this object.</param>
+        public KVObject(string name, IEnumerable<KVValue> items)
+        {
+            //Require.NotNull(name, nameof(name)); // Objects in an array will not have a name
+            Require.NotNull(items, nameof(items));
+
+            Name = name;
+            var value = new KVArrayValue();
             value.AddRange(items);
 
             Value = value;
@@ -90,6 +107,11 @@ namespace ValveKeyValue
         /// </summary>
         public IEnumerable<KVObject> Children => (Value as KVCollectionValue) ?? Enumerable.Empty<KVObject>();
 
+        /// <summary>
+        /// Gets the children of this <see cref="KVObject"/>.
+        /// </summary>
+        public IEnumerable<KVValue> ChildrenValues => (Value as KVArrayValue) ?? Enumerable.Empty<KVValue>();
+
         KVCollectionValue GetCollectionValue()
         {
             if (Value is not KVCollectionValue collection)
@@ -100,6 +122,17 @@ namespace ValveKeyValue
             return collection;
         }
 
-        string DebuggerDescription => $"{Name}: {Value}";
+        string DebuggerDescription
+        {
+            get
+            {
+                if (Value.ValueType == KVValueType.String)
+                {
+                    return $"{Name}: {Value}";
+                }
+
+                return $"{Name}: {Value} ({Value.ValueType})";
+            }
+        }
     }
 }

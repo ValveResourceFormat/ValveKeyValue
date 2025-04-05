@@ -43,6 +43,24 @@ namespace ValveKeyValue.Deserialization
             }
         }
 
+        public void OnArrayValue(KVValue value)
+        {
+            if (StateStack.Count > 0)
+            {
+                var state = StateStack.Peek();
+                state.Children.Add(value);
+            }
+            else
+            {
+                var state = new KVPartialState
+                {
+                    Value = value
+                };
+
+                StateStack.Push(state);
+            }
+        }
+
         public void OnObjectEnd()
         {
             if (StateStack.Count <= 1)
@@ -55,7 +73,38 @@ namespace ValveKeyValue.Deserialization
             var completedObject = MakeObject(state);
 
             var parentState = StateStack.Peek();
-            parentState.Items.Add(completedObject);
+
+            if (parentState.IsArray)
+            {
+                parentState.Children.Add(completedObject.Value); // TODO: Avoid wrapping it into KVObject in the first place?
+            }
+            else
+            {
+                parentState.Items.Add(completedObject);
+            }
+        }
+
+        public void OnArrayEnd()
+        {
+            if (StateStack.Count <= 1)
+            {
+                return;
+            }
+
+            var state = StateStack.Pop();
+
+            var completedObject = MakeArray(state);
+
+            var parentState = StateStack.Peek();
+
+            if (parentState.IsArray)
+            {
+                parentState.Children.Add(completedObject.Value); // TODO: Avoid wrapping it into KVObject in the first place?
+            }
+            else
+            {
+                parentState.Items.Add(completedObject);
+            }
         }
 
         public void DiscardCurrentObject()
@@ -71,11 +120,23 @@ namespace ValveKeyValue.Deserialization
             }
         }
 
-        public void OnObjectStart(string name)
+        public void OnObjectStart(string name, KVFlag flag)
         {
             var state = new KVPartialState
             {
-                Key = name
+                Key = name,
+                Flag = flag,
+            };
+            StateStack.Push(state);
+        }
+
+        public void OnArrayStart(string name, KVFlag flag)
+        {
+            var state = new KVPartialState
+            {
+                Key = name,
+                Flag = flag,
+                IsArray = true,
             };
             StateStack.Push(state);
         }
@@ -115,6 +176,11 @@ namespace ValveKeyValue.Deserialization
                 return null;
             }
 
+            if (state.IsArray)
+            {
+                throw new InvalidCastException("Tried to make an object ouf of an array.");
+            }
+
             KVObject @object;
 
             if (state.Value != null)
@@ -125,6 +191,36 @@ namespace ValveKeyValue.Deserialization
             {
                 @object = new KVObject(state.Key, state.Items);
             }
+
+            @object.Value.Flag = state.Flag;
+
+            return @object;
+        }
+
+        KVObject MakeArray(KVPartialState state)
+        {
+            if (state.Discard)
+            {
+                return null;
+            }
+
+            if (!state.IsArray)
+            {
+                throw new InvalidCastException("Tried to make an array out of an object.");
+            }
+
+            KVObject @object;
+
+            if (state.Value != null)
+            {
+                @object = new KVObject(state.Key, state.Value);
+            }
+            else
+            {
+                @object = new KVObject(state.Key, state.Children);
+            }
+
+            @object.Value.Flag = state.Flag;
 
             return @object;
         }
