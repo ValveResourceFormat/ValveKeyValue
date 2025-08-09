@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace ValveKeyValue
 {
     interface IObjectMember
@@ -6,6 +8,7 @@ namespace ValveKeyValue
 
         string Name { get; }
 
+        [DynamicallyAccessedMembers(Trimming.Properties)]
         Type MemberType { get; }
 
         object Value { get; set; }
