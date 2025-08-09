@@ -38,7 +38,7 @@ namespace ValveKeyValue
                 throw new InvalidDataException($"Invalid conditional syntax \"{expressionText}\"", ex);
             }
 
-            var value = (bool)Expression.Lambda(expression).Compile().DynamicInvoke();
+            var value = Expression.Lambda<Func<bool>>(expression).Compile().Invoke();
             return value;
         }
 
