@@ -108,7 +108,7 @@ namespace ValveKeyValue.Deserialization
             }
         }
 
-        KVObject MakeObject(KVPartialState state)
+        static KVObject MakeObject(KVPartialState state)
         {
             if (state.Discard)
             {

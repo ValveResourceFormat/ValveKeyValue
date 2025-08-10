@@ -106,6 +106,6 @@ namespace ValveKeyValue.Deserialization
             return !IsEndOfFile(next) && char.IsWhiteSpace((char)next);
         }
 
-        protected bool IsEndOfFile(int value) => value == -1;
+        protected static bool IsEndOfFile(int value) => value == -1;
     }
 }
