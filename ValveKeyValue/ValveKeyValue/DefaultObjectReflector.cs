@@ -1,14 +1,14 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace ValveKeyValue
 {
     sealed class DefaultObjectReflector : IObjectReflector
     {
-        IEnumerable<IObjectMember> IObjectReflector.GetMembers(object @object)
+        IEnumerable<IObjectMember> IObjectReflector.GetMembers([DynamicallyAccessedMembers(Trimming.Properties)] Type objectType, object @object)
         {
+            Require.NotNull(objectType, nameof(objectType));
             Require.NotNull(@object, nameof(@object));
-
-            var objectType = @object.GetType();
 
             if (IsValueTupleType(objectType))
             {

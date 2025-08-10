@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using ValveKeyValue.Abstraction;
 using ValveKeyValue.Deserialization;
 using ValveKeyValue.Deserialization.KeyValues1;
@@ -52,7 +53,7 @@ namespace ValveKeyValue
         /// <param name="options">Options to use that can influence the deserialization process.</param>
         /// <returns>A <typeparamref name="TObject" /> instance representing the KeyValues structure in the stream.</returns>
         /// <typeparam name="TObject">The type of object to deserialize.</typeparam>;
-        public TObject Deserialize<TObject>(Stream stream, KVSerializerOptions options = null)
+        public TObject Deserialize<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TObject>(Stream stream, KVSerializerOptions options = null)
         {
             Require.NotNull(stream, nameof(stream));
 
@@ -91,7 +92,7 @@ namespace ValveKeyValue
         /// <param name="name">The top-level object name</param>
         /// <param name="options">Options to use that can influence the serialization process.</param>
         /// <typeparam name="TData">The type of object to serialize.</typeparam>
-        public void Serialize<TData>(Stream stream, TData data, string name, KVSerializerOptions options = null)
+        public void Serialize<[DynamicallyAccessedMembers(Trimming.Properties)] TData>(Stream stream, TData data, string name, KVSerializerOptions options = null)
         {
             Require.NotNull(stream, nameof(stream));
 

@@ -1,7 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace ValveKeyValue
 {
     interface IObjectReflector
     {
-        IEnumerable<IObjectMember> GetMembers(object @object);
+        IEnumerable<IObjectMember> GetMembers([DynamicallyAccessedMembers(Trimming.Properties)] Type objectType, object @object);
     }
 }

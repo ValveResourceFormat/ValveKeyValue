@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace ValveKeyValue
@@ -21,6 +22,8 @@ namespace ValveKeyValue
         string IObjectMember.Name
             => PropertyAttribute?.PropertyName ?? propertyInfo.Name;
 
+        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2073", Justification = "PropertyType")]
+        [DynamicallyAccessedMembers(Trimming.Properties)]
         Type IObjectMember.MemberType => propertyInfo.PropertyType;
 
         object IObjectMember.Value

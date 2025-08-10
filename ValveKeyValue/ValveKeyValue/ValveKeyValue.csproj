@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <LangVersion>10.0</LangVersion>
     <Product>Valve KeyValue Library</Product>
     <Description>Library to parse and write Valve KeyValue formats</Description>
@@ -10,6 +10,7 @@
     <PackageTags>steam valve keyvalues keyvalue kv kv3 csgo dota2 tf2</PackageTags>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>ValveKeyValue.snk</AssemblyOriginatorKeyFile>
+    <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
