@@ -7,8 +7,8 @@ namespace ValveKeyValue
     {
         public PropertyMember(PropertyInfo propertyInfo, object @object)
         {
-            Require.NotNull(propertyInfo, nameof(propertyInfo));
-            Require.NotNull(@object, nameof(@object));
+            ArgumentNullException.ThrowIfNull(propertyInfo);
+            ArgumentNullException.ThrowIfNull(@object);
 
             this.propertyInfo = propertyInfo;
             this.@object = @object;

@@ -14,7 +14,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
         public KV1TokenReader(TextReader textReader, KVSerializerOptions options) : base(textReader)
         {
-            Require.NotNull(options, nameof(options));
+            ArgumentNullException.ThrowIfNull(options);
 
             this.options = options;
         }
@@ -24,7 +24,8 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
         public KVToken ReadNextToken()
         {
-            Require.NotDisposed(nameof(KV1TokenReader), disposed);
+            ObjectDisposedException.ThrowIf(disposed, this);
+
             SwallowWhitespace();
 
             PreviousTokenStartLine = Line;

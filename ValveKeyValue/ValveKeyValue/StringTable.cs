@@ -55,7 +55,7 @@ namespace ValveKeyValue
                 return lookup[index];
             }
         }
-        
+
         public void Add(string value)
         {
             if (!writable)

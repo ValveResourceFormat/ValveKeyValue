@@ -23,7 +23,7 @@ namespace ValveKeyValue.Test
 
             serializer.Serialize(ms, obj);
             ms.Seek(0, SeekOrigin.Begin);
-            
+
             Assert.That(
                 () => serializer.Deserialize<SerializedType>(ms),
                 Throws.InstanceOf<NotSupportedException>()
@@ -32,7 +32,7 @@ namespace ValveKeyValue.Test
 
         class SerializedType
         {
-            public DateTime Value { get;set; }
+            public DateTime Value { get; set; }
         }
     }
 }

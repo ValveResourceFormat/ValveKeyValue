@@ -11,8 +11,8 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
         public KV1BinaryReader(Stream stream, IVisitationListener listener, StringTable stringTable)
         {
-            Require.NotNull(stream, nameof(stream));
-            Require.NotNull(listener, nameof(listener));
+            ArgumentNullException.ThrowIfNull(stream);
+            ArgumentNullException.ThrowIfNull(listener);
 
             if (!stream.CanSeek)
             {
@@ -34,7 +34,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
         public void ReadObject()
         {
-            Require.NotDisposed(nameof(KV1TextReader), disposed);
+            ObjectDisposedException.ThrowIf(disposed, this);
 
             DetectMagicHeader();
 

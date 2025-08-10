@@ -6,7 +6,7 @@ namespace ValveKeyValue.Deserialization
     {
         public KVMergingObjectBuilder(KVObjectBuilder originalBuilder)
         {
-            Require.NotNull(originalBuilder, nameof(originalBuilder));
+            ArgumentNullException.ThrowIfNull(originalBuilder);
 
             this.originalBuilder = originalBuilder;
         }

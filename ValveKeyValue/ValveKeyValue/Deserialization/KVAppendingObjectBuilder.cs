@@ -4,7 +4,7 @@ namespace ValveKeyValue.Deserialization
     {
         public KVAppendingObjectBuilder(KVObjectBuilder originalBuilder)
         {
-            Require.NotNull(originalBuilder, nameof(originalBuilder));
+            ArgumentNullException.ThrowIfNull(originalBuilder);
 
             this.originalBuilder = originalBuilder;
         }

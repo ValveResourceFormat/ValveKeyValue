@@ -37,6 +37,6 @@ namespace ValveKeyValue.Test
             person = new TReader().Read<Person>("Text.object_person.vdf");
         }
 
-        record Person (string FirstName, string LastName, bool CanFixIt);
+        record Person(string FirstName, string LastName, bool CanFixIt);
     }
 }

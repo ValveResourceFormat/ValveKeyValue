@@ -7,7 +7,7 @@ namespace ValveKeyValue
     {
         public static byte[] ParseHexStringAsByteArray(string hexadecimalRepresentation)
         {
-            Require.NotNull(hexadecimalRepresentation, nameof(hexadecimalRepresentation));
+            ArgumentNullException.ThrowIfNull(hexadecimalRepresentation);
 
             var data = new byte[hexadecimalRepresentation.Length / 2];
             for (var i = 0; i < data.Length; i++)

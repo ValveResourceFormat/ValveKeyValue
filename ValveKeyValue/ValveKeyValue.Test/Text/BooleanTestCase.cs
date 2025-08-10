@@ -31,7 +31,7 @@ namespace ValveKeyValue.Test
                 Assert.That(data.test3_oob, Is.True, nameof(data.test3_oob));
             });
         }
-        
+
         [Test]
         public void DynamicSerialization()
         {
@@ -49,7 +49,7 @@ namespace ValveKeyValue.Test
 
             Assert.That(text, Is.EqualTo(expected));
         }
-        
+
         [Test]
         public void StronglyTypedSerialization()
         {

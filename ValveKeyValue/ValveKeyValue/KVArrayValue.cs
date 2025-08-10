@@ -36,13 +36,13 @@ namespace ValveKeyValue
 
         public void Add(KVValue value)
         {
-            Require.NotNull(value, nameof(value));
+            ArgumentNullException.ThrowIfNull(value);
             children.Add(value);
         }
 
         public void AddRange(IEnumerable<KVValue> values)
         {
-            Require.NotNull(values, nameof(values));
+            ArgumentNullException.ThrowIfNull(values);
             children.AddRange(values);
         }
 
@@ -151,31 +151,31 @@ namespace ValveKeyValue
 
         public bool Contains(KVValue item)
         {
-            Require.NotNull(item, nameof(item));
+            ArgumentNullException.ThrowIfNull(item);
             return children.Contains(item);
         }
 
         public void CopyTo(KVValue[] array, int arrayIndex)
         {
-            Require.NotNull(array, nameof(array));
+            ArgumentNullException.ThrowIfNull(array);
             children.CopyTo(array, arrayIndex);
         }
 
         public bool Remove(KVValue item)
         {
-            Require.NotNull(item, nameof(item));
+            ArgumentNullException.ThrowIfNull(item);
             return children.Remove(item);
         }
 
         public int IndexOf(KVValue item)
         {
-            Require.NotNull(item, nameof(item));
+            ArgumentNullException.ThrowIfNull(item);
             return children.IndexOf(item);
         }
 
         public void Insert(int index, KVValue item)
         {
-            Require.NotNull(item, nameof(item));
+            ArgumentNullException.ThrowIfNull(item);
             children.Insert(index, item);
         }
 

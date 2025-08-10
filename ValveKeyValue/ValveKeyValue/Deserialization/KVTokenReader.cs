@@ -4,7 +4,7 @@ namespace ValveKeyValue.Deserialization
     {
         public KVTokenReader(TextReader textReader)
         {
-            Require.NotNull(textReader, nameof(textReader));
+            ArgumentNullException.ThrowIfNull(textReader);
 
             this.textReader = textReader;
         }

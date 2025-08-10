@@ -34,7 +34,8 @@ namespace ValveKeyValue
         /// <returns>A <see cref="KVDocument"/> representing the KeyValues structure encoded in the stream.</returns>
         public KVDocument Deserialize(Stream stream, KVSerializerOptions options = null)
         {
-            Require.NotNull(stream, nameof(stream));
+            ArgumentNullException.ThrowIfNull(stream);
+
             var builder = new KVObjectBuilder();
 
             using (var reader = MakeReader(stream, builder, options ?? KVSerializerOptions.DefaultOptions))
@@ -55,7 +56,7 @@ namespace ValveKeyValue
         /// <typeparam name="TObject">The type of object to deserialize.</typeparam>;
         public TObject Deserialize<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TObject>(Stream stream, KVSerializerOptions options = null)
         {
-            Require.NotNull(stream, nameof(stream));
+            ArgumentNullException.ThrowIfNull(stream);
 
             var @object = Deserialize(stream, options ?? KVSerializerOptions.DefaultOptions);
             var typedObject = ObjectCopier.MakeObject<TObject>(@object);
@@ -94,14 +95,9 @@ namespace ValveKeyValue
         /// <typeparam name="TData">The type of object to serialize.</typeparam>
         public void Serialize<[DynamicallyAccessedMembers(Trimming.Properties)] TData>(Stream stream, TData data, string name, KVSerializerOptions options = null)
         {
-            Require.NotNull(stream, nameof(stream));
-
-            if (data == null)
-            {
-                throw new ArgumentNullException(nameof(data));
-            }
-
-            Require.NotNull(name, nameof(name));
+            ArgumentNullException.ThrowIfNull(stream);
+            ArgumentNullException.ThrowIfNull(data);
+            ArgumentNullException.ThrowIfNull(name);
 
             var kvObjectTree = ObjectCopier.FromObject(typeof(TData), data, name);
             Serialize(stream, kvObjectTree, options);
@@ -109,9 +105,9 @@ namespace ValveKeyValue
 
         IVisitingReader MakeReader(Stream stream, IParsingVisitationListener listener, KVSerializerOptions options)
         {
-            Require.NotNull(stream, nameof(stream));
-            Require.NotNull(listener, nameof(listener));
-            Require.NotNull(options, nameof(options));
+            ArgumentNullException.ThrowIfNull(stream);
+            ArgumentNullException.ThrowIfNull(listener);
+            ArgumentNullException.ThrowIfNull(options);
 
             return format switch
             {
@@ -123,8 +119,8 @@ namespace ValveKeyValue
 
         IVisitationListener MakeSerializer(Stream stream, KVSerializerOptions options)
         {
-            Require.NotNull(stream, nameof(stream));
-            Require.NotNull(options, nameof(options));
+            ArgumentNullException.ThrowIfNull(stream);
+            ArgumentNullException.ThrowIfNull(options);
 
             return format switch
             {
@@ -132,7 +128,6 @@ namespace ValveKeyValue
                 KVSerializationFormat.KeyValues1Binary => new KV1BinarySerializer(stream, options.StringTable),
                 _ => throw new ArgumentOutOfRangeException(nameof(format), format, "Invalid serialization format."),
             };
-            ;
         }
     }
 }

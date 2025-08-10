@@ -8,10 +8,7 @@ namespace ValveKeyValue
     {
         public KVObjectValue(TObject value, KVValueType valueType)
         {
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
+            ArgumentNullException.ThrowIfNull(value);
 
             this.value = value;
             ValueType = valueType;

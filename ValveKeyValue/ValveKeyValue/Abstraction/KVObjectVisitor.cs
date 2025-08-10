@@ -4,7 +4,7 @@ namespace ValveKeyValue.Abstraction
     {
         public KVObjectVisitor(IVisitationListener listener)
         {
-            Require.NotNull(listener, nameof(listener));
+            ArgumentNullException.ThrowIfNull(listener);
 
             this.listener = listener;
         }

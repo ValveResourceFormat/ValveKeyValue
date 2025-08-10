@@ -52,7 +52,7 @@ namespace ValveKeyValue.Test
                 else
                 {
                     throw new InvalidDataException($"Received an unexpected base or include: {filePath}");
-                }                
+                }
             }
         }
     }

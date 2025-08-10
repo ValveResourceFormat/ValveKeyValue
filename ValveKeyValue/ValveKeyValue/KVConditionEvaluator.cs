@@ -9,7 +9,7 @@ namespace ValveKeyValue
     {
         public KVConditionEvaluator(ICollection<string> definedVariables)
         {
-            Require.NotNull(definedVariables, nameof(definedVariables));
+            ArgumentNullException.ThrowIfNull(definedVariables);
 
             this.definedVariables = definedVariables;
         }

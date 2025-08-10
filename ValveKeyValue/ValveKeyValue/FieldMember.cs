@@ -7,8 +7,8 @@ namespace ValveKeyValue
     {
         public FieldMember(FieldInfo fieldInfo, object @object)
         {
-            Require.NotNull(fieldInfo, nameof(fieldInfo));
-            Require.NotNull(@object, nameof(@object));
+            ArgumentNullException.ThrowIfNull(fieldInfo);
+            ArgumentNullException.ThrowIfNull(@object);
 
             this.fieldInfo = fieldInfo;
             this.@object = @object;

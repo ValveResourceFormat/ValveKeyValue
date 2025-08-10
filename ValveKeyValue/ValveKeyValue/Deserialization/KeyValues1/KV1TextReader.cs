@@ -7,9 +7,9 @@ namespace ValveKeyValue.Deserialization.KeyValues1
     {
         public KV1TextReader(TextReader textReader, IParsingVisitationListener listener, KVSerializerOptions options)
         {
-            Require.NotNull(textReader, nameof(textReader));
-            Require.NotNull(listener, nameof(listener));
-            Require.NotNull(options, nameof(options));
+            ArgumentNullException.ThrowIfNull(textReader);
+            ArgumentNullException.ThrowIfNull(listener);
+            ArgumentNullException.ThrowIfNull(options);
 
             this.listener = listener;
             this.options = options;
@@ -29,7 +29,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
         public void ReadObject()
         {
-            Require.NotDisposed(nameof(KV1TextReader), disposed);
+            ObjectDisposedException.ThrowIf(disposed, this);
 
             while (stateMachine.IsInObject)
             {

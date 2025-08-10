@@ -13,7 +13,7 @@ namespace ValveKeyValue
         /// <param name="propertyName">The name of the property as it appears in KeyValues serialized data.</param>
         public KVPropertyAttribute(string propertyName)
         {
-            Require.NotNull(propertyName, nameof(propertyName));
+            ArgumentNullException.ThrowIfNull(propertyName);
             PropertyName = propertyName;
         }
 

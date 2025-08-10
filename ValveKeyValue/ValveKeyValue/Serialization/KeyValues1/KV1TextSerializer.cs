@@ -8,8 +8,8 @@ namespace ValveKeyValue.Serialization.KeyValues1
     {
         public KV1TextSerializer(Stream stream, KVSerializerOptions options)
         {
-            Require.NotNull(stream, nameof(stream));
-            Require.NotNull(options, nameof(options));
+            ArgumentNullException.ThrowIfNull(stream);
+            ArgumentNullException.ThrowIfNull(options);
 
             this.options = options;
             writer = new StreamWriter(stream, new UTF8Encoding(), bufferSize: 1024, leaveOpen: true)

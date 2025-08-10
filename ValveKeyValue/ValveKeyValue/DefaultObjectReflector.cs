@@ -7,8 +7,8 @@ namespace ValveKeyValue
     {
         IEnumerable<IObjectMember> IObjectReflector.GetMembers([DynamicallyAccessedMembers(Trimming.Properties)] Type objectType, object @object)
         {
-            Require.NotNull(objectType, nameof(objectType));
-            Require.NotNull(@object, nameof(@object));
+            ArgumentNullException.ThrowIfNull(objectType);
+            ArgumentNullException.ThrowIfNull(@object);
 
             if (IsValueTupleType(objectType))
             {

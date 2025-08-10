@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 
 namespace ValveKeyValue
 {
@@ -17,8 +16,8 @@ namespace ValveKeyValue
         /// <param name="value">Value of this object.</param>
         public KVObject(string name, KVValue value)
         {
-            Require.NotNull(name, nameof(name));
-            Require.NotNull(value, nameof(value));
+            ArgumentNullException.ThrowIfNull(name);
+            ArgumentNullException.ThrowIfNull(value);
 
             Name = name;
             Value = value;
@@ -31,8 +30,8 @@ namespace ValveKeyValue
         /// <param name="items">Child items of this object.</param>
         public KVObject(string name, IEnumerable<KVObject> items)
         {
-            Require.NotNull(name, nameof(name));
-            Require.NotNull(items, nameof(items));
+            ArgumentNullException.ThrowIfNull(name);
+            ArgumentNullException.ThrowIfNull(items);
 
             Name = name;
             var value = new KVCollectionValue();
@@ -60,16 +59,12 @@ namespace ValveKeyValue
         {
             get
             {
-                Require.NotNull(key, nameof(key));
-
                 var children = GetCollectionValue();
                 return children[key];
             }
 
             set
             {
-                Require.NotNull(key, nameof(key));
-
                 var children = GetCollectionValue();
                 children.Set(key, value);
             }
@@ -81,7 +76,6 @@ namespace ValveKeyValue
         /// <param name="value">The child to add.</param>
         public void Add(KVObject value)
         {
-            Require.NotNull(value, nameof(value));
             GetCollectionValue().Add(value);
         }
 

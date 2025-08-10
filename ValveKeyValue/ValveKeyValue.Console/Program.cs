@@ -29,7 +29,7 @@ static int Execute(
     var options = new KVSerializerOptions
     {
         HasEscapeSequences = escape,
-        EnableValveNullByteBugBehavior = valve_null_bug 
+        EnableValveNullByteBugBehavior = valve_null_bug
     };
     var serializer = KVSerializer.Create(KVSerializationFormat.KeyValues1Text);
     var root = serializer.Deserialize(stream, options);

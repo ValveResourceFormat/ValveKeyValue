@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Text;
 using ValveKeyValue.Abstraction;
 using ValveKeyValue.KeyValues1;
@@ -9,7 +8,7 @@ namespace ValveKeyValue.Serialization.KeyValues1
     {
         public KV1BinarySerializer(Stream stream, StringTable stringTable)
         {
-            Require.NotNull(stream, nameof(stream));
+            ArgumentNullException.ThrowIfNull(stream);
 
             writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true);
             this.stringTable = stringTable;

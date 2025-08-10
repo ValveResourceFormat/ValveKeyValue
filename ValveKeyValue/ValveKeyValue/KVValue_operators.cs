@@ -11,7 +11,6 @@ namespace ValveKeyValue
         /// <param name="value">The <see cref="string"/> to cast.</param>
         public static implicit operator KVValue(string value)
         {
-            Require.NotNull(value, nameof(value));
             return new KVObjectValue<string>(value, KVValueType.String);
         }
 

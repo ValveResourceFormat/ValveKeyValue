@@ -14,37 +14,30 @@ namespace ValveKeyValue
 
         public override KVValueType ValueType => KVValueType.Collection;
 
-        public override KVValue this[string key]
-        {
-            get
-            {
-                Require.NotNull(key, nameof(key));
-                return Get(key)?.Value;
-            }
-        }
+        public override KVValue this[string key] => Get(key)?.Value;
 
         public void Add(KVObject value)
         {
-            Require.NotNull(value, nameof(value));
+            ArgumentNullException.ThrowIfNull(value);
             children.Add(value);
         }
 
         public void AddRange(IEnumerable<KVObject> values)
         {
-            Require.NotNull(values, nameof(values));
+            ArgumentNullException.ThrowIfNull(values);
             children.AddRange(values);
         }
 
         public KVObject Get(string name)
         {
-            Require.NotNull(name, nameof(name));
+            ArgumentNullException.ThrowIfNull(name);
             return children.FirstOrDefault(c => c.Name == name);
         }
 
         public void Set(string name, KVValue value)
         {
-            Require.NotNull(name, nameof(name));
-            Require.NotNull(value, nameof(value));
+            ArgumentNullException.ThrowIfNull(name);
+            ArgumentNullException.ThrowIfNull(value);
 
             children.RemoveAll(kv => kv.Name == name);
             children.Add(new KVObject(name, value));

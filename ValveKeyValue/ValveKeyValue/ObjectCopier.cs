@@ -22,8 +22,8 @@ namespace ValveKeyValue
         [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2062", Justification = "If the lookup value type exists at runtime then it should have enough for us to introspect.")]
         public static TObject MakeObject<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TObject>(KVObject keyValueObject, IObjectReflector reflector)
         {
-            Require.NotNull(keyValueObject, nameof(keyValueObject));
-            Require.NotNull(reflector, nameof(reflector));
+            ArgumentNullException.ThrowIfNull(keyValueObject);
+            ArgumentNullException.ThrowIfNull(reflector);
 
             if (keyValueObject.Value.ValueType == KVValueType.Collection)
             {
@@ -74,14 +74,11 @@ namespace ValveKeyValue
             IObjectReflector reflector,
             HashSet<object> visitedObjects)
         {
-            if (managedObject == null)
-            {
-                throw new ArgumentNullException(nameof(managedObject));
-            }
-
-            Require.NotNull(topLevelName, nameof(topLevelName));
-            Require.NotNull(reflector, nameof(reflector));
-            Require.NotNull(visitedObjects, nameof(visitedObjects));
+            ArgumentNullException.ThrowIfNull(objectType);
+            ArgumentNullException.ThrowIfNull(managedObject);
+            ArgumentNullException.ThrowIfNull(topLevelName);
+            ArgumentNullException.ThrowIfNull(reflector);
+            ArgumentNullException.ThrowIfNull(visitedObjects);
 
             var transformedValue = ConvertObjectToValue(objectType, managedObject, reflector, visitedObjects);
             return new KVObject(topLevelName, transformedValue);
@@ -148,9 +145,9 @@ namespace ValveKeyValue
 
         static void CopyObject(KVObject kv, [DynamicallyAccessedMembers(Trimming.Properties)] Type objectType, object obj, IObjectReflector reflector)
         {
-            Require.NotNull(kv, nameof(kv));
-            Require.NotNull(obj, nameof(obj));
-            Require.NotNull(reflector, nameof(reflector));
+            ArgumentNullException.ThrowIfNull(kv);
+            ArgumentNullException.ThrowIfNull(obj);
+            ArgumentNullException.ThrowIfNull(reflector);
 
             var members = reflector.GetMembers(objectType, obj).ToDictionary(m => m.Name, m => m, StringComparer.OrdinalIgnoreCase);
 
