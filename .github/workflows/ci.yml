@@ -54,17 +54,15 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
 
-    permissions:
-      id-token: write
-
     steps:
     - name: Download artifacts
       uses: actions/download-artifact@v5
       with:
+        name: nupkg
         path: artifacts
 
     - name: Rename nupkg
-      run: mv artifacts/nupkg/ValveKeyValue.*.nupkg artifacts/ValveKeyValue.nupkg
+      run: mv artifacts/ValveKeyValue.*.nupkg artifacts/ValveKeyValue.nupkg
 
     - name: Display artifacts folder structure
       run: ls -Rl
