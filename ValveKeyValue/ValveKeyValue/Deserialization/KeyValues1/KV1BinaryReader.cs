@@ -186,7 +186,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             {
                 stream.Position += 4; // Skip crc32
 
-                // There is likely to reason to handle this separately
+                // There is likely no reason to handle this separately
                 // as the types do not conflict between Steam or Dota 2
                 endMarker = KV1BinaryNodeType.AlternateEnd;
             }

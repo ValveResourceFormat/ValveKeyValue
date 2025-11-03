@@ -6,7 +6,7 @@ namespace ValveKeyValue
     public abstract partial class KVValue
     {
         /// <summary>
-        /// Implicit cast operator for <see cref="string"/>  to KVValue.
+        /// Implicit cast operator for <see cref="string"/> to <see cref="KVValue"/>.
         /// </summary>
         /// <param name="value">The <see cref="string"/> to cast.</param>
         public static implicit operator KVValue(string value)
@@ -15,7 +15,7 @@ namespace ValveKeyValue
         }
 
         /// <summary>
-        /// Implicit cast operator for <see cref="int"/>  to KVValue.
+        /// Implicit cast operator for <see cref="int"/> to <see cref="KVValue"/>.
         /// </summary>
         /// <param name="value">The <see cref="int"/> to cast.</param>
         public static implicit operator KVValue(int value)
@@ -24,7 +24,7 @@ namespace ValveKeyValue
         }
 
         /// <summary>
-        /// Implicit cast operator for <see cref="bool"/>  to KVValue.
+        /// Implicit cast operator for <see cref="bool"/> to <see cref="KVValue"/>.
         /// </summary>
         /// <param name="value">The <see cref="bool"/> to cast.</param>
         public static implicit operator KVValue(bool value)
@@ -33,7 +33,7 @@ namespace ValveKeyValue
         }
 
         /// <summary>
-        /// Implicit cast operator for <see cref="IntPtr"/>  to KVValue.
+        /// Implicit cast operator for <see cref="IntPtr"/> to <see cref="KVValue"/>.
         /// </summary>
         /// <param name="value">The <see cref="IntPtr"/> to cast.</param>
         public static implicit operator KVValue(IntPtr value)
@@ -42,7 +42,7 @@ namespace ValveKeyValue
         }
 
         /// <summary>
-        /// Implicit cast operator for <see cref="ulong"/>  to KVValue.
+        /// Implicit cast operator for <see cref="ulong"/> to <see cref="KVValue"/>.
         /// </summary>
         /// <param name="value">The <see cref="ulong"/> to cast.</param>
         public static implicit operator KVValue(ulong value)
@@ -51,7 +51,7 @@ namespace ValveKeyValue
         }
 
         /// <summary>
-        /// Implicit cast operator for <see cref="float"/>  to KVValue.
+        /// Implicit cast operator for <see cref="float"/> to <see cref="KVValue"/>.
         /// </summary>
         /// <param name="value">The <see cref="float"/> to cast.</param>
         public static implicit operator KVValue(float value)
@@ -60,7 +60,7 @@ namespace ValveKeyValue
         }
 
         /// <summary>
-        /// Implicit cast operator for <see cref="long"/>  to KVValue.
+        /// Implicit cast operator for <see cref="long"/> to <see cref="KVValue"/>.
         /// </summary>
         /// <param name="value">The <see cref="long"/> to cast.</param>
         public static implicit operator KVValue(long value)
@@ -132,7 +132,7 @@ namespace ValveKeyValue
         }
 
         /// <summary>
-        /// Converts a <see cref="KVValue"/> to a <see cref="bool"/>.
+        /// Converts a <see cref="KVValue"/> to a <see cref="int"/>.
         /// </summary>
         /// <param name="value">The <see cref="KVValue"/> to convert.</param>
         public static explicit operator int(KVValue value)

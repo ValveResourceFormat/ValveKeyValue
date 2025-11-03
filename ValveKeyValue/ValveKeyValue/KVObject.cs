@@ -53,8 +53,8 @@ namespace ValveKeyValue
         /// <summary>
         /// Indexer to find a child item by name.
         /// </summary>
-        /// <param name="key">Key of the child object to find</param>
-        /// <returns>A <see cref="KVObject"/> if the child item exists, otherwise <c>null</c>.</returns>
+        /// <param name="key">Key of the child object to find.</param>
+        /// <returns>A <see cref="KVValue"/> if the child item exists, otherwise <c>null</c>.</returns>
         public KVValue this[string key]
         {
             get

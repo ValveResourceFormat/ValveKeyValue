@@ -2,18 +2,32 @@
 
 namespace ValveKeyValue
 {
+    /// <summary>
+    /// Represents a string table for efficient binary serialization.
+    /// </summary>
     public sealed class StringTable
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StringTable"/> class.
+        /// </summary>
         public StringTable()
             : this(new List<string>(), writable: true)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StringTable"/> class with the specified capacity.
+        /// </summary>
+        /// <param name="capacity">The initial capacity.</param>
         public StringTable(int capacity)
             : this(new List<string>(capacity), writable: true)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StringTable"/> class with the specified values.
+        /// </summary>
+        /// <param name="values">The initial string values.</param>
         public StringTable(IList<string> values)
             : this(values, writable: !values.IsReadOnly)
         {
@@ -38,6 +52,11 @@ namespace ValveKeyValue
         readonly bool writable;
         readonly Dictionary<string, int> reverse;
 
+        /// <summary>
+        /// Gets the string at the specified index.
+        /// </summary>
+        /// <param name="index">The zero-based index.</param>
+        /// <returns>The string at the specified index.</returns>
         public string this[int index]
         {
             get
@@ -56,6 +75,10 @@ namespace ValveKeyValue
             }
         }
 
+        /// <summary>
+        /// Adds a string to the table.
+        /// </summary>
+        /// <param name="value">The string to add.</param>
         public void Add(string value)
         {
             if (!writable)
@@ -67,6 +90,11 @@ namespace ValveKeyValue
             reverse.TryAdd(value, lookup.Count - 1);
         }
 
+        /// <summary>
+        /// Gets the index of a string, or adds it if not found.
+        /// </summary>
+        /// <param name="value">The string to find or add.</param>
+        /// <returns>The index of the string.</returns>
         public int GetOrAdd(string value)
         {
             if (!reverse.TryGetValue(value, out var index))
@@ -78,6 +106,10 @@ namespace ValveKeyValue
             return index;
         }
 
+        /// <summary>
+        /// Converts the string table to an array.
+        /// </summary>
+        /// <returns>An array of strings.</returns>
         public string[] ToArray() => lookup.ToArray();
     }
 }

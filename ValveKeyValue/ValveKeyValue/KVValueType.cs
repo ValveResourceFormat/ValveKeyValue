@@ -1,12 +1,12 @@
 namespace ValveKeyValue
 {
     /// <summary>
-    /// Represents the type of a given <see cref="KVValue"/>
+    /// Represents the type of a given <see cref="KVValue"/>.
     /// </summary>
     public enum KVValueType
     {
         /// <summary>
-        /// This <see cref="KVValue"/> is represented by a <see cref="null"/>.
+        /// This <see cref="KVValue"/> is represented by a <see langword="null"/>.
         /// </summary>
         Null,
 
@@ -21,7 +21,7 @@ namespace ValveKeyValue
         Array,
 
         /// <summary>
-        /// This <see cref="KVValue"/> represents a blob of binary bytes of child <see cref="KVValue"/>s.
+        /// This <see cref="KVValue"/> represents a blob of binary bytes.
         /// </summary>
         BinaryBlob,
 

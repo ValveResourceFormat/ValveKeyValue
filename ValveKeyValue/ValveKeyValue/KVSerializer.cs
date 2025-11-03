@@ -21,7 +21,7 @@ namespace ValveKeyValue
         /// <summary>
         /// Creates a new <see cref="KVSerializer"/> for the given format.
         /// </summary>
-        /// <param name="format">The <see cref="KVSerializationFormat"/> to use when (de)serializing. </param>
+        /// <param name="format">The <see cref="KVSerializationFormat"/> to use when (de)serializing.</param>
         /// <returns>A new <see cref="KVSerializer"/> that (de)serializes with the given format.</returns>
         public static KVSerializer Create(KVSerializationFormat format)
             => new(format);
@@ -53,7 +53,7 @@ namespace ValveKeyValue
         /// <param name="stream">The stream to deserialize from.</param>
         /// <param name="options">Options to use that can influence the deserialization process.</param>
         /// <returns>A <typeparamref name="TObject" /> instance representing the KeyValues structure in the stream.</returns>
-        /// <typeparam name="TObject">The type of object to deserialize.</typeparam>;
+        /// <typeparam name="TObject">The type of object to deserialize.</typeparam>
         public TObject Deserialize<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TObject>(Stream stream, KVSerializerOptions options = null)
         {
             ArgumentNullException.ThrowIfNull(stream);
@@ -86,11 +86,11 @@ namespace ValveKeyValue
             Serialize(stream, (KVObject)data, options);
 
         /// <summary>
-        /// Serializes a KeyValue object into stream in plain text..
+        /// Serializes a KeyValue object into stream in plain text.
         /// </summary>
         /// <param name="stream">The stream to serialize into.</param>
         /// <param name="data">The data to serialize.</param>
-        /// <param name="name">The top-level object name</param>
+        /// <param name="name">The top-level object name.</param>
         /// <param name="options">Options to use that can influence the serialization process.</param>
         /// <typeparam name="TData">The type of object to serialize.</typeparam>
         public void Serialize<[DynamicallyAccessedMembers(Trimming.Properties)] TData>(Stream stream, TData data, string name, KVSerializerOptions options = null)
