@@ -1,11 +1,12 @@
-<h1><img src="./Misc/logo.png" width="64" align="center"> Valve's KeyValue for .NET</h1>
+<h1 align="center"><img src="./Misc/logo.png" width="64" height="64" align="center"> Valve Key Value for .NET</h1>
 
-[![Build Status (GitHub)](https://img.shields.io/github/actions/workflow/status/ValveResourceFormat/ValveKeyValue/ci.yml?label=Build&style=flat-square&branch=master)](https://github.com/ValveResourceFormat/ValveKeyValue/actions)
-[![NuGet](https://img.shields.io/nuget/v/ValveKeyValue.svg?label=NuGet&style=flat-square)](https://www.nuget.org/packages/ValveKeyValue/)
-[![Coverage Status](https://img.shields.io/codecov/c/github/ValveResourceFormat/ValveKeyValue/master?label=Coverage&style=flat-square)](https://app.codecov.io/gh/ValveResourceFormat/ValveKeyValue)
+<p align="center">
+    <a href="https://github.com/ValveResourceFormat/ValveKeyValue/actions" title="Build Status"><img alt="Build Status" src="https://img.shields.io/github/actions/workflow/status/ValveResourceFormat/ValveKeyValue/ci.yml?logo=github&label=Build&logoColor=ffffff&style=for-the-badge&branch=master"></a>
+    <a href="https://www.nuget.org/packages/ValveKeyValue/" title="NuGet"><img alt="NuGet" src="https://img.shields.io/nuget/v/ValveKeyValue.svg?logo=nuget&label=NuGet&logoColor=ffffff&color=004880&style=for-the-badge"></a>
+    <a href="https://app.codecov.io/gh/ValveResourceFormat/ValveKeyValue" title="Code Coverage"><img alt="Code Coverage" src="https://img.shields.io/codecov/c/github/ValveResourceFormat/ValveKeyValue/master?logo=codecov&label=Coverage&logoColor=ffffff&color=F01F7A&style=for-the-badge"></a>
+</p>
 
-This library aims to be fully compatible with Valve's various implementations of
-KeyValues format parsing (believe us, it's not consistent).
+KeyValues is a simple key-value pair format used by Valve in Steam and the Source engine for configuration files, game data, and more (`.vdf`, `.res`, `.acf`, etc.). This library aims to be fully compatible with Valve's various implementations of KeyValues format parsing (believe us, it's not consistent).
 
 # KeyValues1
 
@@ -14,7 +15,7 @@ Used by Steam and the Source engine.
 ## Deserializing text
 
 ### Basic deserialization
-```cs
+```csharp
 var stream = File.OpenRead("file.vdf"); // or any other Stream
 
 var kv = KVSerializer.Create(KVSerializationFormat.KeyValues1Text);
@@ -24,7 +25,7 @@ Console.WriteLine(data["some key"]);
 ```
 
 ### Typed deserialization
-```cs
+```csharp
 public class SimpleObject
 {
     public string Name { get; set; }
@@ -38,18 +39,18 @@ KVObject data = kv.Deserialize<SimpleObject>(stream);
 ```
 
 ### Options
-`Deserialize` method also accepts an `KVSerializerOptions` object.
+The `Deserialize` method also accepts a `KVSerializerOptions` object.
 
 By default, operating system specific conditionals are enabled based on the OS the code is running on (`RuntimeInformation`).
 
-`KVSerializerOptions` accepts has the following options:
+`KVSerializerOptions` has the following options:
 
 * `Conditions` - List of conditions to use to match conditional values.
 * `HasEscapeSequences` - Whether the parser should translate escape sequences (e.g. `\n`, `\t`).
-* `EnableValveNullByteBugBehavior` - Whether invalid escape sequences should truncate strings rather than throwing a `InvalidDataException`.
+* `EnableValveNullByteBugBehavior` - Whether invalid escape sequences should truncate strings rather than throwing an `InvalidDataException`.
 * `FileLoader` - Provider for referenced files with `#include` or `#base` directives.
 
-```cs
+```csharp
 var options = new KVSerializerOptions
 {
     HasEscapeSequences = true,
@@ -69,7 +70,7 @@ Essentially the same as text, just change `KeyValues1Text` to `KeyValues1Binary`
 
 ## Serializing to text
 
-```cs
+```csharp
 class DataObject
 {
     public string Name { get; set; }
@@ -100,3 +101,9 @@ kv.Serialize(stream, data, "root object name");
 ## Serializing to binary
 
 Essentially the same as text, just change `KeyValues1Text` to `KeyValues1Binary`.
+
+# KeyValues3
+
+This library does not currently support KeyValues3. There is an [open pull request](https://github.com/ValveResourceFormat/ValveKeyValue/pull/61) for KV3 support.
+
+If you need KV3 support, use [ValveResourceFormat](https://github.com/ValveResourceFormat/ValveResourceFormat) which supports parsing Source 2 formats including KV3.
