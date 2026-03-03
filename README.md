@@ -102,6 +102,10 @@ kv.Serialize(stream, data, "root object name");
 
 Essentially the same as text, just change `KeyValues1Text` to `KeyValues1Binary`.
 
+# KeyValues2 (Datamodel)
+
+This library does not currently support KeyValues2 (Datamodel). If you need KV2/Datamodel support, use our fork of [Datamodel.NET](https://github.com/ValveResourceFormat/Datamodel.NET) instead.
+
 # KeyValues3
 
 This library does not currently support KeyValues3. There is an [open pull request](https://github.com/ValveResourceFormat/ValveKeyValue/pull/61) for KV3 support.
