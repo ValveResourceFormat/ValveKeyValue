@@ -54,7 +54,7 @@ namespace ValveKeyValue.Test.TextKV3
             Assert.Multiple(() =>
             {
                 Assert.That((string)data["multiLineStringValue"], Is.EqualTo("First line of a multi-line string literal.\nSecond line of a multi-line string literal."));
-                Assert.That((string)data["multiLineWithQuotesInside"], Is.EqualTo("hmm this \"\"\"is awkward\n\\\"\"\" yes"));
+                Assert.That((string)data["multiLineWithQuotesInside"], Is.EqualTo("hmm this \\\"\"\"is awkward\n\\\"\"\" yes"));
                 Assert.That((string)data["singleQuotesButWithNewLineAnyway"], Is.EqualTo("hello\nvalve"));
             });
         }
@@ -126,6 +126,35 @@ namespace ValveKeyValue.Test.TextKV3
         }
 
         [Test]
+        public void DeserializesEntityNameFlag()
+        {
+            using var stream = TestDataHelper.OpenResource("TextKV3.entity_name.kv3");
+            var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(data["name"].Flag, Is.EqualTo(KVFlag.EntityName));
+                Assert.That((string)data["name"], Is.EqualTo("some_entity"));
+            });
+        }
+
+        [Test]
+        public void DeserializesEscapeSequences()
+        {
+            using var stream = TestDataHelper.OpenResource("TextKV3.escape_sequences.kv3");
+            var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That((string)data["newline"], Is.EqualTo("hello\nworld"));
+                Assert.That((string)data["tab"], Is.EqualTo("hello\tworld"));
+                Assert.That((string)data["backslash"], Is.EqualTo("hello\\world"));
+                Assert.That((string)data["quote"], Is.EqualTo("hello\"world"));
+                Assert.That((string)data["combined"], Is.EqualTo("line1\nline2\ttab\\slash\"quote"));
+            });
+        }
+
+        [Test]
         public void DeserializesBasicTypes()
         {
             using var stream = TestDataHelper.OpenResource("TextKV3.types.kv3");
@@ -144,19 +173,19 @@ namespace ValveKeyValue.Test.TextKV3
                 Assert.That(data["intValue"].ValueType, Is.EqualTo(KVValueType.UInt64));
                 Assert.That((int)data["intValue"], Is.EqualTo(128));
 
-                Assert.That(data["doubleValue"].ValueType, Is.EqualTo(KVValueType.FloatingPoint));
+                Assert.That(data["doubleValue"].ValueType, Is.EqualTo(KVValueType.FloatingPoint64));
                 Assert.That((double)data["doubleValue"], Is.EqualTo(64.123));
 
                 Assert.That(data["negativeIntValue"].ValueType, Is.EqualTo(KVValueType.Int64));
                 Assert.That((long)data["negativeIntValue"], Is.EqualTo(-1337));
 
-                Assert.That(data["negativeDoubleValue"].ValueType, Is.EqualTo(KVValueType.FloatingPoint));
+                Assert.That(data["negativeDoubleValue"].ValueType, Is.EqualTo(KVValueType.FloatingPoint64));
                 Assert.That((double)data["negativeDoubleValue"], Is.EqualTo(-0.1337));
 
                 Assert.That(data["plusIntValue"].ValueType, Is.EqualTo(KVValueType.UInt64));
                 Assert.That((ulong)data["plusIntValue"], Is.EqualTo(+1337));
 
-                Assert.That(data["plusDoubleValue"].ValueType, Is.EqualTo(KVValueType.FloatingPoint));
+                Assert.That(data["plusDoubleValue"].ValueType, Is.EqualTo(KVValueType.FloatingPoint64));
                 Assert.That((double)data["plusDoubleValue"], Is.EqualTo(+0.1337));
 
                 Assert.That(data["stringValue"].ValueType, Is.EqualTo(KVValueType.String));
@@ -168,13 +197,13 @@ namespace ValveKeyValue.Test.TextKV3
                 Assert.That(data["positiveMaxInt"].ValueType, Is.EqualTo(KVValueType.UInt64));
                 Assert.That((ulong)data["positiveMaxInt"], Is.EqualTo(18446744073709551615));
 
-                Assert.That(data["doubleMaxValue"].ValueType, Is.EqualTo(KVValueType.FloatingPoint));
+                Assert.That(data["doubleMaxValue"].ValueType, Is.EqualTo(KVValueType.FloatingPoint64));
                 Assert.That((double)data["doubleMaxValue"], Is.EqualTo(62147483647.1337));
 
-                Assert.That(data["doubleNegativeMaxValue"].ValueType, Is.EqualTo(KVValueType.FloatingPoint));
+                Assert.That(data["doubleNegativeMaxValue"].ValueType, Is.EqualTo(KVValueType.FloatingPoint64));
                 Assert.That((double)data["doubleNegativeMaxValue"], Is.EqualTo(-62147483647.1337));
 
-                Assert.That(data["doubleExponent"].ValueType, Is.EqualTo(KVValueType.FloatingPoint));
+                Assert.That(data["doubleExponent"].ValueType, Is.EqualTo(KVValueType.FloatingPoint64));
                 Assert.That((double)data["doubleExponent"], Is.EqualTo(123.456));
 
                 // TODO: Should this throw instead because strings need to be quoted? Or should it parse until it hits a non number like 123?

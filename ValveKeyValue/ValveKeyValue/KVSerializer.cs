@@ -45,7 +45,7 @@ namespace ValveKeyValue
             var header = reader.ReadHeader();
             var root = builder.GetObject();
 
-            return new KVDocument(header, root.Name, root.Value); // TODO
+            return new KVDocument(header, root.Name, root.Value);
         }
 
         /// <summary>
@@ -78,13 +78,17 @@ namespace ValveKeyValue
         }
 
         /// <summary>
-        /// Serializes a KeyValue object into stream.
+        /// Serializes a KeyValue document into stream, preserving header encoding and format.
         /// </summary>
         /// <param name="stream">The stream to serialize into.</param>
         /// <param name="data">The data to serialize.</param>
         /// <param name="options">Options to use that can influence the serialization process.</param>
-        public void Serialize(Stream stream, KVDocument data, KVSerializerOptions options = null) =>
-            Serialize(stream, (KVObject)data, options);
+        public void Serialize(Stream stream, KVDocument data, KVSerializerOptions options = null)
+        {
+            using var serializer = MakeSerializer(stream, options ?? KVSerializerOptions.DefaultOptions, data.Header);
+            var visitor = new KVObjectVisitor(serializer);
+            visitor.Visit(data);
+        }
 
         /// <summary>
         /// Serializes a KeyValue object into stream in plain text.
@@ -119,7 +123,7 @@ namespace ValveKeyValue
             };
         }
 
-        IVisitationListener MakeSerializer(Stream stream, KVSerializerOptions options)
+        IVisitationListener MakeSerializer(Stream stream, KVSerializerOptions options, KVHeader header = null)
         {
             ArgumentNullException.ThrowIfNull(stream);
             ArgumentNullException.ThrowIfNull(options);
@@ -128,7 +132,7 @@ namespace ValveKeyValue
             {
                 KVSerializationFormat.KeyValues1Text => new KV1TextSerializer(stream, options),
                 KVSerializationFormat.KeyValues1Binary => new KV1BinarySerializer(stream, options.StringTable),
-                KVSerializationFormat.KeyValues3Text => new KV3TextSerializer(stream),
+                KVSerializationFormat.KeyValues3Text => new KV3TextSerializer(stream, header),
                 _ => throw new ArgumentOutOfRangeException(nameof(format), format, "Invalid serialization format."),
             };
         }

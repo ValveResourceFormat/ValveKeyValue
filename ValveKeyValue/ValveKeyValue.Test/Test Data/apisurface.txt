@@ -5,6 +5,9 @@ public interface ValveKeyValue.IIncludedFileLoader
 
 public class ValveKeyValue.KeyValueException
 {
+    public .ctor();
+    public .ctor(string message);
+    public .ctor(string message, Exception inner);
     protected void add_SerializeObjectState(EventHandler`1[[System.Runtime.Serialization.SafeSerializationEventArgs]] value);
     public bool Equals(object obj);
     protected void Finalize();
@@ -31,6 +34,7 @@ public class ValveKeyValue.KeyValueException
 
 public class ValveKeyValue.KVArrayValue
 {
+    public .ctor();
     public void Add(ValveKeyValue.KVValue value);
     public void AddRange(System.Collections.Generic.IEnumerable`1[[ValveKeyValue.KVValue]] values);
     public void Clear();
@@ -76,6 +80,8 @@ public class ValveKeyValue.KVArrayValue
 
 public class ValveKeyValue.KVBinaryBlob
 {
+    public .ctor(byte[] value);
+    public .ctor(Memory`1[[byte]] value);
     public bool Equals(object obj);
     protected void Finalize();
     public Memory`1[[byte]] get_Bytes();
@@ -108,6 +114,7 @@ public class ValveKeyValue.KVBinaryBlob
 
 public class ValveKeyValue.KVDocument
 {
+    public .ctor(ValveKeyValue.KVHeader header, string name, ValveKeyValue.KVValue value);
     public void Add(ValveKeyValue.KVObject value);
     public bool Equals(object obj);
     protected void Finalize();
@@ -133,6 +140,7 @@ public sealed enum ValveKeyValue.KVFlag
     Panorama = 3;
     SoundEvent = 4;
     SubClass = 5;
+    EntityName = 6;
 
     public int CompareTo(object target);
     public bool Equals(object obj);
@@ -150,20 +158,22 @@ public sealed enum ValveKeyValue.KVFlag
 
 public class ValveKeyValue.KVHeader
 {
+    public .ctor();
     public bool Equals(object obj);
     protected void Finalize();
-    public Guid get_Encoding();
-    public Guid get_Format();
+    public ValveKeyValue.KeyValues3.KV3ID get_Encoding();
+    public ValveKeyValue.KeyValues3.KV3ID get_Format();
     public int GetHashCode();
     public Type GetType();
     protected object MemberwiseClone();
-    public void set_Encoding(Guid value);
-    public void set_Format(Guid value);
+    public void set_Encoding(ValveKeyValue.KeyValues3.KV3ID value);
+    public void set_Format(ValveKeyValue.KeyValues3.KV3ID value);
     public string ToString();
 }
 
 public sealed class ValveKeyValue.KVIgnoreAttribute
 {
+    public .ctor();
     public bool Equals(object obj);
     protected void Finalize();
     public object get_TypeId();
@@ -177,6 +187,9 @@ public sealed class ValveKeyValue.KVIgnoreAttribute
 
 public class ValveKeyValue.KVObject
 {
+    public .ctor(string name, System.Collections.Generic.IEnumerable`1[[ValveKeyValue.KVObject]] items);
+    public .ctor(string name, System.Collections.Generic.IEnumerable`1[[ValveKeyValue.KVValue]] items);
+    public .ctor(string name, ValveKeyValue.KVValue value);
     public void Add(ValveKeyValue.KVObject value);
     public bool Equals(object obj);
     protected void Finalize();
@@ -195,6 +208,7 @@ public class ValveKeyValue.KVObject
 
 public sealed class ValveKeyValue.KVPropertyAttribute
 {
+    public .ctor(string propertyName);
     public bool Equals(object obj);
     protected void Finalize();
     public string get_PropertyName();
@@ -245,6 +259,7 @@ public class ValveKeyValue.KVSerializer
 
 public sealed class ValveKeyValue.KVSerializerOptions
 {
+    public .ctor();
     public bool Equals(object obj);
     protected void Finalize();
     public System.Collections.Generic.IList`1[[string]] get_Conditions();
@@ -252,17 +267,20 @@ public sealed class ValveKeyValue.KVSerializerOptions
     public bool get_EnableValveNullByteBugBehavior();
     public ValveKeyValue.IIncludedFileLoader get_FileLoader();
     public bool get_HasEscapeSequences();
+    public ValveKeyValue.StringTable get_StringTable();
     public int GetHashCode();
     public Type GetType();
     protected object MemberwiseClone();
     public void set_EnableValveNullByteBugBehavior(bool value);
     public void set_FileLoader(ValveKeyValue.IIncludedFileLoader value);
     public void set_HasEscapeSequences(bool value);
+    public void set_StringTable(ValveKeyValue.StringTable value);
     public string ToString();
 }
 
 public class ValveKeyValue.KVValue
 {
+    protected .ctor();
     public bool Equals(object obj);
     protected void Finalize();
     public ValveKeyValue.KVFlag get_Flag();
@@ -320,13 +338,17 @@ public sealed enum ValveKeyValue.KVValueType
     Collection = 1;
     Array = 2;
     BinaryBlob = 3;
-    String = 4;
-    Int32 = 5;
-    UInt64 = 6;
-    FloatingPoint = 7;
-    Pointer = 8;
-    Int64 = 9;
-    Boolean = 10;
+    Boolean = 4;
+    String = 5;
+    Int16 = 6;
+    Int32 = 7;
+    Int64 = 8;
+    UInt16 = 9;
+    UInt32 = 10;
+    UInt64 = 11;
+    FloatingPoint = 12;
+    FloatingPoint64 = 13;
+    Pointer = 14;
 
     public int CompareTo(object target);
     public bool Equals(object obj);
@@ -342,13 +364,33 @@ public sealed enum ValveKeyValue.KVValueType
     public string ToString(string format, IFormatProvider provider);
 }
 
-public class ValveKeyValue.KeyValues3.Encoding
+public sealed class ValveKeyValue.StringTable
 {
+    public .ctor();
+    public .ctor(int capacity);
+    public .ctor(System.Collections.Generic.IList`1[[string]] values);
+    public void Add(string value);
     public bool Equals(object obj);
     protected void Finalize();
+    public string get_Item(int index);
+    public int GetHashCode();
+    public int GetOrAdd(string value);
+    public Type GetType();
+    protected object MemberwiseClone();
+    public string[] ToArray();
+    public string ToString();
+}
+
+public class ValveKeyValue.KeyValues3.Encoding
+{
+    public .ctor();
+    public bool Equals(object obj);
+    protected void Finalize();
+    public static Guid get_Binary();
+    public static Guid get_BinaryAuto();
     public static Guid get_BinaryBlockCompressed();
-    public static Guid get_BinaryBlockLZ4();
-    public static Guid get_BinaryBlockUncompressed();
+    public static Guid get_BinaryLZ4();
+    public static Guid get_BinaryZstd();
     public static Guid get_Text();
     public int GetHashCode();
     public Type GetType();
@@ -358,12 +400,32 @@ public class ValveKeyValue.KeyValues3.Encoding
 
 public class ValveKeyValue.KeyValues3.Format
 {
+    public .ctor();
     public bool Equals(object obj);
     protected void Finalize();
     public static Guid get_Generic();
     public int GetHashCode();
     public Type GetType();
     protected object MemberwiseClone();
+    public string ToString();
+}
+
+public sealed struct ValveKeyValue.KeyValues3.KV3ID
+{
+    public .ctor(string Name, Guid Id);
+    public void Deconstruct(out String& Name, out Guid& Id);
+    public bool Equals(object obj);
+    public bool Equals(ValveKeyValue.KeyValues3.KV3ID other);
+    protected void Finalize();
+    public Guid get_Id();
+    public string get_Name();
+    public int GetHashCode();
+    public Type GetType();
+    protected object MemberwiseClone();
+    public static bool op_Equality(ValveKeyValue.KeyValues3.KV3ID left, ValveKeyValue.KeyValues3.KV3ID right);
+    public static bool op_Inequality(ValveKeyValue.KeyValues3.KV3ID left, ValveKeyValue.KeyValues3.KV3ID right);
+    public void set_Id(Guid value);
+    public void set_Name(string value);
     public string ToString();
 }
 

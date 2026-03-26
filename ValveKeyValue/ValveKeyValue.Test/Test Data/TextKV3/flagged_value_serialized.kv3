@@ -4,7 +4,7 @@
 	bar = resource:"foo"
 	uppercase = resource:"foo"
 	flaggedNumber = panorama:-1234
-	multipleFlags = resource|resource_name|subclass:"cool value"
+	multipleFlags = subclass:"cool value"
 	soundEvent = soundevent:"event sound"
 	noFlags = 5
 	flaggedObject = panorama:{

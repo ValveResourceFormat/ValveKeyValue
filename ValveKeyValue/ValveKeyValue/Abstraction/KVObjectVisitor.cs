@@ -32,9 +32,13 @@ namespace ValveKeyValue.Abstraction
                     listener.OnArrayEnd();
                     break;
 
-                case KVValueType.BinaryBlob: // TODO: Should binary blobs have their own method?
+                case KVValueType.BinaryBlob:
                 case KVValueType.FloatingPoint:
+                case KVValueType.FloatingPoint64:
+                case KVValueType.Int16:
                 case KVValueType.Int32:
+                case KVValueType.UInt16:
+                case KVValueType.UInt32:
                 case KVValueType.Pointer:
                 case KVValueType.String:
                 case KVValueType.UInt64:

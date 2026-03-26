@@ -211,18 +211,18 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
             if (encodingType.Equals("text", StringComparison.OrdinalIgnoreCase) && encoding != Encoding.Text)
             {
-                throw new InvalidDataException($"Unrecognized format specifier, expected '{Encoding.Text}' but got '{encoding}'.");
+                throw new InvalidDataException($"Unrecognized encoding version, expected '{Encoding.Text}' but got '{encoding}'.");
             }
 
             if (formatType.Equals("generic", StringComparison.OrdinalIgnoreCase) && format != Format.Generic)
             {
-                throw new InvalidDataException($"Unrecognized encoding specifier, expected '{Format.Generic}' but got '{format}'.");
+                throw new InvalidDataException($"Unrecognized format version, expected '{Format.Generic}' but got '{format}'.");
             }
 
             return new KVHeader
             {
-                Encoding = encoding,
-                Format = format,
+                Encoding = new KV3ID(encodingType, encoding),
+                Format = new KV3ID(formatType, format),
             };
         }
 
@@ -230,63 +230,41 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         {
             ReadChar(CommentBegin);
 
-            var sb = new StringBuilder();
             var next = Next();
-            var isMultiline = false;
 
             if (next == '*')
             {
-                isMultiline = true;
-            }
-            else if (next != CommentBegin)
-            {
-                // TODO: Return identifier?
-                throw new InvalidDataException("The syntax is incorrect, or is it?");
-            }
-
-            if (isMultiline)
-            {
                 while (true)
                 {
                     next = Next();
 
-                    if (next == '*')
+                    if (next == '*' && Peek() == '/')
                     {
-                        var nextNext = Peek();
-
-                        if (nextNext == '/')
-                        {
-                            Next();
-                            break;
-                        }
+                        Next();
+                        break;
                     }
-
-                    sb.Append(next);
                 }
             }
-            else
+            else if (next == CommentBegin)
             {
                 while (true)
                 {
-                    next = Next();
+                    var peek = Peek();
 
-                    if (next == '\n')
+                    if (IsEndOfFile(peek) || peek == '\n')
                     {
                         break;
                     }
 
-                    sb.Append(next);
-                }
-
-                if (sb.Length > 0 && sb[^1] == '\r')
-                {
-                    sb.Remove(sb.Length - 1, 1);
+                    Next();
                 }
             }
+            else
+            {
+                throw new InvalidDataException($"The syntax is incorrect, expected comment but got '/{next}'.");
+            }
 
-            var text = sb.ToString();
-
-            return new KVToken(KVTokenType.Comment, text);
+            return new KVToken(KVTokenType.Comment);
         }
 
         bool IsIdentifier(string text)
@@ -351,8 +329,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
             var sb = new StringBuilder();
 
-            // Is there another quote mark?
-            // TODO: Peek() for more than one character
             if (quotationMark == '"' && Peek() == '"')
             {
                 Next();
@@ -379,61 +355,120 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
             if (isMultiline)
             {
-                var escapeNext = false;
-
-                // Scan until \n"""
                 while (true)
                 {
                     var next = Next();
 
-                    if (next == '\\')
+                    if (next == '"' && !IsEscaped(sb))
                     {
-                        // TODO: Is valve keeping the \ character in the string?
-                        escapeNext = true;
-                    }
-
-                    if (!escapeNext && next == '\n')
-                    {
-                        var a = Next();
-                        var b = Next();
-                        var c = Next();
-
-                        if (a == '"' && b == '"' && c == '"')
+                        // Check if this is the start of """
+                        if (Peek() == '"')
                         {
-                            break;
+                            Next();
+
+                            if (Peek() == '"')
+                            {
+                                Next();
+                                break;
+                            }
+
+                            // Only two quotes, append both
+                            sb.Append(next);
+                            sb.Append('"');
+                            continue;
                         }
-
-                        sb.Append(next);
-                        sb.Append(a);
-                        sb.Append(b);
-                        sb.Append(c);
                     }
-                    else
-                    {
-                        escapeNext = false;
 
-                        sb.Append(next);
-                    }
+                    sb.Append(next);
                 }
 
-                if (sb.Length > 0 && sb[^1] == '\r')
+                // Strip trailing newline (\n or \r\n)
+                if (sb.Length > 0 && sb[^1] == '\n')
                 {
                     sb.Remove(sb.Length - 1, 1);
+
+                    if (sb.Length > 0 && sb[^1] == '\r')
+                    {
+                        sb.Remove(sb.Length - 1, 1);
+                    }
                 }
             }
             else
             {
-                // TODO: Figure out '\' character escapes, does Valve actually unescape anything?
-                while (Peek() != quotationMark)
+                while (true)
                 {
                     var next = Next();
+
+                    if (next == quotationMark && !IsEscaped(sb))
+                    {
+                        break;
+                    }
+
                     sb.Append(next);
                 }
 
-                ReadChar(quotationMark);
+                return UnescapeString(sb);
             }
 
             return sb.ToString();
+        }
+
+        static bool IsEscaped(StringBuilder sb)
+        {
+            var count = 0;
+
+            for (var i = sb.Length - 1; i >= 0 && sb[i] == '\\'; i--)
+            {
+                count++;
+            }
+
+            return count % 2 == 1;
+        }
+
+        static string UnescapeString(StringBuilder input)
+        {
+            if (input.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            var result = new StringBuilder(input.Length);
+            var isEscaped = false;
+
+            for (var i = 0; i < input.Length; i++)
+            {
+                var c = input[i];
+
+                if (c == '\\' && !isEscaped)
+                {
+                    isEscaped = true;
+                    continue;
+                }
+
+                if (isEscaped)
+                {
+                    switch (c)
+                    {
+                        case 'n':
+                            result.Append('\n');
+                            break;
+                        case 't':
+                            result.Append('\t');
+                            break;
+                        default:
+                            result.Append(c);
+                            break;
+                    }
+
+                    isEscaped = false;
+                }
+                else
+                {
+                    result.Append(c);
+                }
+            }
+
+            return result.ToString();
         }
     }
 }

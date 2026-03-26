@@ -60,9 +60,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                         break;
 
                     case KVTokenType.Identifier:
-                        ReadText(token.Value);
-                        break;
-
                     case KVTokenType.String:
                         ReadText(token.Value);
                         break;
@@ -302,10 +299,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             }
             else if (text.Equals("null", StringComparison.Ordinal))
             {
-                // TODO: Null is not a string
-                // TODO: KVObjectValue does not accept null
-                //value = new KVObjectValue<string>(null, KVValueType.Null);
-                return new KVObjectValue<string>(string.Empty, KVValueType.Null);
+                return new KVNullValue();
             }
             else if (text.Length > 0 && ((text[0] >= '0' && text[0] <= '9') || text[0] == '-' || text[0] == '+'))
             {
@@ -327,37 +321,24 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                     NumberStyles.AllowExponent |
                     NumberStyles.AllowLeadingSign;
 
-                // TODO: 
                 if (double.TryParse(text, FloatingPointNumberStyles, CultureInfo.InvariantCulture, out var floatValue))
                 {
-                    return new KVObjectValue<double>(floatValue, KVValueType.FloatingPoint);
+                    return new KVObjectValue<double>(floatValue, KVValueType.FloatingPoint64);
                 }
             }
 
             return new KVObjectValue<string>(text, KVValueType.String);
         }
 
-        static byte ParseHexCharacter(string hexadecimalRepresentation)
-        {
-            if (hexadecimalRepresentation.Length != 2)
-            {
-                throw new InvalidDataException("Expected hex byte (eg. 00-FF)");
-            }
-
-            return byte.Parse(hexadecimalRepresentation, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-        }
-
         static KVFlag ParseFlag(string flag)
         {
-            return flag.ToLowerInvariant() switch
-            {
-                "resource" => KVFlag.Resource,
-                "resource_name" => KVFlag.ResourceName,
-                "panorama" => KVFlag.Panorama,
-                "soundevent" => KVFlag.SoundEvent,
-                "subclass" => KVFlag.SubClass,
-                _ => throw new InvalidDataException($"Unknown flag '{flag}'"),
-            };
+            if (flag.Equals("resource", StringComparison.OrdinalIgnoreCase)) return KVFlag.Resource;
+            if (flag.Equals("resource_name", StringComparison.OrdinalIgnoreCase)) return KVFlag.ResourceName;
+            if (flag.Equals("panorama", StringComparison.OrdinalIgnoreCase)) return KVFlag.Panorama;
+            if (flag.Equals("soundevent", StringComparison.OrdinalIgnoreCase)) return KVFlag.SoundEvent;
+            if (flag.Equals("subclass", StringComparison.OrdinalIgnoreCase)) return KVFlag.SubClass;
+            if (flag.Equals("entity_name", StringComparison.OrdinalIgnoreCase)) return KVFlag.EntityName;
+            throw new InvalidDataException($"Unknown flag '{flag}'");
         }
     }
 }

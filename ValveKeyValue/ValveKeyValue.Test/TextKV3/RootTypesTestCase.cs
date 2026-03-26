@@ -10,9 +10,8 @@ namespace ValveKeyValue.Test.TextKV3
 
             Assert.Multiple(() =>
             {
-                Assert.That(data.Name, Is.EqualTo("root"));
+                Assert.That(data.Name, Is.Null);
                 Assert.That(data.Value.ValueType, Is.EqualTo(KVValueType.Null));
-                Assert.That((string)data.Value, Is.EqualTo("")); // TODO: This should be a null value
             });
         }
 
@@ -24,7 +23,7 @@ namespace ValveKeyValue.Test.TextKV3
 
             Assert.Multiple(() =>
             {
-                Assert.That(data.Name, Is.EqualTo("root"));
+                Assert.That(data.Name, Is.Null);
                 Assert.That(data.Value.ValueType, Is.EqualTo(KVValueType.String));
                 Assert.That((string)data.Value, Is.EqualTo("cool 123 string"));
             });
@@ -38,7 +37,7 @@ namespace ValveKeyValue.Test.TextKV3
 
             Assert.Multiple(() =>
             {
-                Assert.That(data.Name, Is.EqualTo("root"));
+                Assert.That(data.Name, Is.Null);
                 Assert.That((string)data.Value, Is.EqualTo("First line of a multi-line string literal.\nSecond line of a multi-line string literal."));
             });
         }
@@ -51,7 +50,7 @@ namespace ValveKeyValue.Test.TextKV3
 
             Assert.Multiple(() =>
             {
-                Assert.That(data.Name, Is.EqualTo("root"));
+                Assert.That(data.Name, Is.Null);
                 Assert.That(data.Value.ValueType, Is.EqualTo(KVValueType.String));
                 Assert.That(data.Value.Flag, Is.EqualTo(KVFlag.Resource));
                 Assert.That((string)data.Value, Is.EqualTo("cool_resource.txt"));
@@ -66,7 +65,7 @@ namespace ValveKeyValue.Test.TextKV3
 
             Assert.Multiple(() =>
             {
-                Assert.That(data.Name, Is.EqualTo("root"));
+                Assert.That(data.Name, Is.Null);
                 Assert.That(data.Value.ValueType, Is.EqualTo(KVValueType.Collection));
                 Assert.That(data.Value.Flag, Is.EqualTo(KVFlag.Panorama));
                 Assert.That(data["foo"].Flag, Is.EqualTo(KVFlag.Resource));
@@ -82,7 +81,7 @@ namespace ValveKeyValue.Test.TextKV3
 
             Assert.Multiple(() =>
             {
-                Assert.That(data.Name, Is.EqualTo("root"));
+                Assert.That(data.Name, Is.Null);
                 Assert.That(data.Value.ValueType, Is.EqualTo(KVValueType.BinaryBlob));
                 Assert.That(((KVBinaryBlob)data.Value).Bytes.ToArray(), Is.EqualTo(new byte[]
                 {
@@ -100,7 +99,7 @@ namespace ValveKeyValue.Test.TextKV3
 
             Assert.Multiple(() =>
             {
-                Assert.That(data.Name, Is.EqualTo("root"));
+                Assert.That(data.Name, Is.Null);
                 Assert.That(data.Value.ValueType, Is.EqualTo(KVValueType.UInt64));
                 Assert.That((int)data.Value, Is.EqualTo(1234567890));
             });
@@ -114,7 +113,7 @@ namespace ValveKeyValue.Test.TextKV3
 
             Assert.Multiple(() =>
             {
-                Assert.That(data.Name, Is.EqualTo("root"));
+                Assert.That(data.Name, Is.Null);
                 Assert.That(data.Value.ValueType, Is.EqualTo(KVValueType.Int64));
                 Assert.That((int)data.Value, Is.EqualTo(-1234567890));
             });
@@ -128,8 +127,8 @@ namespace ValveKeyValue.Test.TextKV3
 
             Assert.Multiple(() =>
             {
-                Assert.That(data.Name, Is.EqualTo("root"));
-                Assert.That(data.Value.ValueType, Is.EqualTo(KVValueType.FloatingPoint));
+                Assert.That(data.Name, Is.Null);
+                Assert.That(data.Value.ValueType, Is.EqualTo(KVValueType.FloatingPoint64));
                 Assert.That((float)data.Value, Is.EqualTo(-1337.401f));
             });
         }

@@ -30,7 +30,7 @@ namespace ValveKeyValue
         /// <param name="items">Child items of this object.</param>
         public KVObject(string name, IEnumerable<KVObject> items)
         {
-            ArgumentNullException.ThrowIfNull(name); // Objects in an array will not have a name
+            //ArgumentNullException.ThrowIfNull(name); // Objects in an array will not have a name
             ArgumentNullException.ThrowIfNull(items);
 
             Name = name;

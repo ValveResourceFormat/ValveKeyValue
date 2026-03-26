@@ -67,11 +67,18 @@ namespace ValveKeyValue.Serialization.KeyValues1
         {
             if (name == null)
             {
-                var count = arrayCount.Pop();
+                if (arrayCount.Count > 0)
+                {
+                    var count = arrayCount.Pop();
 
-                name = count.ToString();
+                    name = count.ToString();
 
-                arrayCount.Push(count + 1);
+                    arrayCount.Push(count + 1);
+                }
+                else
+                {
+                    name = string.Empty;
+                }
             }
 
             WriteIndentation();

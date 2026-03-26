@@ -19,7 +19,7 @@ namespace ValveKeyValue.Deserialization
             }
 
             var state = stateStack.Peek();
-            return MakeObject(state);
+            return state.IsArray ? MakeArray(state) : MakeObject(state);
         }
 
         readonly Stack<KVPartialState> stateStack = new();
@@ -190,9 +190,8 @@ namespace ValveKeyValue.Deserialization
             else
             {
                 @object = new KVObject(state.Key, state.Items);
+                @object.Value.Flag = state.Flag;
             }
-
-            @object.Value.Flag = state.Flag;
 
             return @object;
         }
@@ -218,9 +217,8 @@ namespace ValveKeyValue.Deserialization
             else
             {
                 @object = new KVObject(state.Key, state.Children);
+                @object.Value.Flag = state.Flag;
             }
-
-            @object.Value.Flag = state.Flag;
 
             return @object;
         }

@@ -4,7 +4,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
     {
         InObjectBeforeKey,
         InObjectAfterKey,
-        InObjectAfterValue,
         InArray,
     }
 }

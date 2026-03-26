@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using ValveKeyValue.Abstraction;
 
@@ -5,7 +6,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
 {
     sealed class KV3TextSerializer : IVisitationListener, IDisposable
     {
-        public KV3TextSerializer(Stream stream)
+        public KV3TextSerializer(Stream stream, KVHeader header = null)
         {
             ArgumentNullException.ThrowIfNull(stream);
 
@@ -14,8 +15,13 @@ namespace ValveKeyValue.Serialization.KeyValues3
                 NewLine = "\n"
             };
 
-            // TODO: Write correct encoding and format
-            writer.WriteLine("<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->");
+            var defaultEncoding = new ValveKeyValue.KeyValues3.KV3ID("text", ValveKeyValue.KeyValues3.Encoding.Text);
+            var defaultFormat = new ValveKeyValue.KeyValues3.KV3ID("generic", ValveKeyValue.KeyValues3.Format.Generic);
+
+            var encoding = header?.Encoding.Name != null ? header.Encoding : defaultEncoding;
+            var format = header?.Format.Name != null ? header.Format : defaultFormat;
+
+            writer.WriteLine($"<!-- kv3 encoding:{encoding} format:{format} -->");
         }
 
         readonly TextWriter writer;
@@ -95,8 +101,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
         {
             WriteIndentation();
 
-            // TODO: Dumb hack, we should not have a root name
-            if (indentation != 0 && name != "root")
+            if (indentation > 0)
             {
                 WriteKey(name);
             }
@@ -156,7 +161,16 @@ namespace ValveKeyValue.Serialization.KeyValues3
                     writer.Write("null");
                     break;
                 case KVValueType.FloatingPoint:
+                    writer.Write(Convert.ToSingle(value, CultureInfo.InvariantCulture).ToString("#0.000000", CultureInfo.InvariantCulture));
+                    break;
+                case KVValueType.FloatingPoint64:
+                    writer.Write(Convert.ToDouble(value, CultureInfo.InvariantCulture).ToString("#0.000000", CultureInfo.InvariantCulture));
+                    break;
+                case KVValueType.Int16:
+                case KVValueType.Int32:
                 case KVValueType.Int64:
+                case KVValueType.UInt16:
+                case KVValueType.UInt32:
                 case KVValueType.UInt64:
                     writer.Write(value.ToString(null));
                     break;
@@ -245,12 +259,20 @@ namespace ValveKeyValue.Serialization.KeyValues3
                 {
                     switch (@char)
                     {
-                        case '"':
-                            writer.Write("\\\"");
+                        case '\n':
+                            writer.Write("\\n");
+                            break;
+
+                        case '\t':
+                            writer.Write("\\t");
                             break;
 
                         case '\\':
-                            writer.Write("\\");
+                            writer.Write("\\\\");
+                            break;
+
+                        case '"':
+                            writer.Write("\\\"");
                             break;
 
                         default:
@@ -302,10 +324,10 @@ namespace ValveKeyValue.Serialization.KeyValues3
                         sb.Append('"');
                         break;
 
-                    case '\'':
+                    case '\\':
                         escaped = true;
                         sb.Append('\\');
-                        sb.Append('\'');
+                        sb.Append('\\');
                         break;
 
                     default:
@@ -340,40 +362,13 @@ namespace ValveKeyValue.Serialization.KeyValues3
                 return;
             }
 
-            var flags = (int)kvFlag;
-            var i = 0;
-            var currentFlag = -1;
-            var more = false;
+            var name = SerializeFlagName(kvFlag);
 
-            while (i < flags)
+            if (name != null)
             {
-                var flag = (1 << ++currentFlag);
-
-                i += flag;
-
-                if ((flag & flags) == 0)
-                {
-                    continue;
-                }
-
-                var serialized = SerializeFlagName((KVFlag)flag);
-
-                if (serialized == null)
-                {
-                    continue;
-                }
-
-                if (more)
-                {
-                    writer.Write('|');
-                }
-
-                writer.Write(serialized);
-
-                more = true;
+                writer.Write(name);
+                writer.Write(':');
             }
-
-            writer.Write(':');
         }
 
         void WriteLine()
@@ -381,7 +376,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
             writer.WriteLine();
         }
 
-        string SerializeFlagName(KVFlag flag)
+        static string SerializeFlagName(KVFlag flag)
         {
             return flag switch
             {
@@ -390,6 +385,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
                 KVFlag.Panorama => "panorama",
                 KVFlag.SoundEvent => "soundevent",
                 KVFlag.SubClass => "subclass",
+                KVFlag.EntityName => "entity_name",
                 _ => null,
             };
         }
