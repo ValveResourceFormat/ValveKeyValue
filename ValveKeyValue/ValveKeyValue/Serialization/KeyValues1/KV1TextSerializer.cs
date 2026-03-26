@@ -98,14 +98,21 @@ namespace ValveKeyValue.Serialization.KeyValues1
             writer.WriteLine();
         }
 
-        void WriteKeyValuePair(string name, IConvertible value)
+        void WriteKeyValuePair(string name, KVValue value)
         {
-            // TODO: Handle true, false, null value types
-
             WriteIndentation();
             WriteText(name);
             writer.Write('\t');
-            WriteText(value.ToString(CultureInfo.InvariantCulture));
+
+            if (value.ValueType == KVValueType.Boolean)
+            {
+                WriteText(value.ToBoolean(null) ? "1" : "0");
+            }
+            else
+            {
+                WriteText(((IConvertible)value).ToString(CultureInfo.InvariantCulture));
+            }
+
             WriteLine();
         }
 

@@ -13,6 +13,7 @@ namespace ValveKeyValue.Test
             var expected = TestDataHelper.ReadTextResource("apisurface.txt");
             var actual = GenerateApiSurface(typeof(KVObject).GetTypeInfo().Assembly);
 
+            File.WriteAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "apisurface.txt"), actual);
             Assert.That(actual, Is.EqualTo(expected), "This may indicate a breaking change.");
         }
 

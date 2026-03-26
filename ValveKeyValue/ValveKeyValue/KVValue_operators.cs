@@ -29,7 +29,7 @@ namespace ValveKeyValue
         /// <param name="value">The <see cref="bool"/> to cast.</param>
         public static implicit operator KVValue(bool value)
         {
-            return new KVObjectValue<int>(value ? 1 : 0, KVValueType.Int32);
+            return new KVObjectValue<bool>(value, KVValueType.Boolean);
         }
 
         /// <summary>
@@ -66,6 +66,42 @@ namespace ValveKeyValue
         public static implicit operator KVValue(long value)
         {
             return new KVObjectValue<long>(value, KVValueType.Int64);
+        }
+
+        /// <summary>
+        /// Implicit cast operator for <see cref="double"/> to <see cref="KVValue"/>.
+        /// </summary>
+        /// <param name="value">The <see cref="double"/> to cast.</param>
+        public static implicit operator KVValue(double value)
+        {
+            return new KVObjectValue<double>(value, KVValueType.FloatingPoint64);
+        }
+
+        /// <summary>
+        /// Implicit cast operator for <see cref="uint"/> to <see cref="KVValue"/>.
+        /// </summary>
+        /// <param name="value">The <see cref="uint"/> to cast.</param>
+        public static implicit operator KVValue(uint value)
+        {
+            return new KVObjectValue<uint>(value, KVValueType.UInt32);
+        }
+
+        /// <summary>
+        /// Implicit cast operator for <see cref="short"/> to <see cref="KVValue"/>.
+        /// </summary>
+        /// <param name="value">The <see cref="short"/> to cast.</param>
+        public static implicit operator KVValue(short value)
+        {
+            return new KVObjectValue<short>(value, KVValueType.Int16);
+        }
+
+        /// <summary>
+        /// Implicit cast operator for <see cref="ushort"/> to <see cref="KVValue"/>.
+        /// </summary>
+        /// <param name="value">The <see cref="ushort"/> to cast.</param>
+        public static implicit operator KVValue(ushort value)
+        {
+            return new KVObjectValue<ushort>(value, KVValueType.UInt16);
         }
 
         /// <summary>
