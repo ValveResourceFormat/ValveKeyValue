@@ -244,10 +244,10 @@ namespace ValveKeyValue.Serialization.KeyValues3
 
             if (isMultiline)
             {
-                writer.Write("\"\"\"\n");
-
+                text = text.Replace("\r\n", "\n");
                 text = text.Replace("\"\"\"", "\\\"\"\"");
 
+                writer.Write("\"\"\"\n");
                 writer.Write(text);
                 writer.Write("\n\"\"\"");
             }
