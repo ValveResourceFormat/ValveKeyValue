@@ -7,7 +7,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
     {
         public KV3TextSerializer(Stream stream)
         {
-            Require.NotNull(stream, nameof(stream));
+            ArgumentNullException.ThrowIfNull(stream);
 
             writer = new StreamWriter(stream, new UTF8Encoding(), bufferSize: 1024, leaveOpen: true)
             {

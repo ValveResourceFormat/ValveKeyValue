@@ -7,8 +7,8 @@ namespace ValveKeyValue.Deserialization.KeyValues3
     {
         public KV3TextReader(TextReader textReader, IParsingVisitationListener listener)
         {
-            Require.NotNull(textReader, nameof(textReader));
-            Require.NotNull(listener, nameof(listener));
+            ArgumentNullException.ThrowIfNull(textReader);
+            ArgumentNullException.ThrowIfNull(listener);
 
             this.listener = listener;
 
@@ -24,7 +24,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         public KVHeader ReadHeader()
         {
-            Require.NotDisposed(nameof(KV3TextReader), disposed);
+            ObjectDisposedException.ThrowIf(disposed, this);
 
             var header = tokenReader.ReadHeader();
 

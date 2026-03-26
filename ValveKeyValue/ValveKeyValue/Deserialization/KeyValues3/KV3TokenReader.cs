@@ -27,7 +27,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         public KVToken ReadNextToken()
         {
-            Require.NotDisposed(nameof(KV3TokenReader), disposed);
+            ObjectDisposedException.ThrowIf(disposed, this);
             SwallowWhitespace();
 
             var nextChar = Peek();
