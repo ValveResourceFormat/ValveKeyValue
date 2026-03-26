@@ -108,6 +108,24 @@ This library does not currently support KeyValues2 (Datamodel). If you need KV2/
 
 # KeyValues3
 
-This library does not currently support KeyValues3. There is an [open pull request](https://github.com/ValveResourceFormat/ValveKeyValue/pull/61) for KV3 support.
+Used by the Source 2 engine.
 
-If you need KV3 support, use [ValveResourceFormat](https://github.com/ValveResourceFormat/ValveResourceFormat) which supports parsing Source 2 formats including KV3.
+## Deserializing text
+
+```csharp
+var stream = File.OpenRead("file.kv3"); // or any other Stream
+
+var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
+KVObject data = kv.Deserialize(stream);
+
+Console.WriteLine(data["some key"]);
+```
+
+## Serializing to text
+
+```csharp
+using var stream = File.OpenWrite("file.kv3");
+
+var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
+kv.Serialize(stream, data);
+```
