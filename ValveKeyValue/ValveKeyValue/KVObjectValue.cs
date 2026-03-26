@@ -22,10 +22,16 @@ namespace ValveKeyValue
         {
             return ValueType switch
             {
+                KVValueType.Boolean => TypeCode.Boolean,
                 KVValueType.Collection => TypeCode.Object,
                 KVValueType.FloatingPoint => TypeCode.Single,
+                KVValueType.FloatingPoint64 => TypeCode.Double,
+                KVValueType.Int16 => TypeCode.Int16,
                 KVValueType.Int32 or KVValueType.Pointer => TypeCode.Int32,
+                KVValueType.Int64 => TypeCode.Int64,
                 KVValueType.String => TypeCode.String,
+                KVValueType.UInt16 => TypeCode.UInt16,
+                KVValueType.UInt32 => TypeCode.UInt32,
                 KVValueType.UInt64 => TypeCode.UInt64,
                 _ => throw new NotImplementedException($"No known TypeCode for '{ValueType}'."),
             };

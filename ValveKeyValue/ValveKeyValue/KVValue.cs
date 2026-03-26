@@ -11,6 +11,11 @@ namespace ValveKeyValue
         public abstract KVValueType ValueType { get; }
 
         /// <summary>
+        /// Gets or sets the current flags of this <see cref="KVValue"/>.
+        /// </summary>
+        public KVFlag Flag { get; set; }
+
+        /// <summary>
         /// Gets the child with the given key.
         /// </summary>
         /// <param name="key">The name of the child to locate.</param>
