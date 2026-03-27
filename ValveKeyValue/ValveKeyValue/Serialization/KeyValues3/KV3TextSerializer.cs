@@ -180,12 +180,12 @@ namespace ValveKeyValue.Serialization.KeyValues3
                 case KVValueType.Null:
                     writer.Write("null");
                     break;
-                // TODO: Valve uses %f with trailing zero stripping, and handles inf/-inf/nan.
+                // TODO: Valve uses %f with trailing zero stripping.
                 case KVValueType.FloatingPoint:
-                    writer.Write(Convert.ToSingle(value, CultureInfo.InvariantCulture).ToString("#0.000000", CultureInfo.InvariantCulture));
+                    WriteFloat(Convert.ToSingle(value, CultureInfo.InvariantCulture));
                     break;
                 case KVValueType.FloatingPoint64:
-                    writer.Write(Convert.ToDouble(value, CultureInfo.InvariantCulture).ToString("#0.000000", CultureInfo.InvariantCulture));
+                    WriteFloat(Convert.ToDouble(value, CultureInfo.InvariantCulture));
                     break;
                 case KVValueType.Int16:
                 case KVValueType.Int32:
@@ -198,6 +198,46 @@ namespace ValveKeyValue.Serialization.KeyValues3
                 default:
                     WriteText(value.ToString(null));
                     break;
+            }
+        }
+
+        void WriteFloat(float value)
+        {
+            if (float.IsNaN(value))
+            {
+                writer.Write("nan");
+            }
+            else if (float.IsPositiveInfinity(value))
+            {
+                writer.Write("inf");
+            }
+            else if (float.IsNegativeInfinity(value))
+            {
+                writer.Write("-inf");
+            }
+            else
+            {
+                writer.Write(value.ToString("#0.000000", CultureInfo.InvariantCulture));
+            }
+        }
+
+        void WriteFloat(double value)
+        {
+            if (double.IsNaN(value))
+            {
+                writer.Write("nan");
+            }
+            else if (double.IsPositiveInfinity(value))
+            {
+                writer.Write("inf");
+            }
+            else if (double.IsNegativeInfinity(value))
+            {
+                writer.Write("-inf");
+            }
+            else
+            {
+                writer.Write(value.ToString("#0.000000", CultureInfo.InvariantCulture));
             }
         }
 

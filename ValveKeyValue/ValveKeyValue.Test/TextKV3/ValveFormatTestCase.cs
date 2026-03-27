@@ -49,7 +49,24 @@ namespace ValveKeyValue.Test.TextKV3
         [Test]
         public void SerializesFloatInfAndNan()
         {
-            // Parser doesn't support inf/nan yet, so build programmatically
+            using var stream = TestDataHelper.OpenResource("TextKV3.float_inf_nan.kv3");
+            var expected = TestDataHelper.ReadTextResource("TextKV3.float_inf_nan_serialized.kv3");
+
+            var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
+            var data = kv.Deserialize(stream);
+
+            Assert.That((double)data["positiveInf"], Is.EqualTo(double.PositiveInfinity));
+            Assert.That((double)data["positiveInf2"], Is.EqualTo(double.PositiveInfinity));
+            Assert.That((double)data["negativeInf"], Is.EqualTo(double.NegativeInfinity));
+            Assert.That((double)data["nan"], Is.NaN);
+
+            Assert.That(SerializeToString(kv, data), Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void SerializesFloatInfAndNanFromFloat()
+        {
+            var expected = TestDataHelper.ReadTextResource("TextKV3.inf_nan_serialized.kv3");
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
 
             var collection = new KVCollectionValue();
@@ -58,12 +75,22 @@ namespace ValveKeyValue.Test.TextKV3
             collection.Add(new KVObject("nan", (KVValue)float.NaN));
             var doc = new KVDocument(null, null, collection);
 
-            var text = SerializeToString(kv, doc);
+            Assert.That(SerializeToString(kv, doc), Is.EqualTo(expected));
+        }
 
-            // TODO: Valve outputs "inf", "-inf", "nan"
-            Assert.That(text, Contains.Substring("positiveInf = "));
-            Assert.That(text, Contains.Substring("negativeInf = "));
-            Assert.That(text, Contains.Substring("nan = "));
+        [Test]
+        public void SerializesFloatInfAndNanFromDouble()
+        {
+            var expected = TestDataHelper.ReadTextResource("TextKV3.inf_nan_serialized.kv3");
+            var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
+
+            var collection = new KVCollectionValue();
+            collection.Add(new KVObject("positiveInf", (KVValue)double.PositiveInfinity));
+            collection.Add(new KVObject("negativeInf", (KVValue)double.NegativeInfinity));
+            collection.Add(new KVObject("nan", (KVValue)double.NaN));
+            var doc = new KVDocument(null, null, collection);
+
+            Assert.That(SerializeToString(kv, doc), Is.EqualTo(expected));
         }
 
         [Test]
