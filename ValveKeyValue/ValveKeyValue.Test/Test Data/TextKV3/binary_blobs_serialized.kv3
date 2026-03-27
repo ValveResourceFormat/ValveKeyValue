@@ -1,19 +1,10 @@
 <!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
 {
-	emptyBlob = #[
-	]
-	smallBlob = #[
-		11 FF
-	]
-	flaggedBlob = resource:#[
-		AA BB CC
-	]
-	blob15 = #[
-		00 11 22 33 44 55 66 77 88 99 AA BB CC DD FF
-	]
-	blob32 = #[
-		00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F
-	]
+	emptyBlob = #[  ]
+	smallBlob = #[ 11 FF ]
+	flaggedBlob = resource:#[ AA BB CC ]
+	blob15 = #[ 00 11 22 33 44 55 66 77 88 99 AA BB CC DD FF ]
+	blob32 = #[ 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F ]
 	blob33 = 
 	#[
 		00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F

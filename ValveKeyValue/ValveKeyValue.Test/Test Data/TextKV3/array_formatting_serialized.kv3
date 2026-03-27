@@ -1,0 +1,96 @@
+<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
+{
+	empty = [  ]
+	one_int = [ 1 ]
+	two_ints = [ 1, 2 ]
+	three_ints = [ 1, 2, 3 ]
+	four_ints = [ 1, 2, 3, 4 ]
+	five_ints = 
+	[
+		1, 2, 3, 4,
+		5,
+	]
+	eight_ints = 
+	[
+		1, 2, 3, 4,
+		5, 6, 7, 8,
+	]
+	nine_ints = 
+	[
+		1, 2, 3, 4,
+		5, 6, 7, 8,
+		9,
+	]
+	four_bools = [ true, false, true, false ]
+	mixed_simple = [ 1, true, 0.5, null ]
+	one_string = 
+	[
+		"hello",
+	]
+	four_strings = 
+	[
+		"a",
+		"b",
+		"c",
+		"d",
+	]
+	mixed_with_string = 
+	[
+		1,
+		"hello",
+		3,
+	]
+	four_with_object = 
+	[
+		1,
+		2,
+		3,
+		{
+			key = "val"
+		},
+	]
+	four_with_array = 
+	[
+		1,
+		2,
+		3,
+		[ 4 ],
+	]
+	nested_short_in_long = 
+	[
+		1,
+		2,
+		3,
+		4,
+		5,
+		[ 10, 20 ],
+	]
+	matrix4x4 = 
+	[
+		1.0, 0.0, 0.0, 0.0,
+		0.0, 1.0, 0.0, 0.0,
+		0.0, 0.0, 1.0, 0.0,
+		0.5, -2.75, 10.0, 1.0,
+	]
+	vector3 = [ 0.5, -1.0, 3.14159 ]
+	color_rgba = [ 255, 128, 0, 255 ]
+	twelve_floats = 
+	[
+		0.1, 0.2, 0.3, 0.4,
+		0.5, 0.6, 0.7, 0.8,
+		0.9, 1.0, 1.1, 1.2,
+	]
+	matrix_as_vectors = 
+	[
+		[ 1.0, 0.0, 0.0, 0.0 ],
+		[ 0.0, 1.0, 0.0, 0.0 ],
+		[ 0.0, 0.0, 1.0, 0.0 ],
+		[ 0.5, -2.75, 10.0, 1.0 ],
+	]
+	empty_arrays = 
+	[
+		[  ],
+		[  ],
+		[  ],
+	]
+}

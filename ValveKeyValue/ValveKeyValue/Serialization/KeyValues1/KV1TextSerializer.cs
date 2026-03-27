@@ -37,7 +37,7 @@ namespace ValveKeyValue.Serialization.KeyValues1
         public void OnKeyValuePair(string name, KVValue value)
             => WriteKeyValuePair(name, value);
 
-        public void OnArrayStart(string name, KVFlag flag)
+        public void OnArrayStart(string name, KVFlag flag, int elementCount, bool allSimpleElements)
         {
             WriteStartObject(name);
             arrayCount.Push(0);

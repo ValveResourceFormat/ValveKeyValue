@@ -130,7 +130,7 @@ namespace ValveKeyValue.Deserialization
             StateStack.Push(state);
         }
 
-        public void OnArrayStart(string name, KVFlag flag)
+        public void OnArrayStart(string name, KVFlag flag, int elementCount = 0, bool allSimpleElements = false)
         {
             var state = new KVPartialState
             {

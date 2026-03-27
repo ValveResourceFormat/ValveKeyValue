@@ -213,7 +213,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 throw new InvalidOperationException($"Attempted to begin new array while in state {stateMachine.Current}.");
             }
 
-            listener.OnArrayStart(stateMachine.CurrentName, stateMachine.GetAndResetFlag());
+            listener.OnArrayStart(stateMachine.CurrentName, stateMachine.GetAndResetFlag(), 0, false);
 
             stateMachine.PushObject();
             stateMachine.SetArrayCurrent();

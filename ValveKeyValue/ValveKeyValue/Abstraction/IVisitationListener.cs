@@ -8,7 +8,7 @@ namespace ValveKeyValue.Abstraction
 
         void OnKeyValuePair(string name, KVValue value);
 
-        void OnArrayStart(string name, KVFlag flag);
+        void OnArrayStart(string name, KVFlag flag, int elementCount, bool allSimpleElements);
 
         void OnArrayValue(KVValue value);
 

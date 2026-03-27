@@ -1,27 +1,11 @@
 <!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
 {
-	one = 
-	[
-		42,
-	]
-	two = 
-	[
-		1,
-		2,
-	]
-	four = 
-	[
-		1,
-		2,
-		3,
-		4,
-	]
+	one = [ 42 ]
+	two = [ 1, 2 ]
+	four = [ 1, 2, 3, 4 ]
 	five_not_short = 
 	[
-		1,
-		2,
-		3,
-		4,
+		1, 2, 3, 4,
 		5,
 	]
 	strings_not_short = 
@@ -29,10 +13,5 @@
 		"a",
 		"b",
 	]
-	floats = 
-	[
-		1.0,
-		2.5,
-		3.0,
-	]
+	floats = [ 1.0, 2.5, 3.0 ]
 }

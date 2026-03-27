@@ -5,17 +5,8 @@
 		"a",
 		"b",
 	]
-	arrayOnSingleLine = 
-	[
-		16.7551,
-		20.3763,
-		19.6448,
-	]
-	arrayNoSpace = 
-	[
-		1.3763,
-		19.6448,
-	]
+	arrayOnSingleLine = [ 16.7551, 20.3763, 19.6448 ]
+	arrayNoSpace = [ 1.3763, 19.6448 ]
 	arrayMixedTypes = 
 	[
 		"a",
@@ -26,15 +17,8 @@
 		{
 			foo = "bar"
 		},
-		[
-			1,
-			3,
-			3,
-			7,
-		],
-		#[
-			11 FF
-		],
+		[ 1, 3, 3, 7 ],
+		#[ 11 FF ],
 		resource:"hello.world",
 		"""
 multiline

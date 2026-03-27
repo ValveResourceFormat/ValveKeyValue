@@ -27,8 +27,18 @@ namespace ValveKeyValue.Abstraction
                     break;
 
                 case KVValueType.Array:
-                    listener.OnArrayStart(name, value.Flag);
-                    VisitArray((IEnumerable<KVValue>)value);
+                    var array = (ICollection<KVValue>)value;
+                    var allSimple = true;
+                    foreach (var item in array)
+                    {
+                        if (!IsSimpleType(item.ValueType))
+                        {
+                            allSimple = false;
+                            break;
+                        }
+                    }
+                    listener.OnArrayStart(name, value.Flag, array.Count, allSimple);
+                    VisitArray(array);
                     listener.OnArrayEnd();
                     break;
 
@@ -73,5 +83,17 @@ namespace ValveKeyValue.Abstraction
                 VisitObject(null, item, true);
             }
         }
+
+        static bool IsSimpleType(KVValueType type) => type is
+            KVValueType.Null or
+            KVValueType.Boolean or
+            KVValueType.Int16 or
+            KVValueType.Int32 or
+            KVValueType.Int64 or
+            KVValueType.UInt16 or
+            KVValueType.UInt32 or
+            KVValueType.UInt64 or
+            KVValueType.FloatingPoint or
+            KVValueType.FloatingPoint64;
     }
 }

@@ -11,7 +11,6 @@ namespace ValveKeyValue.Test.TextKV3
         public void SerializesEmptyArray()
         {
             using var stream = TestDataHelper.OpenResource("TextKV3.empty_array.kv3");
-            // TODO: Valve outputs empty arrays inline as "[  ]"
             var expected = TestDataHelper.ReadTextResource("TextKV3.empty_array_serialized.kv3");
 
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
@@ -24,8 +23,19 @@ namespace ValveKeyValue.Test.TextKV3
         public void SerializesShortArray()
         {
             using var stream = TestDataHelper.OpenResource("TextKV3.short_array.kv3");
-            // TODO: Valve outputs short arrays (<=4 simple elements) inline as "[ 1, 2, 3 ]"
             var expected = TestDataHelper.ReadTextResource("TextKV3.short_array_serialized.kv3");
+
+            var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
+            var data = kv.Deserialize(stream);
+
+            Assert.That(SerializeToString(kv, data), Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void SerializesArrayFormatting()
+        {
+            using var stream = TestDataHelper.OpenResource("TextKV3.array_formatting.kv3");
+            var expected = TestDataHelper.ReadTextResource("TextKV3.array_formatting_serialized.kv3");
 
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
             var data = kv.Deserialize(stream);
@@ -96,7 +106,6 @@ namespace ValveKeyValue.Test.TextKV3
         public void SerializesBinaryBlobs()
         {
             using var stream = TestDataHelper.OpenResource("TextKV3.binary_blobs.kv3");
-            // TODO: Valve outputs small blobs (<=32 bytes) inline as "#[ XX XX ]"
             var expected = TestDataHelper.ReadTextResource("TextKV3.binary_blobs_serialized.kv3");
 
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);

@@ -26,9 +26,10 @@ namespace ValveKeyValue.Serialization.KeyValues3
 
         readonly TextWriter writer;
         int indentation = 0;
-        readonly Stack<bool> inArray = new();
+        // Tracks nesting: null for objects, tuple for arrays
+        readonly Stack<(bool isShort, bool allSimple, int index, int count)?> context = new();
 
-        bool IsInArray => inArray.Count > 0 && inArray.Peek();
+        bool IsInArray => context.Count > 0 && context.Peek() != null;
 
         public void Dispose()
         {
@@ -37,14 +38,14 @@ namespace ValveKeyValue.Serialization.KeyValues3
 
         public void OnObjectStart(string name, KVFlag flag)
         {
-            inArray.Push(false);
+            context.Push(null);
 
             WriteStartObject(name, flag);
         }
 
         public void OnObjectEnd()
         {
-            inArray.Pop();
+            context.Pop();
 
             WriteEndObject();
         }
@@ -52,49 +53,87 @@ namespace ValveKeyValue.Serialization.KeyValues3
         public void OnKeyValuePair(string name, KVValue value)
             => WriteKeyValuePair(name, value);
 
-        public void OnArrayStart(string name, KVFlag flag)
+        public void OnArrayStart(string name, KVFlag flag, int elementCount, bool allSimpleElements)
         {
-            inArray.Push(true);
+            var isShort = elementCount <= 4 && allSimpleElements;
+            context.Push((isShort, allSimpleElements, 0, elementCount));
 
             WriteIndentation();
 
             WriteKey(name);
             WriteFlag(flag);
 
-            // After "key = " or "key = flag:", put bracket on next line.
-            // TODO: Valve also puts bracket on next line for flagged array elements (name == null, flag != None).
-            if (name != null)
+            if (isShort)
             {
-                writer.WriteLine();
-                WriteIndentation();
+                writer.Write("[ ");
             }
+            else
+            {
+                // After "key = " or "key = flag:", put bracket on next line.
+                // TODO: Valve also puts bracket on next line for flagged array elements (name == null, flag != None).
+                if (name != null)
+                {
+                    writer.WriteLine();
+                    WriteIndentation();
+                }
 
-            // TODO: Valve writes short arrays (<=4 simple elements) inline as "[ 1, 2, 3 ]",
-            // and empty arrays as "[  ]". This requires knowing the element count upfront.
-            writer.Write('[');
-            indentation++;
-            WriteLine();
+                writer.Write('[');
+                indentation++;
+                writer.WriteLine();
+            }
         }
 
         public void OnArrayValue(KVValue value)
         {
-            WriteIndentation();
+            var (isShort, allSimple, index, count) = context.Pop()!.Value;
+            var isLast = index == count - 1;
 
-            WriteValue(value);
+            if (isShort)
+            {
+                WriteValue(value);
 
-            // TODO: Valve does not write trailing comma on the last element of short inline arrays.
-            writer.Write(',');
-            // TODO: Valve groups simple array values 4 per line with spaces instead of newlines.
-            writer.WriteLine();
+                if (!isLast)
+                    writer.Write(", ");
+            }
+            else if (allSimple)
+            {
+                // Group 4 simple values per line
+                if (index % 4 == 0)
+                    WriteIndentation();
+
+                WriteValue(value);
+                writer.Write(',');
+
+                if (!isLast && (index + 1) % 4 != 0)
+                    writer.Write(' ');
+                else
+                    writer.WriteLine();
+            }
+            else
+            {
+                WriteIndentation();
+                WriteValue(value);
+                writer.Write(',');
+                writer.WriteLine();
+            }
+
+            context.Push((isShort, allSimple, index + 1, count));
         }
 
         public void OnArrayEnd()
         {
-            inArray.Pop();
+            var (isShort, _, _, _) = context.Pop()!.Value;
 
-            indentation--;
-            WriteIndentation();
-            writer.Write(']');
+            if (isShort)
+            {
+                writer.Write(" ]");
+            }
+            else
+            {
+                indentation--;
+                WriteIndentation();
+                writer.Write(']');
+            }
 
             if (IsInArray)
             {
@@ -259,58 +298,61 @@ namespace ValveKeyValue.Serialization.KeyValues3
         {
             var bytes = value.Bytes.Span;
 
-            // TODO: Valve writes small blobs (<=32 bytes) inline as "#[ XX XX ]" with no newlines.
-            // TODO: Valve only writes newline before #[ for large blobs in object member context (a5=1),
-            // and does not indent #[ (just "\n#["). In array element context (a5=0), large blobs also
-            // start with "#[ " (space, no newline before), same as small blobs.
-            if (bytes.Length > 32)
+            if (bytes.Length <= 32)
             {
+                // Small and empty blobs are written inline: "#[ XX XX ]" or "#[  ]"
+                writer.Write("#[ ");
+
+                for (var i = 0; i < bytes.Length; i++)
+                {
+                    var b = bytes[i];
+                    writer.Write(HexStringHelper.HexToCharUpper(b >> 4));
+                    writer.Write(HexStringHelper.HexToCharUpper(b));
+
+                    if (i < bytes.Length - 1)
+                        writer.Write(' ');
+                }
+
+                writer.Write(" ]");
+            }
+            else
+            {
+                // Large blobs are written multiline with 32 bytes per line
                 writer.WriteLine();
                 WriteIndentation();
-            }
+                writer.Write('#');
+                writer.Write('[');
+                writer.WriteLine();
+                indentation++;
+                WriteIndentation();
 
-            writer.Write('#');
-            writer.Write('[');
+                for (var i = 0; i < bytes.Length - 1; i++)
+                {
+                    var b = bytes[i];
+                    writer.Write(HexStringHelper.HexToCharUpper(b >> 4));
+                    writer.Write(HexStringHelper.HexToCharUpper(b));
 
-            // TODO: Valve writes empty blobs inline as "#[  ]" (two spaces, no newlines).
-            if (bytes.Length == 0)
-            {
+                    if ((i + 1) % 32 == 0)
+                    {
+                        writer.WriteLine();
+                        WriteIndentation();
+                    }
+                    else
+                    {
+                        writer.Write(' ');
+                    }
+                }
+
+                var last = bytes[bytes.Length - 1];
+                writer.Write(HexStringHelper.HexToCharUpper(last >> 4));
+                writer.Write(HexStringHelper.HexToCharUpper(last));
+
+                indentation--;
+
                 writer.WriteLine();
                 WriteIndentation();
                 writer.Write(']');
-                return;
             }
-
-            writer.WriteLine();
-            indentation++;
-            WriteIndentation();
-
-            for (var i = 0; i < bytes.Length - 1; i++)
-            {
-                var b = bytes[i];
-                writer.Write(HexStringHelper.HexToCharUpper(b >> 4));
-                writer.Write(HexStringHelper.HexToCharUpper(b));
-
-                if ((i + 1) % 32 == 0)
-                {
-                    writer.WriteLine();
-                    WriteIndentation();
-                }
-                else
-                {
-                    writer.Write(' ');
-                }
-            }
-
-            var last = bytes[bytes.Length - 1];
-            writer.Write(HexStringHelper.HexToCharUpper(last >> 4));
-            writer.Write(HexStringHelper.HexToCharUpper(last));
-
-            indentation--;
-
-            writer.WriteLine();
-            WriteIndentation();
-            writer.Write(']');
         }
 
         void WriteIndentation()
