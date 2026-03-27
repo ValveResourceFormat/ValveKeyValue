@@ -180,7 +180,6 @@ namespace ValveKeyValue.Serialization.KeyValues3
                 case KVValueType.Null:
                     writer.Write("null");
                     break;
-                // TODO: Valve uses %f with trailing zero stripping.
                 case KVValueType.FloatingPoint:
                     WriteFloat(Convert.ToSingle(value, CultureInfo.InvariantCulture));
                     break;
@@ -217,7 +216,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
             }
             else
             {
-                writer.Write(value.ToString("#0.000000", CultureInfo.InvariantCulture));
+                WriteFloatFormatted(value);
             }
         }
 
@@ -237,8 +236,23 @@ namespace ValveKeyValue.Serialization.KeyValues3
             }
             else
             {
-                writer.Write(value.ToString("#0.000000", CultureInfo.InvariantCulture));
+                WriteFloatFormatted(value);
             }
+        }
+
+        // Matches Valve's %f (6 decimal places) + V_StripExcessTrailingZeros.
+        // "0.0#####" can't be used here because it rounds differently than %f for edge cases.
+        void WriteFloatFormatted(float value) => WriteFloatTrimmed(value.ToString("F6", CultureInfo.InvariantCulture));
+        void WriteFloatFormatted(double value) => WriteFloatTrimmed(value.ToString("F6", CultureInfo.InvariantCulture));
+
+        void WriteFloatTrimmed(string formatted)
+        {
+            // Strip trailing zeros but keep at least one digit after the decimal point
+            var span = formatted.AsSpan().TrimEnd('0');
+            if (span[^1] == '.')
+                writer.Write(formatted.AsSpan(0, span.Length + 1));
+            else
+                writer.Write(span);
         }
 
         void WriteBinaryBlob(KVBinaryBlob value)
@@ -246,6 +260,9 @@ namespace ValveKeyValue.Serialization.KeyValues3
             var bytes = value.Bytes.Span;
 
             // TODO: Valve writes small blobs (<=32 bytes) inline as "#[ XX XX ]" with no newlines.
+            // TODO: Valve only writes newline before #[ for large blobs in object member context (a5=1),
+            // and does not indent #[ (just "\n#["). In array element context (a5=0), large blobs also
+            // start with "#[ " (space, no newline before), same as small blobs.
             if (bytes.Length > 32)
             {
                 writer.WriteLine();
@@ -255,6 +272,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
             writer.Write('#');
             writer.Write('[');
 
+            // TODO: Valve writes empty blobs inline as "#[  ]" (two spaces, no newlines).
             if (bytes.Length == 0)
             {
                 writer.WriteLine();

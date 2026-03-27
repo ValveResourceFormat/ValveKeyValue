@@ -7,4 +7,19 @@
 	small = 0.001
 	large = 12345.6789
 	trailingZeros = 1.500000
+	negativeZero = -0.0
+	sixDecimalPlaces = 0.000001
+	belowPrecision = 0.0000001
+	hundred = 100.0
+	nearMaxPrecision = 999999.999999
+	negativeSmall = -0.001
+	allZeroDecimals = 2.000000
+	mixedTrailing = 1.230000
+	largeNegative = -99999.12345
+	huge = 1e20
+	hugeNegative = -1e20
+	tiny = 1e-20
+	tinyNegative = -1e-20
+	doubleLarge = 1e15
+	doubleLargeNegative = -1e15
 }

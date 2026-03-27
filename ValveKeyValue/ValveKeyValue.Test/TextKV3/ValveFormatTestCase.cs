@@ -37,7 +37,6 @@ namespace ValveKeyValue.Test.TextKV3
         public void SerializesFloats()
         {
             using var stream = TestDataHelper.OpenResource("TextKV3.floats.kv3");
-            // TODO: Valve strips trailing zeros from floats
             var expected = TestDataHelper.ReadTextResource("TextKV3.floats_serialized.kv3");
 
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
