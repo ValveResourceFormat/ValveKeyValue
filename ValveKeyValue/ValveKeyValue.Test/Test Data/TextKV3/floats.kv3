@@ -1,0 +1,10 @@
+<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
+{
+	zero = 0.0
+	one = 1.0
+	half = 0.5
+	negative = -69.42
+	small = 0.001
+	large = 12345.6789
+	trailingZeros = 1.500000
+}

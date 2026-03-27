@@ -61,6 +61,16 @@ namespace ValveKeyValue.Serialization.KeyValues3
             WriteKey(name);
             WriteFlag(flag);
 
+            // After "key = " or "key = flag:", put bracket on next line.
+            // TODO: Valve also puts bracket on next line for flagged array elements (name == null, flag != None).
+            if (name != null)
+            {
+                writer.WriteLine();
+                WriteIndentation();
+            }
+
+            // TODO: Valve writes short arrays (<=4 simple elements) inline as "[ 1, 2, 3 ]",
+            // and empty arrays as "[  ]". This requires knowing the element count upfront.
             writer.Write('[');
             indentation++;
             WriteLine();
@@ -72,8 +82,10 @@ namespace ValveKeyValue.Serialization.KeyValues3
 
             WriteValue(value);
 
+            // TODO: Valve does not write trailing comma on the last element of short inline arrays.
             writer.Write(',');
-            writer.WriteLine(); // TODO: If short, no line?
+            // TODO: Valve groups simple array values 4 per line with spaces instead of newlines.
+            writer.WriteLine();
         }
 
         public void OnArrayEnd()
@@ -107,6 +119,14 @@ namespace ValveKeyValue.Serialization.KeyValues3
             }
 
             WriteFlag(flag);
+
+            // After "key = " or "key = flag:", put bracket on next line.
+            // TODO: Valve also puts bracket on next line for flagged object elements (name == null, flag != None).
+            if (name != null && indentation > 0)
+            {
+                writer.WriteLine();
+                WriteIndentation();
+            }
 
             writer.Write('{');
             indentation++;
@@ -160,6 +180,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
                 case KVValueType.Null:
                     writer.Write("null");
                     break;
+                // TODO: Valve uses %f with trailing zero stripping, and handles inf/-inf/nan.
                 case KVValueType.FloatingPoint:
                     writer.Write(Convert.ToSingle(value, CultureInfo.InvariantCulture).ToString("#0.000000", CultureInfo.InvariantCulture));
                     break;
@@ -184,7 +205,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
         {
             var bytes = value.Bytes.Span;
 
-            // TODO: Verify this against Valve
+            // TODO: Valve writes small blobs (<=32 bytes) inline as "#[ XX XX ]" with no newlines.
             if (bytes.Length > 32)
             {
                 writer.WriteLine();
@@ -193,49 +214,53 @@ namespace ValveKeyValue.Serialization.KeyValues3
 
             writer.Write('#');
             writer.Write('[');
+
+            if (bytes.Length == 0)
+            {
+                writer.WriteLine();
+                WriteIndentation();
+                writer.Write(']');
+                return;
+            }
+
             writer.WriteLine();
             indentation++;
             WriteIndentation();
 
-            var i = 0;
-
-            for (; i < bytes.Length; i++)
+            for (var i = 0; i < bytes.Length - 1; i++)
             {
                 var b = bytes[i];
                 writer.Write(HexStringHelper.HexToCharUpper(b >> 4));
                 writer.Write(HexStringHelper.HexToCharUpper(b));
 
-                if (i > 0 && i % 32 == 0)
+                if ((i + 1) % 32 == 0)
                 {
                     writer.WriteLine();
                     WriteIndentation();
                 }
-                else if (i != bytes.Length - 1)
+                else
                 {
                     writer.Write(' ');
                 }
             }
 
+            var last = bytes[bytes.Length - 1];
+            writer.Write(HexStringHelper.HexToCharUpper(last >> 4));
+            writer.Write(HexStringHelper.HexToCharUpper(last));
+
             indentation--;
 
-            if (i % 32 != 0)
-            {
-                writer.WriteLine();
-                WriteIndentation();
-            }
-
+            writer.WriteLine();
+            WriteIndentation();
             writer.Write(']');
         }
 
         void WriteIndentation()
         {
-            if (indentation == 0)
+            for (var i = 0; i < indentation; i++)
             {
-                return;
+                writer.Write('\t');
             }
-
-            var text = new string('\t', indentation);
-            writer.Write(text);
         }
 
         void WriteText(string text)

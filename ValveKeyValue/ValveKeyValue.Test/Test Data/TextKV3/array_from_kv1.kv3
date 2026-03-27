@@ -1,28 +1,34 @@
 <!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
 {
-	arrayValue = {
+	arrayValue = 
+	{
 		"0" = "a"
 		"1" = "b"
 	}
-	arrayOnSingleLine = {
+	arrayOnSingleLine = 
+	{
 		"0" = 16.755100
 		"1" = 20.376300
 		"2" = 19.644800
 	}
-	arrayNoSpace = {
+	arrayNoSpace = 
+	{
 		"0" = 1.376300
 		"1" = 19.644800
 	}
-	arrayMixedTypes = {
+	arrayMixedTypes = 
+	{
 		"0" = "a"
 		"1" = 1
 		"2" = 1
 		"3" = 0
 		"4" = ""
-		"5" = {
+		"5" = 
+		{
 			foo = "bar"
 		}
-		"6" = {
+		"6" = 
+		{
 			"0" = 1
 			"1" = 3
 			"2" = 3

@@ -7,10 +7,12 @@
 	multipleFlags = "cool value"
 	soundEvent = "event sound"
 	noFlags = 5
-	flaggedObject = {
+	flaggedObject = 
+	{
 		"1" = "test1"
 		"2" = "test2"
-		"3" = {
+		"3" = 
+		{
 			"0" = "test3"
 		}
 		"4" = "test4"

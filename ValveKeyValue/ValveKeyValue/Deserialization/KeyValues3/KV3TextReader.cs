@@ -301,6 +301,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             {
                 return new KVNullValue();
             }
+            // TODO: Valve handles "inf", "-inf", and "nan" as floating point values
             else if (text.Length > 0 && ((text[0] >= '0' && text[0] <= '9') || text[0] == '-' || text[0] == '+'))
             {
                 // TODO: Due to Valve's string to int/double conversion functions, it is possible to have 0x hex values (as well as prefixed with minus like -0x)
