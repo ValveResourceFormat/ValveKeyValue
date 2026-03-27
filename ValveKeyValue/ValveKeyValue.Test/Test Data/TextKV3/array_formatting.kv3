@@ -22,4 +22,13 @@
 	twelve_floats = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2]
 	matrix_as_vectors = [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.5, -2.75, 10.0, 1.0]]
 	empty_arrays = [[], [], []]
+	flagged_array_element = [resource:[1, 2, 3], panorama:[4, 5]]
+	large_blob_in_array = [#[00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F 20]]
+	multiple_blobs_in_array = [#[AA BB], #[CC DD EE], #[FF]]
+	mixed_blobs_and_values = [1, #[AA BB], "hello", #[CC]]
+	flagged_long_array_in_array = [resource:[1, 2, 3, 4, 5], panorama:[6, 7, 8, 9, 10, 11, 12, 13]]
+	flagged_object_in_array = [resource:{key = "val"}, panorama:{other = 123}]
+	large_and_small_blobs = [#[11], #[00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F 20], #[FF]]
+	flagged_blobs_in_array = [resource:#[AA BB], panorama:#[CC DD EE FF]]
+	flagged_large_blob_in_array = [resource:#[00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F 20]]
 }

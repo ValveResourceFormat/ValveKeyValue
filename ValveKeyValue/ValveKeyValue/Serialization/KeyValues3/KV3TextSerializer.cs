@@ -70,8 +70,8 @@ namespace ValveKeyValue.Serialization.KeyValues3
             else
             {
                 // After "key = " or "key = flag:", put bracket on next line.
-                // TODO: Valve also puts bracket on next line for flagged array elements (name == null, flag != None).
-                if (name != null)
+                // Also for flagged array elements.
+                if (name != null || flag != KVFlag.None)
                 {
                     writer.WriteLine();
                     WriteIndentation();
@@ -87,6 +87,9 @@ namespace ValveKeyValue.Serialization.KeyValues3
         {
             var (isShort, allSimple, index, count) = context.Pop()!.Value;
             var isLast = index == count - 1;
+
+            // Push back before WriteValue so nested code can see the array context
+            context.Push((isShort, allSimple, index + 1, count));
 
             if (isShort)
             {
@@ -116,8 +119,6 @@ namespace ValveKeyValue.Serialization.KeyValues3
                 writer.Write(',');
                 writer.WriteLine();
             }
-
-            context.Push((isShort, allSimple, index + 1, count));
         }
 
         public void OnArrayEnd()
@@ -160,8 +161,8 @@ namespace ValveKeyValue.Serialization.KeyValues3
             WriteFlag(flag);
 
             // After "key = " or "key = flag:", put bracket on next line.
-            // TODO: Valve also puts bracket on next line for flagged object elements (name == null, flag != None).
-            if (name != null && indentation > 0)
+            // Also for flagged object elements.
+            if ((name != null || flag != KVFlag.None) && indentation > 0)
             {
                 writer.WriteLine();
                 WriteIndentation();
@@ -317,12 +318,22 @@ namespace ValveKeyValue.Serialization.KeyValues3
             }
             else
             {
-                // Large blobs are written multiline with 32 bytes per line
-                writer.WriteLine();
-                WriteIndentation();
-                writer.Write('#');
-                writer.Write('[');
-                writer.WriteLine();
+                // Large blobs are written multiline with 32 bytes per line.
+                // In array context, the caller already wrote indentation, so just open inline.
+                // In object context, put #[ on a new indented line.
+                if (IsInArray)
+                {
+                    writer.Write("#[ ");
+                    writer.WriteLine();
+                }
+                else
+                {
+                    writer.WriteLine();
+                    WriteIndentation();
+                    writer.Write('#');
+                    writer.Write('[');
+                    writer.WriteLine();
+                }
                 indentation++;
                 WriteIndentation();
 
