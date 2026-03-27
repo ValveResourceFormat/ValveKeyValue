@@ -456,8 +456,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
                         break;
 
                     default:
-                        // TODO: Use char.IsAscii* functions from newer .NET
-                        if (@char != '.' && @char != '_' && !((@char >= 'A' && @char <= 'Z') || (@char >= 'a' && @char <= 'z') || (@char >= '0' && @char <= '9')))
+                        if (@char != '.' && @char != '_' && !char.IsAsciiLetterOrDigit(@char))
                         {
                             escaped = true;
                         }
