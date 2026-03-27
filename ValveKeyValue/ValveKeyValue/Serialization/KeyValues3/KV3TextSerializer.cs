@@ -307,8 +307,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
                 for (var i = 0; i < bytes.Length; i++)
                 {
                     var b = bytes[i];
-                    writer.Write(HexStringHelper.HexToCharUpper(b >> 4));
-                    writer.Write(HexStringHelper.HexToCharUpper(b));
+                    WriteHexByte(b);
 
                     if (i < bytes.Length - 1)
                         writer.Write(' ');
@@ -340,8 +339,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
                 for (var i = 0; i < bytes.Length - 1; i++)
                 {
                     var b = bytes[i];
-                    writer.Write(HexStringHelper.HexToCharUpper(b >> 4));
-                    writer.Write(HexStringHelper.HexToCharUpper(b));
+                    WriteHexByte(b);
 
                     if ((i + 1) % 32 == 0)
                     {
@@ -354,9 +352,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
                     }
                 }
 
-                var last = bytes[bytes.Length - 1];
-                writer.Write(HexStringHelper.HexToCharUpper(last >> 4));
-                writer.Write(HexStringHelper.HexToCharUpper(last));
+                WriteHexByte(bytes[bytes.Length - 1]);
 
                 indentation--;
 
@@ -364,6 +360,12 @@ namespace ValveKeyValue.Serialization.KeyValues3
                 WriteIndentation();
                 writer.Write(']');
             }
+        }
+
+        void WriteHexByte(byte b)
+        {
+            writer.Write(HexStringHelper.HexToCharUpper(b >> 4));
+            writer.Write(HexStringHelper.HexToCharUpper(b));
         }
 
         void WriteIndentation()
