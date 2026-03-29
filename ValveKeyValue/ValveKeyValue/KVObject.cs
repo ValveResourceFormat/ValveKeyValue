@@ -532,7 +532,7 @@ namespace ValveKeyValue
         }
 
         /// <inheritdoc/>
-        public override string ToString() => Name != null ? $"{Name}: {Value}" : Value.ToString(CultureInfo.InvariantCulture);
+        public override string ToString() => Value.ToString(CultureInfo.InvariantCulture);
 
         private string DebuggerDescription
         {
@@ -540,10 +540,10 @@ namespace ValveKeyValue
             {
                 if (Value.ValueType == KVValueType.String)
                 {
-                    return $"{Name}: {Value}";
+                    return Name != null ? $"{Name}: {Value}" : (string)Value;
                 }
 
-                return $"{Name}: {Value} ({Value.ValueType})";
+                return Name != null ? $"{Name}: {Value} ({Value.ValueType})" : $"{Value} ({Value.ValueType})";
             }
         }
 

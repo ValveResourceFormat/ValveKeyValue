@@ -182,6 +182,31 @@ namespace ValveKeyValue.Test
 
         #endregion
 
+        #region ToString
+
+        [Test]
+        public void ToStringReturnsValueForStringObject()
+        {
+            var obj = new KVObject("key", "hello");
+            Assert.That(obj.ToString(), Is.EqualTo("hello"));
+        }
+
+        [Test]
+        public void ToStringReturnsValueForIntObject()
+        {
+            var obj = new KVObject("key", 42);
+            Assert.That(obj.ToString(), Is.EqualTo("42"));
+        }
+
+        [Test]
+        public void ToStringReturnsCollectionForCollection()
+        {
+            var obj = new KVObject("root", [new KVObject("a", "b")]);
+            Assert.That(obj.ToString(), Is.EqualTo("[Collection]"));
+        }
+
+        #endregion
+
         #region 3. Explicit operators to primitives
 
         [Test]
