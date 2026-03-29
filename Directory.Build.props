@@ -7,7 +7,6 @@
     <AssemblyVersion>$(ProjectBaseVersion)</AssemblyVersion>
     <FileVersion>$(ProjectVersion)</FileVersion>
     <Version>$(ProjectVersion)</Version>
-	<LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup>
