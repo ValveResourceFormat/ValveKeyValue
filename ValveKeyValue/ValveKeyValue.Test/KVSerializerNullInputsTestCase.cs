@@ -13,6 +13,6 @@ namespace ValveKeyValue.Test
                 .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("stream"));
         }
 
-        public static IEnumerable Formats => Enum.GetValues(typeof(KVSerializationFormat));
+        public static IEnumerable Formats => Enum.GetValues<KVSerializationFormat>();
     }
 }

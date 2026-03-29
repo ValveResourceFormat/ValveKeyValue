@@ -76,7 +76,7 @@ namespace ValveKeyValue.Test
                 foreach (var member in members)
                 {
                     var rawValue = type.GetField(member, BindingFlags.Public | BindingFlags.Static).GetValue(null);
-                    var convertedValue = Convert.ChangeType(rawValue, Enum.GetUnderlyingType(type));
+                    var convertedValue = Convert.ChangeType(rawValue, Enum.GetUnderlyingType(type), CultureInfo.InvariantCulture);
 
                     sb.Append("    ");
                     sb.Append(member);

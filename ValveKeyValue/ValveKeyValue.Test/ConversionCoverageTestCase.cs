@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 
 namespace ValveKeyValue.Test
@@ -202,10 +203,8 @@ namespace ValveKeyValue.Test
             KVObject obj = parent;
             Assert.That(obj is KV2Element, Is.True);
 
-            if (obj is KV2Element kv2)
-            {
-                Assert.That(kv2.ClassName, Is.EqualTo("DmeParent"));
-            }
+            var kv2 = (KV2Element)obj;
+            Assert.That(kv2.ClassName, Is.EqualTo("DmeParent"));
         }
 
         #endregion
@@ -217,7 +216,7 @@ namespace ValveKeyValue.Test
         public void ConvertChangeTypeOnKVObjectInt()
         {
             var obj = new KVObject("test", (KVValue)42);
-            var result = Convert.ChangeType(obj, typeof(int));
+            var result = Convert.ChangeType(obj, typeof(int), CultureInfo.InvariantCulture);
             Assert.That(result, Is.EqualTo(42));
         }
 
@@ -225,7 +224,7 @@ namespace ValveKeyValue.Test
         public void ConvertChangeTypeOnKVObjectString()
         {
             var obj = new KVObject("test", (KVValue)"hello");
-            var result = Convert.ChangeType(obj, typeof(string));
+            var result = Convert.ChangeType(obj, typeof(string), CultureInfo.InvariantCulture);
             Assert.That(result, Is.EqualTo("hello"));
         }
 
@@ -233,7 +232,7 @@ namespace ValveKeyValue.Test
         public void ConvertToInt32OnKVObject()
         {
             var obj = new KVObject("test", (KVValue)99);
-            var result = Convert.ToInt32(obj);
+            var result = Convert.ToInt32(obj, CultureInfo.InvariantCulture);
             Assert.That(result, Is.EqualTo(99));
         }
 
@@ -241,7 +240,7 @@ namespace ValveKeyValue.Test
         public void ConvertToDoubleOnKVObject()
         {
             var obj = new KVObject("test", (KVValue)3.14);
-            var result = Convert.ToDouble(obj);
+            var result = Convert.ToDouble(obj, CultureInfo.InvariantCulture);
             Assert.That(result, Is.EqualTo(3.14));
         }
 
@@ -253,8 +252,8 @@ namespace ValveKeyValue.Test
                 new KVObject("count", (KVValue)7),
             ]);
 
-            Assert.That(Convert.ToString(root["name"]), Is.EqualTo("world"));
-            Assert.That(Convert.ToInt32(root["count"]), Is.EqualTo(7));
+            Assert.That(Convert.ToString(root["name"], CultureInfo.InvariantCulture), Is.EqualTo("world"));
+            Assert.That(Convert.ToInt32(root["count"], CultureInfo.InvariantCulture), Is.EqualTo(7));
         }
 
         [Test]

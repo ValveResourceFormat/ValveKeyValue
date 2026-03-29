@@ -7,12 +7,12 @@ namespace ValveKeyValue.Test
 {
     class StronglyTypedCollectionDeserializationTestCase
     {
-        public class RootObject<TCollection>
+        internal class RootObject<TCollection>
         {
             public TCollection Numbers { get; set; }
         }
 
-        public class SimpleObject
+        internal class SimpleObject
         {
             public string Name { get; set; }
             public string Value { get; set; }

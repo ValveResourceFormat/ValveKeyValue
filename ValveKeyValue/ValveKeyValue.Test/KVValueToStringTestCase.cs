@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Globalization;
 using System.Linq;
 
 namespace ValveKeyValue.Test
@@ -6,7 +7,7 @@ namespace ValveKeyValue.Test
     class KVValueToStringTestCase
     {
         [TestCaseSource(nameof(ToStringTestCases))]
-        public string KVValueToStringIsSane(KVValue value) => value.ToString();
+        public string KVValueToStringIsSane(KVValue value) => value.ToString(CultureInfo.InvariantCulture);
 
         public static IEnumerable ToStringTestCases
         {

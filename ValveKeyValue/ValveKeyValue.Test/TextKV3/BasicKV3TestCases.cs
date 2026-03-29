@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace ValveKeyValue.Test.TextKV3
 {
     class BasicKV3TestCases
@@ -96,8 +98,8 @@ namespace ValveKeyValue.Test.TextKV3
             var arrayValue = data["arrayValue"];
 
             Assert.That(arrayValue.Count, Is.EqualTo(2));
-            Assert.That(arrayValue[0].Value.ToString(), Is.EqualTo("a"));
-            Assert.That(arrayValue[1].Value.ToString(), Is.EqualTo("b"));
+            Assert.That(arrayValue[0].Value.ToString(CultureInfo.InvariantCulture), Is.EqualTo("a"));
+            Assert.That(arrayValue[1].Value.ToString(CultureInfo.InvariantCulture), Is.EqualTo("b"));
 
             // TODO: Test all the children values
         }

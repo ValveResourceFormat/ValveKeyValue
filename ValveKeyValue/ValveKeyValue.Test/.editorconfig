@@ -1,0 +1,4 @@
+[*.cs]
+
+# CA1812: Internal types instantiated via reflection/deserialization in tests
+dotnet_diagnostic.CA1812.severity = none

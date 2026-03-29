@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Globalization;
 
 namespace ValveKeyValue.Test
 {
@@ -284,7 +285,7 @@ namespace ValveKeyValue.Test
                 [new KVObject("bbb", "ccc")]);
 
             Assert.That(
-                () => Convert.ChangeType(kv.Value, type),
+                () => Convert.ChangeType(kv.Value, type, CultureInfo.InvariantCulture),
                 Throws.Exception.TypeOf<NotSupportedException>());
         }
 
@@ -295,7 +296,7 @@ namespace ValveKeyValue.Test
                 "aaa",
                 [new KVObject("bbb", "ccc")]);
 
-            return Convert.ChangeType(kv.Value, type);
+            return Convert.ChangeType(kv.Value, type, CultureInfo.InvariantCulture);
         }
     }
 }

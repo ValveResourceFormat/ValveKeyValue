@@ -4,6 +4,8 @@ namespace ValveKeyValue.Test
 {
     class EdgeCaseTestCase
     {
+        private static readonly string[] ExpectedDuplicateKeyValues = ["first", "second"];
+
         #region 1. Chained write creates intermediate structure
 
         [Test]
@@ -485,7 +487,7 @@ namespace ValveKeyValue.Test
                 .Select(c => (string)c)
                 .ToList();
 
-            Assert.That(values, Is.EqualTo(new[] { "first", "second" }));
+            Assert.That(values, Is.EqualTo(ExpectedDuplicateKeyValues));
         }
 
         #endregion

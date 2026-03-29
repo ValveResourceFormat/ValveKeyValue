@@ -4,6 +4,9 @@ namespace ValveKeyValue.Test
 {
     class KVObjectApiTestCase
     {
+        private static readonly string[] ExpectedNames_abc = ["a", "b", "c"];
+        private static readonly string[] ExpectedValues_xy = ["x", "y"];
+
         #region 1. String indexer returns KVObject
 
         [Test]
@@ -535,7 +538,7 @@ namespace ValveKeyValue.Test
                 names.Add(child.Name);
             }
 
-            Assert.That(names, Is.EqualTo(new[] { "a", "b", "c" }));
+            Assert.That(names, Is.EqualTo(ExpectedNames_abc));
         }
 
         [Test]
@@ -552,7 +555,7 @@ namespace ValveKeyValue.Test
                 values.Add((string)child);
             }
 
-            Assert.That(values, Is.EqualTo(new[] { "x", "y" }));
+            Assert.That(values, Is.EqualTo(ExpectedValues_xy));
         }
 
         [Test]

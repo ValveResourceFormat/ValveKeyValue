@@ -2,6 +2,8 @@ namespace ValveKeyValue.Test
 {
     class StringTableFromScratchTestCase
     {
+        private static readonly string[] ExpectedStrings = ["root", "key", "child"];
+
         [Test]
         public void PopulatesStringTableDuringSerialization()
         {
@@ -21,7 +23,7 @@ namespace ValveKeyValue.Test
             serializer.Serialize(ms, kv, new KVSerializerOptions { StringTable = stringTable });
 
             var strings = stringTable.ToArray();
-            Assert.That(strings, Is.EqualTo(new[] { "root", "key", "child" }));
+            Assert.That(strings, Is.EqualTo(ExpectedStrings));
         }
     }
 }

@@ -60,7 +60,7 @@ namespace ValveKeyValue.Test
             public DataObject Other { get; set; }
         }
 
-        public class DataObjectWithList
+        internal class DataObjectWithList
         {
             public List<string> Strings { get; set; } = new List<string>();
             public List<int> Ints { get; set; } = new List<int>();

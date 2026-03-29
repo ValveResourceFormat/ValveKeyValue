@@ -13,7 +13,7 @@ internal class StreamsTestCase
         {
             ArgumentNullException.ThrowIfNull(testData);
 
-            if (maxReadAtOnce <= 0) throw new ArgumentOutOfRangeException(nameof(maxReadAtOnce));
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxReadAtOnce);
 
             TestData = testData;
             MaxReadAtOnce = maxReadAtOnce;
@@ -41,9 +41,9 @@ internal class StreamsTestCase
         {
             ArgumentNullException.ThrowIfNull(buffer);
 
-            if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
+            ArgumentOutOfRangeException.ThrowIfNegative(offset);
 
-            if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count));
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(count);
 
             if (_backingPosition >= TestData.Length) return 0;
 

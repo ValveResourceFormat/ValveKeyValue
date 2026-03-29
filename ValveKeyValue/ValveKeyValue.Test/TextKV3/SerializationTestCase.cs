@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace ValveKeyValue.Test.TextKV3
 {
     class SerializationTestCase
@@ -130,7 +132,7 @@ namespace ValveKeyValue.Test.TextKV3
             using var arrayStream = TestDataHelper.OpenResource("TextKV3.root_array.kv3");
             var arrayData = RoundTrip(kv, kv.Deserialize(arrayStream));
             Assert.That(arrayData.ValueType, Is.EqualTo(KVValueType.Array));
-            Assert.That(arrayData[0].Value.ToString(), Is.EqualTo("a"));
+            Assert.That(arrayData[0].Value.ToString(CultureInfo.InvariantCulture), Is.EqualTo("a"));
         }
 
         [Test]

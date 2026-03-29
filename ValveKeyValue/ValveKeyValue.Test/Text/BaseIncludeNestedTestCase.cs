@@ -1,5 +1,3 @@
-using System.Linq;
-
 namespace ValveKeyValue.Test
 {
     class BaseIncludeNestedTestCase
@@ -13,7 +11,7 @@ namespace ValveKeyValue.Test
         [Test]
         public void HasFourItems()
         {
-            Assert.That(data.Count(), Is.EqualTo(4));
+            Assert.That(data.Count, Is.EqualTo(4));
         }
 
         [TestCase("foo", "bar")]

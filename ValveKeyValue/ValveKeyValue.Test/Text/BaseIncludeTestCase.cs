@@ -1,5 +1,3 @@
-using System.Linq;
-
 namespace ValveKeyValue.Test
 {
     class BaseIncludeTestCase
@@ -13,7 +11,7 @@ namespace ValveKeyValue.Test
         [Test]
         public void HasThreeItems()
         {
-            Assert.That(data.Count(), Is.EqualTo(3));
+            Assert.That(data.Count, Is.EqualTo(3));
         }
 
         [TestCase("foo", "bar")]

@@ -23,7 +23,7 @@ namespace ValveKeyValue.Test
         public void ThrowsInvalidDataException(string conditional)
         {
             var text = TestDataHelper.ReadTextResource("Text.invalid_conditional.vdf");
-            text = text.Replace("{CONDITION}", conditional);
+            text = text.Replace("{CONDITION}", conditional, StringComparison.Ordinal);
 
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(text));
             Assert.That(

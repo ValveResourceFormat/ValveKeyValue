@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace ValveKeyValue.Test
 {
     class TypeGuessingTestCase
@@ -23,7 +25,7 @@ namespace ValveKeyValue.Test
             Assert.That(actualValue.ValueType, Is.EqualTo(expectedType), nameof(KVValueType));
             Assert.That(((IConvertible)actualValue.Value).GetTypeCode(), Is.EqualTo(expectedTypeCode), nameof(TypeCode));
 
-            var typedActualValue = Convert.ChangeType(actualValue.Value, typeof(TExpected));
+            var typedActualValue = Convert.ChangeType(actualValue.Value, typeof(TExpected), CultureInfo.InvariantCulture);
             Assert.That(typedActualValue, Is.EqualTo(expectedValue));
         }
 
