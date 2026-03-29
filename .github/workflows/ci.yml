@@ -23,26 +23,26 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: 9.0.x
+        dotnet-version: 10.0.x
 
     - name: Build
-      run: dotnet build -c Release ValveKeyValue/ValveKeyValue.sln
+      run: dotnet build -c Release
 
     - name: Test
-      run: dotnet test -c Release ValveKeyValue/ValveKeyValue.Test/ValveKeyValue.Test.csproj /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:CoverletOutput='./lcov.info' /p:Include="[ValveKeyValue*]*"
+      run: dotnet test -c Release /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:CoverletOutput='./lcov.info' /p:Include="[ValveKeyValue*]*"
 
     - name: Create nupkg
       run: dotnet pack --configuration Release ValveKeyValue/ValveKeyValue/ValveKeyValue.csproj
 
     - name: Upload nupkg
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v7
       if: matrix.os == 'ubuntu-latest'
       with:
         name: nupkg
         path: 'ValveKeyValue/ValveKeyValue/bin/Release/*.nupkg'
 
     - name: Upload test coverage
-      uses: codecov/codecov-action@v5
+      uses: codecov/codecov-action@v6
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         files: ./ValveKeyValue/ValveKeyValue.Test/lcov.info
@@ -56,7 +56,7 @@ jobs:
 
     steps:
     - name: Download artifacts
-      uses: actions/download-artifact@v6
+      uses: actions/download-artifact@v8
       with:
         name: nupkg
         path: artifacts
