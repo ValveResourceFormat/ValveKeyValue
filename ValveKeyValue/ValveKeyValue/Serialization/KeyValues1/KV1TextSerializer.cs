@@ -110,7 +110,7 @@ namespace ValveKeyValue.Serialization.KeyValues1
             }
             else
             {
-                WriteText(((IConvertible)value).ToString(CultureInfo.InvariantCulture));
+                WriteText(value.ToString(CultureInfo.InvariantCulture));
             }
 
             WriteLine();
@@ -118,13 +118,10 @@ namespace ValveKeyValue.Serialization.KeyValues1
 
         void WriteIndentation()
         {
-            if (indentation == 0)
+            for (var i = 0; i < indentation; i++)
             {
-                return;
+                writer.Write('\t');
             }
-
-            var text = new string('\t', indentation);
-            writer.Write(text);
         }
 
         void WriteText(string text)

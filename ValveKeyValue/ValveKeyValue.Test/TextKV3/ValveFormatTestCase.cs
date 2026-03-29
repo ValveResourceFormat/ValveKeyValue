@@ -80,11 +80,13 @@ namespace ValveKeyValue.Test.TextKV3
             var expected = TestDataHelper.ReadTextResource("TextKV3.inf_nan_serialized.kv3");
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
 
-            var collection = new KVCollectionValue();
-            collection.Add(new KVObject("positiveInf", (KVValue)float.PositiveInfinity));
-            collection.Add(new KVObject("negativeInf", (KVValue)float.NegativeInfinity));
-            collection.Add(new KVObject("nan", (KVValue)float.NaN));
-            var doc = new KVDocument(null, null, collection);
+            var root = new KVObject(null, new KVObject[]
+            {
+                new KVObject("positiveInf", (KVValue)float.PositiveInfinity),
+                new KVObject("negativeInf", (KVValue)float.NegativeInfinity),
+                new KVObject("nan", (KVValue)float.NaN),
+            });
+            var doc = new KVDocument(null, null, root.Value);
 
             Assert.That(SerializeToString(kv, doc), Is.EqualTo(expected));
         }
@@ -95,11 +97,13 @@ namespace ValveKeyValue.Test.TextKV3
             var expected = TestDataHelper.ReadTextResource("TextKV3.inf_nan_serialized.kv3");
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
 
-            var collection = new KVCollectionValue();
-            collection.Add(new KVObject("positiveInf", (KVValue)double.PositiveInfinity));
-            collection.Add(new KVObject("negativeInf", (KVValue)double.NegativeInfinity));
-            collection.Add(new KVObject("nan", (KVValue)double.NaN));
-            var doc = new KVDocument(null, null, collection);
+            var root = new KVObject(null, new KVObject[]
+            {
+                new KVObject("positiveInf", (KVValue)double.PositiveInfinity),
+                new KVObject("negativeInf", (KVValue)double.NegativeInfinity),
+                new KVObject("nan", (KVValue)double.NaN),
+            });
+            var doc = new KVDocument(null, null, root.Value);
 
             Assert.That(SerializeToString(kv, doc), Is.EqualTo(expected));
         }
@@ -125,20 +129,20 @@ namespace ValveKeyValue.Test.TextKV3
 
             var data2 = RoundTrip(kv, data);
 
-            Assert.That(((KVBinaryBlob)data2["emptyBlob"]).Bytes.Length, Is.EqualTo(0));
-            Assert.That(((KVBinaryBlob)data2["smallBlob"]).Bytes.ToArray(), Is.EqualTo(new byte[] { 0x11, 0xFF }));
-            Assert.That(((KVBinaryBlob)data2["flaggedBlob"]).Bytes.ToArray(), Is.EqualTo(new byte[] { 0xAA, 0xBB, 0xCC }));
-            Assert.That(((KVBinaryBlob)data2["blob15"]).Bytes.ToArray(), Is.EqualTo(new byte[] { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xFF }));
+            Assert.That(data2["emptyBlob"].Value.AsBlob().Length, Is.EqualTo(0));
+            Assert.That(data2["smallBlob"].Value.AsBlob(), Is.EqualTo(new byte[] { 0x11, 0xFF }));
+            Assert.That(data2["flaggedBlob"].Value.AsBlob(), Is.EqualTo(new byte[] { 0xAA, 0xBB, 0xCC }));
+            Assert.That(data2["blob15"].Value.AsBlob(), Is.EqualTo(new byte[] { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xFF }));
 
-            var blob32 = (KVBinaryBlob)data2["blob32"];
-            Assert.That(blob32.Bytes.Length, Is.EqualTo(32));
-            Assert.That(blob32.Bytes.Span[0], Is.EqualTo(0x00));
-            Assert.That(blob32.Bytes.Span[31], Is.EqualTo(0x1F));
+            var blob32 = data2["blob32"].Value;
+            Assert.That(blob32.AsBlob().Length, Is.EqualTo(32));
+            Assert.That(blob32.AsSpan()[0], Is.EqualTo(0x00));
+            Assert.That(blob32.AsSpan()[31], Is.EqualTo(0x1F));
 
-            var blob100 = (KVBinaryBlob)data2["blob100"];
-            Assert.That(blob100.Bytes.Length, Is.EqualTo(100));
-            Assert.That(blob100.Bytes.Span[0], Is.EqualTo(0x00));
-            Assert.That(blob100.Bytes.Span[99], Is.EqualTo(0x63));
+            var blob100 = data2["blob100"].Value;
+            Assert.That(blob100.AsBlob().Length, Is.EqualTo(100));
+            Assert.That(blob100.AsSpan()[0], Is.EqualTo(0x00));
+            Assert.That(blob100.AsSpan()[99], Is.EqualTo(0x63));
         }
 
         [Test]
@@ -182,15 +186,16 @@ namespace ValveKeyValue.Test.TextKV3
         {
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
 
-            var shortArray = new KVArrayValue();
-            shortArray.Add((KVValue)1.0);
-            shortArray.Add((KVValue)double.PositiveInfinity);
-            shortArray.Add((KVValue)double.NegativeInfinity);
-            shortArray.Add((KVValue)double.NaN);
+            var shortArray = KVObject.Array("special", new KVValue[]
+            {
+                (KVValue)1.0,
+                (KVValue)double.PositiveInfinity,
+                (KVValue)double.NegativeInfinity,
+                (KVValue)double.NaN,
+            });
 
-            var collection = new KVCollectionValue();
-            collection.Add(new KVObject("special", (KVValue)shortArray));
-            var doc = new KVDocument(null, null, collection);
+            var root = new KVObject(null, new KVObject[] { shortArray });
+            var doc = new KVDocument(null, null, root.Value);
 
             var result = SerializeToString(kv, doc);
             Assert.That(result, Does.Contain("special = [ 1.0, inf, -inf, nan ]"));
@@ -201,14 +206,15 @@ namespace ValveKeyValue.Test.TextKV3
         {
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
 
-            var array = new KVArrayValue();
-            array.Add(new KVBinaryBlob([0xAA]));
-            array.Add(new KVBinaryBlob([0xBB]));
-            array.Add(new KVBinaryBlob([0xCC]));
+            var array = KVObject.Array("blobs", new KVValue[]
+            {
+                KVValue.Blob([0xAA]),
+                KVValue.Blob([0xBB]),
+                KVValue.Blob([0xCC]),
+            });
 
-            var collection = new KVCollectionValue();
-            collection.Add(new KVObject("blobs", (KVValue)array));
-            var doc = new KVDocument(null, null, collection);
+            var root = new KVObject(null, new KVObject[] { array });
+            var doc = new KVDocument(null, null, root.Value);
 
             var result = SerializeToString(kv, doc);
             // Blobs are NOT simple, so array must be multiline even with <=4 elements
@@ -221,19 +227,21 @@ namespace ValveKeyValue.Test.TextKV3
         {
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
 
-            var collection = new KVCollectionValue();
-            collection.Add(new KVObject("simple", "a"));
-            collection.Add(new KVObject("with.dot", "b"));
-            collection.Add(new KVObject("under_score", "c"));
-            collection.Add(new KVObject("has space", "d"));
-            collection.Add(new KVObject("has-dash", "e"));
-            collection.Add(new KVObject("0startsWithDigit", "f"));
-            collection.Add(new KVObject("", "g"));
-            collection.Add(new KVObject("has\"quote", "h"));
-            collection.Add(new KVObject("has\\backslash", "i"));
-            collection.Add(new KVObject("has\nnewline", "j"));
-            collection.Add(new KVObject("has\ttab", "k"));
-            var doc = new KVDocument(null, null, collection);
+            var root = new KVObject(null, new KVObject[]
+            {
+                new KVObject("simple", "a"),
+                new KVObject("with.dot", "b"),
+                new KVObject("under_score", "c"),
+                new KVObject("has space", "d"),
+                new KVObject("has-dash", "e"),
+                new KVObject("0startsWithDigit", "f"),
+                new KVObject("", "g"),
+                new KVObject("has\"quote", "h"),
+                new KVObject("has\\backslash", "i"),
+                new KVObject("has\nnewline", "j"),
+                new KVObject("has\ttab", "k"),
+            });
+            var doc = new KVDocument(null, null, root.Value);
 
             var result = SerializeToString(kv, doc);
             Assert.Multiple(() =>
@@ -257,13 +265,15 @@ namespace ValveKeyValue.Test.TextKV3
         {
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
 
-            var collection = new KVCollectionValue();
-            collection.Add(new KVObject("newline", "hello\nworld"));
-            collection.Add(new KVObject("tab", "a\tb"));
-            collection.Add(new KVObject("backslash", "a\\b"));
-            collection.Add(new KVObject("quote", "a\"b"));
-            collection.Add(new KVObject("all", "\n\t\\\""));
-            var doc = new KVDocument(null, null, collection);
+            var root = new KVObject(null, new KVObject[]
+            {
+                new KVObject("newline", "hello\nworld"),
+                new KVObject("tab", "a\tb"),
+                new KVObject("backslash", "a\\b"),
+                new KVObject("quote", "a\"b"),
+                new KVObject("all", "\n\t\\\""),
+            });
+            var doc = new KVDocument(null, null, root.Value);
 
             var result = SerializeToString(kv, doc);
             Assert.Multiple(() =>
@@ -281,15 +291,16 @@ namespace ValveKeyValue.Test.TextKV3
         {
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
 
-            var array = new KVArrayValue();
-            array.Add(new KVNullValue());
-            array.Add(new KVNullValue());
-            array.Add(new KVNullValue());
-            array.Add(new KVNullValue());
+            var nulls = KVObject.Array("nulls", new KVValue[]
+            {
+                default,
+                default,
+                default,
+                default,
+            });
 
-            var collection = new KVCollectionValue();
-            collection.Add(new KVObject("nulls", (KVValue)array));
-            var doc = new KVDocument(null, null, collection);
+            var root = new KVObject(null, new KVObject[] { nulls });
+            var doc = new KVDocument(null, null, root.Value);
 
             var result = SerializeToString(kv, doc);
             // Nulls are simple, 4 elements -> short
@@ -307,17 +318,17 @@ namespace ValveKeyValue.Test.TextKV3
 
             Assert.Multiple(() =>
             {
-                Assert.That(((KVArrayValue)data2["empty"]).Count, Is.EqualTo(0));
-                Assert.That((int)((KVArrayValue)data2["one_int"])[0], Is.EqualTo(1));
-                Assert.That(((KVArrayValue)data2["four_ints"]).Count, Is.EqualTo(4));
-                Assert.That(((KVArrayValue)data2["nine_ints"]).Count, Is.EqualTo(9));
-                Assert.That(((KVArrayValue)data2["matrix4x4"]).Count, Is.EqualTo(16));
-                Assert.That(((KVArrayValue)data2["vector3"]).Count, Is.EqualTo(3));
-                Assert.That((double)((KVArrayValue)data2["vector3"])[2], Is.EqualTo(3.14159).Within(0.00001));
-                Assert.That(((KVArrayValue)data2["matrix_as_vectors"]).Count, Is.EqualTo(4));
-                Assert.That(((KVArrayValue)((KVArrayValue)data2["matrix_as_vectors"])[0]).Count, Is.EqualTo(4));
-                Assert.That(((KVArrayValue)data2["empty_arrays"]).Count, Is.EqualTo(3));
-                Assert.That(((KVArrayValue)((KVArrayValue)data2["empty_arrays"])[0]).Count, Is.EqualTo(0));
+                Assert.That(data2["empty"].Count, Is.EqualTo(0));
+                Assert.That((int)data2["one_int"][0], Is.EqualTo(1));
+                Assert.That(data2["four_ints"].Count, Is.EqualTo(4));
+                Assert.That(data2["nine_ints"].Count, Is.EqualTo(9));
+                Assert.That(data2["matrix4x4"].Count, Is.EqualTo(16));
+                Assert.That(data2["vector3"].Count, Is.EqualTo(3));
+                Assert.That((double)data2["vector3"][2], Is.EqualTo(3.14159).Within(0.00001));
+                Assert.That(data2["matrix_as_vectors"].Count, Is.EqualTo(4));
+                Assert.That(data2["matrix_as_vectors"][0].Count, Is.EqualTo(4));
+                Assert.That(data2["empty_arrays"].Count, Is.EqualTo(3));
+                Assert.That(data2["empty_arrays"][0].Count, Is.EqualTo(0));
             });
         }
 
@@ -327,23 +338,25 @@ namespace ValveKeyValue.Test.TextKV3
             // Verify the parser can re-read the new inline blob format
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
 
-            var collection = new KVCollectionValue();
-            collection.Add(new KVObject("empty", new KVBinaryBlob([])));
-            collection.Add(new KVObject("small", new KVBinaryBlob([0x11, 0xFF])));
-            collection.Add(new KVObject("exact32", new KVBinaryBlob(Enumerable.Range(0, 32).Select(i => (byte)i).ToArray())));
-            var doc = new KVDocument(null, null, collection);
+            var root = new KVObject(null, new KVObject[]
+            {
+                KVObject.Blob("empty", []),
+                KVObject.Blob("small", [0x11, 0xFF]),
+                KVObject.Blob("exact32", Enumerable.Range(0, 32).Select(i => (byte)i).ToArray()),
+            });
+            var doc = new KVDocument(null, null, root.Value);
 
             // Serialize (produces inline format) -> deserialize -> verify
             var data2 = RoundTrip(kv, doc);
 
             Assert.Multiple(() =>
             {
-                Assert.That(((KVBinaryBlob)data2["empty"]).Bytes.Length, Is.EqualTo(0));
-                Assert.That(((KVBinaryBlob)data2["small"]).Bytes.ToArray(), Is.EqualTo(new byte[] { 0x11, 0xFF }));
-                var exact32 = (KVBinaryBlob)data2["exact32"];
-                Assert.That(exact32.Bytes.Length, Is.EqualTo(32));
-                Assert.That(exact32.Bytes.Span[0], Is.EqualTo(0x00));
-                Assert.That(exact32.Bytes.Span[31], Is.EqualTo(0x1F));
+                Assert.That(data2["empty"].Value.AsBlob().Length, Is.EqualTo(0));
+                Assert.That(data2["small"].Value.AsBlob(), Is.EqualTo(new byte[] { 0x11, 0xFF }));
+                var exact32 = data2["exact32"].Value;
+                Assert.That(exact32.AsBlob().Length, Is.EqualTo(32));
+                Assert.That(exact32.AsSpan()[0], Is.EqualTo(0x00));
+                Assert.That(exact32.AsSpan()[31], Is.EqualTo(0x1F));
             });
         }
 

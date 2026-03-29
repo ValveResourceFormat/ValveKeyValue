@@ -47,13 +47,13 @@ static void RecursivePrint(KVObject obj, int indent = 0)
 
     indent++;
 
-    if (obj.Value is IEnumerable<KVObject> children)
+    if (obj.Value.ValueType is KVValueType.Collection or KVValueType.Array)
     {
         Console.WriteLine($"Name: {obj.Name}");
 
-        foreach (var value in children)
+        foreach (var child in obj)
         {
-            RecursivePrint(value, indent);
+            RecursivePrint(child, indent);
         }
     }
     else

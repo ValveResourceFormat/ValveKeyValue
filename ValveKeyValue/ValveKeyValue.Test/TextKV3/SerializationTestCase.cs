@@ -101,7 +101,7 @@ namespace ValveKeyValue.Test.TextKV3
 
             Assert.Multiple(() =>
             {
-                Assert.That(data2["name"].Flag, Is.EqualTo(KVFlag.EntityName));
+                Assert.That(data2["name"].Value.Flag, Is.EqualTo(KVFlag.EntityName));
                 Assert.That((string)data2["name"], Is.EqualTo("some_entity"));
             });
         }
@@ -113,25 +113,24 @@ namespace ValveKeyValue.Test.TextKV3
 
             using var nullStream = TestDataHelper.OpenResource("TextKV3.root_null.kv3");
             var nullData = RoundTrip(kv, kv.Deserialize(nullStream));
-            Assert.That(nullData.Value.ValueType, Is.EqualTo(KVValueType.Null));
+            Assert.That(nullData.ValueType, Is.EqualTo(KVValueType.Null));
 
             using var stringStream = TestDataHelper.OpenResource("TextKV3.root_string.kv3");
             var stringData = RoundTrip(kv, kv.Deserialize(stringStream));
-            Assert.That((string)stringData.Value, Is.EqualTo("cool 123 string"));
+            Assert.That((string)stringData, Is.EqualTo("cool 123 string"));
 
             using var numberStream = TestDataHelper.OpenResource("TextKV3.root_number.kv3");
             var numberData = RoundTrip(kv, kv.Deserialize(numberStream));
-            Assert.That((int)numberData.Value, Is.EqualTo(1234567890));
+            Assert.That((int)numberData, Is.EqualTo(1234567890));
 
             using var floatStream = TestDataHelper.OpenResource("TextKV3.root_float.kv3");
             var floatData = RoundTrip(kv, kv.Deserialize(floatStream));
-            Assert.That((float)floatData.Value, Is.EqualTo(-1337.401f));
+            Assert.That((float)floatData, Is.EqualTo(-1337.401f));
 
             using var arrayStream = TestDataHelper.OpenResource("TextKV3.root_array.kv3");
             var arrayData = RoundTrip(kv, kv.Deserialize(arrayStream));
-            Assert.That(arrayData.Value.ValueType, Is.EqualTo(KVValueType.Array));
-            var array = (KVArrayValue)arrayData.Value;
-            Assert.That(array[0].ToString(), Is.EqualTo("a"));
+            Assert.That(arrayData.ValueType, Is.EqualTo(KVValueType.Array));
+            Assert.That(arrayData[0].Value.ToString(), Is.EqualTo("a"));
         }
 
         [Test]

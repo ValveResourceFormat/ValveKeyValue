@@ -241,13 +241,13 @@ namespace ValveKeyValue.Test
         public void DecimalSuccess()
         {
             var kv = new KVObject("aaa", "79228162514264337593543950335");
-            Assert.That((decimal)kv.Value, Is.EqualTo(79228162514264337593543950335m));
+            Assert.That(kv.Value.ToDecimal(null), Is.EqualTo(79228162514264337593543950335m));
 
             kv = new KVObject("aaa", "1500000");
-            Assert.That((decimal)kv.Value, Is.EqualTo(1.5E6m));
+            Assert.That(kv.Value.ToDecimal(null), Is.EqualTo(1.5E6m));
 
             kv = new KVObject("aaa", "-1500000");
-            Assert.That((decimal)kv.Value, Is.EqualTo(-1.5E6m));
+            Assert.That(kv.Value.ToDecimal(null), Is.EqualTo(-1.5E6m));
         }
 
         static IEnumerable CommonFailures

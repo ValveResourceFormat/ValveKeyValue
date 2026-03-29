@@ -94,12 +94,12 @@ namespace ValveKeyValue.Test
         {
             var data = ParseResource("Text.conditional_in_key.vdf");
             Assert.That(data, Is.Not.Null);
-            Assert.That(data.Value.ValueType, Is.EqualTo(KVValueType.Collection));
+            Assert.That(data.ValueType, Is.EqualTo(KVValueType.Collection));
 
             var children = data.Children.ToArray();
             Assert.That(children, Has.Length.EqualTo(1));
             Assert.That(children[0].Name, Is.EqualTo("operating system [$WIN32]"));
-            Assert.That((string)children[0].Value, Is.EqualTo("windows 32-bit"));
+            Assert.That((string)children[0], Is.EqualTo("windows 32-bit"));
         }
 
         [Test]
@@ -107,19 +107,19 @@ namespace ValveKeyValue.Test
         {
             var data = ParseResource("Text.conditional_before_object_value.vdf");
             Assert.That(data, Is.Not.Null);
-            Assert.That(data.Value.ValueType, Is.EqualTo(KVValueType.Collection));
+            Assert.That(data.ValueType, Is.EqualTo(KVValueType.Collection));
 
             var children = data.Children.ToArray();
             Assert.That(children, Has.Length.EqualTo(0));
 
             data = ParseResource("Text.conditional_before_object_value.vdf", ["WIN32"]);
             Assert.That(data, Is.Not.Null);
-            Assert.That(data.Value.ValueType, Is.EqualTo(KVValueType.Collection));
+            Assert.That(data.ValueType, Is.EqualTo(KVValueType.Collection));
 
             children = data.Children.ToArray();
             Assert.That(children, Has.Length.EqualTo(1));
             Assert.That(children[0].Name, Is.EqualTo("operating system"));
-            Assert.That((string)children[0].Value, Is.EqualTo("windows 32-bit"));
+            Assert.That((string)children[0], Is.EqualTo("windows 32-bit"));
         }
 
         [Test]
@@ -127,19 +127,19 @@ namespace ValveKeyValue.Test
         {
             var data = ParseResource("Text.conditional_between_key_and_value.vdf");
             Assert.That(data, Is.Not.Null);
-            Assert.That(data.Value.ValueType, Is.EqualTo(KVValueType.Collection));
+            Assert.That(data.ValueType, Is.EqualTo(KVValueType.Collection));
 
             var children = data.Children.ToArray();
             Assert.That(children, Has.Length.EqualTo(0));
 
             data = ParseResource("Text.conditional_between_key_and_value.vdf", ["WIN32"]);
             Assert.That(data, Is.Not.Null);
-            Assert.That(data.Value.ValueType, Is.EqualTo(KVValueType.Collection));
+            Assert.That(data.ValueType, Is.EqualTo(KVValueType.Collection));
 
             children = data.Children.ToArray();
             Assert.That(children, Has.Length.EqualTo(1));
             Assert.That(children[0].Name, Is.EqualTo("operating system"));
-            Assert.That((string)children[0].Value, Is.EqualTo("windows 32-bit"));
+            Assert.That((string)children[0], Is.EqualTo("windows 32-bit"));
         }
 
         [Test]

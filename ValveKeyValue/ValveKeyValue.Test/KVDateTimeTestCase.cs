@@ -7,8 +7,8 @@ namespace ValveKeyValue.Test
         {
             var obj = new KVObject("test", "some value that could be a date");
             Assert.That(
-                () => obj.Value.ToDateTime(default),
-                Throws.InstanceOf<InvalidCastException>());
+                () => ((IConvertible)obj.Value).ToDateTime(default),
+                Throws.InstanceOf<NotSupportedException>());
         }
 
         [Test]

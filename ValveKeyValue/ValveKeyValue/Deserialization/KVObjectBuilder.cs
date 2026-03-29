@@ -4,7 +4,13 @@ namespace ValveKeyValue.Deserialization
 {
     class KVObjectBuilder : IParsingVisitationListener
     {
+        readonly bool useDictionary;
         readonly List<KVObjectBuilder> associatedBuilders = new();
+
+        public KVObjectBuilder(bool useDictionaryForCollections = false)
+        {
+            useDictionary = useDictionaryForCollections;
+        }
 
         public KVObject GetObject()
         {
@@ -48,7 +54,7 @@ namespace ValveKeyValue.Deserialization
             if (StateStack.Count > 0)
             {
                 var state = StateStack.Peek();
-                state.Children.Add(value);
+                state.Items.Add(new KVObject(null, value));
             }
             else
             {
@@ -69,19 +75,8 @@ namespace ValveKeyValue.Deserialization
             }
 
             var state = StateStack.Pop();
-
             var completedObject = MakeObject(state);
-
-            var parentState = StateStack.Peek();
-
-            if (parentState.IsArray)
-            {
-                parentState.Children.Add(completedObject.Value); // TODO: Avoid wrapping it into KVObject in the first place?
-            }
-            else
-            {
-                parentState.Items.Add(completedObject);
-            }
+            StateStack.Peek().Items.Add(completedObject);
         }
 
         public void OnArrayEnd()
@@ -92,19 +87,8 @@ namespace ValveKeyValue.Deserialization
             }
 
             var state = StateStack.Pop();
-
             var completedObject = MakeArray(state);
-
-            var parentState = StateStack.Peek();
-
-            if (parentState.IsArray)
-            {
-                parentState.Children.Add(completedObject.Value); // TODO: Avoid wrapping it into KVObject in the first place?
-            }
-            else
-            {
-                parentState.Items.Add(completedObject);
-            }
+            StateStack.Peek().Items.Add(completedObject);
         }
 
         public void DiscardCurrentObject()
@@ -169,7 +153,7 @@ namespace ValveKeyValue.Deserialization
             }
         }
 
-        static KVObject MakeObject(KVPartialState state)
+        KVObject MakeObject(KVPartialState state)
         {
             if (state.Discard)
             {
@@ -181,19 +165,21 @@ namespace ValveKeyValue.Deserialization
                 throw new InvalidCastException("Tried to make an object ouf of an array.");
             }
 
-            KVObject @object;
-
             if (state.Value != null)
             {
-                @object = new KVObject(state.Key, state.Value);
-            }
-            else
-            {
-                @object = new KVObject(state.Key, state.Items);
-                @object.Value.Flag = state.Flag;
+                return new KVObject(state.Key, state.Value.Value);
             }
 
-            return @object;
+            KVValue collectionValue = useDictionary
+                ? KVValue.CreateDictCollection(state.Items)
+                : new KVValue(KVValueType.Collection, state.Items);
+
+            if (state.Flag != KVFlag.None)
+            {
+                collectionValue = collectionValue with { Flag = state.Flag };
+            }
+
+            return new KVObject(state.Key, collectionValue);
         }
 
         static KVObject MakeArray(KVPartialState state)
@@ -208,19 +194,19 @@ namespace ValveKeyValue.Deserialization
                 throw new InvalidCastException("Tried to make an array out of an object.");
             }
 
-            KVObject @object;
-
             if (state.Value != null)
             {
-                @object = new KVObject(state.Key, state.Value);
-            }
-            else
-            {
-                @object = new KVObject(state.Key, state.Children);
-                @object.Value.Flag = state.Flag;
+                return new KVObject(state.Key, state.Value.Value);
             }
 
-            return @object;
+            var value = new KVValue(KVValueType.Array, state.Items);
+
+            if (state.Flag != KVFlag.None)
+            {
+                value = value with { Flag = state.Flag };
+            }
+
+            return new KVObject(state.Key, value);
         }
     }
 }

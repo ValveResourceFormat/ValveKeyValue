@@ -152,8 +152,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             {
                 case KV3TextReaderState.InArray:
                     {
-                        var value = ParseValue(text);
-                        value.Flag = stateMachine.GetAndResetFlag();
+                        var value = ParseValue(text) with { Flag = stateMachine.GetAndResetFlag() };
                         listener.OnArrayValue(value);
                         break;
                     }
@@ -165,8 +164,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 case KV3TextReaderState.InObjectAfterKey:
                     {
                         var name = stateMachine.CurrentName;
-                        var value = ParseValue(text);
-                        value.Flag = stateMachine.GetAndResetFlag();
+                        var value = ParseValue(text) with { Flag = stateMachine.GetAndResetFlag() };
                         listener.OnKeyValuePair(name, value);
 
                         stateMachine.Push(KV3TextReaderState.InObjectBeforeKey);
@@ -181,10 +179,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         void ReadBinaryBlob(string text)
         {
             var bytes = HexStringHelper.ParseHexStringAsByteArray(text);
-            var value = new KVBinaryBlob(bytes)
-            {
-                Flag = stateMachine.GetAndResetFlag()
-            };
+            var value = KVValue.Blob(bytes) with { Flag = stateMachine.GetAndResetFlag() };
 
             switch (stateMachine.Current)
             {
@@ -293,27 +288,27 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         {
             if (text.Equals("false", StringComparison.Ordinal))
             {
-                return new KVObjectValue<bool>(false, KVValueType.Boolean);
+                return (KVValue)false;
             }
             else if (text.Equals("true", StringComparison.Ordinal))
             {
-                return new KVObjectValue<bool>(true, KVValueType.Boolean);
+                return (KVValue)true;
             }
             else if (text.Equals("null", StringComparison.Ordinal))
             {
-                return new KVNullValue();
+                return default(KVValue);
             }
             else if (text.Equals("nan", StringComparison.OrdinalIgnoreCase))
             {
-                return new KVObjectValue<double>(double.NaN, KVValueType.FloatingPoint64);
+                return (KVValue)double.NaN;
             }
             else if (text.Equals("inf", StringComparison.OrdinalIgnoreCase) || text.Equals("+inf", StringComparison.OrdinalIgnoreCase))
             {
-                return new KVObjectValue<double>(double.PositiveInfinity, KVValueType.FloatingPoint64);
+                return (KVValue)double.PositiveInfinity;
             }
             else if (text.Equals("-inf", StringComparison.OrdinalIgnoreCase))
             {
-                return new KVObjectValue<double>(double.NegativeInfinity, KVValueType.FloatingPoint64);
+                return (KVValue)double.NegativeInfinity;
             }
             else if (text.Length > 0 && ((text[0] >= '0' && text[0] <= '9') || text[0] == '-' || text[0] == '+'))
             {
@@ -323,11 +318,11 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
                 if (text[0] == '-' && long.TryParse(text, IntegerNumberStyles, CultureInfo.InvariantCulture, out var intValue))
                 {
-                    return new KVObjectValue<long>(intValue, KVValueType.Int64);
+                    return (KVValue)intValue;
                 }
                 else if (ulong.TryParse(text, IntegerNumberStyles, CultureInfo.InvariantCulture, out var uintValue))
                 {
-                    return new KVObjectValue<ulong>(uintValue, KVValueType.UInt64);
+                    return (KVValue)uintValue;
                 }
 
                 const NumberStyles FloatingPointNumberStyles =
@@ -337,11 +332,11 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
                 if (double.TryParse(text, FloatingPointNumberStyles, CultureInfo.InvariantCulture, out var floatValue))
                 {
-                    return new KVObjectValue<double>(floatValue, KVValueType.FloatingPoint64);
+                    return (KVValue)floatValue;
                 }
             }
 
-            return new KVObjectValue<string>(text, KVValueType.String);
+            return (KVValue)text;
         }
 
         static KVFlag ParseFlag(string flag)

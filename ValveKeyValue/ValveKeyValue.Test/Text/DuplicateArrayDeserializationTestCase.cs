@@ -22,7 +22,7 @@ namespace ValveKeyValue.Test
             var child = data["Values"];
             Assert.That(child?.ValueType, Is.EqualTo(KVValueType.Collection));
 
-            var valueObjects = ((IEnumerable<KVObject>)child).ToArray();
+            var valueObjects = child.ToArray();
             Assert.That(valueObjects, Has.Length.EqualTo(2));
 
             Assert.That((string)valueObjects[0]?["name"], Is.EqualTo("first"));
@@ -32,13 +32,13 @@ namespace ValveKeyValue.Test
         [Test]
         public void BothChildrenArePresent()
         {
-            var children = ((IEnumerable<KVObject>)data.Value).ToArray();
+            var children = data.ToArray();
             Assert.That(children, Has.Length.EqualTo(2));
 
             var firstNode = children[0];
             Assert.That(firstNode, Is.Not.Null);
 
-            var firstArray = ((IEnumerable<KVObject>)firstNode).ToArray();
+            var firstArray = firstNode.ToArray();
             Assert.That(firstArray, Has.Length.EqualTo(2));
             Assert.That((string)firstArray[0]?["name"], Is.EqualTo("first"));
             Assert.That((string)firstArray[1]?["name"], Is.EqualTo("second"));
@@ -46,7 +46,7 @@ namespace ValveKeyValue.Test
             var secondNode = children[1];
             Assert.That(secondNode, Is.Not.Null);
 
-            var secondArray = ((IEnumerable<KVObject>)secondNode).ToArray();
+            var secondArray = secondNode.ToArray();
             Assert.That(secondArray, Has.Length.EqualTo(2));
             Assert.That((string)secondArray[0]?["name"], Is.EqualTo("third"));
             Assert.That((string)secondArray[1]?["name"], Is.EqualTo("fourth"));

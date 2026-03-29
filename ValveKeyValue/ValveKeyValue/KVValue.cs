@@ -1,79 +1,169 @@
+using System.Diagnostics;
+using System.Globalization;
+using System.Runtime.InteropServices;
+
 namespace ValveKeyValue
 {
     /// <summary>
-    /// Container type for value of a KeyValues object.
+    /// Represents a KeyValue value as a lightweight discriminated union.
+    /// This is a value type -- scalar data is stored inline without heap allocation.
     /// </summary>
-    public abstract partial class KVValue : IConvertible
+    [DebuggerDisplay("{DebuggerDescription}")]
+    [StructLayout(LayoutKind.Auto)]
+    public readonly partial record struct KVValue : IConvertible
     {
         /// <summary>
         /// Gets the value type of this <see cref="KVValue"/>.
         /// </summary>
-        public abstract KVValueType ValueType { get; }
+        public KVValueType ValueType { get; init; }
 
         /// <summary>
-        /// Gets or sets the current flags of this <see cref="KVValue"/>.
+        /// Gets the current flags of this <see cref="KVValue"/>.
         /// </summary>
-        public KVFlag Flag { get; set; }
+        public KVFlag Flag { get; init; }
+
+        // Inline storage for scalar types (no boxing).
+        // Interpretation depends on ValueType.
+        private readonly long _scalar;
+
+        // Reference storage for heap types: string, byte[], List<KVObject>, etc.
+        private readonly object _ref;
+
+        #region Properties
 
         /// <summary>
-        /// Gets the child with the given key.
+        /// Gets a value indicating whether this value is null.
         /// </summary>
-        /// <param name="key">The name of the child to locate.</param>
-        /// <returns>A <see cref="KVValue"/>, or <c>null</c>.</returns>
-        public virtual KVValue this[string key]
+        public bool IsNull => ValueType == KVValueType.Null;
+
+        /// <summary>
+        /// Gets a value indicating whether this value is an array.
+        /// </summary>
+        public bool IsArray => ValueType == KVValueType.Array;
+
+        #endregion
+
+        #region Internal constructors
+
+        internal KVValue(KVValueType type, long scalar, object refValue = null, KVFlag flag = KVFlag.None)
         {
-            get { throw new NotSupportedException($"The indexer on a {nameof(KVValue)} can only be used on a {nameof(KVValue)} that has children."); }
+            ValueType = type;
+            Flag = flag;
+            _scalar = scalar;
+            _ref = refValue;
         }
 
-        /// <inheritdoc/>
-        public abstract TypeCode GetTypeCode();
+        internal KVValue(KVValueType type, object refValue, KVFlag flag = KVFlag.None)
+        {
+            ValueType = type;
+            Flag = flag;
+            _scalar = 0;
+            _ref = refValue;
+        }
+
+        #endregion
+
+        #region Factory methods
+
+        /// <summary>
+        /// Creates a binary blob value.
+        /// </summary>
+        public static KVValue Blob(byte[] data)
+        {
+            ArgumentNullException.ThrowIfNull(data);
+            return new KVValue(KVValueType.BinaryBlob, data);
+        }
+
+        /// <summary>
+        /// Creates a binary blob value.
+        /// </summary>
+        public static KVValue Blob(Memory<byte> data)
+            => Blob(data.ToArray());
+
+        /// <summary>
+        /// Creates a collection value backed by a dictionary for O(1) key lookup.
+        /// Used for KV3 format where duplicate keys are not allowed.
+        /// </summary>
+        internal static KVValue CreateDictCollection(List<KVObject> items)
+        {
+            var dict = new Dictionary<string, KVObject>(items.Count);
+            foreach (var item in items)
+            {
+                dict[item.Name] = item;
+            }
+            return new KVValue(KVValueType.Collection, dict);
+        }
+
+        #endregion
+
+        #region Scalar access
+
+        /// <summary>Converts this value to a <see cref="bool"/>.</summary>
+        public bool ToBoolean() => ToBoolean(null);
+
+        /// <summary>Converts this value to an <see cref="int"/>.</summary>
+        public int ToInt32() => ToInt32(null);
+
+        /// <summary>Converts this value to a <see cref="long"/>.</summary>
+        public long ToInt64() => ToInt64(null);
+
+        /// <summary>Converts this value to a <see cref="float"/>.</summary>
+        public float ToSingle() => ToSingle(null);
+
+        /// <summary>Converts this value to a <see cref="double"/>.</summary>
+        public double ToDouble() => ToDouble(null);
+
+        /// <summary>Returns the string representation of this value, or null if the value is null.</summary>
+        public string AsString() => IsNull ? null : ToString(null);
+
+        /// <summary>Gets the binary blob data as a byte array.</summary>
+        public byte[] AsBlob()
+        {
+            if (ValueType != KVValueType.BinaryBlob)
+            {
+                throw new InvalidOperationException($"Cannot get blob from a {ValueType} value.");
+            }
+
+            return (byte[])_ref;
+        }
+
+        /// <summary>Gets the binary blob data as a span.</summary>
+        public ReadOnlySpan<byte> AsSpan()
+        {
+            if (ValueType != KVValueType.BinaryBlob)
+            {
+                throw new InvalidOperationException($"Cannot get blob span from a {ValueType} value.");
+            }
+
+            return ((byte[])_ref).AsSpan();
+        }
+
+        #endregion
+
+        #region Internal accessors
+
+        internal object RefValue => _ref;
+        internal long ScalarValue => _scalar;
+
+        internal List<KVObject> GetCollectionList()
+            => (List<KVObject>)_ref;
+
+        internal Dictionary<string, KVObject> GetCollectionDict()
+            => (Dictionary<string, KVObject>)_ref;
+
+        internal List<KVObject> GetArrayList()
+            => (List<KVObject>)_ref;
+
+        #endregion
 
         /// <inheritdoc/>
-        public abstract bool ToBoolean(IFormatProvider provider);
+        public override string ToString() => ToString(CultureInfo.InvariantCulture);
 
-        /// <inheritdoc/>
-        public abstract byte ToByte(IFormatProvider provider);
-
-        /// <inheritdoc/>
-        public abstract char ToChar(IFormatProvider provider);
-
-        /// <inheritdoc/>
-        public abstract DateTime ToDateTime(IFormatProvider provider);
-
-        /// <inheritdoc/>
-        public abstract decimal ToDecimal(IFormatProvider provider);
-
-        /// <inheritdoc/>
-        public abstract double ToDouble(IFormatProvider provider);
-
-        /// <inheritdoc/>
-        public abstract short ToInt16(IFormatProvider provider);
-
-        /// <inheritdoc/>
-        public abstract int ToInt32(IFormatProvider provider);
-
-        /// <inheritdoc/>
-        public abstract long ToInt64(IFormatProvider provider);
-
-        /// <inheritdoc/>
-        public abstract sbyte ToSByte(IFormatProvider provider);
-
-        /// <inheritdoc/>
-        public abstract float ToSingle(IFormatProvider provider);
-
-        /// <inheritdoc/>
-        public abstract string ToString(IFormatProvider provider);
-
-        /// <inheritdoc/>
-        public abstract object ToType(Type conversionType, IFormatProvider provider);
-
-        /// <inheritdoc/>
-        public abstract ushort ToUInt16(IFormatProvider provider);
-
-        /// <inheritdoc/>
-        public abstract uint ToUInt32(IFormatProvider provider);
-
-        /// <inheritdoc/>
-        public abstract ulong ToUInt64(IFormatProvider provider);
+        private string DebuggerDescription => ValueType switch
+        {
+            KVValueType.String => $"\"{_ref}\"",
+            KVValueType.Null => "null",
+            _ => $"{ToString(CultureInfo.InvariantCulture)} ({ValueType})",
+        };
     }
 }

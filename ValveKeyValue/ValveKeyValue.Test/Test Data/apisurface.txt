@@ -32,149 +32,38 @@ public class ValveKeyValue.KeyValueException
     public string ToString();
 }
 
-public class ValveKeyValue.KVArrayValue
-{
-    public .ctor();
-    public void Add(ValveKeyValue.KVValue value);
-    public void AddRange(System.Collections.Generic.IEnumerable`1[[ValveKeyValue.KVValue]] values);
-    public void Clear();
-    public bool Contains(ValveKeyValue.KVValue item);
-    public void CopyTo(ValveKeyValue.KVValue[] array, int arrayIndex);
-    public bool Equals(object obj);
-    protected void Finalize();
-    public int get_Count();
-    public ValveKeyValue.KVFlag get_Flag();
-    public bool get_IsReadOnly();
-    public ValveKeyValue.KVValue get_Item(int key);
-    public ValveKeyValue.KVValue get_Item(string key);
-    public ValveKeyValue.KVValueType get_ValueType();
-    public System.Collections.Generic.IEnumerator`1[[ValveKeyValue.KVValue]] GetEnumerator();
-    public int GetHashCode();
-    public Type GetType();
-    public TypeCode GetTypeCode();
-    public int IndexOf(ValveKeyValue.KVValue item);
-    public void Insert(int index, ValveKeyValue.KVValue item);
-    protected object MemberwiseClone();
-    public bool Remove(ValveKeyValue.KVValue item);
-    public void RemoveAt(int index);
-    public void set_Flag(ValveKeyValue.KVFlag value);
-    public void set_Item(int key, ValveKeyValue.KVValue value);
-    public bool ToBoolean(IFormatProvider provider);
-    public byte ToByte(IFormatProvider provider);
-    public char ToChar(IFormatProvider provider);
-    public DateTime ToDateTime(IFormatProvider provider);
-    public decimal ToDecimal(IFormatProvider provider);
-    public double ToDouble(IFormatProvider provider);
-    public short ToInt16(IFormatProvider provider);
-    public int ToInt32(IFormatProvider provider);
-    public long ToInt64(IFormatProvider provider);
-    public sbyte ToSByte(IFormatProvider provider);
-    public float ToSingle(IFormatProvider provider);
-    public string ToString();
-    public string ToString(IFormatProvider provider);
-    public object ToType(Type conversionType, IFormatProvider provider);
-    public ushort ToUInt16(IFormatProvider provider);
-    public uint ToUInt32(IFormatProvider provider);
-    public ulong ToUInt64(IFormatProvider provider);
-}
-
-public class ValveKeyValue.KVBinaryBlob
-{
-    public .ctor(byte[] value);
-    public .ctor(Memory`1[[byte]] value);
-    public bool Equals(object obj);
-    protected void Finalize();
-    public Memory`1[[byte]] get_Bytes();
-    public ValveKeyValue.KVFlag get_Flag();
-    public ValveKeyValue.KVValue get_Item(string key);
-    public ValveKeyValue.KVValueType get_ValueType();
-    public int GetHashCode();
-    public Type GetType();
-    public TypeCode GetTypeCode();
-    protected object MemberwiseClone();
-    public void set_Flag(ValveKeyValue.KVFlag value);
-    public bool ToBoolean(IFormatProvider provider);
-    public byte ToByte(IFormatProvider provider);
-    public char ToChar(IFormatProvider provider);
-    public DateTime ToDateTime(IFormatProvider provider);
-    public decimal ToDecimal(IFormatProvider provider);
-    public double ToDouble(IFormatProvider provider);
-    public short ToInt16(IFormatProvider provider);
-    public int ToInt32(IFormatProvider provider);
-    public long ToInt64(IFormatProvider provider);
-    public sbyte ToSByte(IFormatProvider provider);
-    public float ToSingle(IFormatProvider provider);
-    public string ToString();
-    public string ToString(IFormatProvider provider);
-    public object ToType(Type conversionType, IFormatProvider provider);
-    public ushort ToUInt16(IFormatProvider provider);
-    public uint ToUInt32(IFormatProvider provider);
-    public ulong ToUInt64(IFormatProvider provider);
-}
-
-public class ValveKeyValue.KVCollectionValue
-{
-    public .ctor();
-    public void Add(ValveKeyValue.KVObject value);
-    public void AddRange(System.Collections.Generic.IEnumerable`1[[ValveKeyValue.KVObject]] values);
-    public bool Equals(object obj);
-    protected void Finalize();
-    public ValveKeyValue.KVObject Get(string name);
-    public int get_Count();
-    public ValveKeyValue.KVFlag get_Flag();
-    public ValveKeyValue.KVValue get_Item(string key);
-    public ValveKeyValue.KVValueType get_ValueType();
-    public System.Collections.Generic.IEnumerator`1[[ValveKeyValue.KVObject]] GetEnumerator();
-    public int GetHashCode();
-    public Type GetType();
-    public TypeCode GetTypeCode();
-    protected object MemberwiseClone();
-    public void Set(string name, ValveKeyValue.KVValue value);
-    public void set_Flag(ValveKeyValue.KVFlag value);
-    public bool ToBoolean(IFormatProvider provider);
-    public byte ToByte(IFormatProvider provider);
-    public char ToChar(IFormatProvider provider);
-    public DateTime ToDateTime(IFormatProvider provider);
-    public decimal ToDecimal(IFormatProvider provider);
-    public double ToDouble(IFormatProvider provider);
-    public short ToInt16(IFormatProvider provider);
-    public int ToInt32(IFormatProvider provider);
-    public long ToInt64(IFormatProvider provider);
-    public sbyte ToSByte(IFormatProvider provider);
-    public float ToSingle(IFormatProvider provider);
-    public string ToString();
-    public string ToString(IFormatProvider provider);
-    public object ToType(Type conversionType, IFormatProvider provider);
-    public ushort ToUInt16(IFormatProvider provider);
-    public uint ToUInt32(IFormatProvider provider);
-    public ulong ToUInt64(IFormatProvider provider);
-}
-
 public class ValveKeyValue.KVDocument
 {
     public .ctor(ValveKeyValue.KVHeader header, string name, ValveKeyValue.KVValue value);
-    public void Add(ValveKeyValue.KVObject value);
+    public void Add(string name, ValveKeyValue.KVValue value);
+    public void Add(ValveKeyValue.KVObject child);
     public void Add(ValveKeyValue.KVValue value);
-    public void AddProperty(string name, ValveKeyValue.KVValue value);
+    public void Clear();
     public bool ContainsKey(string name);
     public bool Equals(object obj);
     protected void Finalize();
     public System.Collections.Generic.IEnumerable`1[[ValveKeyValue.KVObject]] get_Children();
-    public System.Collections.Generic.IEnumerable`1[[ValveKeyValue.KVValue]] get_ChildrenValues();
     public int get_Count();
     public ValveKeyValue.KVHeader get_Header();
     public bool get_IsArray();
-    public ValveKeyValue.KVValue get_Item(int index);
-    public ValveKeyValue.KVValue get_Item(string key);
+    public bool get_IsNull();
+    public ValveKeyValue.KVObject get_Item(int index);
+    public ValveKeyValue.KVObject get_Item(string key);
     public string get_Name();
     public ValveKeyValue.KVValue get_Value();
+    public ValveKeyValue.KVValueType get_ValueType();
     public ValveKeyValue.KVObject GetChild(string name);
     public System.Collections.Generic.IEnumerator`1[[ValveKeyValue.KVObject]] GetEnumerator();
     public int GetHashCode();
     public Type GetType();
     protected object MemberwiseClone();
-    public void set_Item(string key, ValveKeyValue.KVValue value);
+    public bool Remove(string key);
+    public void RemoveAt(int index);
+    public void set_Item(string key, ValveKeyValue.KVObject value);
+    public void set_Name(string value);
+    public void set_Value(ValveKeyValue.KVValue value);
     public string ToString();
+    public bool TryGetChild(string name, out ValveKeyValue.KVObject& child);
 }
 
 public sealed enum ValveKeyValue.KVFlag
@@ -230,65 +119,79 @@ public sealed class ValveKeyValue.KVIgnoreAttribute
     public string ToString();
 }
 
-public class ValveKeyValue.KVNullValue
-{
-    public .ctor();
-    public bool Equals(object obj);
-    protected void Finalize();
-    public ValveKeyValue.KVFlag get_Flag();
-    public ValveKeyValue.KVValue get_Item(string key);
-    public ValveKeyValue.KVValueType get_ValueType();
-    public int GetHashCode();
-    public Type GetType();
-    public TypeCode GetTypeCode();
-    protected object MemberwiseClone();
-    public void set_Flag(ValveKeyValue.KVFlag value);
-    public bool ToBoolean(IFormatProvider provider);
-    public byte ToByte(IFormatProvider provider);
-    public char ToChar(IFormatProvider provider);
-    public DateTime ToDateTime(IFormatProvider provider);
-    public decimal ToDecimal(IFormatProvider provider);
-    public double ToDouble(IFormatProvider provider);
-    public short ToInt16(IFormatProvider provider);
-    public int ToInt32(IFormatProvider provider);
-    public long ToInt64(IFormatProvider provider);
-    public sbyte ToSByte(IFormatProvider provider);
-    public float ToSingle(IFormatProvider provider);
-    public string ToString();
-    public string ToString(IFormatProvider provider);
-    public object ToType(Type conversionType, IFormatProvider provider);
-    public ushort ToUInt16(IFormatProvider provider);
-    public uint ToUInt32(IFormatProvider provider);
-    public ulong ToUInt64(IFormatProvider provider);
-}
-
 public class ValveKeyValue.KVObject
 {
     public .ctor(string name);
+    public .ctor(string name, bool value);
+    public .ctor(string name, double value);
+    public .ctor(string name, float value);
+    public .ctor(string name, int value);
+    public .ctor(string name, IntPtr value);
+    public .ctor(string name, long value);
+    public .ctor(string name, string value);
     public .ctor(string name, System.Collections.Generic.IEnumerable`1[[ValveKeyValue.KVObject]] items);
-    public .ctor(string name, System.Collections.Generic.IEnumerable`1[[ValveKeyValue.KVValue]] items);
+    public .ctor(string name, System.Collections.Generic.IEnumerable`1[[ValveKeyValue.KVValue]] values);
+    public .ctor(string name, uint value);
+    public .ctor(string name, ulong value);
     public .ctor(string name, ValveKeyValue.KVValue value);
-    public void Add(ValveKeyValue.KVObject value);
+    public void Add(string name, ValveKeyValue.KVValue value);
+    public void Add(ValveKeyValue.KVObject child);
     public void Add(ValveKeyValue.KVValue value);
-    public void AddProperty(string name, ValveKeyValue.KVValue value);
+    public static ValveKeyValue.KVObject Array(string name);
+    public static ValveKeyValue.KVObject Array(string name, System.Collections.Generic.IEnumerable`1[[ValveKeyValue.KVObject]] elements);
+    public static ValveKeyValue.KVObject Array(string name, System.Collections.Generic.IEnumerable`1[[ValveKeyValue.KVValue]] values);
+    public static ValveKeyValue.KVObject Blob(string name, byte[] data);
+    public void Clear();
+    public static ValveKeyValue.KVObject Collection(string name);
+    public static ValveKeyValue.KVObject Collection(string name, System.Collections.Generic.IEnumerable`1[[ValveKeyValue.KVObject]] children);
     public bool ContainsKey(string name);
     public bool Equals(object obj);
     protected void Finalize();
     public System.Collections.Generic.IEnumerable`1[[ValveKeyValue.KVObject]] get_Children();
-    public System.Collections.Generic.IEnumerable`1[[ValveKeyValue.KVValue]] get_ChildrenValues();
     public int get_Count();
     public bool get_IsArray();
-    public ValveKeyValue.KVValue get_Item(int index);
-    public ValveKeyValue.KVValue get_Item(string key);
+    public bool get_IsNull();
+    public ValveKeyValue.KVObject get_Item(int index);
+    public ValveKeyValue.KVObject get_Item(string key);
     public string get_Name();
     public ValveKeyValue.KVValue get_Value();
+    public ValveKeyValue.KVValueType get_ValueType();
     public ValveKeyValue.KVObject GetChild(string name);
     public System.Collections.Generic.IEnumerator`1[[ValveKeyValue.KVObject]] GetEnumerator();
     public int GetHashCode();
     public Type GetType();
+    public static ValveKeyValue.KVObject ListCollection(string name);
+    public static ValveKeyValue.KVObject ListCollection(string name, System.Collections.Generic.IEnumerable`1[[ValveKeyValue.KVObject]] children);
     protected object MemberwiseClone();
-    public void set_Item(string key, ValveKeyValue.KVValue value);
+    public static string op_Explicit(ValveKeyValue.KVObject obj);
+    public static int op_Explicit(ValveKeyValue.KVObject obj);
+    public static bool op_Explicit(ValveKeyValue.KVObject obj);
+    public static float op_Explicit(ValveKeyValue.KVObject obj);
+    public static double op_Explicit(ValveKeyValue.KVObject obj);
+    public static long op_Explicit(ValveKeyValue.KVObject obj);
+    public static ulong op_Explicit(ValveKeyValue.KVObject obj);
+    public static uint op_Explicit(ValveKeyValue.KVObject obj);
+    public static short op_Explicit(ValveKeyValue.KVObject obj);
+    public static ushort op_Explicit(ValveKeyValue.KVObject obj);
+    public static byte op_Explicit(ValveKeyValue.KVObject obj);
+    public static IntPtr op_Explicit(ValveKeyValue.KVObject obj);
+    public static ValveKeyValue.KVObject op_Implicit(bool value);
+    public static ValveKeyValue.KVObject op_Implicit(double value);
+    public static ValveKeyValue.KVObject op_Implicit(float value);
+    public static ValveKeyValue.KVObject op_Implicit(int value);
+    public static ValveKeyValue.KVObject op_Implicit(long value);
+    public static ValveKeyValue.KVObject op_Implicit(short value);
+    public static ValveKeyValue.KVObject op_Implicit(string value);
+    public static ValveKeyValue.KVObject op_Implicit(uint value);
+    public static ValveKeyValue.KVObject op_Implicit(ulong value);
+    public static ValveKeyValue.KVObject op_Implicit(ushort value);
+    public bool Remove(string key);
+    public void RemoveAt(int index);
+    public void set_Item(string key, ValveKeyValue.KVObject value);
+    public void set_Name(string value);
+    public void set_Value(ValveKeyValue.KVValue value);
     public string ToString();
+    public bool TryGetChild(string name, out ValveKeyValue.KVObject& child);
 }
 
 public sealed class ValveKeyValue.KVPropertyAttribute
@@ -363,34 +266,41 @@ public sealed class ValveKeyValue.KVSerializerOptions
     public string ToString();
 }
 
-public class ValveKeyValue.KVValue
+public sealed struct ValveKeyValue.KVValue
 {
-    protected .ctor();
+    public byte[] AsBlob();
+    public ReadOnlySpan`1[[byte]] AsSpan();
+    public string AsString();
+    public static ValveKeyValue.KVValue Blob(byte[] data);
+    public static ValveKeyValue.KVValue Blob(Memory`1[[byte]] data);
     public bool Equals(object obj);
+    public bool Equals(ValveKeyValue.KVValue other);
     protected void Finalize();
     public ValveKeyValue.KVFlag get_Flag();
-    public ValveKeyValue.KVValue get_Item(string key);
+    public bool get_IsArray();
+    public bool get_IsNull();
     public ValveKeyValue.KVValueType get_ValueType();
     public int GetHashCode();
     public Type GetType();
-    public TypeCode GetTypeCode();
     protected object MemberwiseClone();
+    public static bool op_Equality(ValveKeyValue.KVValue left, ValveKeyValue.KVValue right);
     public static string op_Explicit(ValveKeyValue.KVValue value);
-    public static bool op_Explicit(ValveKeyValue.KVValue value);
-    public static byte op_Explicit(ValveKeyValue.KVValue value);
-    public static char op_Explicit(ValveKeyValue.KVValue value);
-    public static decimal op_Explicit(ValveKeyValue.KVValue value);
-    public static double op_Explicit(ValveKeyValue.KVValue value);
-    public static float op_Explicit(ValveKeyValue.KVValue value);
     public static int op_Explicit(ValveKeyValue.KVValue value);
+    public static bool op_Explicit(ValveKeyValue.KVValue value);
+    public static float op_Explicit(ValveKeyValue.KVValue value);
+    public static double op_Explicit(ValveKeyValue.KVValue value);
     public static long op_Explicit(ValveKeyValue.KVValue value);
-    public static sbyte op_Explicit(ValveKeyValue.KVValue value);
-    public static short op_Explicit(ValveKeyValue.KVValue value);
-    public static uint op_Explicit(ValveKeyValue.KVValue value);
     public static ulong op_Explicit(ValveKeyValue.KVValue value);
+    public static uint op_Explicit(ValveKeyValue.KVValue value);
+    public static short op_Explicit(ValveKeyValue.KVValue value);
     public static ushort op_Explicit(ValveKeyValue.KVValue value);
+    public static char op_Explicit(ValveKeyValue.KVValue value);
+    public static byte op_Explicit(ValveKeyValue.KVValue value);
+    public static sbyte op_Explicit(ValveKeyValue.KVValue value);
+    public static decimal op_Explicit(ValveKeyValue.KVValue value);
     public static IntPtr op_Explicit(ValveKeyValue.KVValue value);
     public static ValveKeyValue.KVValue op_Implicit(bool value);
+    public static ValveKeyValue.KVValue op_Implicit(byte[] value);
     public static ValveKeyValue.KVValue op_Implicit(double value);
     public static ValveKeyValue.KVValue op_Implicit(float value);
     public static ValveKeyValue.KVValue op_Implicit(int value);
@@ -401,17 +311,23 @@ public class ValveKeyValue.KVValue
     public static ValveKeyValue.KVValue op_Implicit(uint value);
     public static ValveKeyValue.KVValue op_Implicit(ulong value);
     public static ValveKeyValue.KVValue op_Implicit(ushort value);
+    public static bool op_Inequality(ValveKeyValue.KVValue left, ValveKeyValue.KVValue right);
     public void set_Flag(ValveKeyValue.KVFlag value);
+    public void set_ValueType(ValveKeyValue.KVValueType value);
+    public bool ToBoolean();
     public bool ToBoolean(IFormatProvider provider);
     public byte ToByte(IFormatProvider provider);
     public char ToChar(IFormatProvider provider);
-    public DateTime ToDateTime(IFormatProvider provider);
     public decimal ToDecimal(IFormatProvider provider);
+    public double ToDouble();
     public double ToDouble(IFormatProvider provider);
     public short ToInt16(IFormatProvider provider);
+    public int ToInt32();
     public int ToInt32(IFormatProvider provider);
+    public long ToInt64();
     public long ToInt64(IFormatProvider provider);
     public sbyte ToSByte(IFormatProvider provider);
+    public float ToSingle();
     public float ToSingle(IFormatProvider provider);
     public string ToString();
     public string ToString(IFormatProvider provider);

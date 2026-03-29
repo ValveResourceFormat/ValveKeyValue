@@ -6,12 +6,9 @@ namespace ValveKeyValue.Deserialization
 
         public KVFlag Flag { get; set; }
 
-        public KVValue Value { get; set; }
+        public KVValue? Value { get; set; }
 
-        public IList<KVObject> Items { get; } = new List<KVObject>();
-
-        // TODO: Somehow merge with Items?
-        public IList<KVValue> Children { get; } = new List<KVValue>();
+        public List<KVObject> Items { get; } = new List<KVObject>();
 
         public bool Discard { get; set; }
 

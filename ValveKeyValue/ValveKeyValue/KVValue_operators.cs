@@ -1,242 +1,124 @@
 namespace ValveKeyValue
 {
-    /// <summary>
-    /// Container type for value of a KeyValues object.
-    /// </summary>
-    public abstract partial class KVValue
+    public readonly partial record struct KVValue
     {
-        /// <summary>
-        /// Implicit cast operator for <see cref="string"/> to <see cref="KVValue"/>.
-        /// </summary>
-        /// <param name="value">The <see cref="string"/> to cast.</param>
+        #region Implicit operators (FROM primitives)
+
+        /// <summary>Implicit cast operator for <see cref="string"/> to <see cref="KVValue"/>.</summary>
         public static implicit operator KVValue(string value)
-        {
-            return new KVObjectValue<string>(value, KVValueType.String);
-        }
+            => value is null ? default : new(KVValueType.String, value);
 
-        /// <summary>
-        /// Implicit cast operator for <see cref="int"/> to <see cref="KVValue"/>.
-        /// </summary>
-        /// <param name="value">The <see cref="int"/> to cast.</param>
+        /// <summary>Implicit cast operator for <see cref="int"/> to <see cref="KVValue"/>.</summary>
         public static implicit operator KVValue(int value)
-        {
-            return new KVObjectValue<int>(value, KVValueType.Int32);
-        }
+            => new(KVValueType.Int32, value);
 
-        /// <summary>
-        /// Implicit cast operator for <see cref="bool"/> to <see cref="KVValue"/>.
-        /// </summary>
-        /// <param name="value">The <see cref="bool"/> to cast.</param>
+        /// <summary>Implicit cast operator for <see cref="bool"/> to <see cref="KVValue"/>.</summary>
         public static implicit operator KVValue(bool value)
-        {
-            return new KVObjectValue<bool>(value, KVValueType.Boolean);
-        }
+            => new(KVValueType.Boolean, value ? 1L : 0L);
 
-        /// <summary>
-        /// Implicit cast operator for <see cref="IntPtr"/> to <see cref="KVValue"/>.
-        /// </summary>
-        /// <param name="value">The <see cref="IntPtr"/> to cast.</param>
-        public static implicit operator KVValue(IntPtr value)
-        {
-            return new KVObjectValue<int>(value.ToInt32(), KVValueType.Pointer);
-        }
-
-        /// <summary>
-        /// Implicit cast operator for <see cref="ulong"/> to <see cref="KVValue"/>.
-        /// </summary>
-        /// <param name="value">The <see cref="ulong"/> to cast.</param>
-        public static implicit operator KVValue(ulong value)
-        {
-            return new KVObjectValue<ulong>(value, KVValueType.UInt64);
-        }
-
-        /// <summary>
-        /// Implicit cast operator for <see cref="float"/> to <see cref="KVValue"/>.
-        /// </summary>
-        /// <param name="value">The <see cref="float"/> to cast.</param>
+        /// <summary>Implicit cast operator for <see cref="float"/> to <see cref="KVValue"/>.</summary>
         public static implicit operator KVValue(float value)
-        {
-            return new KVObjectValue<float>(value, KVValueType.FloatingPoint);
-        }
+            => new(KVValueType.FloatingPoint, BitConverter.SingleToInt32Bits(value));
 
-        /// <summary>
-        /// Implicit cast operator for <see cref="long"/> to <see cref="KVValue"/>.
-        /// </summary>
-        /// <param name="value">The <see cref="long"/> to cast.</param>
-        public static implicit operator KVValue(long value)
-        {
-            return new KVObjectValue<long>(value, KVValueType.Int64);
-        }
-
-        /// <summary>
-        /// Implicit cast operator for <see cref="double"/> to <see cref="KVValue"/>.
-        /// </summary>
-        /// <param name="value">The <see cref="double"/> to cast.</param>
+        /// <summary>Implicit cast operator for <see cref="double"/> to <see cref="KVValue"/>.</summary>
         public static implicit operator KVValue(double value)
-        {
-            return new KVObjectValue<double>(value, KVValueType.FloatingPoint64);
-        }
+            => new(KVValueType.FloatingPoint64, BitConverter.DoubleToInt64Bits(value));
 
-        /// <summary>
-        /// Implicit cast operator for <see cref="uint"/> to <see cref="KVValue"/>.
-        /// </summary>
-        /// <param name="value">The <see cref="uint"/> to cast.</param>
+        /// <summary>Implicit cast operator for <see cref="long"/> to <see cref="KVValue"/>.</summary>
+        public static implicit operator KVValue(long value)
+            => new(KVValueType.Int64, value);
+
+        /// <summary>Implicit cast operator for <see cref="ulong"/> to <see cref="KVValue"/>.</summary>
+        public static implicit operator KVValue(ulong value)
+            => new(KVValueType.UInt64, unchecked((long)value));
+
+        /// <summary>Implicit cast operator for <see cref="uint"/> to <see cref="KVValue"/>.</summary>
         public static implicit operator KVValue(uint value)
-        {
-            return new KVObjectValue<uint>(value, KVValueType.UInt32);
-        }
+            => new(KVValueType.UInt32, value);
 
-        /// <summary>
-        /// Implicit cast operator for <see cref="short"/> to <see cref="KVValue"/>.
-        /// </summary>
-        /// <param name="value">The <see cref="short"/> to cast.</param>
+        /// <summary>Implicit cast operator for <see cref="short"/> to <see cref="KVValue"/>.</summary>
         public static implicit operator KVValue(short value)
-        {
-            return new KVObjectValue<short>(value, KVValueType.Int16);
-        }
+            => new(KVValueType.Int16, value);
 
-        /// <summary>
-        /// Implicit cast operator for <see cref="ushort"/> to <see cref="KVValue"/>.
-        /// </summary>
-        /// <param name="value">The <see cref="ushort"/> to cast.</param>
+        /// <summary>Implicit cast operator for <see cref="ushort"/> to <see cref="KVValue"/>.</summary>
         public static implicit operator KVValue(ushort value)
-        {
-            return new KVObjectValue<ushort>(value, KVValueType.UInt16);
-        }
+            => new(KVValueType.UInt16, value);
 
-        /// <summary>
-        /// Converts a <see cref="KVValue"/> to a <see cref="string"/>.
-        /// </summary>
-        /// <param name="value">The <see cref="KVValue"/> to convert.</param>
+        /// <summary>Implicit cast operator for <see cref="IntPtr"/> to <see cref="KVValue"/>.</summary>
+        /// <remarks>
+        /// Valve's KV format defines pointers as 32-bit. Values exceeding <see cref="int.MaxValue"/> will throw <see cref="OverflowException"/>.
+        /// </remarks>
+        public static implicit operator KVValue(IntPtr value)
+            => new(KVValueType.Pointer, value.ToInt32());
+
+        /// <summary>Implicit cast operator for <see langword="byte[]"/> to <see cref="KVValue"/>.</summary>
+        public static implicit operator KVValue(byte[] value)
+            => value is null ? default : new(KVValueType.BinaryBlob, value);
+
+        #endregion
+
+        #region Explicit operators (TO primitives)
+
+        /// <summary>Converts a <see cref="KVValue"/> to a <see cref="string"/>.</summary>
         public static explicit operator string(KVValue value)
-        {
-            return value?.ToString(null);
-        }
+            => value.ToString(null);
 
-        /// <summary>
-        /// Converts a <see cref="KVValue"/> to a <see cref="bool"/>.
-        /// </summary>
-        /// <param name="value">The <see cref="KVValue"/> to convert.</param>
-        public static explicit operator bool(KVValue value)
-        {
-            return value.ToBoolean(null);
-        }
-
-        /// <summary>
-        /// Converts a <see cref="KVValue"/> to a <see cref="byte"/>.
-        /// </summary>
-        /// <param name="value">The <see cref="KVValue"/> to convert.</param>
-        public static explicit operator byte(KVValue value)
-        {
-            return value.ToByte(null);
-        }
-
-        /// <summary>
-        /// Converts a <see cref="KVValue"/> to a <see cref="char"/>.
-        /// </summary>
-        /// <param name="value">The <see cref="KVValue"/> to convert.</param>
-        public static explicit operator char(KVValue value)
-        {
-            return value.ToChar(null);
-        }
-
-        /// <summary>
-        /// Converts a <see cref="KVValue"/> to a <see cref="decimal"/>.
-        /// </summary>
-        /// <param name="value">The <see cref="KVValue"/> to convert.</param>
-        public static explicit operator decimal(KVValue value)
-        {
-            return value.ToDecimal(null);
-        }
-
-        /// <summary>
-        /// Converts a <see cref="KVValue"/> to a <see cref="double"/>.
-        /// </summary>
-        /// <param name="value">The <see cref="KVValue"/> to convert.</param>
-        public static explicit operator double(KVValue value)
-        {
-            return value.ToDouble(null);
-        }
-
-        /// <summary>
-        /// Converts a <see cref="KVValue"/> to a <see cref="float"/>.
-        /// </summary>
-        /// <param name="value">The <see cref="KVValue"/> to convert.</param>
-        public static explicit operator float(KVValue value)
-        {
-            return value.ToSingle(null);
-        }
-
-        /// <summary>
-        /// Converts a <see cref="KVValue"/> to a <see cref="int"/>.
-        /// </summary>
-        /// <param name="value">The <see cref="KVValue"/> to convert.</param>
+        /// <summary>Converts a <see cref="KVValue"/> to an <see cref="int"/>.</summary>
         public static explicit operator int(KVValue value)
-        {
-            return value.ToInt32(null);
-        }
+            => value.ToInt32(null);
 
-        /// <summary>
-        /// Converts a <see cref="KVValue"/> to a <see cref="long"/>.
-        /// </summary>
-        /// <param name="value">The <see cref="KVValue"/> to convert.</param>
+        /// <summary>Converts a <see cref="KVValue"/> to a <see cref="bool"/>.</summary>
+        public static explicit operator bool(KVValue value)
+            => value.ToBoolean(null);
+
+        /// <summary>Converts a <see cref="KVValue"/> to a <see cref="float"/>.</summary>
+        public static explicit operator float(KVValue value)
+            => value.ToSingle(null);
+
+        /// <summary>Converts a <see cref="KVValue"/> to a <see cref="double"/>.</summary>
+        public static explicit operator double(KVValue value)
+            => value.ToDouble(null);
+
+        /// <summary>Converts a <see cref="KVValue"/> to a <see cref="long"/>.</summary>
         public static explicit operator long(KVValue value)
-        {
-            return value.ToInt64(null);
-        }
+            => value.ToInt64(null);
 
-        /// <summary>
-        /// Converts a <see cref="KVValue"/> to a <see cref="sbyte"/>.
-        /// </summary>
-        /// <param name="value">The <see cref="KVValue"/> to convert.</param>
-        public static explicit operator sbyte(KVValue value)
-        {
-            return value.ToSByte(null);
-        }
-
-        /// <summary>
-        /// Converts a <see cref="KVValue"/> to a <see cref="short"/>.
-        /// </summary>
-        /// <param name="value">The <see cref="KVValue"/> to convert.</param>
-        public static explicit operator short(KVValue value)
-        {
-            return value.ToInt16(null);
-        }
-
-        /// <summary>
-        /// Converts a <see cref="KVValue"/> to a <see cref="uint"/>.
-        /// </summary>
-        /// <param name="value">The <see cref="KVValue"/> to convert.</param>
-        public static explicit operator uint(KVValue value)
-        {
-            return value.ToUInt32(null);
-        }
-
-        /// <summary>
-        /// Converts a <see cref="KVValue"/> to a <see cref="ulong"/>.
-        /// </summary>
-        /// <param name="value">The <see cref="KVValue"/> to convert.</param>
+        /// <summary>Converts a <see cref="KVValue"/> to a <see cref="ulong"/>.</summary>
         public static explicit operator ulong(KVValue value)
-        {
-            return value.ToUInt64(null);
-        }
+            => value.ToUInt64(null);
 
-        /// <summary>
-        /// Converts a <see cref="KVValue"/> to a <see cref="ushort"/>.
-        /// </summary>
-        /// <param name="value">The <see cref="KVValue"/> to convert.</param>
+        /// <summary>Converts a <see cref="KVValue"/> to a <see cref="uint"/>.</summary>
+        public static explicit operator uint(KVValue value)
+            => value.ToUInt32(null);
+
+        /// <summary>Converts a <see cref="KVValue"/> to a <see cref="short"/>.</summary>
+        public static explicit operator short(KVValue value)
+            => value.ToInt16(null);
+
+        /// <summary>Converts a <see cref="KVValue"/> to a <see cref="ushort"/>.</summary>
         public static explicit operator ushort(KVValue value)
-        {
-            return value.ToUInt16(null);
-        }
+            => value.ToUInt16(null);
 
-        /// <summary>
-        /// Converts a <see cref="KVValue"/> to a <see cref="IntPtr"/>.
-        /// </summary>
-        /// <param name="value">The <see cref="KVValue"/> to convert.</param>
+        /// <summary>Converts a <see cref="KVValue"/> to a <see cref="char"/>.</summary>
+        public static explicit operator char(KVValue value)
+            => value.ToChar(null);
+
+        /// <summary>Converts a <see cref="KVValue"/> to a <see cref="byte"/>.</summary>
+        public static explicit operator byte(KVValue value)
+            => value.ToByte(null);
+
+        /// <summary>Converts a <see cref="KVValue"/> to a <see cref="sbyte"/>.</summary>
+        public static explicit operator sbyte(KVValue value)
+            => value.ToSByte(null);
+
+        /// <summary>Converts a <see cref="KVValue"/> to a <see cref="decimal"/>.</summary>
+        public static explicit operator decimal(KVValue value)
+            => value.ToDecimal(null);
+
+        /// <summary>Converts a <see cref="KVValue"/> to an <see cref="IntPtr"/>.</summary>
         public static explicit operator IntPtr(KVValue value)
-        {
-            return new IntPtr(value.ToInt32(null));
-        }
+            => new(value.ToInt32(null));
+
+        #endregion
     }
 }

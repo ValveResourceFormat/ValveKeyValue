@@ -269,7 +269,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                 }
 
                 var value = BitConverter.ToUInt64(data, 0);
-                return new KVObjectValue<ulong>(value, KVValueType.UInt64);
+                return (KVValue)value;
             }
 
             const NumberStyles IntegerNumberStyles =
@@ -278,7 +278,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
             if (int.TryParse(text, IntegerNumberStyles, CultureInfo.InvariantCulture, out var intValue))
             {
-                return new KVObjectValue<int>(intValue, KVValueType.Int32);
+                return (KVValue)intValue;
             }
 
             const NumberStyles FloatingPointNumberStyles =
@@ -289,15 +289,15 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
             if (!IsStrToLBase10Compatible(text) && float.TryParse(text, FloatingPointNumberStyles, CultureInfo.InvariantCulture, out var floatValue))
             {
-                return new KVObjectValue<float>(floatValue, KVValueType.FloatingPoint);
+                return (KVValue)floatValue;
             }
 
-            return new KVObjectValue<string>(text, KVValueType.String);
+            return (KVValue)text;
         }
 
         // The string may begin with an arbitrary amount of white space (as determined by isspace(3)) followed by a single optional
-        // ‘+’ or ‘-’ sign.  If base is zero or 16, the string may then include a “0x” prefix, and the number will be read in base 16;
-        // otherwise, a zero base is taken as 10 (decimal) unless the next character is ‘0’, in which case it is taken as 8 (octal).
+        // '+' or '-' sign.  If base is zero or 16, the string may then include a "0x" prefix, and the number will be read in base 16;
+        // otherwise, a zero base is taken as 10 (decimal) unless the next character is '0', in which case it is taken as 8 (octal).
         // The remainder of the string is converted to a long, long long, intmax_t or quad_t value in the obvious manner, stopping at
         // the first character which is not a valid digit in the given base.
         // - man(3) page for strtol

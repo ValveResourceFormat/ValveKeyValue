@@ -205,7 +205,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
             switch (value.ValueType)
             {
                 case KVValueType.BinaryBlob:
-                    WriteBinaryBlob((KVBinaryBlob)value);
+                    WriteBinaryBlob(value);
                     break;
                 case KVValueType.Boolean:
                     if ((bool)value)
@@ -221,10 +221,10 @@ namespace ValveKeyValue.Serialization.KeyValues3
                     writer.Write("null");
                     break;
                 case KVValueType.FloatingPoint:
-                    WriteFloat(Convert.ToSingle(value, CultureInfo.InvariantCulture));
+                    WriteFloat(value.ToSingle(CultureInfo.InvariantCulture));
                     break;
                 case KVValueType.FloatingPoint64:
-                    WriteFloat(Convert.ToDouble(value, CultureInfo.InvariantCulture));
+                    WriteFloat(value.ToDouble(CultureInfo.InvariantCulture));
                     break;
                 case KVValueType.Int16:
                 case KVValueType.Int32:
@@ -295,9 +295,9 @@ namespace ValveKeyValue.Serialization.KeyValues3
                 writer.Write(span);
         }
 
-        void WriteBinaryBlob(KVBinaryBlob value)
+        void WriteBinaryBlob(KVValue value)
         {
-            var bytes = value.Bytes.Span;
+            var bytes = value.AsSpan();
 
             if (bytes.Length <= 32)
             {

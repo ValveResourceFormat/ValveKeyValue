@@ -14,7 +14,7 @@ namespace ValveKeyValue.Test
 
         [Test]
         public void IsObjectWithChildren()
-            => Assert.That(obj.Value.ValueType, Is.EqualTo(KVValueType.Collection));
+            => Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Collection));
 
         [TestCase(ExpectedResult = 5)]
         public int HasChildren()
@@ -27,7 +27,7 @@ namespace ValveKeyValue.Test
         [TestCase("i64", 0x0102030405060708, typeof(long))]
         public void HasNamedChildWithValue(string name, object value, Type valueType)
         {
-            Assert.That(Convert.ChangeType(obj[name], valueType), Is.EqualTo(value));
+            Assert.That(Convert.ChangeType(obj[name].Value, valueType), Is.EqualTo(value));
         }
 
         [Test]

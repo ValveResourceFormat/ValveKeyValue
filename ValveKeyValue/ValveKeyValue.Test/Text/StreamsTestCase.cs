@@ -91,7 +91,7 @@ internal class StreamsTestCase
 
         var data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(blockingStream);
 
-        Assert.That(data["test"].ToInt32(CultureInfo.InvariantCulture), Is.EqualTo(1337));
+        Assert.That(data["test"].Value.ToInt32(CultureInfo.InvariantCulture), Is.EqualTo(1337));
     }
 
     [Test]

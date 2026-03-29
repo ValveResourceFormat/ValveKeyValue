@@ -40,7 +40,7 @@ namespace ValveKeyValue.Test
                 convertedKv = serializer.Deserialize(ms, options);
             }
 
-            Assert.That((string)convertedKv.Value, Is.EqualTo(value));
+            Assert.That((string)convertedKv, Is.EqualTo(value));
 
             return text;
         }

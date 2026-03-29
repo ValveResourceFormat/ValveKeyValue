@@ -38,7 +38,7 @@ namespace ValveKeyValue
         {
             ArgumentNullException.ThrowIfNull(stream);
 
-            var builder = new KVObjectBuilder();
+            var builder = new KVObjectBuilder(useDictionaryForCollections: format == KVSerializationFormat.KeyValues3Text);
 
             using var reader = MakeReader(stream, builder, options ?? KVSerializerOptions.DefaultOptions);
 

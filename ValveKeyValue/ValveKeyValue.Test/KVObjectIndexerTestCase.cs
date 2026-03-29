@@ -9,12 +9,9 @@ namespace ValveKeyValue.Test
         public string IndexerReturnsChildValue(string key) => (string)data[key];
 
         [Test]
-        public void IndexerOnValueNodeThrowsException()
+        public void IndexerOnValueNodeReturnsNull()
         {
-            Assert.That(
-                () => data["foo"]["bar"],
-                Throws.Exception.InstanceOf<NotSupportedException>()
-                .With.Message.EqualTo("The indexer on a KVValue can only be used on a KVValue that has children."));
+            Assert.That(data["foo"]["bar"], Is.Null);
         }
 
         KVObject data;

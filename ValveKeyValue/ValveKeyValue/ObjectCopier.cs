@@ -97,12 +97,12 @@ namespace ValveKeyValue
             }
 
             var attemptedKvValue = ConvertToKVValue(managedObject, objectType);
-            if (attemptedKvValue != null)
+            if (attemptedKvValue.HasValue)
             {
-                return attemptedKvValue;
+                return attemptedKvValue.Value;
             }
 
-            var childObjects = new KVCollectionValue();
+            var childObjects = new List<KVObject>();
 
             if (typeof(IDictionary).IsAssignableFrom(objectType))
             {
@@ -140,7 +140,7 @@ namespace ValveKeyValue
                 }
             }
 
-            return childObjects;
+            return new KVValue(KVValueType.Collection, childObjects);
         }
 
         static void CopyObject(KVObject kv, [DynamicallyAccessedMembers(Trimming.Properties)] Type objectType, object obj, IObjectReflector reflector)
@@ -163,7 +163,7 @@ namespace ValveKeyValue
             }
         }
 
-        static bool IsArray(KVObject obj, out KVValue[] values)
+        static bool IsArray(KVObject obj, out object[] values)
         {
             values = null;
 
@@ -185,7 +185,7 @@ namespace ValveKeyValue
                 }
             }
 
-            values = items.Select(i => i.Value).ToArray();
+            values = items.Select(i => (object)i.Value).ToArray();
             return true;
         }
 
@@ -407,31 +407,36 @@ namespace ValveKeyValue
             [DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] Type valueType,
             IObjectReflector reflector)
         {
-            if (value is KVCollectionValue collectionValue)
+            if (value is KVValue kvValue && kvValue.ValueType == KVValueType.Collection)
             {
-                return MakeObject(valueType, new KVObject("boo", (KVValue)collectionValue), reflector);
+                return MakeObject(valueType, new KVObject(null, kvValue), reflector);
+            }
+
+            if (value is KVValue boxedKvValue)
+            {
+                return Convert.ChangeType(boxedKvValue.ToType(valueType, null), valueType, CultureInfo.InvariantCulture);
             }
 
             return Convert.ChangeType(value, valueType, CultureInfo.InvariantCulture);
         }
 
-        static bool TryConvertValueTo<TValue>(string name, object value, out TValue converted)
+        static bool TryConvertValueTo<TValue>(string name, KVValue value, out TValue converted)
         {
             if (typeof(TValue) == typeof(IntPtr))
             {
-                converted = (TValue)(object)(IntPtr)(KVValue)value;
+                converted = (TValue)(object)(IntPtr)value;
                 return true;
             }
 
-            if (CanConvertValueTo(typeof(TValue)) && value is IConvertible)
+            if (CanConvertValueTo(typeof(TValue)))
             {
                 try
                 {
-                    converted = (TValue)Convert.ChangeType(value, typeof(TValue), CultureInfo.InvariantCulture);
+                    converted = (TValue)value.ToType(typeof(TValue), CultureInfo.InvariantCulture);
                 }
                 catch (Exception e)
                 {
-                    throw new NotSupportedException($"Conversion to {typeof(TValue)} failed. (key = {name}, object type = {value.GetType()})", e);
+                    throw new NotSupportedException($"Conversion to {typeof(TValue)} failed. (key = {name}, type = {value.ValueType})", e);
                 }
 
                 return true;
@@ -460,7 +465,7 @@ namespace ValveKeyValue
                 type == typeof(string);
         }
 
-        static KVValue ConvertToKVValue(object value, Type type)
+        static KVValue? ConvertToKVValue(object value, Type type)
         {
             if (type == typeof(IntPtr))
             {
@@ -487,7 +492,7 @@ namespace ValveKeyValue
                 TypeCode.UInt16 => (KVValue)(ulong)(ushort)value, // There is no uint16 kv type
                 TypeCode.UInt32 => (KVValue)(ulong)(uint)value, // There is no uint32 kv type
                 TypeCode.UInt64 => (KVValue)(ulong)value,
-                _ => null,
+                _ => (KVValue?)null,
             };
         }
     }

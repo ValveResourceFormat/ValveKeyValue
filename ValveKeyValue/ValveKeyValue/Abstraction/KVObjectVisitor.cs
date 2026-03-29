@@ -13,32 +13,38 @@ namespace ValveKeyValue.Abstraction
 
         public void Visit(KVObject @object)
         {
-            VisitObject(@object.Name, @object.Value, false);
+            VisitObject(@object.Name, @object, false);
         }
 
-        void VisitObject(string name, KVValue value, bool isArray)
+        void VisitObject(string name, KVObject obj, bool isArray)
         {
-            switch (value.ValueType)
+            switch (obj.Value.ValueType)
             {
                 case KVValueType.Collection:
-                    listener.OnObjectStart(name, value.Flag);
-                    VisitValue((IEnumerable<KVObject>)value);
+                    listener.OnObjectStart(name, obj.Value.Flag);
+                    foreach (var child in obj)
+                    {
+                        VisitObject(child.Name, child, false);
+                    }
                     listener.OnObjectEnd();
                     break;
 
                 case KVValueType.Array:
-                    var array = (ICollection<KVValue>)value;
+                    var arrayList = obj.Value.GetArrayList();
                     var allSimple = true;
-                    foreach (var item in array)
+                    foreach (var element in arrayList)
                     {
-                        if (!IsSimpleType(item.ValueType))
+                        if (!IsSimpleType(element.Value.ValueType))
                         {
                             allSimple = false;
                             break;
                         }
                     }
-                    listener.OnArrayStart(name, value.Flag, array.Count, allSimple);
-                    VisitArray(array);
+                    listener.OnArrayStart(name, obj.Value.Flag, arrayList.Count, allSimple);
+                    foreach (var element in arrayList)
+                    {
+                        VisitObject(null, element, true);
+                    }
                     listener.OnArrayEnd();
                     break;
 
@@ -57,30 +63,14 @@ namespace ValveKeyValue.Abstraction
                 case KVValueType.Null:
                     if (isArray)
                     {
-                        listener.OnArrayValue(value);
+                        listener.OnArrayValue(obj.Value);
                         break;
                     }
-                    listener.OnKeyValuePair(name, value);
+                    listener.OnKeyValuePair(name, obj.Value);
                     break;
 
                 default:
-                    throw new InvalidOperationException($"Unhandled value type: {value.ValueType}");
-            }
-        }
-
-        void VisitValue(IEnumerable<KVObject> collection)
-        {
-            foreach (var item in collection)
-            {
-                VisitObject(item.Name, item.Value, false);
-            }
-        }
-
-        void VisitArray(IEnumerable<KVValue> collection)
-        {
-            foreach (var item in collection)
-            {
-                VisitObject(null, item, true);
+                    throw new InvalidOperationException($"Unhandled value type: {obj.Value.ValueType}");
             }
         }
 
