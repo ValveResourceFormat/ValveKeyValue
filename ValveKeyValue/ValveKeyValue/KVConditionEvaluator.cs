@@ -143,7 +143,7 @@ namespace ValveKeyValue
             tokens.Insert(startIndex, new KVConditionToken(evalutedExpression));
         }
 
-        Expression EvaluteVariableExpression(string variable)
+        MethodCallExpression EvaluteVariableExpression(string variable)
         {
             var instance = Expression.Constant(this);
             var method = typeof(KVConditionEvaluator)
@@ -151,7 +151,7 @@ namespace ValveKeyValue
             return Expression.Call(instance, method, new[] { Expression.Constant(variable) });
         }
 
-        static KVConditionToken ReadToken(TextReader reader)
+        static KVConditionToken ReadToken(StringReader reader)
         {
             SkipWhitespace(reader);
 
@@ -202,7 +202,7 @@ namespace ValveKeyValue
             throw new InvalidOperationException("Bad condition syntax.");
         }
 
-        static void SkipWhitespace(TextReader reader)
+        static void SkipWhitespace(StringReader reader)
         {
             var next = reader.Peek();
             while (next != -1 && char.IsWhiteSpace((char)next))
@@ -212,7 +212,7 @@ namespace ValveKeyValue
             }
         }
 
-        static KVConditionToken ReadVariableToken(TextReader reader)
+        static KVConditionToken ReadVariableToken(StringReader reader)
         {
             var builder = new StringBuilder();
             while (IsReadableVariableCharacter(reader.Peek()))

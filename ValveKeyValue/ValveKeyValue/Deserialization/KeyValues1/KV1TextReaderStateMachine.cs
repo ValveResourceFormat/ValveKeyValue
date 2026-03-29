@@ -4,17 +4,13 @@ namespace ValveKeyValue.Deserialization.KeyValues1
     {
         public KV1TextReaderStateMachine()
         {
-            states = new Stack<KVPartialState<KV1TextReaderState>>();
-            includedPathsToMerge = new List<string>();
-            includedPathsToAppend = new List<string>();
-
             PushObject();
             Push(KV1TextReaderState.InObjectBeforeKey);
         }
 
-        readonly Stack<KVPartialState<KV1TextReaderState>> states;
-        readonly IList<string> includedPathsToMerge;
-        readonly IList<string> includedPathsToAppend;
+        readonly Stack<KVPartialState<KV1TextReaderState>> states = new();
+        readonly List<string> includedPathsToMerge = new();
+        readonly List<string> includedPathsToAppend = new();
 
         public KV1TextReaderState Current => CurrentObject.States.Peek();
 

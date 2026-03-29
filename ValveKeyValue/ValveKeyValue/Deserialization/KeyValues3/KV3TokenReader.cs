@@ -267,7 +267,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             return new KVToken(KVTokenType.Comment);
         }
 
-        bool IsIdentifier(string text)
+        static bool IsIdentifier(string text)
         {
             for (var i = 0; i < text.Length; i++)
             {

@@ -19,8 +19,8 @@ namespace ValveKeyValue.Serialization.KeyValues1
         }
 
         readonly KVSerializerOptions options;
-        readonly TextWriter writer;
-        int indentation = 0;
+        readonly StreamWriter writer;
+        int indentation;
         readonly Stack<int> arrayCount = new();
 
         public void Dispose()
@@ -47,7 +47,7 @@ namespace ValveKeyValue.Serialization.KeyValues1
         {
             var count = arrayCount.Pop();
 
-            WriteKeyValuePair(count.ToString(), value);
+            WriteKeyValuePair(count.ToString(CultureInfo.InvariantCulture), value);
 
             arrayCount.Push(count + 1);
         }
@@ -71,7 +71,7 @@ namespace ValveKeyValue.Serialization.KeyValues1
                 {
                     var count = arrayCount.Pop();
 
-                    name = count.ToString();
+                    name = count.ToString(CultureInfo.InvariantCulture);
 
                     arrayCount.Push(count + 1);
                 }

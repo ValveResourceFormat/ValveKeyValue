@@ -72,6 +72,8 @@ namespace ValveKeyValue
         /// <param name="options">Options to use that can influence the serialization process.</param>
         public void Serialize(Stream stream, KVObject data, KVSerializerOptions options = null)
         {
+            ArgumentNullException.ThrowIfNull(data);
+
             using var serializer = MakeSerializer(stream, options ?? KVSerializerOptions.DefaultOptions);
             var visitor = new KVObjectVisitor(serializer);
             visitor.Visit(data);
@@ -85,6 +87,8 @@ namespace ValveKeyValue
         /// <param name="options">Options to use that can influence the serialization process.</param>
         public void Serialize(Stream stream, KVDocument data, KVSerializerOptions options = null)
         {
+            ArgumentNullException.ThrowIfNull(data);
+
             using var serializer = MakeSerializer(stream, options ?? KVSerializerOptions.DefaultOptions, data.Header);
             var visitor = new KVObjectVisitor(serializer);
             visitor.Visit(data);
@@ -119,7 +123,7 @@ namespace ValveKeyValue
                 KVSerializationFormat.KeyValues1Text => new KV1TextReader(new StreamReader(stream, null, true, -1, leaveOpen: true), listener, options),
                 KVSerializationFormat.KeyValues1Binary => new KV1BinaryReader(stream, listener, options.StringTable),
                 KVSerializationFormat.KeyValues3Text => new KV3TextReader(new StreamReader(stream, null, true, -1, leaveOpen: true), listener),
-                _ => throw new ArgumentOutOfRangeException(nameof(format), format, "Invalid serialization format."),
+                _ => throw new InvalidOperationException($"Invalid serialization format: {format}"),
             };
         }
 
@@ -133,7 +137,7 @@ namespace ValveKeyValue
                 KVSerializationFormat.KeyValues1Text => new KV1TextSerializer(stream, options),
                 KVSerializationFormat.KeyValues1Binary => new KV1BinarySerializer(stream, options.StringTable),
                 KVSerializationFormat.KeyValues3Text => new KV3TextSerializer(stream, header),
-                _ => throw new ArgumentOutOfRangeException(nameof(format), format, "Invalid serialization format."),
+                _ => throw new InvalidOperationException($"Invalid serialization format: {format}"),
             };
         }
     }

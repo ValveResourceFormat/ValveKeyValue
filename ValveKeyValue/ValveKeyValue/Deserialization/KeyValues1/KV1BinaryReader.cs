@@ -25,9 +25,11 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true);
         }
 
+#pragma warning disable CA2213 // Not owned by this class
         readonly Stream stream;
-        readonly BinaryReader reader;
         readonly IVisitationListener listener;
+#pragma warning restore CA2213
+        readonly BinaryReader reader;
         readonly StringTable stringTable;
         bool disposed;
         KV1BinaryNodeType endMarker = KV1BinaryNodeType.End;

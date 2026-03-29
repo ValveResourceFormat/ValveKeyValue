@@ -121,7 +121,7 @@ namespace ValveKeyValue
                 var counter = 0;
                 foreach (var child in (IEnumerable)managedObject)
                 {
-                    var childKVObject = FromObjectCore(child.GetType(), child, counter.ToString(), reflector, visitedObjects);
+                    var childKVObject = FromObjectCore(child.GetType(), child, counter.ToString(CultureInfo.InvariantCulture), reflector, visitedObjects);
                     childObjects.Add(childKVObject);
 
                     counter++;
@@ -412,7 +412,7 @@ namespace ValveKeyValue
                 return MakeObject(valueType, new KVObject("boo", (KVValue)collectionValue), reflector);
             }
 
-            return Convert.ChangeType(value, valueType);
+            return Convert.ChangeType(value, valueType, CultureInfo.InvariantCulture);
         }
 
         static bool TryConvertValueTo<TValue>(string name, object value, out TValue converted)

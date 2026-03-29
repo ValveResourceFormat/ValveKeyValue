@@ -4,7 +4,7 @@ namespace ValveKeyValue.Deserialization
 {
     class KVObjectBuilder : IParsingVisitationListener
     {
-        readonly IList<KVObjectBuilder> associatedBuilders = new List<KVObjectBuilder>();
+        readonly List<KVObjectBuilder> associatedBuilders = new();
 
         public KVObject GetObject()
         {
@@ -196,7 +196,7 @@ namespace ValveKeyValue.Deserialization
             return @object;
         }
 
-        KVObject MakeArray(KVPartialState state)
+        static KVObject MakeArray(KVPartialState state)
         {
             if (state.Discard)
             {

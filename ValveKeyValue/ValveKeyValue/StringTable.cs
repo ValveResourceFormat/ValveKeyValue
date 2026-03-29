@@ -29,7 +29,7 @@ namespace ValveKeyValue
         /// </summary>
         /// <param name="values">The initial string values.</param>
         public StringTable(IList<string> values)
-            : this(values, writable: !values.IsReadOnly)
+            : this(values ?? throw new ArgumentNullException(nameof(values)), writable: !values.IsReadOnly)
         {
         }
 

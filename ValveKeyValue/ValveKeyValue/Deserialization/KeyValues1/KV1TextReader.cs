@@ -19,7 +19,9 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             stateMachine = new KV1TextReaderStateMachine();
         }
 
+#pragma warning disable CA2213 // Not owned by this class
         readonly IParsingVisitationListener listener;
+#pragma warning restore CA2213
         readonly KVSerializerOptions options;
 
         readonly KVConditionEvaluator conditionEvaluator;

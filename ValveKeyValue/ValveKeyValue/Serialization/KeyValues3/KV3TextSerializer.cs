@@ -24,8 +24,8 @@ namespace ValveKeyValue.Serialization.KeyValues3
             writer.WriteLine($"<!-- kv3 encoding:{encoding} format:{format} -->");
         }
 
-        readonly TextWriter writer;
-        int indentation = 0;
+        readonly StreamWriter writer;
+        int indentation;
         // Tracks nesting: null for objects, tuple for arrays
         readonly Stack<(bool isShort, bool allSimple, int index, int count)?> context = new();
 
@@ -378,12 +378,12 @@ namespace ValveKeyValue.Serialization.KeyValues3
 
         void WriteText(string text)
         {
-            var isMultiline = text.Contains("\n", StringComparison.Ordinal);
+            var isMultiline = text.Contains('\n', StringComparison.Ordinal);
 
             if (isMultiline)
             {
-                text = text.Replace("\r\n", "\n");
-                text = text.Replace("\"\"\"", "\\\"\"\"");
+                text = text.Replace("\r\n", "\n", StringComparison.Ordinal);
+                text = text.Replace("\"\"\"", "\\\"\"\"", StringComparison.Ordinal);
 
                 writer.Write("\"\"\"\n");
                 writer.Write(text);

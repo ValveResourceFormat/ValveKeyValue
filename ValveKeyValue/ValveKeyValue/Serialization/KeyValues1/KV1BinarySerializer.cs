@@ -70,7 +70,7 @@ namespace ValveKeyValue.Serialization.KeyValues1
                     break;
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(value.ValueType), value.ValueType, "Unhandled value type.");
+                    throw new InvalidOperationException($"Unhandled value type: {value.ValueType}");
             }
         }
 

@@ -3,7 +3,7 @@ namespace ValveKeyValue.KeyValues3
     /// <summary>
     /// Known KeyValues3 encoding identifiers.
     /// </summary>
-    public class Encoding
+    public static class Encoding
     {
         /// <summary>Automatic binary encoding selection.</summary>
         public static Guid BinaryAuto { get; } = new(new byte[] { 0xE6, 0x09, 0xB1, 0x6E, 0x85, 0x6B, 0x83, 0x45, 0xA3, 0x12, 0x70, 0x3A, 0x6E, 0x04, 0x06, 0x8C });

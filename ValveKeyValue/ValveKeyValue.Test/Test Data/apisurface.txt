@@ -470,9 +470,8 @@ public sealed class ValveKeyValue.StringTable
     public string ToString();
 }
 
-public class ValveKeyValue.KeyValues3.Encoding
+public sealed class ValveKeyValue.KeyValues3.Encoding
 {
-    public .ctor();
     public bool Equals(object obj);
     protected void Finalize();
     public static Guid get_Binary();
@@ -487,9 +486,8 @@ public class ValveKeyValue.KeyValues3.Encoding
     public string ToString();
 }
 
-public class ValveKeyValue.KeyValues3.Format
+public sealed class ValveKeyValue.KeyValues3.Format
 {
-    public .ctor();
     public bool Equals(object obj);
     protected void Finalize();
     public static Guid get_Generic();
