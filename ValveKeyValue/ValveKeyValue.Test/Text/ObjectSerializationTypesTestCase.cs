@@ -16,6 +16,10 @@ namespace ValveKeyValue.Test
                     VULong = 0x8877665544332211u,
                     VEnum = SomeEnum.Leet,
                     VFlags = SomeFlags.Foo | SomeFlags.Bar,
+                    VByteEnum = ByteEnum.Max,
+                    VShortEnum = ShortEnum.Negative,
+                    VLongEnum = LongEnum.Big,
+                    VULongEnum = ULongEnum.Big,
                 },
             };
 
@@ -32,9 +36,19 @@ namespace ValveKeyValue.Test
             var expected = TestDataHelper.ReadTextResource("Text.serialization_types_expected.vdf");
             Assert.That(text, Is.EqualTo(expected));
 
-            // TODO: Deserializing enums does not work yet
-            //var deserialized = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<DataObject[]>(text);
-            //Assert.That(deserialized, Is.EqualTo(dataObject));
+            var deserialized = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<DataObject[]>(text);
+            Assert.That(deserialized, Has.Length.EqualTo(1));
+            Assert.That(deserialized[0].VString, Is.EqualTo(dataObject[0].VString));
+            Assert.That(deserialized[0].VInt, Is.EqualTo(dataObject[0].VInt));
+            Assert.That(deserialized[0].VFloat, Is.EqualTo(dataObject[0].VFloat));
+            Assert.That(deserialized[0].VLong, Is.EqualTo(dataObject[0].VLong));
+            Assert.That(deserialized[0].VULong, Is.EqualTo(dataObject[0].VULong));
+            Assert.That(deserialized[0].VEnum, Is.EqualTo(dataObject[0].VEnum));
+            Assert.That(deserialized[0].VFlags, Is.EqualTo(dataObject[0].VFlags));
+            Assert.That(deserialized[0].VByteEnum, Is.EqualTo(dataObject[0].VByteEnum));
+            Assert.That(deserialized[0].VShortEnum, Is.EqualTo(dataObject[0].VShortEnum));
+            Assert.That(deserialized[0].VLongEnum, Is.EqualTo(dataObject[0].VLongEnum));
+            Assert.That(deserialized[0].VULongEnum, Is.EqualTo(dataObject[0].VULongEnum));
         }
 
         class DataObject
@@ -46,6 +60,10 @@ namespace ValveKeyValue.Test
             public float VFloat { get; set; }
             public SomeEnum VEnum { get; set; }
             public SomeFlags VFlags { get; set; }
+            public ByteEnum VByteEnum { get; set; }
+            public ShortEnum VShortEnum { get; set; }
+            public LongEnum VLongEnum { get; set; }
+            public ULongEnum VULongEnum { get; set; }
         }
 
         enum SomeEnum
@@ -60,6 +78,28 @@ namespace ValveKeyValue.Test
         {
             Foo = 1 << 1,
             Bar = 1 << 3,
+        }
+
+        enum ByteEnum : byte
+        {
+            Zero = 0,
+            Max = 255,
+        }
+
+        enum ShortEnum : short
+        {
+            Negative = -1,
+            Positive = 100,
+        }
+
+        enum LongEnum : long
+        {
+            Big = 0x0102030405060708,
+        }
+
+        enum ULongEnum : ulong
+        {
+            Big = 0x8877665544332211,
         }
     }
 }
