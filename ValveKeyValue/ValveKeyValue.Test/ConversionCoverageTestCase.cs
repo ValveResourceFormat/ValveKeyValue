@@ -164,6 +164,15 @@ namespace ValveKeyValue.Test
             Assert.That(obj.Value.AsBlob(), Is.EqualTo(new byte[] { 0xAB, 0xCD }));
         }
 
+        [Test]
+        public void BlobFromMemoryByte()
+        {
+            var memory = new Memory<byte>([0x01, 0x02, 0x03]);
+            var v = KVValue.Blob(memory);
+            Assert.That(v.ValueType, Is.EqualTo(KVValueType.BinaryBlob));
+            Assert.That(v.AsBlob(), Is.EqualTo(new byte[] { 0x01, 0x02, 0x03 }));
+        }
+
         #endregion
 
         /*
@@ -313,6 +322,23 @@ namespace ValveKeyValue.Test
             data["newkey"] = 99;
             Assert.That((int)data["newkey"], Is.EqualTo(99));
             Assert.That(data.Count, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void DictBackedCollectionSetNullRemovesKey()
+        {
+            var kv3Text = "<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->\n{\n\tkey1 = \"value1\"\n\tkey2 = 42\n}";
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(kv3Text));
+            var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
+
+            Assert.That(data.Count, Is.EqualTo(2));
+
+            data["key1"] = null;
+
+            Assert.That(data.ContainsKey("key1"), Is.False);
+            Assert.That(data["key1"], Is.Null);
+            Assert.That(data.Count, Is.EqualTo(1));
+            Assert.That((int)data["key2"], Is.EqualTo(42));
         }
 
         #endregion

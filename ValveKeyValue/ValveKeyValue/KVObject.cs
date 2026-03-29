@@ -464,8 +464,28 @@ namespace ValveKeyValue
 
                     break;
                 case List<KVObject> list when Value.ValueType == KVValueType.Collection:
-                    list.RemoveAll(c => c.Name == key);
-                    if (value != null)
+                    var firstIndex = list.FindIndex(c => c.Name == key);
+                    if (firstIndex >= 0)
+                    {
+                        if (value != null)
+                        {
+                            list[firstIndex] = value;
+
+                            // Remove any remaining duplicates after the replaced entry
+                            for (var i = list.Count - 1; i > firstIndex; i--)
+                            {
+                                if (list[i].Name == key)
+                                {
+                                    list.RemoveAt(i);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            list.RemoveAll(c => c.Name == key);
+                        }
+                    }
+                    else if (value != null)
                     {
                         list.Add(value);
                     }

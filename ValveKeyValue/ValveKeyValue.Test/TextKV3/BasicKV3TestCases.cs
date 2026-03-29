@@ -1,9 +1,18 @@
 using System.Globalization;
+using System.Text;
 
 namespace ValveKeyValue.Test.TextKV3
 {
     class BasicKV3TestCases
     {
+        private static readonly string[] ExpectedNames = ["a", "b", "c"];
+        private static readonly int[] ExpectedIntValues = [10, 20, 30];
+        private static readonly byte[] ExpectedBlobData =
+        [
+            0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+            0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xFF
+        ];
+
         [Test]
         public void DeserializesHeaderAndValue()
         {
@@ -111,11 +120,17 @@ namespace ValveKeyValue.Test.TextKV3
             var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
 
             Assert.That(data["array"].ValueType, Is.EqualTo(KVValueType.BinaryBlob));
-            Assert.That(data["array"].Value.AsBlob(), Is.EqualTo(new byte[]
-            {
-                0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
-                0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xFF
-            }));
+            Assert.That(data["array"].Value.AsBlob(), Is.EqualTo(ExpectedBlobData));
+        }
+
+        [Test]
+        public void DeserializesBinaryBlobToTypedByteArray()
+        {
+            using var stream = TestDataHelper.OpenResource("TextKV3.binary_blob.kv3");
+            var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize<TypedBlobData>(stream);
+
+            Assert.That(data.Array, Is.Not.Null);
+            Assert.That(data.Array, Is.EqualTo(ExpectedBlobData));
         }
 
         [Test]
@@ -231,5 +246,65 @@ namespace ValveKeyValue.Test.TextKV3
                 Assert.That((string)data["empty.string"], Is.EqualTo(string.Empty));
             });
         }
+
+        [Test]
+        public void DeserializesArrayToTypedIntList()
+        {
+            var kv3Text = "<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->\n{\n\tnumbers = [1, 2, 3]\n}";
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(kv3Text));
+            var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize<TypedArrayData>(stream);
+
+            Assert.That(data.Numbers, Is.Not.Null);
+            Assert.That(data.Numbers, Has.Count.EqualTo(3));
+            Assert.That(data.Numbers[0], Is.EqualTo(1));
+            Assert.That(data.Numbers[1], Is.EqualTo(2));
+            Assert.That(data.Numbers[2], Is.EqualTo(3));
+        }
+
+        [Test]
+        public void DeserializesArrayToTypedStringArray()
+        {
+            var kv3Text = "<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->\n{\n\tnames = [\"a\", \"b\", \"c\"]\n}";
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(kv3Text));
+            var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize<TypedStringArrayData>(stream);
+
+            Assert.That(data.Names, Is.Not.Null);
+            Assert.That(data.Names, Has.Length.EqualTo(3));
+            Assert.That(data.Names, Is.EqualTo(ExpectedNames));
+        }
+
+        [Test]
+        public void DeserializesArrayToTypedIntArray()
+        {
+            var kv3Text = "<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->\n{\n\tvalues = [10, 20, 30]\n}";
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(kv3Text));
+            var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize<TypedIntArrayData>(stream);
+
+            Assert.That(data.Values, Is.Not.Null);
+            Assert.That(data.Values, Has.Length.EqualTo(3));
+            Assert.That(data.Values, Is.EqualTo(ExpectedIntValues));
+        }
+
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes - used by deserializer
+        class TypedArrayData
+        {
+            public List<int> Numbers { get; set; }
+        }
+
+        class TypedStringArrayData
+        {
+            public string[] Names { get; set; }
+        }
+
+        class TypedIntArrayData
+        {
+            public int[] Values { get; set; }
+        }
+
+        class TypedBlobData
+        {
+            public byte[] Array { get; set; }
+        }
+#pragma warning restore CA1812
     }
 }

@@ -5,6 +5,8 @@ namespace ValveKeyValue.Test
     class EdgeCaseTestCase
     {
         private static readonly string[] ExpectedDuplicateKeyValues = ["first", "second"];
+        private static readonly string[] ExpectedOrderABC = ["a", "b", "c"];
+        private static readonly string[] ExpectedOrderAB = ["a", "b"];
 
         #region 1. Chained write creates intermediate structure
 
@@ -26,7 +28,60 @@ namespace ValveKeyValue.Test
 
         #endregion
 
-        #region 2. Indexer set with null removes child
+        #region 2. Indexer set preserves insertion order in list collection
+
+        [Test]
+        public void IndexerSetPreservesOrderInListCollection()
+        {
+            var obj = new KVObject("root", [
+                new KVObject("a", "1"),
+                new KVObject("b", "2"),
+                new KVObject("c", "3"),
+            ]);
+
+            obj["b"] = "updated";
+
+            var names = obj.Children.Select(c => c.Name).ToList();
+            Assert.That(names, Is.EqualTo(ExpectedOrderABC));
+            Assert.That((string)obj["b"], Is.EqualTo("updated"));
+        }
+
+        [Test]
+        public void IndexerSetAppendsNewKeyInListCollection()
+        {
+            var obj = new KVObject("root", [
+                new KVObject("a", "1"),
+            ]);
+
+            obj["b"] = "2";
+
+            Assert.That(obj.Count, Is.EqualTo(2));
+            var names = obj.Children.Select(c => c.Name).ToList();
+            Assert.That(names, Is.EqualTo(ExpectedOrderAB));
+            Assert.That((string)obj["b"], Is.EqualTo("2"));
+        }
+
+        [Test]
+        public void IndexerSetRemovesDuplicatesAndKeepsFirstPosition()
+        {
+            var obj = new KVObject("root", [
+                new KVObject("a", "1"),
+                new KVObject("b", "first"),
+                new KVObject("c", "3"),
+                new KVObject("b", "second"),
+            ]);
+
+            obj["b"] = "replaced";
+
+            Assert.That(obj.Count, Is.EqualTo(3));
+            var names = obj.Children.Select(c => c.Name).ToList();
+            Assert.That(names, Is.EqualTo(ExpectedOrderABC));
+            Assert.That((string)obj["b"], Is.EqualTo("replaced"));
+        }
+
+        #endregion
+
+        #region 3. Indexer set with null removes child
 
         [Test]
         public void IndexerSetNullRemovesChildFromListCollection()
@@ -173,6 +228,18 @@ namespace ValveKeyValue.Test
             var obj = new KVObject("nullobj");
 
             Assert.That(obj.ContainsKey("x"), Is.False);
+        }
+
+        [Test]
+        public void ContainsKeyOnListCollectionReturnsCorrectly()
+        {
+            var obj = new KVObject("root", [
+                new KVObject("a", "1"),
+                new KVObject("b", "2"),
+            ]);
+
+            Assert.That(obj.ContainsKey("a"), Is.True);
+            Assert.That(obj.ContainsKey("missing"), Is.False);
         }
 
         #endregion
@@ -389,6 +456,20 @@ namespace ValveKeyValue.Test
             Assert.That(child, Is.Not.Null);
             Assert.That(child.Name, Is.EqualTo("existing"));
             Assert.That((string)child, Is.EqualTo("value"));
+        }
+
+        [Test]
+        public void TryGetChildOnDictBackedCollection()
+        {
+            var kv3Text = "<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->\n{\n\tkey1 = \"value1\"\n}";
+            using var stream = new System.IO.MemoryStream(System.Text.Encoding.UTF8.GetBytes(kv3Text));
+            var obj = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
+
+            Assert.That(obj.TryGetChild("key1", out var found), Is.True);
+            Assert.That((string)found, Is.EqualTo("value1"));
+
+            Assert.That(obj.TryGetChild("missing", out var notFound), Is.False);
+            Assert.That(notFound, Is.Null);
         }
 
         #endregion

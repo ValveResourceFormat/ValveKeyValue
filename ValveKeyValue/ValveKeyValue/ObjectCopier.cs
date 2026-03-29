@@ -50,6 +50,16 @@ namespace ValveKeyValue
                 CopyObject(keyValueObject, typeof(TObject), typedObject, reflector);
                 return (TObject)typedObject;
             }
+            else if (keyValueObject.Value.ValueType == KVValueType.Array)
+            {
+                var arrayValues = keyValueObject.Children.Select(c => (object)c.Value).ToArray();
+                if (ConstructTypedEnumerable(typeof(TObject), arrayValues, reflector, out var enumerable))
+                {
+                    return (TObject)enumerable;
+                }
+
+                throw new NotSupportedException($"Cannot convert Array to {typeof(TObject).Name}. (key = {keyValueObject.Name})");
+            }
             else if (TryConvertValueTo<TObject>(keyValueObject.Name, keyValueObject.Value, out var converted))
             {
                 return converted;
@@ -414,6 +424,11 @@ namespace ValveKeyValue
 
             if (value is KVValue boxedKvValue)
             {
+                if (boxedKvValue.ValueType == KVValueType.BinaryBlob && valueType == typeof(byte[]))
+                {
+                    return boxedKvValue.AsBlob();
+                }
+
                 return Convert.ChangeType(boxedKvValue.ToType(valueType, null), valueType, CultureInfo.InvariantCulture);
             }
 
@@ -425,6 +440,12 @@ namespace ValveKeyValue
             if (typeof(TValue) == typeof(IntPtr))
             {
                 converted = (TValue)(object)(IntPtr)value;
+                return true;
+            }
+
+            if (typeof(TValue) == typeof(byte[]) && value.ValueType == KVValueType.BinaryBlob)
+            {
+                converted = (TValue)(object)value.AsBlob();
                 return true;
             }
 
