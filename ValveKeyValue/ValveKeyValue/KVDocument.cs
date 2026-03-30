@@ -22,15 +22,10 @@ namespace ValveKeyValue
         /// <param name="name">Root key name of the document.</param>
         /// <param name="root">Root value of the document.</param>
         public KVDocument(KVHeader header, string name, KVObject root)
+            : base(root.ValueType, root._scalar, root._ref, root.Flag)
         {
             Header = header;
             Name = name;
-
-            // Copy the root's fields into this document object
-            ValueType = root.ValueType;
-            Flag = root.Flag;
-            _scalar = root._scalar;
-            _ref = root._ref;
         }
     }
 }

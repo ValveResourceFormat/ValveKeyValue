@@ -18,7 +18,7 @@ namespace ValveKeyValue
         /// <summary>
         /// Gets the value type of this object.
         /// </summary>
-        public KVValueType ValueType { get; internal set; }
+        public KVValueType ValueType { get; }
 
         /// <summary>
         /// Gets or sets the flags of this object.
@@ -27,10 +27,10 @@ namespace ValveKeyValue
 
         // Inline storage for scalar types (no boxing).
         // Interpretation depends on ValueType.
-        internal long _scalar;
+        internal readonly long _scalar;
 
         // Reference storage for heap types: string, byte[], List<KVObject>, Dictionary<string, KVObject>, etc.
-        internal object _ref;
+        internal readonly object _ref;
 
         /// <summary>
         /// Gets a value indicating whether this value is null.
