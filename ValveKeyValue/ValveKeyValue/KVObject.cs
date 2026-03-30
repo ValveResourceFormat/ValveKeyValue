@@ -369,6 +369,12 @@ namespace ValveKeyValue
             => new();
 
         /// <summary>
+        /// Creates an empty dictionary-backed collection with the specified capacity.
+        /// </summary>
+        public static KVObject Collection(int capacity)
+            => new(KVValueType.Collection, new Dictionary<string, KVObject>(capacity));
+
+        /// <summary>
         /// Creates a dictionary-backed collection from the given children.
         /// </summary>
         public static KVObject Collection(IEnumerable<KeyValuePair<string, KVObject>> children)
@@ -393,6 +399,13 @@ namespace ValveKeyValue
             => new(KVValueType.Collection, new List<KeyValuePair<string, KVObject>>());
 
         /// <summary>
+        /// Creates an empty list-backed collection with the specified capacity.
+        /// Preserves insertion order and allows duplicate keys (used for KV1 format).
+        /// </summary>
+        public static KVObject ListCollection(int capacity)
+            => new(KVValueType.Collection, new List<KeyValuePair<string, KVObject>>(capacity));
+
+        /// <summary>
         /// Creates a list-backed collection from the given children.
         /// Preserves insertion order and allows duplicate keys (used for KV1 format).
         /// </summary>
@@ -407,6 +420,12 @@ namespace ValveKeyValue
         /// </summary>
         public static KVObject Array()
             => new(KVValueType.Array, new List<KVObject>());
+
+        /// <summary>
+        /// Creates an empty array-valued <see cref="KVObject"/> with the specified capacity.
+        /// </summary>
+        public static KVObject Array(int capacity)
+            => new(KVValueType.Array, new List<KVObject>(capacity));
 
         /// <summary>
         /// Creates an array-valued <see cref="KVObject"/> from the given elements.

@@ -497,6 +497,46 @@ namespace ValveKeyValue.Test
         }
 
         [Test]
+        public void ArrayFactoryWithCapacity()
+        {
+            var arr = KVObject.Array(4);
+
+            Assert.That(arr.IsArray, Is.True);
+            Assert.That(arr.ValueType, Is.EqualTo(KVValueType.Array));
+            Assert.That(arr.Count, Is.EqualTo(0));
+
+            arr.Add("a");
+            arr.Add("b");
+            Assert.That(arr.Count, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void CollectionFactoryWithCapacity()
+        {
+            var obj = KVObject.Collection(4);
+
+            Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Collection));
+            Assert.That(obj.Count, Is.EqualTo(0));
+
+            obj.Add("key", "value");
+            Assert.That(obj.Count, Is.EqualTo(1));
+            Assert.That((string)obj["key"], Is.EqualTo("value"));
+        }
+
+        [Test]
+        public void ListCollectionFactoryWithCapacity()
+        {
+            var obj = KVObject.ListCollection(4);
+
+            Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Collection));
+            Assert.That(obj.Count, Is.EqualTo(0));
+
+            obj.Add("key", "value");
+            Assert.That(obj.Count, Is.EqualTo(1));
+            Assert.That((string)obj["key"], Is.EqualTo("value"));
+        }
+
+        [Test]
         public void DefaultConstructorCreatesDictBacked()
         {
             var obj = new KVObject();

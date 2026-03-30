@@ -156,12 +156,14 @@ public class ValveKeyValue.KVObject
     public void Add(string key, ValveKeyValue.KVObject value);
     public void Add(ValveKeyValue.KVObject value);
     public static ValveKeyValue.KVObject Array();
+    public static ValveKeyValue.KVObject Array(int capacity);
     public static ValveKeyValue.KVObject Array(System.Collections.Generic.IEnumerable`1[[ValveKeyValue.KVObject]] elements);
     public byte[] AsBlob();
     public ReadOnlySpan`1[[byte]] AsSpan();
     public static ValveKeyValue.KVObject Blob(byte[] data);
     public void Clear();
     public static ValveKeyValue.KVObject Collection();
+    public static ValveKeyValue.KVObject Collection(int capacity);
     public static ValveKeyValue.KVObject Collection(System.Collections.Generic.IEnumerable`1[[System.Collections.Generic.KeyValuePair`2[[string, ValveKeyValue.KVObject]]]] children);
     public bool ContainsKey(string name);
     public bool Equals(object obj);
@@ -181,6 +183,7 @@ public class ValveKeyValue.KVObject
     public int GetHashCode();
     public Type GetType();
     public static ValveKeyValue.KVObject ListCollection();
+    public static ValveKeyValue.KVObject ListCollection(int capacity);
     public static ValveKeyValue.KVObject ListCollection(System.Collections.Generic.IEnumerable`1[[System.Collections.Generic.KeyValuePair`2[[string, ValveKeyValue.KVObject]]]] children);
     protected object MemberwiseClone();
     public static ValveKeyValue.KVObject Null();
