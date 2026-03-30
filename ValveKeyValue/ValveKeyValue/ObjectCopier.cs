@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -14,6 +15,7 @@ namespace ValveKeyValue
     static class ObjectCopier
     {
         static readonly JsonSerializerOptions s_options = CreateOptions();
+        static readonly ConditionalWeakTable<JsonSerializerContext, JsonSerializerOptions> s_contextOptionsCache = new();
 
         [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2026", Justification = "Types that exist at runtime are preserved.")]
         [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Types that exist at runtime are preserved.")]
@@ -30,6 +32,20 @@ namespace ValveKeyValue
                 Converters = { new IntPtrConverter() },
             };
             return options;
+        }
+
+        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2026", Justification = "Types that exist at runtime are preserved.")]
+        [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Types that exist at runtime are preserved.")]
+        static JsonSerializerOptions GetOptions(JsonSerializerContext context)
+        {
+            return s_contextOptionsCache.GetValue(context, static ctx => new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                TypeInfoResolver = JsonTypeInfoResolver.Combine(ctx, new DefaultJsonTypeInfoResolver())
+                    .WithAddedModifier(ModifyTypeInfo),
+                Converters = { new IntPtrConverter() },
+            });
         }
 
         [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2070", Justification = "Non-public properties on types that exist at runtime are available.")]
@@ -92,21 +108,31 @@ namespace ValveKeyValue
         [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2026", Justification = "Types that exist at runtime are preserved.")]
         [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Types that exist at runtime are preserved.")]
         public static TObject MakeObject<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TObject>(KVObject keyValueObject)
+            => MakeObjectCore<TObject>(keyValueObject, s_options);
+
+        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2026", Justification = "Types that exist at runtime are preserved.")]
+        [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Types that exist at runtime are preserved.")]
+        public static TObject MakeObject<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TObject>(KVObject keyValueObject, JsonSerializerContext context)
+            => MakeObjectCore<TObject>(keyValueObject, GetOptions(context));
+
+        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2026", Justification = "Types that exist at runtime are preserved.")]
+        [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Types that exist at runtime are preserved.")]
+        static TObject MakeObjectCore<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TObject>(KVObject keyValueObject, JsonSerializerOptions options)
         {
             ArgumentNullException.ThrowIfNull(keyValueObject);
 
             if (IsValueTupleType(typeof(TObject)))
             {
-                return (TObject)DeserializeValueTuple(typeof(TObject), keyValueObject);
+                return (TObject)DeserializeValueTuple(typeof(TObject), keyValueObject, options);
             }
 
-            var jsonNode = KVObjectToJsonNode(keyValueObject, typeof(TObject));
-            return jsonNode.Deserialize<TObject>(s_options);
+            var jsonNode = KVObjectToJsonNode(keyValueObject, typeof(TObject), options);
+            return jsonNode.Deserialize<TObject>(options);
         }
 
         [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2026", Justification = "Types that exist at runtime are preserved.")]
         [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Types that exist at runtime are preserved.")]
-        static JsonNode KVObjectToJsonNode(KVObject kv, Type targetType)
+        static JsonNode KVObjectToJsonNode(KVObject kv, Type targetType, JsonSerializerOptions options)
         {
             targetType = Nullable.GetUnderlyingType(targetType) ?? targetType;
 
@@ -114,8 +140,8 @@ namespace ValveKeyValue
             {
                 KVValueType.Null => null,
                 KVValueType.BinaryBlob => JsonValue.Create(Convert.ToBase64String(kv.AsBlob())),
-                KVValueType.Collection => ConvertCollectionToJson(kv, targetType),
-                KVValueType.Array => ConvertArrayToJson(kv, targetType),
+                KVValueType.Collection => ConvertCollectionToJson(kv, targetType, options),
+                KVValueType.Array => ConvertArrayToJson(kv, targetType, options),
                 _ => ConvertScalarToJson(kv, targetType),
             };
         }
@@ -178,7 +204,7 @@ namespace ValveKeyValue
             };
         }
 
-        static JsonNode ConvertCollectionToJson(KVObject kv, Type targetType)
+        static JsonNode ConvertCollectionToJson(KVObject kv, Type targetType, JsonSerializerOptions options)
         {
             if (IsDictionary(targetType))
             {
@@ -188,7 +214,7 @@ namespace ValveKeyValue
                 {
                     if (!obj.ContainsKey(key))
                     {
-                        obj.Add(key, KVObjectToJsonNode(child, valueType));
+                        obj.Add(key, KVObjectToJsonNode(child, valueType, options));
                     }
                 }
 
@@ -203,11 +229,11 @@ namespace ValveKeyValue
                         $"Cannot deserialize a non-array value to type \"{targetType.Namespace}.{targetType.Name}\".");
                 }
 
-                return new JsonArray(items.Select(c => KVObjectToJsonNode(c, elementType)).ToArray());
+                return new JsonArray(items.Select(c => KVObjectToJsonNode(c, elementType, options)).ToArray());
             }
 
             // POCO — resolve property types from STJ contract model
-            var typeInfo = s_options.GetTypeInfo(targetType);
+            var typeInfo = options.GetTypeInfo(targetType);
             var propTypes = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
             foreach (var prop in typeInfo.Properties)
             {
@@ -220,17 +246,17 @@ namespace ValveKeyValue
                 if (!jsonObj.ContainsKey(key))
                 {
                     var childType = propTypes.GetValueOrDefault(key, typeof(object));
-                    jsonObj.Add(key, KVObjectToJsonNode(child, childType));
+                    jsonObj.Add(key, KVObjectToJsonNode(child, childType, options));
                 }
             }
 
             return jsonObj;
         }
 
-        static JsonArray ConvertArrayToJson(KVObject kv, Type targetType)
+        static JsonArray ConvertArrayToJson(KVObject kv, Type targetType, JsonSerializerOptions options)
         {
             var elementType = GetCollectionElementType(targetType) ?? typeof(object);
-            return new JsonArray(kv.GetArrayList().Select(c => KVObjectToJsonNode(c, elementType)).ToArray());
+            return new JsonArray(kv.GetArrayList().Select(c => KVObjectToJsonNode(c, elementType, options)).ToArray());
         }
 
         static bool TryGetArrayItems(KVObject kv, out List<KVObject> items)
@@ -299,13 +325,20 @@ namespace ValveKeyValue
         public static KVObject FromObject(
             [DynamicallyAccessedMembers(Trimming.Properties)] Type objectType,
             object managedObject)
-            => ConvertObjectToValue(objectType, managedObject, new HashSet<object>());
+            => ConvertObjectToValue(objectType, managedObject, new HashSet<object>(), s_options);
+
+        public static KVObject FromObject(
+            [DynamicallyAccessedMembers(Trimming.Properties)] Type objectType,
+            object managedObject,
+            JsonSerializerContext context)
+            => ConvertObjectToValue(objectType, managedObject, new HashSet<object>(), GetOptions(context));
 
         [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2072", Justification = "If the IDictionary's value object already exists at runtime then its properties will too.")]
         static KVObject ConvertObjectToValue(
             [DynamicallyAccessedMembers(Trimming.Properties)] Type objectType,
             object managedObject,
-            HashSet<object> visitedObjects)
+            HashSet<object> visitedObjects,
+            JsonSerializerOptions options)
         {
             if (!objectType.IsValueType && objectType != typeof(string) && !visitedObjects.Add(managedObject))
             {
@@ -327,7 +360,7 @@ namespace ValveKeyValue
                 while (enumerator.MoveNext())
                 {
                     var entry = enumerator.Entry;
-                    var childObjectValue = ConvertObjectToValue(entry.Value.GetType(), entry.Value, visitedObjects);
+                    var childObjectValue = ConvertObjectToValue(entry.Value.GetType(), entry.Value, visitedObjects, options);
                     childItems.Add(new KeyValuePair<string, KVObject>(entry.Key.ToString(), childObjectValue));
                 }
             }
@@ -336,7 +369,7 @@ namespace ValveKeyValue
                 var counter = 0;
                 foreach (var child in (IEnumerable)managedObject)
                 {
-                    var childValue = ConvertObjectToValue(child.GetType(), child, visitedObjects);
+                    var childValue = ConvertObjectToValue(child.GetType(), child, visitedObjects, options);
                     childItems.Add(new KeyValuePair<string, KVObject>(counter.ToString(CultureInfo.InvariantCulture), childValue));
                     counter++;
                 }
@@ -350,13 +383,13 @@ namespace ValveKeyValue
                     if (value is null)
                         continue;
 
-                    var childValue = ConvertObjectToValue(value.GetType(), value, visitedObjects);
+                    var childValue = ConvertObjectToValue(value.GetType(), value, visitedObjects, options);
                     childItems.Add(new KeyValuePair<string, KVObject>(field.Name, childValue));
                 }
             }
             else
             {
-                var typeInfo = s_options.GetTypeInfo(objectType);
+                var typeInfo = options.GetTypeInfo(objectType);
                 foreach (var prop in typeInfo.Properties.OrderBy(p => p.Name, StringComparer.InvariantCulture))
                 {
                     if (prop.Get is null)
@@ -366,7 +399,7 @@ namespace ValveKeyValue
                     if (!prop.PropertyType.IsValueType && value is null)
                         continue;
 
-                    var childValue = ConvertObjectToValue(value.GetType(), value, visitedObjects);
+                    var childValue = ConvertObjectToValue(value.GetType(), value, visitedObjects, options);
                     childItems.Add(new KeyValuePair<string, KVObject>(prop.Name, childValue));
                 }
             }
@@ -416,7 +449,7 @@ namespace ValveKeyValue
         [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2072", Justification = "ValueTuple fields exist at runtime.")]
         [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2026", Justification = "ValueTuple field types exist at runtime.")]
         [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "ValueTuple field types exist at runtime.")]
-        static object DeserializeValueTuple(Type type, KVObject kv)
+        static object DeserializeValueTuple(Type type, KVObject kv, JsonSerializerOptions options)
         {
             var fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public);
             var boxed = Activator.CreateInstance(type);
@@ -435,12 +468,12 @@ namespace ValveKeyValue
                 object value;
                 if (IsValueTupleType(field.FieldType))
                 {
-                    value = DeserializeValueTuple(field.FieldType, child);
+                    value = DeserializeValueTuple(field.FieldType, child, options);
                 }
                 else
                 {
-                    var jsonNode = KVObjectToJsonNode(child, field.FieldType);
-                    value = jsonNode.Deserialize(field.FieldType, s_options);
+                    var jsonNode = KVObjectToJsonNode(child, field.FieldType, options);
+                    value = jsonNode.Deserialize(field.FieldType, options);
                 }
 
                 field.SetValue(boxed, value);

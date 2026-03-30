@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 using ValveKeyValue.Abstraction;
 using ValveKeyValue.Deserialization;
 using ValveKeyValue.Deserialization.KeyValues1;
@@ -65,6 +66,24 @@ namespace ValveKeyValue
         }
 
         /// <summary>
+        /// Deserializes an object from a KeyValues representation in a stream, using a source-generated <see cref="JsonSerializerContext"/> for type resolution.
+        /// </summary>
+        /// <param name="stream">The stream to deserialize from.</param>
+        /// <param name="jsonContext">The <see cref="JsonSerializerContext"/> to use for type resolution.</param>
+        /// <param name="options">Options to use that can influence the deserialization process.</param>
+        /// <returns>A <typeparamref name="TObject" /> instance representing the KeyValues structure in the stream.</returns>
+        /// <typeparam name="TObject">The type of object to deserialize.</typeparam>
+        public TObject Deserialize<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TObject>(Stream stream, JsonSerializerContext jsonContext, KVSerializerOptions options = null)
+        {
+            ArgumentNullException.ThrowIfNull(stream);
+            ArgumentNullException.ThrowIfNull(jsonContext);
+
+            var @object = Deserialize(stream, options ?? KVSerializerOptions.DefaultOptions);
+            var typedObject = ObjectCopier.MakeObject<TObject>(@object, jsonContext);
+            return typedObject;
+        }
+
+        /// <summary>
         /// Serializes a KeyValue object into stream.
         /// </summary>
         /// <param name="stream">The stream to serialize into.</param>
@@ -110,6 +129,29 @@ namespace ValveKeyValue
             ArgumentNullException.ThrowIfNull(name);
 
             var kvObjectTree = ObjectCopier.FromObject(typeof(TData), data);
+
+            using var serializer = MakeSerializer(stream, options ?? KVSerializerOptions.DefaultOptions);
+            var visitor = new KVObjectVisitor(serializer);
+            visitor.Visit(name, kvObjectTree);
+        }
+
+        /// <summary>
+        /// Serializes a KeyValue object into stream in plain text, using a source-generated <see cref="JsonSerializerContext"/> for type resolution.
+        /// </summary>
+        /// <param name="stream">The stream to serialize into.</param>
+        /// <param name="data">The data to serialize.</param>
+        /// <param name="name">The top-level object name.</param>
+        /// <param name="jsonContext">The <see cref="JsonSerializerContext"/> to use for type resolution.</param>
+        /// <param name="options">Options to use that can influence the serialization process.</param>
+        /// <typeparam name="TData">The type of object to serialize.</typeparam>
+        public void Serialize<[DynamicallyAccessedMembers(Trimming.Properties)] TData>(Stream stream, TData data, string name, JsonSerializerContext jsonContext, KVSerializerOptions options = null)
+        {
+            ArgumentNullException.ThrowIfNull(stream);
+            ArgumentNullException.ThrowIfNull(data);
+            ArgumentNullException.ThrowIfNull(name);
+            ArgumentNullException.ThrowIfNull(jsonContext);
+
+            var kvObjectTree = ObjectCopier.FromObject(typeof(TData), data, jsonContext);
 
             using var serializer = MakeSerializer(stream, options ?? KVSerializerOptions.DefaultOptions);
             var visitor = new KVObjectVisitor(serializer);

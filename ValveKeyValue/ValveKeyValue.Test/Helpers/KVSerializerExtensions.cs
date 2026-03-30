@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace ValveKeyValue.Test
 {
     static class KVSerializerExtensions
@@ -36,6 +38,18 @@ namespace ValveKeyValue.Test
             ms.Seek(0, SeekOrigin.Begin);
 
             return serializer.Deserialize<TObject>(ms, options);
+        }
+
+        public static TObject Deserialize<TObject>(this KVSerializer serializer, string text, JsonSerializerContext jsonContext, KVSerializerOptions options = null)
+        {
+            using var ms = new MemoryStream();
+            using var writer = new StreamWriter(ms);
+            writer.Write(text);
+            writer.Flush();
+
+            ms.Seek(0, SeekOrigin.Begin);
+
+            return serializer.Deserialize<TObject>(ms, jsonContext, options);
         }
     }
 }
