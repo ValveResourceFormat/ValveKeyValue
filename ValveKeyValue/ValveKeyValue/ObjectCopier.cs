@@ -19,7 +19,6 @@ namespace ValveKeyValue
             [DynamicallyAccessedMembers(Trimming.Properties)] Type objectType, KVObject keyValueObject, IObjectReflector reflector)
             => InvokeGeneric(nameof(MakeObject), objectType, new object[] { keyValueObject, reflector });
 
-        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2062", Justification = "If the lookup value type exists at runtime then it should have enough for us to introspect.")]
         public static TObject MakeObject<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TObject>(KVObject keyValueObject, IObjectReflector reflector)
         {
             ArgumentNullException.ThrowIfNull(keyValueObject);
@@ -27,11 +26,7 @@ namespace ValveKeyValue
 
             if (keyValueObject.ValueType == KVValueType.Collection)
             {
-                if (IsLookupWithStringKey(typeof(TObject), out var lookupValueType))
-                {
-                    return (TObject)MakeLookup(lookupValueType, keyValueObject, reflector);
-                }
-                else if (IsDictionary(typeof(TObject)))
+                if (IsDictionary(typeof(TObject)))
                 {
                     return (TObject)MakeDictionary(typeof(TObject), keyValueObject, reflector);
                 }
@@ -180,47 +175,6 @@ namespace ValveKeyValue
 
             values = items.Select(i => (object)i.Value).ToArray();
             return true;
-        }
-
-        static bool IsLookupWithStringKey(Type type, out Type valueType)
-        {
-            valueType = null;
-
-            if (!type.IsConstructedGenericType)
-            {
-                return false;
-            }
-
-            var genericType = type.GetGenericTypeDefinition();
-            if (genericType != typeof(ILookup<,>))
-            {
-                return false;
-            }
-
-            var genericArguments = type.GetGenericArguments();
-            if (genericArguments.Length != 2)
-            {
-                return false;
-            }
-
-            if (genericArguments[0] != typeof(string))
-            {
-                return false;
-            }
-
-            valueType = genericArguments[1];
-            return true;
-        }
-
-        static object MakeLookup(
-            [DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] Type valueType,
-            KVObject obj,
-            IObjectReflector reflector)
-            => InvokeGeneric(nameof(MakeLookupCore), valueType, new object[] { obj, reflector });
-
-        static ILookup<string, TValue> MakeLookupCore<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TValue>(KVObject obj, IObjectReflector reflector)
-        {
-            return obj.ToLookup(kvp => kvp.Key, kvp => ConvertValue<TValue>(kvp.Value, reflector));
         }
 
         static readonly Dictionary<Type, Func<Type, object[], IObjectReflector, object>> EnumerableBuilders = new()
