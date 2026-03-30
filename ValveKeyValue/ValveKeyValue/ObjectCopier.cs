@@ -4,78 +4,307 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.ExceptionServices;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 
 namespace ValveKeyValue
 {
-    // TODO: Migrate to IVisitationListener
     static class ObjectCopier
     {
-        public static TObject MakeObject<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TObject>(KVObject keyValueObject)
-            => MakeObject<TObject>(keyValueObject, new DefaultObjectReflector());
+        static readonly JsonSerializerOptions s_options = CreateOptions();
 
-        public static object MakeObject(
-            [DynamicallyAccessedMembers(Trimming.Properties)] Type objectType, KVObject keyValueObject, IObjectReflector reflector)
-            => InvokeGeneric(nameof(MakeObject), objectType, new object[] { keyValueObject, reflector });
-
-        public static TObject MakeObject<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TObject>(KVObject keyValueObject, IObjectReflector reflector)
+        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2026", Justification = "Types that exist at runtime are preserved.")]
+        [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Types that exist at runtime are preserved.")]
+        static JsonSerializerOptions CreateOptions()
         {
-            ArgumentNullException.ThrowIfNull(keyValueObject);
-            ArgumentNullException.ThrowIfNull(reflector);
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                TypeInfoResolver = new DefaultJsonTypeInfoResolver
+                {
+                    Modifiers = { ModifyTypeInfo }
+                },
+                Converters = { new IntPtrConverter() },
+            };
+            return options;
+        }
 
-            if (keyValueObject.ValueType == KVValueType.Collection)
+        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2070", Justification = "Non-public properties on types that exist at runtime are available.")]
+        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2075", Justification = "Non-public properties on types that exist at runtime are available.")]
+        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2026", Justification = "Non-public properties on types that exist at runtime are available.")]
+        [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Non-public properties on types that exist at runtime are available.")]
+        static void ModifyTypeInfo(JsonTypeInfo typeInfo)
+        {
+            if (typeInfo.Kind != JsonTypeInfoKind.Object)
+                return;
+
+            var seenProps = new HashSet<string>();
+
+            for (var i = typeInfo.Properties.Count - 1; i >= 0; i--)
             {
-                if (IsDictionary(typeof(TObject)))
+                var prop = typeInfo.Properties[i];
+                var memberInfo = prop.AttributeProvider as MemberInfo;
+
+                if (memberInfo?.GetCustomAttribute<KVIgnoreAttribute>() != null)
                 {
-                    return (TObject)MakeDictionary(typeof(TObject), keyValueObject, reflector);
-                }
-                else if (IsArray(keyValueObject, out var enumerableValues) && ConstructTypedEnumerable(typeof(TObject), enumerableValues, reflector, out var enumerable))
-                {
-                    return (TObject)enumerable;
-                }
-                else if (IsConstructibleEnumerableType(typeof(TObject)))
-                {
-                    throw new InvalidOperationException($"Cannot deserialize a non-array value to type \"{typeof(TObject).Namespace}.{typeof(TObject).Name}\".");
+                    typeInfo.Properties.RemoveAt(i);
+                    continue;
                 }
 
-                // The object must remain boxed until it is fully initiallized, as this is the only way
-                // that we can build a struct due to the nature of struct copying.
-                var typedObject = RuntimeHelpers.GetUninitializedObject(typeof(TObject));
-                CopyObject(keyValueObject, typeof(TObject), typedObject, reflector);
-                return (TObject)typedObject;
-            }
-            else if (keyValueObject.ValueType == KVValueType.Array)
-            {
-                var arrayValues = keyValueObject.GetArrayList().Select(c => (object)c).ToArray();
-                if (ConstructTypedEnumerable(typeof(TObject), arrayValues, reflector, out var enumerable))
+                var kvProp = memberInfo?.GetCustomAttribute<KVPropertyAttribute>();
+                if (kvProp != null)
                 {
-                    return (TObject)enumerable;
+                    prop.Name = kvProp.PropertyName;
                 }
 
-                throw new NotSupportedException($"Cannot convert Array to {typeof(TObject).Name}.");
+                if (memberInfo is PropertyInfo pi)
+                {
+                    seenProps.Add(pi.Name);
+                }
             }
-            else if (TryConvertValueTo<TObject>(keyValueObject, out var converted))
+
+            foreach (var pi in typeInfo.Type.GetProperties(BindingFlags.Instance | BindingFlags.NonPublic))
             {
-                return converted;
-            }
-            else
-            {
-                // TODO: For nullable types this typeof is not that useful
-                throw new NotSupportedException($"Converting to {typeof(TObject).Name} is not supported. (type = {keyValueObject.ValueType})");
+                if (seenProps.Contains(pi.Name))
+                    continue;
+                if (pi.GetCustomAttribute<KVIgnoreAttribute>() != null)
+                    continue;
+
+                var jsonProp = typeInfo.CreateJsonPropertyInfo(pi.PropertyType, pi.Name);
+                jsonProp.Get = pi.CanRead ? pi.GetValue : null;
+                jsonProp.Set = pi.CanWrite ? pi.SetValue : null;
+
+                var kvProp = pi.GetCustomAttribute<KVPropertyAttribute>();
+                if (kvProp != null)
+                {
+                    jsonProp.Name = kvProp.PropertyName;
+                }
+
+                typeInfo.Properties.Add(jsonProp);
             }
         }
+
+        #region Deserialization (KVObject -> T)
+
+        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2026", Justification = "Types that exist at runtime are preserved.")]
+        [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Types that exist at runtime are preserved.")]
+        public static TObject MakeObject<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TObject>(KVObject keyValueObject)
+        {
+            ArgumentNullException.ThrowIfNull(keyValueObject);
+
+            if (IsValueTupleType(typeof(TObject)))
+            {
+                return (TObject)DeserializeValueTuple(typeof(TObject), keyValueObject);
+            }
+
+            var jsonNode = KVObjectToJsonNode(keyValueObject, typeof(TObject));
+            return jsonNode.Deserialize<TObject>(s_options);
+        }
+
+        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2026", Justification = "Types that exist at runtime are preserved.")]
+        [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Types that exist at runtime are preserved.")]
+        static JsonNode KVObjectToJsonNode(KVObject kv, Type targetType)
+        {
+            targetType = Nullable.GetUnderlyingType(targetType) ?? targetType;
+
+            return kv.ValueType switch
+            {
+                KVValueType.Null => null,
+                KVValueType.BinaryBlob => JsonValue.Create(Convert.ToBase64String(kv.AsBlob())),
+                KVValueType.Collection => ConvertCollectionToJson(kv, targetType),
+                KVValueType.Array => ConvertArrayToJson(kv, targetType),
+                _ => ConvertScalarToJson(kv, targetType),
+            };
+        }
+
+        static JsonNode ConvertScalarToJson(KVObject kv, Type targetType)
+        {
+            if (targetType == typeof(DateTime))
+            {
+                throw new NotSupportedException($"Converting to DateTime is not supported. (type = {kv.ValueType})");
+            }
+
+            if (targetType == typeof(bool))
+                return JsonValue.Create(kv.ToBoolean(CultureInfo.InvariantCulture));
+            if (targetType == typeof(string))
+                return JsonValue.Create(kv.ToString(CultureInfo.InvariantCulture));
+            if (targetType == typeof(IntPtr))
+                return JsonValue.Create(kv.ToInt32(CultureInfo.InvariantCulture));
+            if (targetType == typeof(byte))
+                return JsonValue.Create((int)kv.ToByte(CultureInfo.InvariantCulture));
+            if (targetType == typeof(sbyte))
+                return JsonValue.Create((int)kv.ToSByte(CultureInfo.InvariantCulture));
+            if (targetType == typeof(short))
+                return JsonValue.Create((int)kv.ToInt16(CultureInfo.InvariantCulture));
+            if (targetType == typeof(ushort))
+                return JsonValue.Create((int)kv.ToUInt16(CultureInfo.InvariantCulture));
+            if (targetType == typeof(int))
+                return JsonValue.Create(kv.ToInt32(CultureInfo.InvariantCulture));
+            if (targetType == typeof(uint))
+                return JsonValue.Create(kv.ToUInt32(CultureInfo.InvariantCulture));
+            if (targetType == typeof(long))
+                return JsonValue.Create(kv.ToInt64(CultureInfo.InvariantCulture));
+            if (targetType == typeof(ulong))
+                return JsonValue.Create(kv.ToUInt64(CultureInfo.InvariantCulture));
+            if (targetType == typeof(float))
+                return JsonValue.Create(kv.ToSingle(CultureInfo.InvariantCulture));
+            if (targetType == typeof(double))
+                return JsonValue.Create(kv.ToDouble(CultureInfo.InvariantCulture));
+            if (targetType == typeof(decimal))
+                return JsonValue.Create(kv.ToDecimal(CultureInfo.InvariantCulture));
+            if (targetType == typeof(char))
+                return JsonValue.Create(kv.ToChar(CultureInfo.InvariantCulture).ToString());
+
+            if (targetType.IsEnum)
+                return ConvertScalarToJson(kv, Enum.GetUnderlyingType(targetType));
+
+            // Unknown target — structural fallback
+            return kv.ValueType switch
+            {
+                KVValueType.String => JsonValue.Create(kv.ToString(CultureInfo.InvariantCulture)),
+                KVValueType.Boolean => JsonValue.Create(kv.ToBoolean(CultureInfo.InvariantCulture)),
+                KVValueType.Int16 or KVValueType.Int32 or KVValueType.Pointer
+                    => JsonValue.Create(kv.ToInt32(CultureInfo.InvariantCulture)),
+                KVValueType.Int64 => JsonValue.Create(kv.ToInt64(CultureInfo.InvariantCulture)),
+                KVValueType.UInt16 or KVValueType.UInt32
+                    => JsonValue.Create(kv.ToUInt32(CultureInfo.InvariantCulture)),
+                KVValueType.UInt64 => JsonValue.Create(kv.ToUInt64(CultureInfo.InvariantCulture)),
+                KVValueType.FloatingPoint => JsonValue.Create(kv.ToSingle(CultureInfo.InvariantCulture)),
+                KVValueType.FloatingPoint64 => JsonValue.Create(kv.ToDouble(CultureInfo.InvariantCulture)),
+                _ => JsonValue.Create(kv.ToString(CultureInfo.InvariantCulture)),
+            };
+        }
+
+        static JsonNode ConvertCollectionToJson(KVObject kv, Type targetType)
+        {
+            if (IsDictionary(targetType))
+            {
+                var valueType = targetType.GetGenericArguments()[1];
+                var obj = new JsonObject();
+                foreach (var (key, child) in kv)
+                {
+                    if (!obj.ContainsKey(key))
+                    {
+                        obj.Add(key, KVObjectToJsonNode(child, valueType));
+                    }
+                }
+
+                return obj;
+            }
+
+            if (IsCollectionType(targetType, out var elementType))
+            {
+                if (!TryGetArrayItems(kv, out var items))
+                {
+                    throw new InvalidOperationException(
+                        $"Cannot deserialize a non-array value to type \"{targetType.Namespace}.{targetType.Name}\".");
+                }
+
+                return new JsonArray(items.Select(c => KVObjectToJsonNode(c, elementType)).ToArray());
+            }
+
+            // POCO — resolve property types from STJ contract model
+            var typeInfo = s_options.GetTypeInfo(targetType);
+            var propTypes = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
+            foreach (var prop in typeInfo.Properties)
+            {
+                propTypes.TryAdd(prop.Name, prop.PropertyType);
+            }
+
+            var jsonObj = new JsonObject();
+            foreach (var (key, child) in kv)
+            {
+                if (!jsonObj.ContainsKey(key))
+                {
+                    var childType = propTypes.GetValueOrDefault(key, typeof(object));
+                    jsonObj.Add(key, KVObjectToJsonNode(child, childType));
+                }
+            }
+
+            return jsonObj;
+        }
+
+        static JsonArray ConvertArrayToJson(KVObject kv, Type targetType)
+        {
+            var elementType = GetCollectionElementType(targetType) ?? typeof(object);
+            return new JsonArray(kv.GetArrayList().Select(c => KVObjectToJsonNode(c, elementType)).ToArray());
+        }
+
+        static bool TryGetArrayItems(KVObject kv, out List<KVObject> items)
+        {
+            items = null;
+            var indexed = new List<(int Index, KVObject Value)>();
+
+            foreach (var (key, child) in kv)
+            {
+                if (!int.TryParse(key, NumberStyles.Number, CultureInfo.InvariantCulture, out var index))
+                    return false;
+                indexed.Add((index, child));
+            }
+
+            indexed.Sort((a, b) => a.Index.CompareTo(b.Index));
+            for (var i = 0; i < indexed.Count; i++)
+            {
+                if (indexed[i].Index != i)
+                    return false;
+            }
+
+            items = indexed.ConvertAll(i => i.Value);
+            return true;
+        }
+
+        static bool IsDictionary(Type type)
+            => type.IsConstructedGenericType && type.GetGenericTypeDefinition() == typeof(Dictionary<,>);
+
+        static bool IsCollectionType(Type type, out Type elementType)
+        {
+            elementType = null;
+            if (type.IsArray && type != typeof(byte[]))
+            {
+                elementType = type.GetElementType();
+                return true;
+            }
+
+            if (type.IsConstructedGenericType)
+            {
+                var gtd = type.GetGenericTypeDefinition();
+                if (gtd == typeof(List<>) || gtd == typeof(IList<>) ||
+                    gtd == typeof(Collection<>) || gtd == typeof(ICollection<>) ||
+                    gtd == typeof(ObservableCollection<>))
+                {
+                    elementType = type.GetGenericArguments()[0];
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        static Type GetCollectionElementType(Type type)
+        {
+            if (type.IsArray)
+                return type.GetElementType();
+            if (type.IsConstructedGenericType)
+                return type.GetGenericArguments()[0];
+            return null;
+        }
+
+        #endregion
+
+        #region Serialization (T -> KVObject)
 
         public static KVObject FromObject(
             [DynamicallyAccessedMembers(Trimming.Properties)] Type objectType,
             object managedObject)
-            => ConvertObjectToValue(objectType, managedObject, new DefaultObjectReflector(), new HashSet<object>());
+            => ConvertObjectToValue(objectType, managedObject, new HashSet<object>());
 
         [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2072", Justification = "If the IDictionary's value object already exists at runtime then its properties will too.")]
         static KVObject ConvertObjectToValue(
             [DynamicallyAccessedMembers(Trimming.Properties)] Type objectType,
             object managedObject,
-            IObjectReflector reflector,
             HashSet<object> visitedObjects)
         {
             if (!objectType.IsValueType && objectType != typeof(string) && !visitedObjects.Add(managedObject))
@@ -98,8 +327,7 @@ namespace ValveKeyValue
                 while (enumerator.MoveNext())
                 {
                     var entry = enumerator.Entry;
-
-                    var childObjectValue = ConvertObjectToValue(entry.Value.GetType(), entry.Value, reflector, visitedObjects);
+                    var childObjectValue = ConvertObjectToValue(entry.Value.GetType(), entry.Value, visitedObjects);
                     childItems.Add(new KeyValuePair<string, KVObject>(entry.Key.ToString(), childObjectValue));
                 }
             }
@@ -108,325 +336,42 @@ namespace ValveKeyValue
                 var counter = 0;
                 foreach (var child in (IEnumerable)managedObject)
                 {
-                    var childValue = ConvertObjectToValue(child.GetType(), child, reflector, visitedObjects);
+                    var childValue = ConvertObjectToValue(child.GetType(), child, visitedObjects);
                     childItems.Add(new KeyValuePair<string, KVObject>(counter.ToString(CultureInfo.InvariantCulture), childValue));
-
                     counter++;
+                }
+            }
+            else if (IsValueTupleType(objectType))
+            {
+                foreach (var field in objectType.GetFields(BindingFlags.Instance | BindingFlags.Public)
+                    .OrderBy(f => f.Name, StringComparer.InvariantCulture))
+                {
+                    var value = field.GetValue(managedObject);
+                    if (value is null)
+                        continue;
+
+                    var childValue = ConvertObjectToValue(value.GetType(), value, visitedObjects);
+                    childItems.Add(new KeyValuePair<string, KVObject>(field.Name, childValue));
                 }
             }
             else
             {
-                foreach (var member in reflector.GetMembers(objectType, managedObject).OrderBy(p => p.Name, StringComparer.InvariantCulture))
+                var typeInfo = s_options.GetTypeInfo(objectType);
+                foreach (var prop in typeInfo.Properties.OrderBy(p => p.Name, StringComparer.InvariantCulture))
                 {
-                    if (!member.MemberType.IsValueType && member.Value is null)
-                    {
+                    if (prop.Get is null)
                         continue;
-                    }
 
-                    var childValue = ConvertObjectToValue(member.Value.GetType(), member.Value, reflector, visitedObjects);
-                    childItems.Add(new KeyValuePair<string, KVObject>(member.Name, childValue));
+                    var value = prop.Get(managedObject);
+                    if (!prop.PropertyType.IsValueType && value is null)
+                        continue;
+
+                    var childValue = ConvertObjectToValue(value.GetType(), value, visitedObjects);
+                    childItems.Add(new KeyValuePair<string, KVObject>(prop.Name, childValue));
                 }
             }
 
             return new KVObject(KVValueType.Collection, childItems);
-        }
-
-        static void CopyObject(KVObject kv, [DynamicallyAccessedMembers(Trimming.Properties)] Type objectType, object obj, IObjectReflector reflector)
-        {
-            ArgumentNullException.ThrowIfNull(kv);
-            ArgumentNullException.ThrowIfNull(obj);
-            ArgumentNullException.ThrowIfNull(reflector);
-
-            var members = reflector.GetMembers(objectType, obj).ToDictionary(m => m.Name, m => m, StringComparer.OrdinalIgnoreCase);
-
-            foreach (var (key, child) in kv)
-            {
-                if (!members.TryGetValue(key, out var member))
-                {
-                    continue;
-                }
-
-                var convertedValue = MakeObject(member.MemberType, child, reflector);
-                member.Value = convertedValue;
-            }
-        }
-
-        static bool IsArray(KVObject obj, out object[] values)
-        {
-            values = null;
-
-            if (obj.Any(kvp => !IsNumeric(kvp.Key)))
-            {
-                return false;
-            }
-
-            var items = obj
-                .Select(kvp => new { Index = int.Parse(kvp.Key, NumberStyles.Number, CultureInfo.InvariantCulture), kvp.Value })
-                .OrderBy(i => i.Index)
-                .ToArray();
-
-            for (int i = 0; i < items.Length; i++)
-            {
-                if (i != items[i].Index)
-                {
-                    return false;
-                }
-            }
-
-            values = items.Select(i => (object)i.Value).ToArray();
-            return true;
-        }
-
-        static readonly Dictionary<Type, Func<Type, object[], IObjectReflector, object>> EnumerableBuilders = new()
-        {
-            [typeof(List<>)] = (type, values, reflector) => InvokeGeneric(nameof(MakeList), type.GetGenericArguments()[0], new object[] { values, reflector }),
-            [typeof(IList<>)] = (type, values, reflector) => InvokeGeneric(nameof(MakeList), type.GetGenericArguments()[0], new object[] { values, reflector }),
-            [typeof(Collection<>)] = (type, values, reflector) => InvokeGeneric(nameof(MakeCollection), type.GetGenericArguments()[0], new object[] { values, reflector }),
-            [typeof(ICollection<>)] = (type, values, reflector) => InvokeGeneric(nameof(MakeCollection), type.GetGenericArguments()[0], new object[] { values, reflector }),
-            [typeof(ObservableCollection<>)] = (type, values, reflector) => InvokeGeneric(nameof(MakeObservableCollection), type.GetGenericArguments()[0], new object[] { values, reflector }),
-        };
-
-        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2072", Justification = "If our T[] array exists then so much the element T.")]
-        [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "If our T[] array exists then so much the element T.")]
-        static bool ConstructTypedEnumerable(
-            Type type,
-            object[] values,
-            IObjectReflector reflector,
-            out object typedEnumerable)
-        {
-            object listObject = null;
-
-            if (type.IsArray)
-            {
-                var elementType = type.GetElementType();
-                var itemArray = Array.CreateInstance(elementType, values.Length);
-
-                for (int i = 0; i < itemArray.Length; i++)
-                {
-                    var item = ConvertValue(values[i], elementType, reflector);
-                    itemArray.SetValue(item, i);
-                }
-
-                listObject = itemArray;
-            }
-            else if (type.IsConstructedGenericType)
-            {
-                if (EnumerableBuilders.TryGetValue(type.GetGenericTypeDefinition(), out var builder))
-                {
-                    listObject = builder(type, values, reflector);
-                }
-            }
-
-            typedEnumerable = listObject;
-            return listObject != null;
-        }
-
-        static bool IsConstructibleEnumerableType(Type type)
-        {
-            if (type.IsArray)
-            {
-                return true;
-            }
-
-            if (!type.IsConstructedGenericType)
-            {
-                return false;
-            }
-
-            var gtd = type.GetGenericTypeDefinition();
-
-            if (EnumerableBuilders.ContainsKey(gtd))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2060", Justification = "Analysis cannot follow MakeGenericMethod. All callers validated manually.")]
-        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2111", Justification = "Analysis cannot follow MakeGenericMethod. All callers validated manually.")]
-        [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Analysis cannot follow MakeGenericMethod. All callers validated manually.")]
-        static object InvokeGeneric(string methodName, Type genericType, params object[] parameters)
-        {
-            var method = typeof(ObjectCopier)
-                .GetTypeInfo()
-                .GetDeclaredMethods(methodName)
-                .Single(m => m.IsStatic && m.GetParameters().Length == parameters.Length);
-
-            try
-            {
-                return method.MakeGenericMethod(genericType).Invoke(null, parameters);
-            }
-            catch (TargetInvocationException ex) when (ex.InnerException != null)
-            {
-                ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
-                throw; // Unreachable
-            }
-        }
-
-        static List<TElement> MakeList<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TElement>(object[] items, IObjectReflector reflector)
-        {
-            var list = new List<TElement>(capacity: items.Length);
-            foreach (var item in items)
-            {
-                list.Add(ConvertValue<TElement>(item, reflector));
-            }
-            return list;
-        }
-
-        static Collection<TElement> MakeCollection<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TElement>(object[] items, IObjectReflector reflector)
-        {
-            return new Collection<TElement>(MakeList<TElement>(items, reflector));
-        }
-
-        static ObservableCollection<TElement> MakeObservableCollection<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TElement>(object[] items, IObjectReflector reflector)
-        {
-            return new ObservableCollection<TElement>(MakeList<TElement>(items, reflector));
-        }
-
-        static bool IsNumeric(string str)
-        {
-            if (str.Length == 0)
-            {
-                return false;
-            }
-
-            return int.TryParse(str, NumberStyles.Number, CultureInfo.InvariantCulture, out _);
-        }
-
-        static bool IsDictionary(Type type)
-        {
-            if (!type.IsConstructedGenericType)
-            {
-                return false;
-            }
-
-            var genericType = type.GetGenericTypeDefinition();
-            if (genericType != typeof(Dictionary<,>))
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2060", Justification = "Analysis cannot follow MakeGenericMethod but we should be clear by here anyway.")]
-        [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Analysis cannot follow MakeGenericMethod but we should be clear by here anyway.")]
-        static object MakeDictionary(
-            [DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] Type type,
-            KVObject kv,
-            IObjectReflector reflector)
-        {
-            var dictionary = Activator.CreateInstance(type);
-            var genericArguments = type.GetGenericArguments();
-
-            var method = typeof(ObjectCopier)
-                .GetMethod(nameof(FillDictionary), BindingFlags.Static | BindingFlags.NonPublic);
-            method.MakeGenericMethod(genericArguments)
-                .Invoke(null, new[] { dictionary, kv, reflector });
-
-            return dictionary;
-        }
-
-        static void FillDictionary<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TKey, [DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TValue>(Dictionary<TKey, TValue> dictionary, KVObject kv, IObjectReflector reflector)
-        {
-            foreach (var (childKey, child) in kv)
-            {
-                var key = ConvertValue<TKey>(childKey, reflector);
-
-                if (dictionary.ContainsKey(key))
-                {
-                    continue;
-                }
-
-                var value = ConvertValue<TValue>(child, reflector);
-                dictionary.Add(key, value);
-            }
-        }
-
-        static TValue ConvertValue<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TValue>(object value, IObjectReflector reflector)
-            => (TValue)ConvertValue(value, typeof(TValue), reflector);
-
-        static object ConvertValue(
-            object value,
-            [DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] Type valueType,
-            IObjectReflector reflector)
-        {
-            if (value is KVObject kvObject)
-            {
-                if (kvObject.ValueType == KVValueType.Collection)
-                {
-                    return MakeObject(valueType, kvObject, reflector);
-                }
-
-                if (kvObject.ValueType == KVValueType.BinaryBlob && valueType == typeof(byte[]))
-                {
-                    return kvObject.AsBlob();
-                }
-
-                return Convert.ChangeType(kvObject.ToType(valueType, null), valueType, CultureInfo.InvariantCulture);
-            }
-
-            return Convert.ChangeType(value, valueType, CultureInfo.InvariantCulture);
-        }
-
-        static bool TryConvertValueTo<TValue>(KVObject value, out TValue converted)
-        {
-            if (typeof(TValue) == typeof(IntPtr))
-            {
-                converted = (TValue)(object)(IntPtr)value;
-                return true;
-            }
-
-            if (typeof(TValue) == typeof(byte[]) && value.ValueType == KVValueType.BinaryBlob)
-            {
-                converted = (TValue)(object)value.AsBlob();
-                return true;
-            }
-
-            if (typeof(TValue).IsEnum)
-            {
-                var underlyingType = Enum.GetUnderlyingType(typeof(TValue));
-                var underlyingValue = value.ToType(underlyingType, CultureInfo.InvariantCulture);
-                converted = (TValue)Enum.ToObject(typeof(TValue), underlyingValue);
-                return true;
-            }
-
-            if (CanConvertValueTo(typeof(TValue)))
-            {
-                try
-                {
-                    converted = (TValue)value.ToType(typeof(TValue), CultureInfo.InvariantCulture);
-                }
-                catch (Exception e)
-                {
-                    throw new NotSupportedException($"Conversion to {typeof(TValue)} failed. (type = {value.ValueType})", e);
-                }
-
-                return true;
-            }
-
-            converted = default;
-            return false;
-        }
-
-        static bool CanConvertValueTo(Type type)
-        {
-            return
-                type == typeof(bool) ||
-                type == typeof(byte) ||
-                type == typeof(char) ||
-                type == typeof(decimal) ||
-                type == typeof(double) ||
-                type == typeof(float) ||
-                type == typeof(int) ||
-                type == typeof(long) ||
-                type == typeof(uint) ||
-                type == typeof(ulong) ||
-                type == typeof(ushort) ||
-                type == typeof(sbyte) ||
-                type == typeof(short) ||
-                type == typeof(string);
         }
 
         static KVObject ConvertToKVObject(object value, Type type)
@@ -445,18 +390,82 @@ namespace ValveKeyValue
             return Type.GetTypeCode(type) switch
             {
                 TypeCode.Boolean => new KVObject((bool)value),
-                TypeCode.Byte => new KVObject((int)(byte)value), // There is no byte kv type
-                TypeCode.SByte => new KVObject((int)(sbyte)value), // There is no sbyte kv type
-                TypeCode.Int16 => new KVObject((int)(short)value), // There is no int16 kv type
+                TypeCode.Byte => new KVObject((int)(byte)value),
+                TypeCode.SByte => new KVObject((int)(sbyte)value),
+                TypeCode.Int16 => new KVObject((int)(short)value),
                 TypeCode.Int32 => new KVObject((int)value),
                 TypeCode.Int64 => new KVObject((long)value),
                 TypeCode.Single => new KVObject((float)value),
                 TypeCode.String => new KVObject((string)value),
-                TypeCode.UInt16 => new KVObject((ulong)(ushort)value), // There is no uint16 kv type
-                TypeCode.UInt32 => new KVObject((ulong)(uint)value), // There is no uint32 kv type
+                TypeCode.UInt16 => new KVObject((ulong)(ushort)value),
+                TypeCode.UInt32 => new KVObject((ulong)(uint)value),
                 TypeCode.UInt64 => new KVObject((ulong)value),
                 _ => null,
             };
         }
+
+        #endregion
+
+        #region ValueTuple support
+
+        static bool IsValueTupleType(Type type)
+            => type.IsGenericType && type.FullName.StartsWith("System.ValueTuple`", StringComparison.Ordinal);
+
+        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2070", Justification = "ValueTuple fields exist at runtime.")]
+        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2067", Justification = "ValueTuple types exist at runtime.")]
+        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2072", Justification = "ValueTuple fields exist at runtime.")]
+        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2026", Justification = "ValueTuple field types exist at runtime.")]
+        [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "ValueTuple field types exist at runtime.")]
+        static object DeserializeValueTuple(Type type, KVObject kv)
+        {
+            var fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public);
+            var boxed = Activator.CreateInstance(type);
+
+            var kvChildren = new Dictionary<string, KVObject>(StringComparer.OrdinalIgnoreCase);
+            foreach (var (key, child) in kv)
+            {
+                kvChildren.TryAdd(key, child);
+            }
+
+            foreach (var field in fields)
+            {
+                if (!kvChildren.TryGetValue(field.Name, out var child))
+                    continue;
+
+                object value;
+                if (IsValueTupleType(field.FieldType))
+                {
+                    value = DeserializeValueTuple(field.FieldType, child);
+                }
+                else
+                {
+                    var jsonNode = KVObjectToJsonNode(child, field.FieldType);
+                    value = jsonNode.Deserialize(field.FieldType, s_options);
+                }
+
+                field.SetValue(boxed, value);
+            }
+
+            return boxed;
+        }
+
+        #endregion
+
+        #region Custom JSON converters
+
+        sealed class IntPtrConverter : JsonConverter<IntPtr>
+        {
+            public override IntPtr Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                if (reader.TokenType == JsonTokenType.String)
+                    return new IntPtr(int.Parse(reader.GetString(), CultureInfo.InvariantCulture));
+                return new IntPtr(reader.GetInt32());
+            }
+
+            public override void Write(Utf8JsonWriter writer, IntPtr value, JsonSerializerOptions options)
+                => writer.WriteNumberValue(value.ToInt32());
+        }
+
+        #endregion
     }
 }
