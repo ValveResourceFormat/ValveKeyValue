@@ -7,7 +7,7 @@ namespace ValveKeyValue.Test
         [Test]
         public void IsNotNullOrEmpty()
         {
-            Assert.That(data, Is.Not.Null.Or.Empty);
+            Assert.That(data, Is.Not.Null);
         }
 
         [Test]

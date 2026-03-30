@@ -41,7 +41,7 @@ namespace ValveKeyValue.Serialization.KeyValues1
             }
         }
 
-        public void OnKeyValuePair(string name, KVValue value)
+        public void OnKeyValuePair(string name, KVObject value)
         {
             Write(GetNodeType(value.ValueType));
             WriteKeyForNextValue(name);
@@ -75,7 +75,7 @@ namespace ValveKeyValue.Serialization.KeyValues1
         }
 
         public void OnArrayStart(string name, KVFlag flag, int elementCount, bool allSimpleElements) => throw new NotImplementedException();
-        public void OnArrayValue(KVValue value) => throw new NotImplementedException();
+        public void OnArrayValue(KVObject value) => throw new NotImplementedException();
         public void OnArrayEnd() => throw new NotImplementedException();
 
         void Write(KV1BinaryNodeType nodeType)

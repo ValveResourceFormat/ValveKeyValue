@@ -50,7 +50,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
             WriteEndObject();
         }
 
-        public void OnKeyValuePair(string name, KVValue value)
+        public void OnKeyValuePair(string name, KVObject value)
             => WriteKeyValuePair(name, value);
 
         public void OnArrayStart(string name, KVFlag flag, int elementCount, bool allSimpleElements)
@@ -83,7 +83,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
             }
         }
 
-        public void OnArrayValue(KVValue value)
+        public void OnArrayValue(KVObject value)
         {
             var (isShort, allSimple, index, count) = context.Pop()!.Value;
             var isLast = index == count - 1;
@@ -187,7 +187,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
             writer.WriteLine();
         }
 
-        void WriteKeyValuePair(string name, KVValue value)
+        void WriteKeyValuePair(string name, KVObject value)
         {
             WriteIndentation();
 
@@ -198,7 +198,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
             WriteLine();
         }
 
-        void WriteValue(KVValue value)
+        void WriteValue(KVObject value)
         {
             WriteFlag(value.Flag);
 
@@ -295,7 +295,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
                 writer.Write(span);
         }
 
-        void WriteBinaryBlob(KVValue value)
+        void WriteBinaryBlob(KVObject value)
         {
             var bytes = value.AsSpan();
 

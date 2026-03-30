@@ -98,8 +98,8 @@ namespace ValveKeyValue.Test
 
             var children = data.Children.ToArray();
             Assert.That(children, Has.Length.EqualTo(1));
-            Assert.That(children[0].Name, Is.EqualTo("operating system [$WIN32]"));
-            Assert.That((string)children[0], Is.EqualTo("windows 32-bit"));
+            Assert.That(children[0].Key, Is.EqualTo("operating system [$WIN32]"));
+            Assert.That((string)children[0].Value, Is.EqualTo("windows 32-bit"));
         }
 
         [Test]
@@ -118,8 +118,8 @@ namespace ValveKeyValue.Test
 
             children = data.Children.ToArray();
             Assert.That(children, Has.Length.EqualTo(1));
-            Assert.That(children[0].Name, Is.EqualTo("operating system"));
-            Assert.That((string)children[0], Is.EqualTo("windows 32-bit"));
+            Assert.That(children[0].Key, Is.EqualTo("operating system"));
+            Assert.That((string)children[0].Value, Is.EqualTo("windows 32-bit"));
         }
 
         [Test]
@@ -138,8 +138,8 @@ namespace ValveKeyValue.Test
 
             children = data.Children.ToArray();
             Assert.That(children, Has.Length.EqualTo(1));
-            Assert.That(children[0].Name, Is.EqualTo("operating system"));
-            Assert.That((string)children[0], Is.EqualTo("windows 32-bit"));
+            Assert.That(children[0].Key, Is.EqualTo("operating system"));
+            Assert.That((string)children[0].Value, Is.EqualTo("windows 32-bit"));
         }
 
         [Test]

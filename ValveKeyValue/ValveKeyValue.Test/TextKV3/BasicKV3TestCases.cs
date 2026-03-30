@@ -30,29 +30,29 @@ namespace ValveKeyValue.Test.TextKV3
 
             Assert.Multiple(() =>
             {
-                Assert.That(data["foo"].Value.Flag, Is.EqualTo(KVFlag.Resource));
+                Assert.That(data["foo"].Flag, Is.EqualTo(KVFlag.Resource));
                 Assert.That((string)data["foo"], Is.EqualTo("bar"));
 
-                Assert.That(data["bar"].Value.Flag, Is.EqualTo(KVFlag.Resource));
+                Assert.That(data["bar"].Flag, Is.EqualTo(KVFlag.Resource));
                 Assert.That((string)data["bar"], Is.EqualTo("foo"));
 
-                Assert.That(data["multipleFlags"].Value.Flag, Is.EqualTo(KVFlag.SubClass));
+                Assert.That(data["multipleFlags"].Flag, Is.EqualTo(KVFlag.SubClass));
                 Assert.That((string)data["multipleFlags"], Is.EqualTo("cool value"));
 
-                Assert.That(data["flaggedNumber"].Value.Flag, Is.EqualTo(KVFlag.Panorama));
+                Assert.That(data["flaggedNumber"].Flag, Is.EqualTo(KVFlag.Panorama));
                 Assert.That((long)data["flaggedNumber"], Is.EqualTo(-1234));
 
-                Assert.That(data["soundEvent"].Value.Flag, Is.EqualTo(KVFlag.SoundEvent));
+                Assert.That(data["soundEvent"].Flag, Is.EqualTo(KVFlag.SoundEvent));
                 Assert.That((string)data["soundEvent"], Is.EqualTo("event sound"));
 
-                Assert.That(data["noFlags"].Value.Flag, Is.EqualTo(KVFlag.None));
+                Assert.That(data["noFlags"].Flag, Is.EqualTo(KVFlag.None));
                 Assert.That((long)data["noFlags"], Is.EqualTo(5));
 
-                Assert.That(data["flaggedObject"].Value.Flag, Is.EqualTo(KVFlag.Panorama));
-                Assert.That(data["flaggedObject"]["1"].Value.Flag, Is.EqualTo(KVFlag.SoundEvent));
-                Assert.That(data["flaggedObject"]["2"].Value.Flag, Is.EqualTo(KVFlag.None));
-                Assert.That(data["flaggedObject"]["3"].Value.Flag, Is.EqualTo(KVFlag.SubClass));
-                Assert.That(data["flaggedObject"]["4"].Value.Flag, Is.EqualTo(KVFlag.ResourceName));
+                Assert.That(data["flaggedObject"].Flag, Is.EqualTo(KVFlag.Panorama));
+                Assert.That(data["flaggedObject"]["1"].Flag, Is.EqualTo(KVFlag.SoundEvent));
+                Assert.That(data["flaggedObject"]["2"].Flag, Is.EqualTo(KVFlag.None));
+                Assert.That(data["flaggedObject"]["3"].Flag, Is.EqualTo(KVFlag.SubClass));
+                Assert.That(data["flaggedObject"]["4"].Flag, Is.EqualTo(KVFlag.ResourceName));
             });
         }
 
@@ -107,8 +107,8 @@ namespace ValveKeyValue.Test.TextKV3
             var arrayValue = data["arrayValue"];
 
             Assert.That(arrayValue.Count, Is.EqualTo(2));
-            Assert.That(arrayValue[0].Value.ToString(CultureInfo.InvariantCulture), Is.EqualTo("a"));
-            Assert.That(arrayValue[1].Value.ToString(CultureInfo.InvariantCulture), Is.EqualTo("b"));
+            Assert.That(arrayValue[0].ToString(CultureInfo.InvariantCulture), Is.EqualTo("a"));
+            Assert.That(arrayValue[1].ToString(CultureInfo.InvariantCulture), Is.EqualTo("b"));
 
             // TODO: Test all the children values
         }
@@ -120,7 +120,7 @@ namespace ValveKeyValue.Test.TextKV3
             var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
 
             Assert.That(data["array"].ValueType, Is.EqualTo(KVValueType.BinaryBlob));
-            Assert.That(data["array"].Value.AsBlob(), Is.EqualTo(ExpectedBlobData));
+            Assert.That(data["array"].AsBlob(), Is.EqualTo(ExpectedBlobData));
         }
 
         [Test]
@@ -150,7 +150,7 @@ namespace ValveKeyValue.Test.TextKV3
 
             Assert.Multiple(() =>
             {
-                Assert.That(data["name"].Value.Flag, Is.EqualTo(KVFlag.EntityName));
+                Assert.That(data["name"].Flag, Is.EqualTo(KVFlag.EntityName));
                 Assert.That((string)data["name"], Is.EqualTo("some_entity"));
             });
         }
@@ -185,7 +185,6 @@ namespace ValveKeyValue.Test.TextKV3
                 Assert.That((bool)data["boolTrueValue"], Is.EqualTo(true));
 
                 Assert.That(data["nullValue"].ValueType, Is.EqualTo(KVValueType.Null));
-                //Assert.That(data["nullValue"], Is.EqualTo(null));
 
                 Assert.That(data["intValue"].ValueType, Is.EqualTo(KVValueType.UInt64));
                 Assert.That((int)data["intValue"], Is.EqualTo(128));
@@ -223,7 +222,6 @@ namespace ValveKeyValue.Test.TextKV3
                 Assert.That(data["doubleExponent"].ValueType, Is.EqualTo(KVValueType.FloatingPoint64));
                 Assert.That((double)data["doubleExponent"], Is.EqualTo(123.456));
 
-                // TODO: Should this throw instead because strings need to be quoted? Or should it parse until it hits a non number like 123?
                 Assert.That(data["intWithStringSuffix"].ValueType, Is.EqualTo(KVValueType.String));
                 Assert.That((string)data["intWithStringSuffix"], Is.EqualTo("123foobar"));
 

@@ -252,7 +252,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             return stream;
         }
 
-        static KVValue ParseValue(string text)
+        static KVObject ParseValue(string text)
         {
             // "0x" + 2 digits per byte. Long is 8 bytes, so s + 16 = 18.
             // Expressed this way for readability, rather than using a magic value.
@@ -269,7 +269,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                 }
 
                 var value = BitConverter.ToUInt64(data, 0);
-                return (KVValue)value;
+                return new KVObject(value);
             }
 
             const NumberStyles IntegerNumberStyles =
@@ -278,7 +278,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
             if (int.TryParse(text, IntegerNumberStyles, CultureInfo.InvariantCulture, out var intValue))
             {
-                return (KVValue)intValue;
+                return new KVObject(intValue);
             }
 
             const NumberStyles FloatingPointNumberStyles =
@@ -289,10 +289,10 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
             if (!IsStrToLBase10Compatible(text) && float.TryParse(text, FloatingPointNumberStyles, CultureInfo.InvariantCulture, out var floatValue))
             {
-                return (KVValue)floatValue;
+                return new KVObject(floatValue);
             }
 
-            return (KVValue)text;
+            return new KVObject(text);
         }
 
         // The string may begin with an arbitrary amount of white space (as determined by isspace(3)) followed by a single optional

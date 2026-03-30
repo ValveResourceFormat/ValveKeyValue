@@ -2,10 +2,10 @@ using System.Collections;
 
 namespace ValveKeyValue
 {
-    public partial class KVObject : IEnumerable<KVObject>
+    public partial class KVObject : IEnumerable<KeyValuePair<string, KVObject>>
     {
         /// <inheritdoc/>
-        public IEnumerator<KVObject> GetEnumerator()
+        public IEnumerator<KeyValuePair<string, KVObject>> GetEnumerator()
             => Children.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator()

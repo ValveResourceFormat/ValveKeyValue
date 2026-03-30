@@ -17,7 +17,7 @@ namespace ValveKeyValue.Test
         [Test]
         public void Name()
         {
-            Assert.That(data.Name, Is.EqualTo("depots"));
+            Assert.That(((KVDocument)data).Name, Is.EqualTo("depots"));
         }
 
         [Test]

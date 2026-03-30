@@ -1,56 +1,57 @@
 using System.Globalization;
+using System.Linq;
 using System.Text;
 
 namespace ValveKeyValue.Test
 {
     class ConversionCoverageTestCase
     {
-        #region 1. Missing implicit operators (short, ushort, IntPtr)
+        #region Missing implicit operators (short, ushort, IntPtr)
 
         [Test]
-        public void ImplicitShortToKVValue()
+        public void ImplicitShortToKVObject()
         {
-            KVValue v = (short)42;
+            KVObject v = (short)42;
             Assert.That(v.ValueType, Is.EqualTo(KVValueType.Int16));
             Assert.That((short)v, Is.EqualTo((short)42));
         }
 
         [Test]
-        public void ImplicitUShortToKVValue()
+        public void ImplicitUShortToKVObject()
         {
-            KVValue v = (ushort)42;
+            KVObject v = (ushort)42;
             Assert.That(v.ValueType, Is.EqualTo(KVValueType.UInt16));
             Assert.That((ushort)v, Is.EqualTo((ushort)42));
         }
 
         [Test]
-        public void ImplicitIntPtrToKVValue()
+        public void ImplicitIntPtrToKVObject()
         {
-            KVValue v = new IntPtr(42);
+            KVObject v = new IntPtr(42);
             Assert.That(v.ValueType, Is.EqualTo(KVValueType.Pointer));
             Assert.That((int)v, Is.EqualTo(42));
         }
 
         #endregion
 
-        #region 2. Missing explicit operators (IntPtr)
+        #region Missing explicit operators (IntPtr)
 
         [Test]
-        public void ExplicitKVValueToIntPtr()
+        public void ExplicitKVObjectToIntPtr()
         {
-            var v = (KVValue)42;
+            KVObject v = 42;
             IntPtr p = (IntPtr)v;
             Assert.That(p, Is.EqualTo(new IntPtr(42)));
         }
 
         #endregion
 
-        #region 3. KVObject IntPtr and byte operators
+        #region KVObject IntPtr and byte operators
 
         [Test]
         public void KVObjectToIntPtr()
         {
-            var obj = new KVObject("test", (KVValue)new IntPtr(123));
+            KVObject obj = new IntPtr(123);
             IntPtr p = (IntPtr)obj;
             Assert.That(p, Is.EqualTo(new IntPtr(123)));
         }
@@ -58,19 +59,19 @@ namespace ValveKeyValue.Test
         [Test]
         public void KVObjectToByte()
         {
-            var obj = new KVObject("test", (KVValue)7);
+            KVObject obj = 7;
             byte b = (byte)obj;
             Assert.That(b, Is.EqualTo((byte)7));
         }
 
         #endregion
 
-        #region 4. Cross-type conversions (store as X, read as Y)
+        #region Cross-type conversions (store as X, read as Y)
 
         [Test]
         public void IntToFloat()
         {
-            var v = (KVValue)42;
+            KVObject v = 42;
             float f = (float)v;
             Assert.That(f, Is.EqualTo(42.0f));
         }
@@ -78,7 +79,7 @@ namespace ValveKeyValue.Test
         [Test]
         public void FloatToInt()
         {
-            var v = (KVValue)3.14f;
+            KVObject v = 3.14f;
             int i = (int)v;
             Assert.That(i, Is.EqualTo(3));
         }
@@ -86,7 +87,7 @@ namespace ValveKeyValue.Test
         [Test]
         public void IntToLong()
         {
-            var v = (KVValue)42;
+            KVObject v = 42;
             long l = (long)v;
             Assert.That(l, Is.EqualTo(42L));
         }
@@ -94,7 +95,7 @@ namespace ValveKeyValue.Test
         [Test]
         public void IntToString()
         {
-            var v = (KVValue)42;
+            KVObject v = 42;
             string s = (string)v;
             Assert.That(s, Is.EqualTo("42"));
         }
@@ -102,129 +103,76 @@ namespace ValveKeyValue.Test
         [Test]
         public void StringToInt()
         {
-            var v = (KVValue)"123";
+            KVObject v = "123";
             int i = (int)v;
             Assert.That(i, Is.EqualTo(123));
         }
 
         #endregion
 
-        #region 5. Error paths for non-convertible types
+        #region Error paths for non-convertible types
 
         [Test]
         public void CollectionToIntThrows()
         {
-            var obj = new KVObject("test", new KVObject[] { new KVObject("a", (KVValue)1) });
-            Assert.That(() => (int)obj.Value, Throws.InstanceOf<NotSupportedException>());
+            var obj = KVObject.ListCollection();
+            obj.Add("a", 1);
+            Assert.That(() => (int)obj, Throws.InstanceOf<NotSupportedException>());
         }
 
         [Test]
         public void NullToIntThrows()
         {
-            var nullVal = default(KVValue);
+            var nullVal = KVObject.Null();
             Assert.That(() => (int)nullVal, Throws.InstanceOf<NotSupportedException>());
         }
 
         [Test]
         public void BinaryBlobToIntThrows()
         {
-            var blobVal = KVValue.Blob(new byte[] { 1, 2, 3 });
+            var blobVal = KVObject.Blob(new byte[] { 1, 2, 3 });
             Assert.That(() => (int)blobVal, Throws.InstanceOf<NotSupportedException>());
         }
 
         #endregion
 
-        #region 6. byte[] implicit operator
+        #region byte[] implicit operator
 
         [Test]
-        public void ImplicitByteArrayToKVValue()
+        public void ImplicitByteArrayToKVObject()
         {
-            KVValue v = new byte[] { 1, 2, 3 };
+            KVObject v = new byte[] { 1, 2, 3 };
             Assert.That(v.ValueType, Is.EqualTo(KVValueType.BinaryBlob));
             Assert.That(v.AsBlob(), Is.EqualTo(new byte[] { 1, 2, 3 }));
         }
 
         [Test]
-        public void NullByteArrayToKVValueIsNull()
+        public void NullByteArrayToKVObjectIsNull()
         {
-            KVValue v = (byte[])null;
+            KVObject v = (byte[])null;
             Assert.That(v.IsNull, Is.True);
         }
 
         #endregion
 
-        #region 7. KVObject.Blob factory
+        #region KVObject.Blob factory
 
         [Test]
         public void KVObjectBlobFactory()
         {
-            var obj = KVObject.Blob("test", new byte[] { 0xAB, 0xCD });
-            Assert.That(obj.Name, Is.EqualTo("test"));
+            var obj = KVObject.Blob(new byte[] { 0xAB, 0xCD });
             Assert.That(obj.ValueType, Is.EqualTo(KVValueType.BinaryBlob));
-            Assert.That(obj.Value.AsBlob(), Is.EqualTo(new byte[] { 0xAB, 0xCD }));
-        }
-
-        [Test]
-        public void BlobFromMemoryByte()
-        {
-            var memory = new Memory<byte>([0x01, 0x02, 0x03]);
-            var v = KVValue.Blob(memory);
-            Assert.That(v.ValueType, Is.EqualTo(KVValueType.BinaryBlob));
-            Assert.That(v.AsBlob(), Is.EqualTo(new byte[] { 0x01, 0x02, 0x03 }));
+            Assert.That(obj.AsBlob(), Is.EqualTo(new byte[] { 0xAB, 0xCD }));
         }
 
         #endregion
 
-        /*
-        #region 8. KV2Element basic tests
-
-        [Test]
-        public void KV2ElementBasicProperties()
-        {
-            var elementId = Guid.NewGuid();
-            var elem = new KV2Element("test") { ElementId = elementId, ClassName = "DmeElement" };
-
-            Assert.That(elem.Name, Is.EqualTo("test"));
-            Assert.That(elem.ClassName, Is.EqualTo("DmeElement"));
-            Assert.That(elem.ElementId, Is.EqualTo(elementId));
-            Assert.That(elem.ElementId, Is.Not.EqualTo(Guid.Empty));
-            Assert.That(elem, Is.InstanceOf<KVObject>());
-        }
-
-        [Test]
-        public void KV2ElementWithChildren()
-        {
-            var child = new KV2Element("child", (KVValue)"hello") { ElementId = Guid.NewGuid(), ClassName = "DmeChild" };
-            var parent = new KV2Element("parent", new KVObject[] { child }) { ElementId = Guid.NewGuid(), ClassName = "DmeParent" };
-
-            Assert.That(parent.Count, Is.EqualTo(1));
-            Assert.That(parent["child"], Is.InstanceOf<KV2Element>());
-        }
-
-        [Test]
-        public void KV2ElementPatternMatching()
-        {
-            var parent = new KV2Element("parent", new KVObject[] {
-                new KV2Element("child", (KVValue)"hello") { ElementId = Guid.NewGuid(), ClassName = "DmeChild" }
-            })
-            { ElementId = Guid.NewGuid(), ClassName = "DmeParent" };
-
-            KVObject obj = parent;
-            Assert.That(obj is KV2Element, Is.True);
-
-            var kv2 = (KV2Element)obj;
-            Assert.That(kv2.ClassName, Is.EqualTo("DmeParent"));
-        }
-
-        #endregion
-        */
-
-        #region 9. KVObject IConvertible (Convert.ChangeType works directly)
+        #region KVObject IConvertible (Convert.ChangeType works directly)
 
         [Test]
         public void ConvertChangeTypeOnKVObjectInt()
         {
-            var obj = new KVObject("test", (KVValue)42);
+            KVObject obj = 42;
             var result = Convert.ChangeType(obj, typeof(int), CultureInfo.InvariantCulture);
             Assert.That(result, Is.EqualTo(42));
         }
@@ -232,7 +180,7 @@ namespace ValveKeyValue.Test
         [Test]
         public void ConvertChangeTypeOnKVObjectString()
         {
-            var obj = new KVObject("test", (KVValue)"hello");
+            KVObject obj = "hello";
             var result = Convert.ChangeType(obj, typeof(string), CultureInfo.InvariantCulture);
             Assert.That(result, Is.EqualTo("hello"));
         }
@@ -240,7 +188,7 @@ namespace ValveKeyValue.Test
         [Test]
         public void ConvertToInt32OnKVObject()
         {
-            var obj = new KVObject("test", (KVValue)99);
+            KVObject obj = 99;
             var result = Convert.ToInt32(obj, CultureInfo.InvariantCulture);
             Assert.That(result, Is.EqualTo(99));
         }
@@ -248,7 +196,7 @@ namespace ValveKeyValue.Test
         [Test]
         public void ConvertToDoubleOnKVObject()
         {
-            var obj = new KVObject("test", (KVValue)3.14);
+            KVObject obj = 3.14;
             var result = Convert.ToDouble(obj, CultureInfo.InvariantCulture);
             Assert.That(result, Is.EqualTo(3.14));
         }
@@ -256,10 +204,9 @@ namespace ValveKeyValue.Test
         [Test]
         public void ConvertChangeTypeOnIndexerResult()
         {
-            var root = new KVObject("root", [
-                new KVObject("name", (KVValue)"world"),
-                new KVObject("count", (KVValue)7),
-            ]);
+            var root = KVObject.ListCollection();
+            root.Add("name", "world");
+            root.Add("count", 7);
 
             Assert.That(Convert.ToString(root["name"], CultureInfo.InvariantCulture), Is.EqualTo("world"));
             Assert.That(Convert.ToInt32(root["count"], CultureInfo.InvariantCulture), Is.EqualTo(7));
@@ -268,7 +215,7 @@ namespace ValveKeyValue.Test
         [Test]
         public void KVObjectIConvertibleToStringWithProvider()
         {
-            var obj = new KVObject("test", (KVValue)3.14f);
+            KVObject obj = 3.14f;
             var convertible = (IConvertible)obj;
             var result = convertible.ToString(System.Globalization.CultureInfo.InvariantCulture);
             Assert.That(result, Is.EqualTo("3.14"));
@@ -276,7 +223,7 @@ namespace ValveKeyValue.Test
 
         #endregion
 
-        #region 10. Dictionary-backed collection mutation
+        #region Dictionary-backed collection mutation
 
         [Test]
         public void DictBackedCollectionAddAndLookup()
@@ -292,7 +239,7 @@ namespace ValveKeyValue.Test
             Assert.That(data.Count, Is.EqualTo(2));
 
             // Add puts into dict
-            data.Add(new KVObject("key3", (KVValue)"value3"));
+            data.Add("key3", "value3");
             Assert.That(data.Count, Is.EqualTo(3));
             Assert.That((string)data["key3"], Is.EqualTo("value3"));
 
@@ -339,6 +286,136 @@ namespace ValveKeyValue.Test
             Assert.That(data["key1"], Is.Null);
             Assert.That(data.Count, Is.EqualTo(1));
             Assert.That((int)data["key2"], Is.EqualTo(42));
+        }
+
+        #endregion
+
+        #region Implicit byte/sbyte operators
+
+        [Test]
+        public void ImplicitByteToKVObject()
+        {
+            KVObject v = (byte)255;
+            Assert.That(v.ValueType, Is.EqualTo(KVValueType.Int32));
+            Assert.That((int)v, Is.EqualTo(255));
+            Assert.That((byte)v, Is.EqualTo((byte)255));
+        }
+
+        [Test]
+        public void ImplicitSByteToKVObject()
+        {
+            KVObject v = (sbyte)-42;
+            Assert.That(v.ValueType, Is.EqualTo(KVValueType.Int32));
+            Assert.That((int)v, Is.EqualTo(-42));
+            Assert.That((sbyte)v, Is.EqualTo((sbyte)-42));
+        }
+
+        [Test]
+        public void ImplicitByteInAdd()
+        {
+            var obj = KVObject.Collection();
+            obj.Add("val", (byte)10);
+            Assert.That((int)obj["val"], Is.EqualTo(10));
+        }
+
+        #endregion
+
+        #region Keys and Values properties
+
+        [Test]
+        public void KeysOnDictCollection()
+        {
+            var obj = KVObject.Collection();
+            obj.Add("a", 1);
+            obj.Add("b", 2);
+            obj.Add("c", 3);
+
+            var keys = obj.Keys.ToList();
+            Assert.That(keys, Has.Member("a").And.Member("b").And.Member("c").And.Count.EqualTo(3));
+        }
+
+        [Test]
+        public void KeysOnListCollection()
+        {
+            var obj = KVObject.ListCollection();
+            obj.Add("x", 10);
+            obj.Add("y", 20);
+            obj.Add("x", 30); // duplicate key
+
+            var keys = obj.Keys.ToList();
+            Assert.That(keys, Has.Count.EqualTo(3));
+            Assert.That(keys[0], Is.EqualTo("x"));
+            Assert.That(keys[1], Is.EqualTo("y"));
+            Assert.That(keys[2], Is.EqualTo("x"));
+        }
+
+        [Test]
+        public void KeysOnScalarIsEmpty()
+        {
+            KVObject obj = 42;
+            Assert.That(obj.Keys.Any(), Is.False);
+        }
+
+        [Test]
+        public void KeysOnArrayIsEmpty()
+        {
+            var arr = KVObject.Array();
+            arr.Add(1);
+            arr.Add(2);
+            Assert.That(arr.Keys.Any(), Is.False);
+        }
+
+        [Test]
+        public void ValuesOnDictCollection()
+        {
+            var obj = KVObject.Collection();
+            obj.Add("a", 1);
+            obj.Add("b", 2);
+
+            var values = obj.Values.Select(v => (int)v).ToList();
+            Assert.That(values, Has.Member(1).And.Member(2).And.Count.EqualTo(2));
+        }
+
+        [Test]
+        public void ValuesOnListCollection()
+        {
+            var obj = KVObject.ListCollection();
+            obj.Add("a", "hello");
+            obj.Add("b", "world");
+
+            var values = obj.Values.Select(v => (string)v).ToList();
+            Assert.That(values, Has.Count.EqualTo(2));
+            Assert.That(values[0], Is.EqualTo("hello"));
+            Assert.That(values[1], Is.EqualTo("world"));
+        }
+
+        [Test]
+        public void ValuesOnArray()
+        {
+            var arr = KVObject.Array();
+            arr.Add(10);
+            arr.Add(20);
+            arr.Add(30);
+
+            var values = arr.Values.Select(v => (int)v).ToList();
+            Assert.That(values, Has.Count.EqualTo(3));
+            Assert.That(values[0], Is.EqualTo(10));
+            Assert.That(values[1], Is.EqualTo(20));
+            Assert.That(values[2], Is.EqualTo(30));
+        }
+
+        [Test]
+        public void ValuesOnScalarIsEmpty()
+        {
+            KVObject obj = "hello";
+            Assert.That(obj.Values.Any(), Is.False);
+        }
+
+        [Test]
+        public void ValuesOnNullIsEmpty()
+        {
+            var obj = KVObject.Null();
+            Assert.That(obj.Values.Any(), Is.False);
         }
 
         #endregion

@@ -7,17 +7,17 @@ namespace ValveKeyValue.Test
         static KVSerializer KV1 => KVSerializer.Create(KVSerializationFormat.KeyValues1Text);
         static KVSerializer KV3 => KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
 
-        static KVObject DeserializeKV1(string text)
+        static KVDocument DeserializeKV1(string text)
         {
             return KV1.Deserialize(text);
         }
 
-        static KVObject DeserializeKV3(string text)
+        static KVDocument DeserializeKV3(string text)
         {
             return KV3.Deserialize(text);
         }
 
-        static KVDocument RoundTripKV1(KVObject data)
+        static KVDocument RoundTripKV1(KVDocument data)
         {
             using var ms = new MemoryStream();
             KV1.Serialize(ms, data);
@@ -25,7 +25,7 @@ namespace ValveKeyValue.Test
             return KV1.Deserialize(ms);
         }
 
-        static KVDocument RoundTripKV3(KVObject data)
+        static KVDocument RoundTripKV3(KVDocument data)
         {
             using var ms = new MemoryStream();
             KV3.Serialize(ms, data);
@@ -35,7 +35,7 @@ namespace ValveKeyValue.Test
 
         #endregion
 
-        #region 1. KV1 text round-trip with mutation
+        #region KV1 text round-trip with mutation
 
         [Test]
         public void KV1TextRoundTripWithMutation()
@@ -52,7 +52,7 @@ namespace ValveKeyValue.Test
             Assert.That((string)data["name"], Is.EqualTo("original"));
 
             // Mutate via indexer
-            data["name"] = new KVObject("name", "modified");
+            data["name"] = "modified";
 
             var result = RoundTripKV1(data);
 
@@ -66,7 +66,7 @@ namespace ValveKeyValue.Test
 
         #endregion
 
-        #region 2. KV3 text round-trip with mutation
+        #region KV3 text round-trip with mutation
 
         [Test]
         public void KV3TextRoundTripWithMutation()
@@ -77,7 +77,7 @@ namespace ValveKeyValue.Test
             Assert.That((string)data["name"], Is.EqualTo("original"));
 
             // Mutate
-            data["name"] = new KVObject("name", (KVValue)"updated");
+            data["name"] = "updated";
 
             var result = RoundTripKV3(data);
 
@@ -90,7 +90,7 @@ namespace ValveKeyValue.Test
 
         #endregion
 
-        #region 3. KV1 array round-trip
+        #region KV1 array round-trip
 
         [Test]
         public void KV1ArrayRoundTrip()
@@ -125,7 +125,7 @@ namespace ValveKeyValue.Test
 
         #endregion
 
-        #region 4. KV3 dict-backed collection round-trip
+        #region KV3 dict-backed collection round-trip
 
         [Test]
         public void KV3DictBackedCollectionRoundTrip()
@@ -155,17 +155,17 @@ namespace ValveKeyValue.Test
 
         #endregion
 
-        #region 5. Adding children then serializing
+        #region Adding children then serializing
 
         [Test]
         public void AddingChildrenThenSerializingKV1()
         {
-            var root = new KVObject("Config", new List<KVObject>());
+            var root = KVObject.ListCollection();
+            root.Add("key1", "value1");
+            root.Add("key2", "value2");
+            var doc = new KVDocument(null, "Config", root);
 
-            root.Add(new KVObject("key1", "value1"));
-            root.Add(new KVObject("key2", "value2"));
-
-            var result = RoundTripKV1(root);
+            var result = RoundTripKV1(doc);
 
             Assert.Multiple(() =>
             {
@@ -179,15 +179,12 @@ namespace ValveKeyValue.Test
         [Test]
         public void AddingChildrenThenSerializingKV3()
         {
-            var children = new List<KVObject>
-            {
-                new("existing", (KVValue)"yes"),
-            };
-            var root = new KVObject("root", (IEnumerable<KVObject>)children);
+            var root = KVObject.ListCollection();
+            root.Add("existing", "yes");
+            root.Add("added", "dynamically");
+            var doc = new KVDocument(null, "root", root);
 
-            root.Add(new KVObject("added", (KVValue)"dynamically"));
-
-            var result = RoundTripKV3(root);
+            var result = RoundTripKV3(doc);
 
             Assert.Multiple(() =>
             {
@@ -198,7 +195,7 @@ namespace ValveKeyValue.Test
 
         #endregion
 
-        #region 6. Removing children then serializing
+        #region Removing children then serializing
 
         [Test]
         public void RemovingChildrenThenSerializingKV1()
@@ -253,7 +250,7 @@ namespace ValveKeyValue.Test
 
         #endregion
 
-        #region 7. Nested collection round-trip
+        #region Nested collection round-trip
 
         [Test]
         public void DeeplyNestedCollectionRoundTripKV1()
@@ -302,7 +299,7 @@ namespace ValveKeyValue.Test
 
         #endregion
 
-        #region 8. Binary blob round-trip (KV3)
+        #region Binary blob round-trip (KV3)
 
         [Test]
         public void BinaryBlobRoundTripKV3()
@@ -312,14 +309,14 @@ namespace ValveKeyValue.Test
             var expectedBytes = new byte[] { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xFF };
 
             var data = DeserializeKV3(input);
-            Assert.That(data["blob"].Value.AsBlob(), Is.EqualTo(expectedBytes));
+            Assert.That(data["blob"].AsBlob(), Is.EqualTo(expectedBytes));
 
             var result = RoundTripKV3(data);
 
             Assert.Multiple(() =>
             {
                 Assert.That(result["blob"].ValueType, Is.EqualTo(KVValueType.BinaryBlob));
-                Assert.That(result["blob"].Value.AsBlob(), Is.EqualTo(expectedBytes));
+                Assert.That(result["blob"].AsBlob(), Is.EqualTo(expectedBytes));
             });
         }
 
@@ -329,20 +326,20 @@ namespace ValveKeyValue.Test
             var input = "<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->\n{\n\tempty_blob = #[  ]\n}\n";
 
             var data = DeserializeKV3(input);
-            Assert.That(data["empty_blob"].Value.AsBlob(), Is.EqualTo(Array.Empty<byte>()));
+            Assert.That(data["empty_blob"].AsBlob(), Is.EqualTo(Array.Empty<byte>()));
 
             var result = RoundTripKV3(data);
 
             Assert.Multiple(() =>
             {
                 Assert.That(result["empty_blob"].ValueType, Is.EqualTo(KVValueType.BinaryBlob));
-                Assert.That(result["empty_blob"].Value.AsBlob(), Is.EqualTo(Array.Empty<byte>()));
+                Assert.That(result["empty_blob"].AsBlob(), Is.EqualTo(Array.Empty<byte>()));
             });
         }
 
         #endregion
 
-        #region 9. Flag preservation round-trip (KV3)
+        #region Flag preservation round-trip (KV3)
 
         [Test]
         public void FlagPreservationRoundTripKV3()
@@ -353,45 +350,45 @@ namespace ValveKeyValue.Test
 
             Assert.Multiple(() =>
             {
-                Assert.That(data["resource_ref"].Value.Flag, Is.EqualTo(KVFlag.Resource));
-                Assert.That(data["resource_name_ref"].Value.Flag, Is.EqualTo(KVFlag.ResourceName));
-                Assert.That(data["panorama_ref"].Value.Flag, Is.EqualTo(KVFlag.Panorama));
-                Assert.That(data["sound_ref"].Value.Flag, Is.EqualTo(KVFlag.SoundEvent));
-                Assert.That(data["subclass_ref"].Value.Flag, Is.EqualTo(KVFlag.SubClass));
-                Assert.That(data["entity_ref"].Value.Flag, Is.EqualTo(KVFlag.EntityName));
-                Assert.That(data["no_flag"].Value.Flag, Is.EqualTo(KVFlag.None));
+                Assert.That(data["resource_ref"].Flag, Is.EqualTo(KVFlag.Resource));
+                Assert.That(data["resource_name_ref"].Flag, Is.EqualTo(KVFlag.ResourceName));
+                Assert.That(data["panorama_ref"].Flag, Is.EqualTo(KVFlag.Panorama));
+                Assert.That(data["sound_ref"].Flag, Is.EqualTo(KVFlag.SoundEvent));
+                Assert.That(data["subclass_ref"].Flag, Is.EqualTo(KVFlag.SubClass));
+                Assert.That(data["entity_ref"].Flag, Is.EqualTo(KVFlag.EntityName));
+                Assert.That(data["no_flag"].Flag, Is.EqualTo(KVFlag.None));
             });
 
             var result = RoundTripKV3(data);
 
             Assert.Multiple(() =>
             {
-                Assert.That(result["resource_ref"].Value.Flag, Is.EqualTo(KVFlag.Resource));
+                Assert.That(result["resource_ref"].Flag, Is.EqualTo(KVFlag.Resource));
                 Assert.That((string)result["resource_ref"], Is.EqualTo("materials/default.vmat"));
 
-                Assert.That(result["resource_name_ref"].Value.Flag, Is.EqualTo(KVFlag.ResourceName));
+                Assert.That(result["resource_name_ref"].Flag, Is.EqualTo(KVFlag.ResourceName));
                 Assert.That((string)result["resource_name_ref"], Is.EqualTo("models/hero.vmdl"));
 
-                Assert.That(result["panorama_ref"].Value.Flag, Is.EqualTo(KVFlag.Panorama));
+                Assert.That(result["panorama_ref"].Flag, Is.EqualTo(KVFlag.Panorama));
                 Assert.That((string)result["panorama_ref"], Is.EqualTo("panorama/layout.xml"));
 
-                Assert.That(result["sound_ref"].Value.Flag, Is.EqualTo(KVFlag.SoundEvent));
+                Assert.That(result["sound_ref"].Flag, Is.EqualTo(KVFlag.SoundEvent));
                 Assert.That((string)result["sound_ref"], Is.EqualTo("sounds/bang.vsnd"));
 
-                Assert.That(result["subclass_ref"].Value.Flag, Is.EqualTo(KVFlag.SubClass));
+                Assert.That(result["subclass_ref"].Flag, Is.EqualTo(KVFlag.SubClass));
                 Assert.That((string)result["subclass_ref"], Is.EqualTo("some_subclass"));
 
-                Assert.That(result["entity_ref"].Value.Flag, Is.EqualTo(KVFlag.EntityName));
+                Assert.That(result["entity_ref"].Flag, Is.EqualTo(KVFlag.EntityName));
                 Assert.That((string)result["entity_ref"], Is.EqualTo("npc_hero"));
 
-                Assert.That(result["no_flag"].Value.Flag, Is.EqualTo(KVFlag.None));
+                Assert.That(result["no_flag"].Flag, Is.EqualTo(KVFlag.None));
                 Assert.That((string)result["no_flag"], Is.EqualTo("plain_value"));
             });
         }
 
         #endregion
 
-        #region 10. Null value round-trip (KV3)
+        #region Null value round-trip (KV3)
 
         [Test]
         public void NullValueRoundTripKV3()

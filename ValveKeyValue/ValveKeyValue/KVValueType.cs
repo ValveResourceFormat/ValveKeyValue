@@ -1,82 +1,82 @@
 namespace ValveKeyValue
 {
     /// <summary>
-    /// Represents the type of a given <see cref="KVValue"/>.
+    /// Represents the type of a given <see cref="KVObject"/>.
     /// </summary>
     public enum KVValueType
     {
         /// <summary>
-        /// This <see cref="KVValue"/> is represented by a <see langword="null"/>.
+        /// This <see cref="KVObject"/> is represented by a <see langword="null"/>.
         /// </summary>
         Null,
 
         /// <summary>
-        /// This <see cref="KVValue"/> represents a collection of child <see cref="KVObject"/>s.
+        /// This <see cref="KVObject"/> represents a collection of child <see cref="KVObject"/>s.
         /// </summary>
         Collection,
 
         /// <summary>
-        /// This <see cref="KVValue"/> represents an array of child <see cref="KVValue"/>s.
+        /// This <see cref="KVObject"/> represents an array of child <see cref="KVObject"/>s.
         /// </summary>
         Array,
 
         /// <summary>
-        /// This <see cref="KVValue"/> represents a blob of binary bytes.
+        /// This <see cref="KVObject"/> represents a blob of binary bytes.
         /// </summary>
         BinaryBlob,
 
         /// <summary>
-        /// This <see cref="KVValue"/> is represented by a <see cref="bool"/>.
+        /// This <see cref="KVObject"/> is represented by a <see cref="bool"/>.
         /// </summary>
         Boolean,
 
         /// <summary>
-        /// This <see cref="KVValue"/> is represented by a <see cref="string"/>.
+        /// This <see cref="KVObject"/> is represented by a <see cref="string"/>.
         /// </summary>
         String,
 
         /// <summary>
-        /// This <see cref="KVValue"/> is represented by a <see cref="short"/>.
+        /// This <see cref="KVObject"/> is represented by a <see cref="short"/>.
         /// </summary>
         Int16,
 
         /// <summary>
-        /// This <see cref="KVValue"/> is represented by a <see cref="int"/>.
+        /// This <see cref="KVObject"/> is represented by a <see cref="int"/>.
         /// </summary>
         Int32,
 
         /// <summary>
-        /// This <see cref="KVValue"/> is represented by a <see cref="long"/>.
+        /// This <see cref="KVObject"/> is represented by a <see cref="long"/>.
         /// </summary>
         Int64,
 
         /// <summary>
-        /// This <see cref="KVValue"/> is represented by a <see cref="ushort"/>.
+        /// This <see cref="KVObject"/> is represented by a <see cref="ushort"/>.
         /// </summary>
         UInt16,
 
         /// <summary>
-        /// This <see cref="KVValue"/> is represented by a <see cref="uint"/>.
+        /// This <see cref="KVObject"/> is represented by a <see cref="uint"/>.
         /// </summary>
         UInt32,
 
         /// <summary>
-        /// This <see cref="KVValue"/> is represented by a <see cref="ulong"/>.
+        /// This <see cref="KVObject"/> is represented by a <see cref="ulong"/>.
         /// </summary>
         UInt64,
 
         /// <summary>
-        /// This <see cref="KVValue"/> is represented by a <see cref="float"/>.
+        /// This <see cref="KVObject"/> is represented by a <see cref="float"/>.
         /// </summary>
         FloatingPoint,
 
         /// <summary>
-        /// This <see cref="KVValue"/> is represented by a <see cref="double"/>.
+        /// This <see cref="KVObject"/> is represented by a <see cref="double"/>.
         /// </summary>
         FloatingPoint64,
 
         /// <summary>
-        /// This <see cref="KVValue"/> is represented by a <see cref="int"/>, but represents a pointer.
+        /// This <see cref="KVObject"/> is represented by a <see cref="int"/>, but represents a pointer.
         /// </summary>
         Pointer,
     }

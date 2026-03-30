@@ -5,29 +5,27 @@ namespace ValveKeyValue.Test
         [Test]
         public void InvalidCast()
         {
-            var obj = new KVObject("test", "some value that could be a date");
+            var obj = new KVObject("some value that could be a date");
             Assert.That(
-                () => ((IConvertible)obj.Value).ToDateTime(default),
+                () => ((IConvertible)obj).ToDateTime(default),
                 Throws.InstanceOf<NotSupportedException>());
         }
 
         [Test]
         public void DeserializeDateTimeNotSupported()
         {
-            var obj = new KVObject("test",
-            [
-                new KVObject("Value", "some value that could be a date")
-            ]);
+            var obj = KVObject.ListCollection();
+            obj.Add("Value", "some value that could be a date");
             using var ms = new MemoryStream();
             var serializer = KVSerializer.Create(KVSerializationFormat.KeyValues1Text);
 
-            serializer.Serialize(ms, obj);
+            serializer.Serialize(ms, new KVDocument(null, "test", obj));
             ms.Seek(0, SeekOrigin.Begin);
 
             Assert.That(
                 () => serializer.Deserialize<SerializedType>(ms),
                 Throws.InstanceOf<NotSupportedException>()
-                .With.Message.EqualTo("Converting to DateTime is not supported. (key = Value, type = String)"));
+                .With.Message.EqualTo("Converting to DateTime is not supported. (type = String)"));
         }
 
         class SerializedType

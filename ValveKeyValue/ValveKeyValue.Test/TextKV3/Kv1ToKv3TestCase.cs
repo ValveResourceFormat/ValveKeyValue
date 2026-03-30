@@ -12,7 +12,7 @@ namespace ValveKeyValue.Test.TextKV3
             var kv3 = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
             var data = kv1.Deserialize(stream);
 
-            data.Add(new KVObject("test", "success"));
+            data.Add("test", "success");
 
             string text;
             using (var ms = new MemoryStream())
@@ -37,7 +37,7 @@ namespace ValveKeyValue.Test.TextKV3
             var kv3 = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
             var data = kv1.Deserialize(stream);
 
-            data.Add(new KVObject("test", "success"));
+            data.Add("test", "success");
 
             string text;
             using (var ms = new MemoryStream())

@@ -1,162 +1,171 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace ValveKeyValue
 {
     /// <summary>
-    /// Represents a named KeyValue node in a tree structure.
+    /// Represents a KeyValue value node. This is the single type for all KV data.
+    /// Scalar data (int, float, string, etc.) is stored inline.
+    /// Collection/array data holds references to child KVObjects.
+    /// Keys (names) are stored in the parent container, not on the child.
     /// </summary>
     [DebuggerDisplay("{DebuggerDescription}")]
-    public partial class KVObject : IEnumerable<KVObject>
+    public partial class KVObject : IEnumerable<KeyValuePair<string, KVObject>>
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="KVObject"/> class with an empty dictionary-backed collection.
-        /// </summary>
-        /// <param name="name">Name of this object.</param>
-        public KVObject(string name)
-        {
-            Name = name;
-            Value = new KVValue(KVValueType.Collection, new Dictionary<string, KVObject>());
-        }
+        #region Properties
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="KVObject"/> class with a scalar or blob value.
+        /// Gets the value type of this object.
         /// </summary>
-        /// <param name="name">Name of this object.</param>
-        /// <param name="value">Value of this object.</param>
-        public KVObject(string name, KVValue value)
-        {
-            Name = name;
-            Value = value;
-        }
-
-        /// <inheritdoc cref="KVObject(string, KVValue)"/>
-        public KVObject(string name, string value) : this(name, (KVValue)value) { }
-
-        /// <inheritdoc cref="KVObject(string, KVValue)"/>
-        public KVObject(string name, bool value) : this(name, (KVValue)value) { }
-
-        /// <inheritdoc cref="KVObject(string, KVValue)"/>
-        public KVObject(string name, int value) : this(name, (KVValue)value) { }
-
-        /// <inheritdoc cref="KVObject(string, KVValue)"/>
-        public KVObject(string name, uint value) : this(name, (KVValue)value) { }
-
-        /// <inheritdoc cref="KVObject(string, KVValue)"/>
-        public KVObject(string name, long value) : this(name, (KVValue)value) { }
-
-        /// <inheritdoc cref="KVObject(string, KVValue)"/>
-        public KVObject(string name, ulong value) : this(name, (KVValue)value) { }
-
-        /// <inheritdoc cref="KVObject(string, KVValue)"/>
-        public KVObject(string name, float value) : this(name, (KVValue)value) { }
-
-        /// <inheritdoc cref="KVObject(string, KVValue)"/>
-        public KVObject(string name, double value) : this(name, (KVValue)value) { }
-
-        /// <inheritdoc cref="KVObject(string, KVValue)"/>
-        public KVObject(string name, IntPtr value) : this(name, (KVValue)value) { }
+        public KVValueType ValueType { get; internal set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="KVObject"/> class as a list-backed collection of named children.
-        /// Preserves insertion order and allows duplicate keys (used for KV1 format).
+        /// Gets or sets the flags of this object.
         /// </summary>
-        /// <remarks>
-        /// Uses a list backing (O(n) key lookup) to support duplicate keys.
-        /// For O(1) lookup with unique keys, use <see cref="Collection(string)"/> or the parameterless constructor instead.
-        /// </remarks>
-        /// <param name="name">Name of this object.</param>
-        /// <param name="items">Child items of this object.</param>
-        public KVObject(string name, IEnumerable<KVObject> items)
-        {
-            ArgumentNullException.ThrowIfNull(items);
+        public KVFlag Flag { get; set; }
 
-            Name = name;
-            var list = new List<KVObject>(items);
-            Value = new KVValue(KVValueType.Collection, list);
-        }
+        // Inline storage for scalar types (no boxing).
+        // Interpretation depends on ValueType.
+        internal long _scalar;
+
+        // Reference storage for heap types: string, byte[], List<KVObject>, Dictionary<string, KVObject>, etc.
+        internal object _ref;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="KVObject"/> class as an array of values.
-        /// Each value is wrapped in an unnamed <see cref="KVObject"/>.
+        /// Gets a value indicating whether this value is null.
         /// </summary>
-        /// <param name="name">Name of this object.</param>
-        /// <param name="values">The array values.</param>
-        public KVObject(string name, IEnumerable<KVValue> values)
-        {
-            ArgumentNullException.ThrowIfNull(values);
-
-            Name = name;
-            var list = new List<KVObject>();
-            foreach (var v in values)
-            {
-                list.Add(new KVObject(null, v));
-            }
-            Value = new KVValue(KVValueType.Array, list);
-        }
+        public bool IsNull => ValueType == KVValueType.Null;
 
         /// <summary>
-        /// Gets or sets the name of this object.
+        /// Gets a value indicating whether this value is an array.
         /// </summary>
-        /// <remarks>
-        /// Changing the name of a child that is already in a dictionary-backed parent
-        /// will not update the parent's key. Use the parent's string indexer to re-key instead.
-        /// </remarks>
-        public string Name { get; set; }
-
-        /// <summary>
-        /// Gets or sets the value of this object.
-        /// </summary>
-        public KVValue Value { get; set; }
+        public bool IsArray => ValueType == KVValueType.Array;
 
         /// <summary>
         /// Gets the number of children in this object's collection or array value.
         /// Returns 0 if the value is neither a collection nor an array.
         /// </summary>
-        public int Count => Value.ValueType switch
+        public int Count => ValueType switch
         {
             KVValueType.Collection => GetCollectionCount(),
-            KVValueType.Array => Value.GetArrayList().Count,
+            KVValueType.Array => GetArrayList().Count,
             _ => 0,
         };
 
-        /// <summary>
-        /// Gets the value type of this object's value.
-        /// </summary>
-        public KVValueType ValueType => Value.ValueType;
+        #endregion
+
+        #region Constructors
 
         /// <summary>
-        /// Gets a value indicating whether this object's value is an array.
+        /// Initializes a new instance of the <see cref="KVObject"/> class as an empty dictionary-backed collection.
         /// </summary>
-        public bool IsArray => Value.IsArray;
+        public KVObject()
+        {
+            ValueType = KVValueType.Collection;
+            _ref = new Dictionary<string, KVObject>();
+        }
 
         /// <summary>
-        /// Gets a value indicating whether this object's value is null.
+        /// Initializes a new instance of the <see cref="KVObject"/> class with a string value.
         /// </summary>
-        public bool IsNull => Value.IsNull;
+        public KVObject(string value)
+        {
+            if (value is null)
+            {
+                ValueType = KVValueType.Null;
+                return;
+            }
+
+            ValueType = KVValueType.String;
+            _ref = value;
+        }
+
+        /// <inheritdoc cref="KVObject(string)"/>
+        public KVObject(bool value)
+        {
+            ValueType = KVValueType.Boolean;
+            _scalar = value ? 1L : 0L;
+        }
+
+        /// <inheritdoc cref="KVObject(string)"/>
+        public KVObject(int value)
+        {
+            ValueType = KVValueType.Int32;
+            _scalar = value;
+        }
+
+        /// <inheritdoc cref="KVObject(string)"/>
+        public KVObject(uint value)
+        {
+            ValueType = KVValueType.UInt32;
+            _scalar = value;
+        }
+
+        /// <inheritdoc cref="KVObject(string)"/>
+        public KVObject(long value)
+        {
+            ValueType = KVValueType.Int64;
+            _scalar = value;
+        }
+
+        /// <inheritdoc cref="KVObject(string)"/>
+        public KVObject(ulong value)
+        {
+            ValueType = KVValueType.UInt64;
+            _scalar = unchecked((long)value);
+        }
+
+        /// <inheritdoc cref="KVObject(string)"/>
+        public KVObject(float value)
+        {
+            ValueType = KVValueType.FloatingPoint;
+            _scalar = BitConverter.SingleToInt32Bits(value);
+        }
+
+        /// <inheritdoc cref="KVObject(string)"/>
+        public KVObject(double value)
+        {
+            ValueType = KVValueType.FloatingPoint64;
+            _scalar = BitConverter.DoubleToInt64Bits(value);
+        }
+
+        /// <inheritdoc cref="KVObject(string)"/>
+        public KVObject(IntPtr value)
+        {
+            ValueType = KVValueType.Pointer;
+            _scalar = value.ToInt32();
+        }
+
+        internal KVObject(KVValueType type, long scalar, object refValue = null, KVFlag flag = KVFlag.None)
+        {
+            ValueType = type;
+            Flag = flag;
+            _scalar = scalar;
+            _ref = refValue;
+        }
+
+        internal KVObject(KVValueType type, object refValue, KVFlag flag = KVFlag.None)
+        {
+            ValueType = type;
+            Flag = flag;
+            _ref = refValue;
+        }
+
+        #endregion
 
         #region Indexers
 
         /// <summary>
-        /// Gets or sets a child by name. Returns <c>null</c> if the key is not found.
+        /// Gets or sets a child by key. Returns <c>null</c> if the key is not found.
         /// Setting a value creates or replaces the child with the given key.
         /// </summary>
-        /// <param name="key">Key of the child object to find.</param>
-        /// <returns>The child <see cref="KVObject"/>, or <c>null</c> if not found.</returns>
         public KVObject this[string key]
         {
             get => GetChild(key);
             set
             {
                 ArgumentNullException.ThrowIfNull(key);
-
-                if (value != null)
-                {
-                    value.Name = key;
-                }
-
                 SetChild(key, value);
             }
         }
@@ -164,18 +173,16 @@ namespace ValveKeyValue
         /// <summary>
         /// Gets a child by index (for arrays and collections by insertion order).
         /// </summary>
-        /// <param name="index">The index.</param>
-        /// <returns>The child <see cref="KVObject"/> at the specified index.</returns>
         public KVObject this[int index]
         {
             get
             {
-                if (Value.ValueType == KVValueType.Array)
+                if (ValueType == KVValueType.Array)
                 {
-                    return Value.GetArrayList()[index];
+                    return GetArrayList()[index];
                 }
 
-                if (Value.ValueType == KVValueType.Collection)
+                if (ValueType == KVValueType.Collection)
                 {
                     return GetCollectionByIndex(index);
                 }
@@ -191,59 +198,76 @@ namespace ValveKeyValue
         #region Navigation
 
         /// <summary>
-        /// Gets a child <see cref="KVObject"/> by name.
+        /// Gets a child <see cref="KVObject"/> by key.
         /// </summary>
-        /// <param name="name">Name of the child to find.</param>
-        /// <returns>The child <see cref="KVObject"/>, or <c>null</c> if not found.</returns>
         public KVObject GetChild(string name)
         {
             ArgumentNullException.ThrowIfNull(name);
 
-            return Value.RefValue switch
+            return _ref switch
             {
                 Dictionary<string, KVObject> dict => dict.GetValueOrDefault(name),
-                List<KVObject> list when Value.ValueType == KVValueType.Collection => FindInList(list, name),
+                List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection => FindInList(list, name),
                 _ => null,
             };
         }
 
         /// <summary>
-        /// Tries to get a child <see cref="KVObject"/> by name.
+        /// Tries to get a child <see cref="KVObject"/> by key.
         /// </summary>
-        /// <param name="name">Name of the child to find.</param>
-        /// <param name="child">The child if found; otherwise <c>null</c>.</param>
-        /// <returns><c>true</c> if the child was found; otherwise <c>false</c>.</returns>
-        public bool TryGetChild(string name, out KVObject child)
+        public bool TryGetValue(string name, out KVObject child)
         {
             child = GetChild(name);
             return child != null;
         }
 
         /// <summary>
-        /// Determines whether this object contains a child with the given name.
+        /// Determines whether this object contains a child with the given key.
         /// </summary>
-        /// <param name="name">The name to check for.</param>
-        /// <returns><c>true</c> if a child with the given name exists; otherwise, <c>false</c>.</returns>
         public bool ContainsKey(string name)
         {
             ArgumentNullException.ThrowIfNull(name);
 
-            return Value.RefValue switch
+            return _ref switch
             {
                 Dictionary<string, KVObject> dict => dict.ContainsKey(name),
-                List<KVObject> list when Value.ValueType == KVValueType.Collection => FindInList(list, name) != null,
+                List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection => FindInList(list, name) != null,
                 _ => false,
             };
         }
 
         /// <summary>
-        /// Gets the children of this <see cref="KVObject"/> as a sequence.
+        /// Gets the children of this <see cref="KVObject"/> as a sequence of key-value pairs.
+        /// For arrays, keys are <c>null</c>.
         /// Empty if this is not a collection or array.
         /// </summary>
-        public IEnumerable<KVObject> Children => Value.ValueType switch
+        public IEnumerable<KeyValuePair<string, KVObject>> Children => ValueType switch
         {
             KVValueType.Collection => GetCollectionChildren(),
-            KVValueType.Array => Value.GetArrayList(),
+            KVValueType.Array => EnumerateArray(),
+            _ => [],
+        };
+
+        /// <summary>
+        /// Gets the keys of this collection.
+        /// Empty if this is not a collection.
+        /// </summary>
+        public IEnumerable<string> Keys => _ref switch
+        {
+            Dictionary<string, KVObject> dict when ValueType == KVValueType.Collection => dict.Keys,
+            List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection => list.Select(kvp => kvp.Key),
+            _ => [],
+        };
+
+        /// <summary>
+        /// Gets the values of this collection or array.
+        /// Empty if this is not a collection or array.
+        /// </summary>
+        public IEnumerable<KVObject> Values => _ref switch
+        {
+            Dictionary<string, KVObject> dict when ValueType == KVValueType.Collection => dict.Values,
+            List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection => list.Select(kvp => kvp.Value),
+            List<KVObject> list when ValueType == KVValueType.Array => list,
             _ => [],
         };
 
@@ -252,63 +276,50 @@ namespace ValveKeyValue
         #region Mutation
 
         /// <summary>
-        /// Adds a <see cref="KVObject" /> as a child of the current collection.
+        /// Adds a named child to this collection.
         /// </summary>
-        /// <param name="child">The child to add.</param>
-        public void Add(KVObject child)
+        public void Add(string key, KVObject value)
         {
-            ArgumentNullException.ThrowIfNull(child);
+            ArgumentNullException.ThrowIfNull(key);
 
-            switch (Value.RefValue)
+            switch (_ref)
             {
                 case Dictionary<string, KVObject> dict:
-                    dict[child.Name] = child;
+                    dict[key] = value;
                     break;
-                case List<KVObject> list:
-                    list.Add(child);
+                case List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection:
+                    list.Add(new KeyValuePair<string, KVObject>(key, value));
                     break;
                 default:
-                    throw new InvalidOperationException($"Cannot add a child to a {Value.ValueType} value.");
+                    throw new InvalidOperationException($"Cannot add a named child to a {ValueType} value.");
             }
         }
 
         /// <summary>
-        /// Adds a named value as a child of the current collection.
+        /// Adds a value to this object's array.
         /// </summary>
-        /// <param name="name">Name of the child.</param>
-        /// <param name="value">Value of the child.</param>
-        public void Add(string name, KVValue value)
+        public void Add(KVObject value)
         {
-            Add(new KVObject(name, value));
-        }
-
-        /// <summary>
-        /// Adds a value to this object's array, wrapped in an unnamed <see cref="KVObject"/>.
-        /// </summary>
-        /// <param name="value">The value to add.</param>
-        public void Add(KVValue value)
-        {
-            if (Value.ValueType != KVValueType.Array)
+            if (ValueType != KVValueType.Array)
             {
-                throw new InvalidOperationException($"Cannot add an array element to a {Value.ValueType} value.");
+                throw new InvalidOperationException($"Cannot add an array element to a {ValueType} value.");
             }
 
-            Value.GetArrayList().Add(new KVObject(null, value));
+            GetArrayList().Add(value);
         }
 
         /// <summary>
-        /// Removes a child by key name.
+        /// Removes a child by key.
         /// </summary>
-        /// <param name="key">The key of the child to remove.</param>
-        /// <returns><c>true</c> if the child was found and removed; otherwise <c>false</c>.</returns>
         public bool Remove(string key)
         {
             ArgumentNullException.ThrowIfNull(key);
 
-            return Value.RefValue switch
+            return _ref switch
             {
                 Dictionary<string, KVObject> dict => dict.Remove(key),
-                List<KVObject> list when Value.ValueType == KVValueType.Collection => list.RemoveAll(c => c.Name == key) > 0,
+                // RemoveAll: removes all entries with this key, not just the first (list-backed collections allow duplicate keys)
+                List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection => list.RemoveAll(c => c.Key == key) > 0,
                 _ => false,
             };
         }
@@ -316,15 +327,14 @@ namespace ValveKeyValue
         /// <summary>
         /// Removes an element from an array by index.
         /// </summary>
-        /// <param name="index">The index of the element to remove.</param>
         public void RemoveAt(int index)
         {
-            if (Value.ValueType != KVValueType.Array)
+            if (ValueType != KVValueType.Array)
             {
-                throw new InvalidOperationException($"Cannot remove by index from a {Value.ValueType} value.");
+                throw new InvalidOperationException($"Cannot remove by index from a {ValueType} value.");
             }
 
-            Value.GetArrayList().RemoveAt(index);
+            GetArrayList().RemoveAt(index);
         }
 
         /// <summary>
@@ -332,12 +342,15 @@ namespace ValveKeyValue
         /// </summary>
         public void Clear()
         {
-            switch (Value.RefValue)
+            switch (_ref)
             {
                 case Dictionary<string, KVObject> dict:
                     dict.Clear();
                     break;
-                case List<KVObject> list:
+                case List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection:
+                    list.Clear();
+                    break;
+                case List<KVObject> list when ValueType == KVValueType.Array:
                     list.Clear();
                     break;
             }
@@ -345,112 +358,143 @@ namespace ValveKeyValue
 
         #endregion
 
-        // IEnumerable<KVObject> is in KVObject_IEnumerable.cs
+        // IEnumerable<KeyValuePair<string, KVObject>> is in KVObject_IEnumerable.cs
 
         #region Static factory methods
 
         /// <summary>
-        /// Creates an empty dictionary-backed collection <see cref="KVObject"/>.
-        /// Provides O(1) key lookup. Does not allow duplicate keys.
+        /// Creates an empty dictionary-backed collection.
         /// </summary>
-        /// <param name="name">Name of the object.</param>
-        /// <returns>A new <see cref="KVObject"/> with an empty dictionary-backed collection value.</returns>
-        public static KVObject Collection(string name)
-            => new(name);
+        public static KVObject Collection()
+            => new();
 
         /// <summary>
-        /// Creates a dictionary-backed collection <see cref="KVObject"/> from the given children.
-        /// Provides O(1) key lookup. Does not allow duplicate keys.
+        /// Creates a dictionary-backed collection from the given children.
         /// </summary>
-        /// <param name="name">Name of the object.</param>
-        /// <param name="children">The child objects.</param>
-        /// <returns>A new <see cref="KVObject"/> with a dictionary-backed collection value.</returns>
-        public static KVObject Collection(string name, IEnumerable<KVObject> children)
+        public static KVObject Collection(IEnumerable<KeyValuePair<string, KVObject>> children)
         {
             ArgumentNullException.ThrowIfNull(children);
 
-            var dict = new Dictionary<string, KVObject>();
-            foreach (var child in children)
+            var capacity = children is ICollection<KeyValuePair<string, KVObject>> col ? col.Count : 0;
+            var dict = new Dictionary<string, KVObject>(capacity);
+            foreach (var (key, value) in children)
             {
-                dict[child.Name] = child;
+                dict[key] = value;
             }
 
-            return new KVObject(name, new KVValue(KVValueType.Collection, dict));
+            return new KVObject(KVValueType.Collection, dict);
         }
 
         /// <summary>
-        /// Creates an empty list-backed collection <see cref="KVObject"/>.
+        /// Creates an empty list-backed collection.
         /// Preserves insertion order and allows duplicate keys (used for KV1 format).
         /// </summary>
-        /// <param name="name">Name of the object.</param>
-        /// <returns>A new <see cref="KVObject"/> with an empty list-backed collection value.</returns>
-        public static KVObject ListCollection(string name)
-            => new(name, System.Array.Empty<KVObject>());
+        public static KVObject ListCollection()
+            => new(KVValueType.Collection, new List<KeyValuePair<string, KVObject>>());
 
         /// <summary>
-        /// Creates a list-backed collection <see cref="KVObject"/> from the given children.
+        /// Creates a list-backed collection from the given children.
         /// Preserves insertion order and allows duplicate keys (used for KV1 format).
         /// </summary>
-        /// <param name="name">Name of the object.</param>
-        /// <param name="children">The child objects.</param>
-        /// <returns>A new <see cref="KVObject"/> with a list-backed collection value.</returns>
-        public static KVObject ListCollection(string name, IEnumerable<KVObject> children)
-            => new(name, children);
+        public static KVObject ListCollection(IEnumerable<KeyValuePair<string, KVObject>> children)
+        {
+            ArgumentNullException.ThrowIfNull(children);
+            return new KVObject(KVValueType.Collection, new List<KeyValuePair<string, KVObject>>(children));
+        }
 
         /// <summary>
         /// Creates an empty array-valued <see cref="KVObject"/>.
         /// </summary>
-        /// <param name="name">Name of the object.</param>
-        /// <returns>A new <see cref="KVObject"/> with an empty array value.</returns>
-        public static KVObject Array(string name)
-            => new(name, new KVValue(KVValueType.Array, new List<KVObject>()));
+        public static KVObject Array()
+            => new(KVValueType.Array, new List<KVObject>());
 
         /// <summary>
         /// Creates an array-valued <see cref="KVObject"/> from the given elements.
         /// </summary>
-        /// <param name="name">Name of the object.</param>
-        /// <param name="elements">The array elements.</param>
-        /// <returns>A new <see cref="KVObject"/> with an array value.</returns>
-        public static KVObject Array(string name, IEnumerable<KVObject> elements)
+        public static KVObject Array(IEnumerable<KVObject> elements)
         {
             ArgumentNullException.ThrowIfNull(elements);
-
-            var list = new List<KVObject>(elements);
-            return new KVObject(name, new KVValue(KVValueType.Array, list));
-        }
-
-        /// <summary>
-        /// Creates an array-valued <see cref="KVObject"/> from the given values.
-        /// </summary>
-        /// <param name="name">Name of the object.</param>
-        /// <param name="values">The array values (wrapped in unnamed KVObjects).</param>
-        /// <returns>A new <see cref="KVObject"/> with an array value.</returns>
-        public static KVObject Array(string name, IEnumerable<KVValue> values)
-        {
-            ArgumentNullException.ThrowIfNull(values);
-
-            var list = new List<KVObject>();
-            foreach (var v in values)
-            {
-                list.Add(new KVObject(null, v));
-            }
-
-            return new KVObject(name, new KVValue(KVValueType.Array, list));
+            return new KVObject(KVValueType.Array, new List<KVObject>(elements));
         }
 
         /// <summary>
         /// Creates a binary blob <see cref="KVObject"/>.
         /// </summary>
-        public static KVObject Blob(string name, byte[] data)
-            => new(name, KVValue.Blob(data));
+        public static KVObject Blob(byte[] data)
+        {
+            ArgumentNullException.ThrowIfNull(data);
+            return new KVObject(KVValueType.BinaryBlob, data);
+        }
+
+        /// <summary>
+        /// Creates a null-valued <see cref="KVObject"/>.
+        /// </summary>
+        public static KVObject Null() => new(KVValueType.Null, 0L);
 
         #endregion
+
+        #region Scalar access
+
+        /// <summary>Converts this value to a <see cref="bool"/>.</summary>
+        public bool ToBoolean() => ToBoolean(null);
+
+        /// <summary>Converts this value to an <see cref="int"/>.</summary>
+        public int ToInt32() => ToInt32(null);
+
+        /// <summary>Converts this value to a <see cref="long"/>.</summary>
+        public long ToInt64() => ToInt64(null);
+
+        /// <summary>Converts this value to a <see cref="float"/>.</summary>
+        public float ToSingle() => ToSingle(null);
+
+        /// <summary>Converts this value to a <see cref="double"/>.</summary>
+        public double ToDouble() => ToDouble(null);
+
+        /// <summary>Gets the binary blob data as a byte array.</summary>
+        public byte[] AsBlob()
+        {
+            if (ValueType != KVValueType.BinaryBlob)
+            {
+                throw new InvalidOperationException($"Cannot get blob from a {ValueType} value.");
+            }
+
+            return (byte[])_ref;
+        }
+
+        /// <summary>Gets the binary blob data as a span.</summary>
+        public ReadOnlySpan<byte> AsSpan()
+        {
+            if (ValueType != KVValueType.BinaryBlob)
+            {
+                throw new InvalidOperationException($"Cannot get blob span from a {ValueType} value.");
+            }
+
+            return ((byte[])_ref).AsSpan();
+        }
+
+        #endregion
+
+        #region Internal accessors
+
+        internal List<KVObject> GetArrayList()
+            => (List<KVObject>)_ref;
+
+        internal Dictionary<string, KVObject> GetCollectionDict()
+            => (Dictionary<string, KVObject>)_ref;
+
+        internal List<KeyValuePair<string, KVObject>> GetCollectionList()
+            => (List<KeyValuePair<string, KVObject>>)_ref;
+
+        #endregion
+
+        /// <inheritdoc/>
+        public override string ToString() => ToString(CultureInfo.InvariantCulture);
 
         #region Private helpers
 
         private void SetChild(string key, KVObject value)
         {
-            switch (Value.RefValue)
+            switch (_ref)
             {
                 case Dictionary<string, KVObject> dict:
                     if (value == null)
@@ -463,18 +507,18 @@ namespace ValveKeyValue
                     }
 
                     break;
-                case List<KVObject> list when Value.ValueType == KVValueType.Collection:
-                    var firstIndex = list.FindIndex(c => c.Name == key);
+                case List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection:
+                    var firstIndex = list.FindIndex(c => c.Key == key);
                     if (firstIndex >= 0)
                     {
                         if (value != null)
                         {
-                            list[firstIndex] = value;
+                            list[firstIndex] = new KeyValuePair<string, KVObject>(key, value);
 
                             // Remove any remaining duplicates after the replaced entry
                             for (var i = list.Count - 1; i > firstIndex; i--)
                             {
-                                if (list[i].Name == key)
+                                if (list[i].Key == key)
                                 {
                                     list.RemoveAt(i);
                                 }
@@ -482,70 +526,71 @@ namespace ValveKeyValue
                         }
                         else
                         {
-                            list.RemoveAll(c => c.Name == key);
+                            list.RemoveAll(c => c.Key == key);
                         }
                     }
                     else if (value != null)
                     {
-                        list.Add(value);
+                        list.Add(new KeyValuePair<string, KVObject>(key, value));
                     }
 
                     break;
                 default:
-                    throw new InvalidOperationException($"Cannot set a child on a {Value.ValueType} value.");
+                    throw new InvalidOperationException($"Cannot set a child on a {ValueType} value.");
             }
         }
 
-        private int GetCollectionCount() => Value.RefValue switch
+        private int GetCollectionCount() => _ref switch
         {
             Dictionary<string, KVObject> dict => dict.Count,
-            List<KVObject> list => list.Count,
+            List<KeyValuePair<string, KVObject>> list => list.Count,
             _ => 0,
         };
 
-        private IEnumerable<KVObject> GetCollectionChildren() => Value.RefValue switch
+        private IEnumerable<KeyValuePair<string, KVObject>> GetCollectionChildren() => _ref switch
         {
-            Dictionary<string, KVObject> dict => dict.Values,
-            List<KVObject> list => list,
+            Dictionary<string, KVObject> dict => dict,
+            List<KeyValuePair<string, KVObject>> list => list,
             _ => [],
         };
 
-        private KVObject GetCollectionByIndex(int index) => Value.RefValue switch
+        private KVObject GetCollectionByIndex(int index) => _ref switch
         {
             Dictionary<string, KVObject> dict => dict.Values.ElementAt(index),
-            List<KVObject> list => list[index],
+            List<KeyValuePair<string, KVObject>> list => list[index].Value,
             _ => throw new InvalidOperationException("Not a collection."),
         };
 
-        private static KVObject FindInList(List<KVObject> list, string name)
+        private IEnumerable<KeyValuePair<string, KVObject>> EnumerateArray()
         {
-            var span = CollectionsMarshal.AsSpan(list);
-            foreach (ref readonly var item in span)
+            var list = GetArrayList();
+            for (var i = 0; i < list.Count; i++)
             {
-                if (item.Name == name)
+                yield return new KeyValuePair<string, KVObject>(null, list[i]);
+            }
+        }
+
+        private static KVObject FindInList(List<KeyValuePair<string, KVObject>> list, string name)
+        {
+            foreach (var kvp in list)
+            {
+                if (kvp.Key == name)
                 {
-                    return item;
+                    return kvp.Value;
                 }
             }
 
             return null;
         }
 
-        /// <inheritdoc/>
-        public override string ToString() => Value.ToString(CultureInfo.InvariantCulture);
-
-        private string DebuggerDescription
+        private string DebuggerDescription => ValueType switch
         {
-            get
-            {
-                if (Value.ValueType == KVValueType.String)
-                {
-                    return Name != null ? $"{Name}: {Value}" : (string)Value;
-                }
-
-                return Name != null ? $"{Name}: {Value} ({Value.ValueType})" : $"{Value} ({Value.ValueType})";
-            }
-        }
+            KVValueType.String => $"\"{_ref}\"",
+            KVValueType.Null => "null",
+            KVValueType.Collection => $"Collection ({GetCollectionCount()} items)",
+            KVValueType.Array => $"Array ({GetArrayList().Count} items)",
+            _ => $"{ToString(CultureInfo.InvariantCulture)} ({ValueType})",
+        };
 
         #endregion
     }

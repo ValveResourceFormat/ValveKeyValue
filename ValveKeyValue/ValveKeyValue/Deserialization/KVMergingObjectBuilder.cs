@@ -1,5 +1,3 @@
-using System.Linq;
-
 namespace ValveKeyValue.Deserialization
 {
     sealed class KVMergingObjectBuilder : KVObjectBuilder
@@ -27,30 +25,29 @@ namespace ValveKeyValue.Deserialization
         {
             foreach (var item in from.Items)
             {
-                var matchingItem = into.Items.FirstOrDefault(i => i.Name == item.Name);
-                if (matchingItem == null)
+                var matchingIndex = into.Items.FindIndex(i => i.Key == item.Key);
+                if (matchingIndex < 0)
                 {
                     into.Items.Add(item);
                 }
                 else
                 {
-                    Merge(from: item, into: matchingItem);
+                    Merge(from: item.Value, into: into.Items[matchingIndex].Value);
                 }
             }
         }
 
         static void Merge(KVObject from, KVObject into)
         {
-            foreach (var child in from)
+            foreach (var (key, child) in from)
             {
-                var matchingChild = into.Children.FirstOrDefault(c => c.Name == child.Name);
-                if (matchingChild == null && into.Value.ValueType == KVValueType.Collection)
-                {
-                    into.Add(child);
-                }
-                else
+                if (into.TryGetValue(key, out var matchingChild))
                 {
                     Merge(from: child, into: matchingChild);
+                }
+                else if (into.ValueType == KVValueType.Collection)
+                {
+                    into.Add(key, child);
                 }
             }
         }

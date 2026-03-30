@@ -8,16 +8,15 @@ namespace ValveKeyValue.Test
         private static readonly string[] ExpectedOrderABC = ["a", "b", "c"];
         private static readonly string[] ExpectedOrderAB = ["a", "b"];
 
-        #region 1. Chained write creates intermediate structure
+        #region Chained write creates intermediate structure
 
         [Test]
         public void ChainedWriteCreatesNewChildInExistingCollection()
         {
-            var obj = new KVObject("root", [
-                new KVObject("a", [
-                    new KVObject("existing", "yes")
-                ])
-            ]);
+            var inner = KVObject.ListCollection();
+            inner.Add("existing", "yes");
+            var obj = KVObject.ListCollection();
+            obj.Add("a", inner);
 
             obj["a"]["b"] = 42;
 
@@ -28,20 +27,19 @@ namespace ValveKeyValue.Test
 
         #endregion
 
-        #region 2. Indexer set preserves insertion order in list collection
+        #region Indexer set preserves insertion order in list collection
 
         [Test]
         public void IndexerSetPreservesOrderInListCollection()
         {
-            var obj = new KVObject("root", [
-                new KVObject("a", "1"),
-                new KVObject("b", "2"),
-                new KVObject("c", "3"),
-            ]);
+            var obj = KVObject.ListCollection();
+            obj.Add("a", "1");
+            obj.Add("b", "2");
+            obj.Add("c", "3");
 
             obj["b"] = "updated";
 
-            var names = obj.Children.Select(c => c.Name).ToList();
+            var names = obj.Children.Select(c => c.Key).ToList();
             Assert.That(names, Is.EqualTo(ExpectedOrderABC));
             Assert.That((string)obj["b"], Is.EqualTo("updated"));
         }
@@ -49,14 +47,13 @@ namespace ValveKeyValue.Test
         [Test]
         public void IndexerSetAppendsNewKeyInListCollection()
         {
-            var obj = new KVObject("root", [
-                new KVObject("a", "1"),
-            ]);
+            var obj = KVObject.ListCollection();
+            obj.Add("a", "1");
 
             obj["b"] = "2";
 
             Assert.That(obj.Count, Is.EqualTo(2));
-            var names = obj.Children.Select(c => c.Name).ToList();
+            var names = obj.Children.Select(c => c.Key).ToList();
             Assert.That(names, Is.EqualTo(ExpectedOrderAB));
             Assert.That((string)obj["b"], Is.EqualTo("2"));
         }
@@ -64,32 +61,30 @@ namespace ValveKeyValue.Test
         [Test]
         public void IndexerSetRemovesDuplicatesAndKeepsFirstPosition()
         {
-            var obj = new KVObject("root", [
-                new KVObject("a", "1"),
-                new KVObject("b", "first"),
-                new KVObject("c", "3"),
-                new KVObject("b", "second"),
-            ]);
+            var obj = KVObject.ListCollection();
+            obj.Add("a", "1");
+            obj.Add("b", "first");
+            obj.Add("c", "3");
+            obj.Add("b", "second");
 
             obj["b"] = "replaced";
 
             Assert.That(obj.Count, Is.EqualTo(3));
-            var names = obj.Children.Select(c => c.Name).ToList();
+            var names = obj.Children.Select(c => c.Key).ToList();
             Assert.That(names, Is.EqualTo(ExpectedOrderABC));
             Assert.That((string)obj["b"], Is.EqualTo("replaced"));
         }
 
         #endregion
 
-        #region 3. Indexer set with null removes child
+        #region Indexer set with null removes child
 
         [Test]
         public void IndexerSetNullRemovesChildFromListCollection()
         {
-            var obj = new KVObject("root", [
-                new KVObject("a", "1"),
-                new KVObject("b", "2"),
-            ]);
+            var obj = KVObject.ListCollection();
+            obj.Add("a", "1");
+            obj.Add("b", "2");
 
             obj["a"] = null;
 
@@ -101,9 +96,8 @@ namespace ValveKeyValue.Test
         [Test]
         public void IndexerSetNullOnMissingKeyDoesNotThrow()
         {
-            var obj = new KVObject("root", [
-                new KVObject("a", "1"),
-            ]);
+            var obj = KVObject.ListCollection();
+            obj.Add("a", "1");
 
             obj["nonexistent"] = null;
 
@@ -113,53 +107,53 @@ namespace ValveKeyValue.Test
 
         #endregion
 
-        #region 3. Add to non-collection throws
+        #region Add to non-collection throws
 
         [Test]
         public void AddChildToScalarThrowsInvalidOperationException()
         {
-            var obj = new KVObject("scalar", "hello");
+            var obj = new KVObject("hello");
 
             Assert.That(
-                () => obj.Add(new KVObject("child", "value")),
+                () => obj.Add("child", "value"),
                 Throws.InstanceOf<InvalidOperationException>());
         }
 
         #endregion
 
-        #region 4. Add(KVValue) to non-array throws
+        #region Add(KVObject) to non-array throws
 
         [Test]
-        public void AddKVValueToCollectionThrowsInvalidOperationException()
+        public void AddKVObjectToCollectionThrowsInvalidOperationException()
         {
-            var obj = new KVObject("root", [new KVObject("a", "1")]);
+            var obj = KVObject.ListCollection();
+            obj.Add("a", "1");
 
             Assert.That(
-                () => obj.Add((KVValue)42),
+                () => obj.Add(new KVObject(42)),
                 Throws.InstanceOf<InvalidOperationException>());
         }
 
         [Test]
-        public void AddKVValueToScalarThrowsInvalidOperationException()
+        public void AddKVObjectToScalarThrowsInvalidOperationException()
         {
-            var obj = new KVObject("scalar", "hello");
+            var obj = new KVObject("hello");
 
             Assert.That(
-                () => obj.Add((KVValue)42),
+                () => obj.Add(new KVObject(42)),
                 Throws.InstanceOf<InvalidOperationException>());
         }
 
         #endregion
 
-        #region 5. RemoveAt on non-array throws
+        #region RemoveAt on non-array throws
 
         [Test]
         public void RemoveAtOnCollectionThrowsInvalidOperationException()
         {
-            var obj = new KVObject("root", [
-                new KVObject("a", "1"),
-                new KVObject("b", "2"),
-            ]);
+            var obj = KVObject.ListCollection();
+            obj.Add("a", "1");
+            obj.Add("b", "2");
 
             Assert.That(
                 () => obj.RemoveAt(0),
@@ -169,7 +163,7 @@ namespace ValveKeyValue.Test
         [Test]
         public void RemoveAtOnScalarThrowsInvalidOperationException()
         {
-            var obj = new KVObject("scalar", "hello");
+            var obj = new KVObject("hello");
 
             Assert.That(
                 () => obj.RemoveAt(0),
@@ -178,12 +172,12 @@ namespace ValveKeyValue.Test
 
         #endregion
 
-        #region 6. Integer indexer on scalar throws
+        #region Integer indexer on scalar throws
 
         [Test]
         public void IntegerIndexerOnScalarThrowsNotSupportedException()
         {
-            var obj = new KVObject("scalar", "hello");
+            var obj = new KVObject("hello");
 
             Assert.That(
                 () => { var _ = obj[0]; },
@@ -192,12 +186,12 @@ namespace ValveKeyValue.Test
 
         #endregion
 
-        #region 7. GetChild on scalar returns null
+        #region GetChild on scalar returns null
 
         [Test]
         public void GetChildOnScalarReturnsNull()
         {
-            var obj = new KVObject("scalar", "hello");
+            var obj = new KVObject("hello");
 
             Assert.That(obj.GetChild("x"), Is.Null);
         }
@@ -205,19 +199,19 @@ namespace ValveKeyValue.Test
         [Test]
         public void GetChildOnNullValuedObjectReturnsNull()
         {
-            var obj = new KVObject("nullobj");
+            var obj = KVObject.Null();
 
             Assert.That(obj.GetChild("x"), Is.Null);
         }
 
         #endregion
 
-        #region 8. ContainsKey on scalar returns false
+        #region ContainsKey on scalar returns false
 
         [Test]
         public void ContainsKeyOnScalarReturnsFalse()
         {
-            var obj = new KVObject("scalar", "hello");
+            var obj = new KVObject("hello");
 
             Assert.That(obj.ContainsKey("x"), Is.False);
         }
@@ -225,7 +219,7 @@ namespace ValveKeyValue.Test
         [Test]
         public void ContainsKeyOnNullValuedObjectReturnsFalse()
         {
-            var obj = new KVObject("nullobj");
+            var obj = KVObject.Null();
 
             Assert.That(obj.ContainsKey("x"), Is.False);
         }
@@ -233,10 +227,9 @@ namespace ValveKeyValue.Test
         [Test]
         public void ContainsKeyOnListCollectionReturnsCorrectly()
         {
-            var obj = new KVObject("root", [
-                new KVObject("a", "1"),
-                new KVObject("b", "2"),
-            ]);
+            var obj = KVObject.ListCollection();
+            obj.Add("a", "1");
+            obj.Add("b", "2");
 
             Assert.That(obj.ContainsKey("a"), Is.True);
             Assert.That(obj.ContainsKey("missing"), Is.False);
@@ -244,12 +237,12 @@ namespace ValveKeyValue.Test
 
         #endregion
 
-        #region 9. Count on scalar is 0
+        #region Count on scalar is 0
 
         [Test]
         public void CountOnScalarIsZero()
         {
-            var obj = new KVObject("scalar", "hello");
+            var obj = new KVObject("hello");
 
             Assert.That(obj.Count, Is.EqualTo(0));
         }
@@ -257,19 +250,19 @@ namespace ValveKeyValue.Test
         [Test]
         public void CountOnNullValuedObjectIsZero()
         {
-            var obj = new KVObject("nullobj");
+            var obj = KVObject.Null();
 
             Assert.That(obj.Count, Is.EqualTo(0));
         }
 
         #endregion
 
-        #region 10. Empty collection
+        #region Empty collection
 
         [Test]
         public void EmptyCollectionHasCountZero()
         {
-            var obj = new KVObject("x", Array.Empty<KVObject>());
+            var obj = KVObject.ListCollection();
 
             Assert.That(obj.Count, Is.EqualTo(0));
         }
@@ -277,7 +270,7 @@ namespace ValveKeyValue.Test
         [Test]
         public void EmptyCollectionIteratesEmpty()
         {
-            var obj = new KVObject("x", Array.Empty<KVObject>());
+            var obj = KVObject.ListCollection();
             var items = obj.Children.ToList();
 
             Assert.That(items, Is.Empty);
@@ -286,7 +279,7 @@ namespace ValveKeyValue.Test
         [Test]
         public void EmptyCollectionIsNotArray()
         {
-            var obj = new KVObject("x", Array.Empty<KVObject>());
+            var obj = KVObject.ListCollection();
 
             Assert.That(obj.IsArray, Is.False);
             Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Collection));
@@ -294,12 +287,12 @@ namespace ValveKeyValue.Test
 
         #endregion
 
-        #region 11. Empty array
+        #region Empty array
 
         [Test]
         public void EmptyArrayHasCountZero()
         {
-            var obj = new KVObject("x", Array.Empty<KVValue>());
+            var obj = KVObject.Array();
 
             Assert.That(obj.Count, Is.EqualTo(0));
         }
@@ -307,7 +300,7 @@ namespace ValveKeyValue.Test
         [Test]
         public void EmptyArrayIsArray()
         {
-            var obj = new KVObject("x", Array.Empty<KVValue>());
+            var obj = KVObject.Array();
 
             Assert.That(obj.IsArray, Is.True);
             Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Array));
@@ -316,7 +309,7 @@ namespace ValveKeyValue.Test
         [Test]
         public void EmptyArrayIteratesEmpty()
         {
-            var obj = new KVObject("x", Array.Empty<KVValue>());
+            var obj = KVObject.Array();
             var items = obj.Children.ToList();
 
             Assert.That(items, Is.Empty);
@@ -324,38 +317,40 @@ namespace ValveKeyValue.Test
 
         #endregion
 
-        #region 12. KVValue with expressions preserve all fields
+        #region KVObject flag mutation
 
         [Test]
-        public void WithExpressionPreservesIntValue()
+        public void FlagMutationPreservesIntValue()
         {
-            KVValue val = 42;
-            var modified = val with { Flag = KVFlag.Resource };
+            KVObject val = 42;
+            val.Flag = KVFlag.Resource;
 
-            Assert.That(modified.Flag, Is.EqualTo(KVFlag.Resource));
-            Assert.That(modified.ValueType, Is.EqualTo(KVValueType.Int32));
-            Assert.That((int)modified, Is.EqualTo(42));
+            Assert.That(val.Flag, Is.EqualTo(KVFlag.Resource));
+            Assert.That(val.ValueType, Is.EqualTo(KVValueType.Int32));
+            Assert.That((int)val, Is.EqualTo(42));
         }
 
         [Test]
-        public void WithExpressionPreservesStringValue()
+        public void FlagMutationPreservesStringValue()
         {
-            KVValue val = "hello";
-            var modified = val with { Flag = KVFlag.SoundEvent };
+            KVObject val = "hello";
+            val.Flag = KVFlag.SoundEvent;
 
-            Assert.That(modified.Flag, Is.EqualTo(KVFlag.SoundEvent));
-            Assert.That(modified.ValueType, Is.EqualTo(KVValueType.String));
-            Assert.That((string)modified, Is.EqualTo("hello"));
+            Assert.That(val.Flag, Is.EqualTo(KVFlag.SoundEvent));
+            Assert.That(val.ValueType, Is.EqualTo(KVValueType.String));
+            Assert.That((string)val, Is.EqualTo("hello"));
         }
 
         [Test]
-        public void WithExpressionChangingFlagPreservesOriginal()
+        public void FlagMutationOnSeparateObjects()
         {
-            KVValue val = 99;
-            var withResource = val with { Flag = KVFlag.Panorama };
-            var withBoth = withResource with { Flag = KVFlag.EntityName };
+            KVObject val = 99;
+            KVObject withResource = 99;
+            withResource.Flag = KVFlag.Panorama;
+            KVObject withBoth = 99;
+            withBoth.Flag = KVFlag.EntityName;
 
-            // Original is unmodified (value type)
+            // Each is a separate object
             Assert.That(val.Flag, Is.EqualTo(KVFlag.None));
             Assert.That(withResource.Flag, Is.EqualTo(KVFlag.Panorama));
             Assert.That(withBoth.Flag, Is.EqualTo(KVFlag.EntityName));
@@ -364,78 +359,26 @@ namespace ValveKeyValue.Test
 
         #endregion
 
-        #region 13. KVValue equality
+        #region TryGetValue returns false for missing
 
         [Test]
-        public void TwoKVValuesWithSameIntAreEqual()
+        public void TryGetValueReturnsFalseForMissing()
         {
-            KVValue a = 42;
-            KVValue b = 42;
+            var obj = KVObject.ListCollection();
+            obj.Add("a", "1");
 
-            Assert.That(a, Is.EqualTo(b));
-            Assert.That(a == b, Is.True);
-        }
-
-        [Test]
-        public void TwoKVValuesWithSameStringAreEqual()
-        {
-            KVValue a = "hello";
-            KVValue b = "hello";
-
-            Assert.That(a, Is.EqualTo(b));
-            Assert.That(a == b, Is.True);
-        }
-
-        [Test]
-        public void TwoDefaultKVValuesAreEqual()
-        {
-            var a = default(KVValue);
-            var b = default(KVValue);
-
-            Assert.That(a, Is.EqualTo(b));
-            Assert.That(a == b, Is.True);
-        }
-
-        [Test]
-        public void DifferentValuesAreNotEqual()
-        {
-            KVValue a = 42;
-            KVValue b = 99;
-
-            Assert.That(a, Is.Not.EqualTo(b));
-            Assert.That(a != b, Is.True);
-        }
-
-        [Test]
-        public void DifferentTypesAreNotEqual()
-        {
-            KVValue a = 42;
-            KVValue b = "42";
-
-            Assert.That(a, Is.Not.EqualTo(b));
-        }
-
-        #endregion
-
-        #region 14. TryGetChild returns false for missing
-
-        [Test]
-        public void TryGetChildReturnsFalseForMissing()
-        {
-            var obj = new KVObject("root", [new KVObject("a", "1")]);
-
-            var result = obj.TryGetChild("missing", out var child);
+            var result = obj.TryGetValue("missing", out var child);
 
             Assert.That(result, Is.False);
             Assert.That(child, Is.Null);
         }
 
         [Test]
-        public void TryGetChildReturnsFalseOnScalar()
+        public void TryGetValueReturnsFalseOnScalar()
         {
-            var obj = new KVObject("scalar", "hello");
+            var obj = new KVObject("hello");
 
-            var result = obj.TryGetChild("anything", out var child);
+            var result = obj.TryGetValue("anything", out var child);
 
             Assert.That(result, Is.False);
             Assert.That(child, Is.Null);
@@ -443,45 +386,45 @@ namespace ValveKeyValue.Test
 
         #endregion
 
-        #region 15. TryGetChild returns true for existing
+        #region TryGetValue returns true for existing
 
         [Test]
-        public void TryGetChildReturnsTrueForExisting()
+        public void TryGetValueReturnsTrueForExisting()
         {
-            var obj = new KVObject("root", [new KVObject("existing", "value")]);
+            var obj = KVObject.ListCollection();
+            obj.Add("existing", "value");
 
-            var result = obj.TryGetChild("existing", out var child);
+            var result = obj.TryGetValue("existing", out var child);
 
             Assert.That(result, Is.True);
             Assert.That(child, Is.Not.Null);
-            Assert.That(child.Name, Is.EqualTo("existing"));
             Assert.That((string)child, Is.EqualTo("value"));
         }
 
         [Test]
-        public void TryGetChildOnDictBackedCollection()
+        public void TryGetValueOnDictBackedCollection()
         {
             var kv3Text = "<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->\n{\n\tkey1 = \"value1\"\n}";
             using var stream = new System.IO.MemoryStream(System.Text.Encoding.UTF8.GetBytes(kv3Text));
             var obj = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
 
-            Assert.That(obj.TryGetChild("key1", out var found), Is.True);
+            Assert.That(obj.TryGetValue("key1", out var found), Is.True);
             Assert.That((string)found, Is.EqualTo("value1"));
 
-            Assert.That(obj.TryGetChild("missing", out var notFound), Is.False);
+            Assert.That(obj.TryGetValue("missing", out var notFound), Is.False);
             Assert.That(notFound, Is.Null);
         }
 
         #endregion
 
-        #region 16. Add(string, KVValue) adds named child
+        #region Add(string, KVObject) adds named child
 
         [Test]
-        public void AddStringKVValueAddsNamedChild()
+        public void AddStringKVObjectAddsNamedChild()
         {
-            var obj = new KVObject("root", Array.Empty<KVObject>());
+            var obj = KVObject.ListCollection();
 
-            obj.Add("key1", (KVValue)"value1");
+            obj.Add("key1", "value1");
 
             Assert.That(obj.Count, Is.EqualTo(1));
             Assert.That((string)obj["key1"], Is.EqualTo("value1"));
@@ -489,13 +432,13 @@ namespace ValveKeyValue.Test
 
         #endregion
 
-        #region 18. CreateArray from KVValue enumerable
+        #region CreateArray from KVObject enumerable
 
         [Test]
-        public void CreateArrayFromKVValueEnumerable()
+        public void CreateArrayFromKVObjectEnumerable()
         {
-            var values = new KVValue[] { "alpha", "beta", "gamma" };
-            var arr = KVObject.Array("a", values);
+            KVObject[] values = ["alpha", "beta", "gamma"];
+            var arr = KVObject.Array(values);
 
             Assert.That(arr.IsArray, Is.True);
             Assert.That(arr.Count, Is.EqualTo(3));
@@ -505,21 +448,21 @@ namespace ValveKeyValue.Test
         }
 
         [Test]
-        public void CreateArrayFromKVValueEnumerableWrapsInUnnamedObjects()
+        public void CreateArrayFromKVObjectEnumerableChildrenHaveNullKeys()
         {
-            var values = new KVValue[] { 1, 2 };
-            var arr = KVObject.Array("a", values);
+            KVObject[] values = [1, 2];
+            var arr = KVObject.Array(values);
 
-            foreach (var child in arr)
+            foreach (var (key, value) in arr)
             {
-                Assert.That(child.Name, Is.Null);
+                Assert.That(key, Is.Null);
             }
         }
 
         [Test]
-        public void CreateArrayFromEmptyKVValueEnumerable()
+        public void CreateArrayFromEmptyKVObjectEnumerable()
         {
-            var arr = KVObject.Array("a", Array.Empty<KVValue>());
+            var arr = KVObject.Array(Array.Empty<KVObject>());
 
             Assert.That(arr.IsArray, Is.True);
             Assert.That(arr.Count, Is.EqualTo(0));
@@ -527,16 +470,15 @@ namespace ValveKeyValue.Test
 
         #endregion
 
-        #region 19. Multiple children with same name in KV1 (list-backed)
+        #region Multiple children with same name in KV1 (list-backed)
 
         [Test]
         public void DuplicateKeysPreservedInListCollection()
         {
-            var obj = new KVObject("root", [
-                new KVObject("key", "first"),
-                new KVObject("key", "second"),
-                new KVObject("other", "value"),
-            ]);
+            var obj = KVObject.ListCollection();
+            obj.Add("key", "first");
+            obj.Add("key", "second");
+            obj.Add("other", "value");
 
             Assert.That(obj.Count, Is.EqualTo(3));
         }
@@ -544,10 +486,9 @@ namespace ValveKeyValue.Test
         [Test]
         public void GetChildReturnsFistForDuplicateKeysInListCollection()
         {
-            var obj = new KVObject("root", [
-                new KVObject("key", "first"),
-                new KVObject("key", "second"),
-            ]);
+            var obj = KVObject.ListCollection();
+            obj.Add("key", "first");
+            obj.Add("key", "second");
 
             var child = obj.GetChild("key");
 
@@ -558,14 +499,13 @@ namespace ValveKeyValue.Test
         [Test]
         public void EnumerationPreservesDuplicateKeysInListCollection()
         {
-            var obj = new KVObject("root", [
-                new KVObject("key", "first"),
-                new KVObject("key", "second"),
-            ]);
+            var obj = KVObject.ListCollection();
+            obj.Add("key", "first");
+            obj.Add("key", "second");
 
             var values = obj.Children
-                .Where(c => c.Name == "key")
-                .Select(c => (string)c)
+                .Where(c => c.Key == "key")
+                .Select(c => (string)c.Value)
                 .ToList();
 
             Assert.That(values, Is.EqualTo(ExpectedDuplicateKeyValues));

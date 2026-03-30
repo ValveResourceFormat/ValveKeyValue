@@ -5,16 +5,15 @@ namespace ValveKeyValue.Test
         [Test]
         public void SerializesToBinaryStructure()
         {
-            var kvo = new KVObject("TestObject",
-            [
-                new KVObject("key", "value"),
-                new KVObject("key_utf8", "邪恶的战"),
-                new KVObject("int", 0x10203040),
-                new KVObject("flt", 1234.5678f),
-                new KVObject("ptr", new IntPtr(0x12345678)),
-                new KVObject("lng", 0x8877665544332211u),
-                new KVObject("i64", 0x0102030405060708)
-            ]);
+            var kvo = KVObject.ListCollection();
+            kvo.Add("key", "value");
+            kvo.Add("key_utf8", "邪恶的战");
+            kvo.Add("int", 0x10203040);
+            kvo.Add("flt", 1234.5678f);
+            kvo.Add("ptr", new IntPtr(0x12345678));
+            kvo.Add("lng", 0x8877665544332211u);
+            kvo.Add("i64", 0x0102030405060708);
+            var doc = new KVDocument(null, "TestObject", kvo);
 
             var expectedData = new byte[]
             {
@@ -46,12 +45,19 @@ namespace ValveKeyValue.Test
             };
 
             using var ms = new MemoryStream();
-            KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Serialize(ms, kvo);
+            KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Serialize(ms, doc);
             Assert.That(ms.ToArray(), Is.EqualTo(expectedData));
 
             ms.Seek(0, SeekOrigin.Begin);
             var deserialized = KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Deserialize(ms);
-            Assert.That(deserialized, Is.EqualTo(kvo));
+            Assert.That(deserialized.Name, Is.EqualTo("TestObject"));
+            Assert.That((string)deserialized["key"], Is.EqualTo("value"));
+            Assert.That((string)deserialized["key_utf8"], Is.EqualTo("邪恶的战"));
+            Assert.That((int)deserialized["int"], Is.EqualTo(0x10203040));
+            Assert.That((float)deserialized["flt"], Is.EqualTo(1234.5678f));
+            Assert.That((IntPtr)deserialized["ptr"], Is.EqualTo(new IntPtr(0x12345678)));
+            Assert.That((ulong)deserialized["lng"], Is.EqualTo(0x8877665544332211u));
+            Assert.That((long)deserialized["i64"], Is.EqualTo(0x0102030405060708));
         }
     }
 }

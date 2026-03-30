@@ -6,11 +6,11 @@ namespace ValveKeyValue.Abstraction
 
         void OnObjectEnd();
 
-        void OnKeyValuePair(string name, KVValue value);
+        void OnKeyValuePair(string name, KVObject value);
 
         void OnArrayStart(string name, KVFlag flag, int elementCount, bool allSimpleElements);
 
-        void OnArrayValue(KVValue value);
+        void OnArrayValue(KVObject value);
 
         void OnArrayEnd();
     }

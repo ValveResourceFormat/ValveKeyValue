@@ -13,7 +13,7 @@ namespace ValveKeyValue.Test.TextKV3
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
             var data = kv.Deserialize(stream);
 
-            data.Add(new KVObject("multiLineString", "hello\nworld"));
+            data.Add("multiLineString", "hello\nworld");
 
             string text;
             using (var ms = new MemoryStream())
@@ -37,7 +37,7 @@ namespace ValveKeyValue.Test.TextKV3
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
             var data = kv.Deserialize(stream);
 
-            data.Add(new KVObject("test", "success"));
+            data.Add("test", "success");
 
             string text;
             using (var ms = new MemoryStream())
@@ -103,7 +103,7 @@ namespace ValveKeyValue.Test.TextKV3
 
             Assert.Multiple(() =>
             {
-                Assert.That(data2["name"].Value.Flag, Is.EqualTo(KVFlag.EntityName));
+                Assert.That(data2["name"].Flag, Is.EqualTo(KVFlag.EntityName));
                 Assert.That((string)data2["name"], Is.EqualTo("some_entity"));
             });
         }
@@ -132,7 +132,7 @@ namespace ValveKeyValue.Test.TextKV3
             using var arrayStream = TestDataHelper.OpenResource("TextKV3.root_array.kv3");
             var arrayData = RoundTrip(kv, kv.Deserialize(arrayStream));
             Assert.That(arrayData.ValueType, Is.EqualTo(KVValueType.Array));
-            Assert.That(arrayData[0].Value.ToString(CultureInfo.InvariantCulture), Is.EqualTo("a"));
+            Assert.That(arrayData[0].ToString(CultureInfo.InvariantCulture), Is.EqualTo("a"));
         }
 
         [Test]
@@ -144,7 +144,7 @@ namespace ValveKeyValue.Test.TextKV3
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
             var data = kv.Deserialize(stream);
 
-            data.Add(new KVObject("test", "success"));
+            data.Add("test", "success");
 
             string text;
             using (var ms = new MemoryStream())

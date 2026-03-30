@@ -43,9 +43,9 @@ namespace ValveKeyValue
             using var reader = MakeReader(stream, builder, options ?? KVSerializerOptions.DefaultOptions);
 
             var header = reader.ReadHeader();
-            var root = builder.GetObject();
+            var result = builder.GetObject();
 
-            return new KVDocument(header, root.Name, root.Value);
+            return new KVDocument(header, result.Key, result.Value);
         }
 
         /// <summary>
@@ -74,9 +74,10 @@ namespace ValveKeyValue
         {
             ArgumentNullException.ThrowIfNull(data);
 
+            var name = (data as KVDocument)?.Name;
             using var serializer = MakeSerializer(stream, options ?? KVSerializerOptions.DefaultOptions);
             var visitor = new KVObjectVisitor(serializer);
-            visitor.Visit(data);
+            visitor.Visit(name, data);
         }
 
         /// <summary>
@@ -91,7 +92,7 @@ namespace ValveKeyValue
 
             using var serializer = MakeSerializer(stream, options ?? KVSerializerOptions.DefaultOptions, data.Header);
             var visitor = new KVObjectVisitor(serializer);
-            visitor.Visit(data);
+            visitor.Visit(data.Name, data);
         }
 
         /// <summary>
@@ -108,8 +109,11 @@ namespace ValveKeyValue
             ArgumentNullException.ThrowIfNull(data);
             ArgumentNullException.ThrowIfNull(name);
 
-            var kvObjectTree = ObjectCopier.FromObject(typeof(TData), data, name);
-            Serialize(stream, kvObjectTree, options);
+            var kvObjectTree = ObjectCopier.FromObject(typeof(TData), data);
+
+            using var serializer = MakeSerializer(stream, options ?? KVSerializerOptions.DefaultOptions);
+            var visitor = new KVObjectVisitor(serializer);
+            visitor.Visit(name, kvObjectTree);
         }
 
         IVisitingReader MakeReader(Stream stream, IParsingVisitationListener listener, KVSerializerOptions options)

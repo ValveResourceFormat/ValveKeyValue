@@ -25,8 +25,8 @@ namespace ValveKeyValue.Test
             var valueObjects = child.ToArray();
             Assert.That(valueObjects, Has.Length.EqualTo(2));
 
-            Assert.That((string)valueObjects[0]?["name"], Is.EqualTo("first"));
-            Assert.That((string)valueObjects[1]?["name"], Is.EqualTo("second"));
+            Assert.That((string)valueObjects[0].Value?["name"], Is.EqualTo("first"));
+            Assert.That((string)valueObjects[1].Value?["name"], Is.EqualTo("second"));
         }
 
         [Test]
@@ -35,21 +35,21 @@ namespace ValveKeyValue.Test
             var children = data.ToArray();
             Assert.That(children, Has.Length.EqualTo(2));
 
-            var firstNode = children[0];
+            var firstNode = children[0].Value;
             Assert.That(firstNode, Is.Not.Null);
 
             var firstArray = firstNode.ToArray();
             Assert.That(firstArray, Has.Length.EqualTo(2));
-            Assert.That((string)firstArray[0]?["name"], Is.EqualTo("first"));
-            Assert.That((string)firstArray[1]?["name"], Is.EqualTo("second"));
+            Assert.That((string)firstArray[0].Value?["name"], Is.EqualTo("first"));
+            Assert.That((string)firstArray[1].Value?["name"], Is.EqualTo("second"));
 
-            var secondNode = children[1];
+            var secondNode = children[1].Value;
             Assert.That(secondNode, Is.Not.Null);
 
             var secondArray = secondNode.ToArray();
             Assert.That(secondArray, Has.Length.EqualTo(2));
-            Assert.That((string)secondArray[0]?["name"], Is.EqualTo("third"));
-            Assert.That((string)secondArray[1]?["name"], Is.EqualTo("fourth"));
+            Assert.That((string)secondArray[0].Value?["name"], Is.EqualTo("third"));
+            Assert.That((string)secondArray[1].Value?["name"], Is.EqualTo("fourth"));
         }
 
         KVObject data;

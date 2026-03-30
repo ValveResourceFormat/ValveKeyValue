@@ -23,9 +23,9 @@ namespace ValveKeyValue.Test
 
             Assert.That(actualValue, Is.Not.Null);
             Assert.That(actualValue.ValueType, Is.EqualTo(expectedType), nameof(KVValueType));
-            Assert.That(((IConvertible)actualValue.Value).GetTypeCode(), Is.EqualTo(expectedTypeCode), nameof(TypeCode));
+            Assert.That(((IConvertible)actualValue).GetTypeCode(), Is.EqualTo(expectedTypeCode), nameof(TypeCode));
 
-            var typedActualValue = Convert.ChangeType(actualValue.Value, typeof(TExpected), CultureInfo.InvariantCulture);
+            var typedActualValue = Convert.ChangeType(actualValue, typeof(TExpected), CultureInfo.InvariantCulture);
             Assert.That(typedActualValue, Is.EqualTo(expectedValue));
         }
 

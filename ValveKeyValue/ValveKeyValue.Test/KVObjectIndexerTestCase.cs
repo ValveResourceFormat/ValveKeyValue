@@ -19,13 +19,10 @@ namespace ValveKeyValue.Test
         [OneTimeSetUp]
         public void SetUp()
         {
-            data = new KVObject(
-                "test data",
-                [
-                    new KVObject("foo", "bar"),
-                    new KVObject("bar", "baz"),
-                    new KVObject("baz", "-"),
-                ]);
+            data = KVObject.ListCollection();
+            data.Add("foo", "bar");
+            data.Add("bar", "baz");
+            data.Add("baz", "-");
         }
     }
 }

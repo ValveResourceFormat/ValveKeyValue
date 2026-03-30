@@ -19,28 +19,16 @@ namespace ValveKeyValue
         public string ClassName { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="KV2Element"/> class with a null value.
+        /// Initializes a new instance of the <see cref="KV2Element"/> class as an empty collection.
         /// </summary>
-        /// <param name="name">Name of this element.</param>
-        public KV2Element(string name) : base(name)
+        public KV2Element() : base()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="KV2Element"/> class with a scalar or blob value.
+        /// Initializes a new instance of the <see cref="KV2Element"/> class as a collection from children.
         /// </summary>
-        /// <param name="name">Name of this element.</param>
-        /// <param name="value">Value of this element.</param>
-        public KV2Element(string name, KVValue value) : base(name, value)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="KV2Element"/> class as a collection of named children.
-        /// </summary>
-        /// <param name="name">Name of this element.</param>
-        /// <param name="items">Child items of this element.</param>
-        public KV2Element(string name, IEnumerable<KVObject> items) : base(name, items)
+        internal KV2Element(List<KeyValuePair<string, KVObject>> items) : base(KVValueType.Collection, items)
         {
         }
     }

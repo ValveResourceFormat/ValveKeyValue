@@ -35,16 +35,15 @@ namespace ValveKeyValue.Test
         [Test]
         public void DynamicSerialization()
         {
-            var data = new KVObject("object",
-            [
-                new KVObject("test1_false", false),
-                new KVObject("test2_true", true),
-            ]);
+            var data = KVObject.ListCollection();
+            data.Add("test1_false", false);
+            data.Add("test2_true", true);
+            var doc = new KVDocument(null, "object", data);
 
             var expected = TestDataHelper.ReadTextResource("Text.boolean_serialization.vdf");
 
             using var ms = new MemoryStream();
-            KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Serialize(ms, data);
+            KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Serialize(ms, doc);
             var text = Encoding.UTF8.GetString(ms.ToArray());
 
             Assert.That(text, Is.EqualTo(expected));

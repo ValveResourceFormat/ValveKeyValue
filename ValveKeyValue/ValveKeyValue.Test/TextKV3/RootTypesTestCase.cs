@@ -52,7 +52,7 @@ namespace ValveKeyValue.Test.TextKV3
             {
                 Assert.That(data.Name, Is.Null);
                 Assert.That(data.ValueType, Is.EqualTo(KVValueType.String));
-                Assert.That(data.Value.Flag, Is.EqualTo(KVFlag.Resource));
+                Assert.That(data.Flag, Is.EqualTo(KVFlag.Resource));
                 Assert.That((string)data, Is.EqualTo("cool_resource.txt"));
             });
         }
@@ -67,8 +67,8 @@ namespace ValveKeyValue.Test.TextKV3
             {
                 Assert.That(data.Name, Is.Null);
                 Assert.That(data.ValueType, Is.EqualTo(KVValueType.Collection));
-                Assert.That(data.Value.Flag, Is.EqualTo(KVFlag.Panorama));
-                Assert.That(data["foo"].Value.Flag, Is.EqualTo(KVFlag.Resource));
+                Assert.That(data.Flag, Is.EqualTo(KVFlag.Panorama));
+                Assert.That(data["foo"].Flag, Is.EqualTo(KVFlag.Resource));
                 Assert.That((string)data["foo"], Is.EqualTo("bar"));
             });
         }
@@ -83,7 +83,7 @@ namespace ValveKeyValue.Test.TextKV3
             {
                 Assert.That(data.Name, Is.Null);
                 Assert.That(data.ValueType, Is.EqualTo(KVValueType.BinaryBlob));
-                Assert.That(data.Value.AsBlob(), Is.EqualTo(new byte[]
+                Assert.That(data.AsBlob(), Is.EqualTo(new byte[]
                 {
                     0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
                     0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xFF

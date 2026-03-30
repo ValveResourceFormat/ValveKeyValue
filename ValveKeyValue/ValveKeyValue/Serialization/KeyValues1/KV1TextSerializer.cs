@@ -34,7 +34,7 @@ namespace ValveKeyValue.Serialization.KeyValues1
         public void OnObjectEnd()
             => WriteEndObject();
 
-        public void OnKeyValuePair(string name, KVValue value)
+        public void OnKeyValuePair(string name, KVObject value)
             => WriteKeyValuePair(name, value);
 
         public void OnArrayStart(string name, KVFlag flag, int elementCount, bool allSimpleElements)
@@ -43,7 +43,7 @@ namespace ValveKeyValue.Serialization.KeyValues1
             arrayCount.Push(0);
         }
 
-        public void OnArrayValue(KVValue value)
+        public void OnArrayValue(KVObject value)
         {
             var count = arrayCount.Pop();
 
@@ -98,7 +98,7 @@ namespace ValveKeyValue.Serialization.KeyValues1
             writer.WriteLine();
         }
 
-        void WriteKeyValuePair(string name, KVValue value)
+        void WriteKeyValuePair(string name, KVObject value)
         {
             WriteIndentation();
             WriteText(name);

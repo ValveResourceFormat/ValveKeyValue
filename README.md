@@ -8,12 +8,12 @@
 
 KeyValues is a simple key-value pair format used by Valve in Steam and the Source engine for configuration files, game data, and more (`.vdf`, `.res`, `.acf`, etc.). This library aims to be fully compatible with Valve's various implementations of KeyValues format parsing (believe us, it's not consistent).
 
-# Core Types
+# Core Type
 
-The library is built around two types:
+The library is built around a single type:
 
-- **`KVObject`** (class) -- a named tree node. Holds a `Name` and a `KVValue`. Supports navigation, mutation, and enumeration.
-- **`KVValue`** (readonly record struct) -- the data. Stores scalars inline (no boxing), strings, binary blobs, arrays, and collections. Supports implicit/explicit conversions, flags, and `with` expressions.
+- **`KVObject`** (class) -- a value node. Can be a scalar (string, int, float, bool, etc.), a binary blob, an array, or a named collection of children. Keys (names) are stored in the parent container, not on the child -- similar to how JSON works.
+- **`KVDocument`** (class, extends `KVObject`) -- a deserialized document with a root key `Name` and optional `Header`.
 
 All types are shared across KV1 and KV3 -- you can deserialize from one format and serialize to another. However, not all value types are supported by all formats:
 
@@ -32,46 +32,46 @@ When constructing objects programmatically, use `KVObject.Collection()` (dict-ba
 ### Constructing
 
 ```csharp
-// Scalar value (typed constructors for common types, no cast needed)
-var obj = new KVObject("key", "hello");
-var obj = new KVObject("key", 42);
-var obj = new KVObject("key", 3.14f);
-var obj = new KVObject("key", true);
+// Scalar values (typed constructors)
+var obj = new KVObject("hello");    // string
+var obj = new KVObject(42);         // int
+var obj = new KVObject(3.14f);      // float
+var obj = new KVObject(true);       // bool
+
+// Implicit conversion from primitives
+KVObject obj = "hello";
+KVObject obj = 42;
 
 // Dictionary-backed collection (O(1) lookup, no duplicate keys)
-var obj = KVObject.Collection("root");                // empty, can Add children
-var obj = KVObject.Collection("root", [               // with children
-    new KVObject("name", "Dota 2"),
-    new KVObject("appid", 570),
-]);
+var obj = KVObject.Collection();                     // empty
+var obj = new KVObject();                            // same as above
 
 // List-backed collection (preserves insertion order, allows duplicate keys, for KV1)
-var obj = KVObject.ListCollection("root");            // empty
-var obj = KVObject.ListCollection("root", [           // with children
-    new KVObject("key", "first"),
-    new KVObject("key", "second"),                     // duplicate keys allowed
-]);
+var obj = KVObject.ListCollection();                 // empty
 
-// Array from values (implicit conversions from primitives)
-var arr = KVObject.Array("items");                                     // empty, can Add elements
-var arr = KVObject.Array("tags", new KVValue[] { "action", "moba" });  // from KVValue[]
+// Build up children
+var obj = new KVObject();
+obj["name"] = "Dota 2";                              // implicit string -> KVObject
+obj["appid"] = 570;                                   // implicit int -> KVObject
 
-// Array from KVObjects (when elements need flags, nested structure, etc.)
-var arr = KVObject.Array("data", [
-    new KVObject(null, (KVValue)"element"),
-    new KVObject(null, flaggedValue),
-]);
+// Array
+var arr = KVObject.Array();                           // empty
+var arr = KVObject.Array([ new KVObject("a"), new KVObject("b") ]); // from elements
 
 // Binary blob
-var blob = KVObject.Blob("data", new byte[] { 0x01, 0x02, 0x03 });
-```
+var blob = KVObject.Blob(new byte[] { 0x01, 0x02, 0x03 });
 
-> `new KVObject("name")` is equivalent to `KVObject.Collection("name")` (empty dict-backed collection).
+// Null value
+var nul = KVObject.Null();
+```
 
 ### Reading values
 
 ```csharp
-KVObject data = kv.Deserialize(stream);
+KVDocument data = kv.Deserialize(stream);
+
+// Root key name (only on KVDocument)
+string rootName = data.Name;
 
 // String indexer returns KVObject (supports chaining)
 string name = (string)data["config"]["name"];
@@ -84,15 +84,15 @@ float x = (float)data["position"][0];
 
 // Check existence
 if (data.ContainsKey("optional")) { ... }
-if (data.TryGetChild("optional", out var child)) { ... }
+if (data.TryGetValue("optional", out var child)) { ... }
 
 // Null-safe (indexer returns null for missing keys)
 KVObject val = data["missing"]; // null
 
-// Access the underlying KVValue directly
-KVValueType type = data.ValueType;           // forwarded from Value
-KVFlag flag = data["texture"].Value.Flag;    // flags live on KVValue
-ReadOnlySpan<byte> bytes = data["blob"].Value.AsSpan();
+// Direct access to value properties
+KVValueType type = data.ValueType;
+KVFlag flag = data["texture"].Flag;
+ReadOnlySpan<byte> bytes = data["blob"].AsSpan();
 ```
 
 ### Modifying
@@ -105,70 +105,51 @@ data["count"] = 42;
 // Chained writes work (reference semantics)
 data["config"]["resolution"] = "1920x1080";
 
-// Add/remove children
-data.Add(new KVObject("newprop", 42));
-data.Add("shorthand", (KVValue)"value");
+// Add children to collections
+data.Add("newprop", 42);           // implicit int -> KVObject
+data.Add("text", "value");         // implicit string -> KVObject
+
+// Add elements to arrays
+arr.Add(3.14f);                    // implicit float -> KVObject
+
+// Remove
 data.Remove("deprecated");
-
-// Array mutation
-arr.Add((KVValue)"new element");
 arr.RemoveAt(2);
-
-// Clear
 data.Clear();
 
-// Modify flags via with expression
-var child = data.GetChild("texture");
-child.Value = child.Value with { Flag = KVFlag.Resource };
+// Set flags directly
+data["texture"].Flag = KVFlag.Resource;
 ```
 
 ### Enumerating
 
 ```csharp
-// KVObject implements IEnumerable<KVObject>
-foreach (var child in data)
+// KVObject implements IEnumerable<KeyValuePair<string, KVObject>>
+// Keys are the child names, values are the child KVObjects
+foreach (var (key, child) in data)
 {
-    Console.WriteLine($"{child.Name} = {(string)child}");
+    Console.WriteLine($"{key} = {(string)child}");
 }
 
-// LINQ works naturally
-var names = data.Children.Select(c => c.Name);
+// Keys and Values properties
+var keys = data.Keys;            // IEnumerable<string>
+var values = data.Values;        // IEnumerable<KVObject>
+
+// Array elements have null keys
+foreach (var (key, element) in arrayObj)
+{
+    // key is null for array elements
+    Console.WriteLine((string)element);
+}
+
+// Values on arrays returns elements directly (no KVP wrapper)
+foreach (var element in arrayObj.Values)
+{
+    Console.WriteLine((string)element);
+}
 
 // Scalars yield nothing
 foreach (var child in scalarObj) { } // empty
-```
-
-## KVValue
-
-A `readonly record struct` that stores scalar data inline (no boxing):
-
-```csharp
-// Implicit from primitives
-KVValue v = "hello";
-KVValue v = 42;
-KVValue v = 3.14f;
-KVValue v = true;
-
-// Explicit to primitives
-string s = (string)value;
-int n = (int)value;
-
-// Typed accessors
-string s = value.AsString();
-int n = value.ToInt32(CultureInfo.InvariantCulture);
-ReadOnlySpan<byte> data = value.AsSpan();
-byte[] blob = value.AsBlob();
-
-// Properties
-value.ValueType  // KVValueType enum
-value.Flag       // KVFlag enum
-value.IsNull     // true if ValueType == Null
-
-// with expressions (readonly record struct)
-var flagged = value with { Flag = KVFlag.Resource };
-
-// default is null
-default(KVValue).IsNull == true
 ```
 
 # KeyValues1
@@ -182,7 +163,7 @@ Used by Steam and the Source engine.
 var stream = File.OpenRead("file.vdf"); // or any other Stream
 
 var kv = KVSerializer.Create(KVSerializationFormat.KeyValues1Text);
-KVObject data = kv.Deserialize(stream);
+KVDocument data = kv.Deserialize(stream);
 
 Console.WriteLine(data["some key"]);
 ```
@@ -279,7 +260,7 @@ Used by the Source 2 engine.
 var stream = File.OpenRead("file.kv3"); // or any other Stream
 
 var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
-KVObject data = kv.Deserialize(stream);
+KVDocument data = kv.Deserialize(stream);
 
 Console.WriteLine(data["some key"]);
 ```

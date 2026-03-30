@@ -11,36 +11,36 @@ namespace ValveKeyValue.Abstraction
 
         readonly IVisitationListener listener;
 
-        public void Visit(KVObject @object)
+        public void Visit(string name, KVObject @object)
         {
-            VisitObject(@object.Name, @object, false);
+            VisitObject(name, @object, false);
         }
 
         void VisitObject(string name, KVObject obj, bool isArray)
         {
-            switch (obj.Value.ValueType)
+            switch (obj.ValueType)
             {
                 case KVValueType.Collection:
-                    listener.OnObjectStart(name, obj.Value.Flag);
-                    foreach (var child in obj)
+                    listener.OnObjectStart(name, obj.Flag);
+                    foreach (var (childKey, child) in obj)
                     {
-                        VisitObject(child.Name, child, false);
+                        VisitObject(childKey, child, false);
                     }
                     listener.OnObjectEnd();
                     break;
 
                 case KVValueType.Array:
-                    var arrayList = obj.Value.GetArrayList();
+                    var arrayList = obj.GetArrayList();
                     var allSimple = true;
                     foreach (var element in arrayList)
                     {
-                        if (!IsSimpleType(element.Value.ValueType))
+                        if (!IsSimpleType(element.ValueType))
                         {
                             allSimple = false;
                             break;
                         }
                     }
-                    listener.OnArrayStart(name, obj.Value.Flag, arrayList.Count, allSimple);
+                    listener.OnArrayStart(name, obj.Flag, arrayList.Count, allSimple);
                     foreach (var element in arrayList)
                     {
                         VisitObject(null, element, true);
@@ -63,14 +63,14 @@ namespace ValveKeyValue.Abstraction
                 case KVValueType.Null:
                     if (isArray)
                     {
-                        listener.OnArrayValue(obj.Value);
+                        listener.OnArrayValue(obj);
                         break;
                     }
-                    listener.OnKeyValuePair(name, obj.Value);
+                    listener.OnKeyValuePair(name, obj);
                     break;
 
                 default:
-                    throw new InvalidOperationException($"Unhandled value type: {obj.Value.ValueType}");
+                    throw new InvalidOperationException($"Unhandled value type: {obj.ValueType}");
             }
         }
 

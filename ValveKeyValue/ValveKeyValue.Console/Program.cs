@@ -36,28 +36,28 @@ static int Execute(
     var serializer = KVSerializer.Create(format);
     var root = serializer.Deserialize(stream, options);
 
-    RecursivePrint(root);
+    RecursivePrint(root.Name, root);
 
     return 0;
 }
 
-static void RecursivePrint(KVObject obj, int indent = 0)
+static void RecursivePrint(string name, KVObject obj, int indent = 0)
 {
     Console.Write(new string('\t', indent));
 
     indent++;
 
-    if (obj.Value.ValueType is KVValueType.Collection or KVValueType.Array)
+    if (obj.ValueType is KVValueType.Collection or KVValueType.Array)
     {
-        Console.WriteLine($"Name: {obj.Name}");
+        Console.WriteLine($"Name: {name}");
 
-        foreach (var child in obj)
+        foreach (var (key, child) in obj)
         {
-            RecursivePrint(child, indent);
+            RecursivePrint(key, child, indent);
         }
     }
     else
     {
-        Console.WriteLine($"{obj.Name}: {obj.Value}");
+        Console.WriteLine($"{name}: {obj}");
     }
 }

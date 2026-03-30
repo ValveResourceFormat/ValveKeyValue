@@ -13,7 +13,7 @@ namespace ValveKeyValue.Test
         [OneTimeSetUp]
         public void SetUp()
         {
-            data = new KVObject("foo", "bar");
+            data = new KVObject("bar");
         }
     }
 }

@@ -28,7 +28,7 @@ namespace ValveKeyValue.Test
         [TestCase("i64", 0x0102030405060708, typeof(long))]
         public void HasNamedChildWithValue(string name, object value, Type valueType)
         {
-            Assert.That(Convert.ChangeType(obj[name].Value, valueType, CultureInfo.InvariantCulture), Is.EqualTo(value));
+            Assert.That(Convert.ChangeType(obj[name], valueType, CultureInfo.InvariantCulture), Is.EqualTo(value));
         }
 
         [Test]
@@ -42,7 +42,7 @@ namespace ValveKeyValue.Test
             Assert.That(ms.ToArray(), Is.EqualTo(TestData.ToArray()));
         }
 
-        KVObject obj;
+        KVDocument obj;
 
         [OneTimeSetUp]
         public void SetUp()

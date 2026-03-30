@@ -95,7 +95,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         void ReadValue(KV1BinaryNodeType type)
         {
             var name = ReadKeyForNextValue();
-            KVValue value;
+            KVObject value;
 
             switch (type)
             {
@@ -107,7 +107,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
                 case KV1BinaryNodeType.String:
                     // UTF8 encoding is used for string values
-                    value = (KVValue)ReadNullTerminatedUtf8String();
+                    value = new KVObject(ReadNullTerminatedUtf8String());
                     break;
 
                 case KV1BinaryNodeType.WideString:
@@ -115,27 +115,27 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
                 case KV1BinaryNodeType.Int32:
                 case KV1BinaryNodeType.Color:
-                    value = (KVValue)reader.ReadInt32();
+                    value = new KVObject(reader.ReadInt32());
                     break;
 
                 case KV1BinaryNodeType.Pointer:
-                    value = new KVValue(KVValueType.Pointer, (long)reader.ReadInt32());
+                    value = new KVObject(KVValueType.Pointer, (long)reader.ReadInt32());
                     break;
 
                 case KV1BinaryNodeType.UInt64:
-                    value = (KVValue)reader.ReadUInt64();
+                    value = new KVObject(reader.ReadUInt64());
                     break;
 
                 case KV1BinaryNodeType.Float32:
                     var floatValue = BitConverter.ToSingle(reader.ReadBytes(4), 0);
-                    value = (KVValue)floatValue;
+                    value = new KVObject(floatValue);
                     break;
 
                 case KV1BinaryNodeType.ProbablyBinary:
                     throw new NotSupportedException("Hit kv type 9, please create an issue saying where you found it: https://github.com/ValveResourceFormat/ValveKeyValue/issues");
 
                 case KV1BinaryNodeType.Int64:
-                    value = (KVValue)reader.ReadInt64();
+                    value = new KVObject(reader.ReadInt64());
                     break;
 
                 default:
