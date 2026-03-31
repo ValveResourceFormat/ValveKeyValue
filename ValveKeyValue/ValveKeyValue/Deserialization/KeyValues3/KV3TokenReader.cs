@@ -1,4 +1,4 @@
-using System.Linq;
+using System.Buffers;
 using System.Text;
 using ValveKeyValue.KeyValues3;
 using Encoding = ValveKeyValue.KeyValues3.Encoding;
@@ -16,14 +16,12 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         const char Assignment = '=';
         const char Comma = ',';
 
+        // Dota 2 binary from 2017 used "+" as a terminate (for flagged values), but then they changed it to "|"
+        static readonly SearchValues<char> TokenTerminators = SearchValues.Create("{}[]=, \t\n\r'\":|;");
+
         public KV3TokenReader(TextReader textReader) : base(textReader)
         {
-            // Dota 2 binary from 2017 used "+" as a terminate (for flagged values), but then they changed it to "|"
-            var terminators = "{}[]=, \t\n\r'\":|;".ToCharArray();
-            integerTerminators = new HashSet<int>(terminators.Select(t => (int)t));
         }
-
-        readonly HashSet<int> integerTerminators;
 
         public KVToken ReadNextToken()
         {
@@ -315,7 +313,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             {
                 next = Peek();
 
-                if (next <= ' ' || integerTerminators.Contains(next))
+                if (next <= ' ' || TokenTerminators.Contains((char)next))
                 {
                     break;
                 }
