@@ -68,6 +68,7 @@ namespace ValveKeyValue
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KVObject"/> class with a string value.
+        /// If <paramref name="value"/> is <c>null</c>, creates a null-valued instance.
         /// </summary>
         public KVObject(string value)
         {
@@ -81,56 +82,72 @@ namespace ValveKeyValue
             _ref = value;
         }
 
-        /// <inheritdoc cref="KVObject(string)"/>
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KVObject"/> class with a boolean value.
+        /// </summary>
         public KVObject(bool value)
         {
             ValueType = KVValueType.Boolean;
             _scalar = value ? 1L : 0L;
         }
 
-        /// <inheritdoc cref="KVObject(string)"/>
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KVObject"/> class with an integer value.
+        /// </summary>
         public KVObject(int value)
         {
             ValueType = KVValueType.Int32;
             _scalar = value;
         }
 
-        /// <inheritdoc cref="KVObject(string)"/>
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KVObject"/> class with an unsigned integer value.
+        /// </summary>
         public KVObject(uint value)
         {
             ValueType = KVValueType.UInt32;
             _scalar = value;
         }
 
-        /// <inheritdoc cref="KVObject(string)"/>
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KVObject"/> class with a 64-bit integer value.
+        /// </summary>
         public KVObject(long value)
         {
             ValueType = KVValueType.Int64;
             _scalar = value;
         }
 
-        /// <inheritdoc cref="KVObject(string)"/>
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KVObject"/> class with an unsigned 64-bit integer value.
+        /// </summary>
         public KVObject(ulong value)
         {
             ValueType = KVValueType.UInt64;
             _scalar = unchecked((long)value);
         }
 
-        /// <inheritdoc cref="KVObject(string)"/>
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KVObject"/> class with a float value.
+        /// </summary>
         public KVObject(float value)
         {
             ValueType = KVValueType.FloatingPoint;
             _scalar = BitConverter.SingleToInt32Bits(value);
         }
 
-        /// <inheritdoc cref="KVObject(string)"/>
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KVObject"/> class with a double value.
+        /// </summary>
         public KVObject(double value)
         {
             ValueType = KVValueType.FloatingPoint64;
             _scalar = BitConverter.DoubleToInt64Bits(value);
         }
 
-        /// <inheritdoc cref="KVObject(string)"/>
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KVObject"/> class with a pointer value.
+        /// </summary>
         public KVObject(IntPtr value)
         {
             ValueType = KVValueType.Pointer;
@@ -192,8 +209,6 @@ namespace ValveKeyValue
         }
 
         #endregion
-
-        // Operators are in KVObject_operators.cs
 
         #region Navigation
 
@@ -358,8 +373,6 @@ namespace ValveKeyValue
 
         #endregion
 
-        // IEnumerable<KeyValuePair<string, KVObject>> is in KVObject_IEnumerable.cs
-
         #region Static factory methods
 
         /// <summary>
@@ -452,22 +465,7 @@ namespace ValveKeyValue
 
         #endregion
 
-        #region Scalar access
-
-        /// <summary>Converts this value to a <see cref="bool"/>.</summary>
-        public bool ToBoolean() => ToBoolean(null);
-
-        /// <summary>Converts this value to an <see cref="int"/>.</summary>
-        public int ToInt32() => ToInt32(null);
-
-        /// <summary>Converts this value to a <see cref="long"/>.</summary>
-        public long ToInt64() => ToInt64(null);
-
-        /// <summary>Converts this value to a <see cref="float"/>.</summary>
-        public float ToSingle() => ToSingle(null);
-
-        /// <summary>Converts this value to a <see cref="double"/>.</summary>
-        public double ToDouble() => ToDouble(null);
+        #region Blob access
 
         /// <summary>Gets the binary blob data as a byte array.</summary>
         public byte[] AsBlob()
@@ -505,9 +503,6 @@ namespace ValveKeyValue
             => (List<KeyValuePair<string, KVObject>>)_ref;
 
         #endregion
-
-        /// <inheritdoc/>
-        public override string ToString() => ToString(CultureInfo.InvariantCulture);
 
         #region Private helpers
 

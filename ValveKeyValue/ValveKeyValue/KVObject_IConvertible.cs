@@ -42,6 +42,28 @@ namespace ValveKeyValue
 
         #endregion
 
+        #region Convenience overloads
+
+        /// <summary>Converts this value to a <see cref="bool"/>.</summary>
+        public bool ToBoolean() => ToBoolean(null);
+
+        /// <summary>Converts this value to an <see cref="int"/>.</summary>
+        public int ToInt32() => ToInt32(null);
+
+        /// <summary>Converts this value to a <see cref="long"/>.</summary>
+        public long ToInt64() => ToInt64(null);
+
+        /// <summary>Converts this value to a <see cref="float"/>.</summary>
+        public float ToSingle() => ToSingle(null);
+
+        /// <summary>Converts this value to a <see cref="double"/>.</summary>
+        public double ToDouble() => ToDouble(null);
+
+        /// <inheritdoc/>
+        public override string ToString() => ToString(CultureInfo.InvariantCulture);
+
+        #endregion
+
         #region Conversion methods
 
         /// <inheritdoc cref="IConvertible.ToBoolean"/>

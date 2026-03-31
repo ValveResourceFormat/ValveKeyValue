@@ -34,10 +34,10 @@ namespace ValveKeyValue
         /// <summary>Implicit cast from <see cref="ushort"/> to <see cref="KVObject"/>.</summary>
         public static implicit operator KVObject(ushort value) => new(KVValueType.UInt16, (long)value);
 
-        /// <summary>Implicit cast from <see cref="byte"/> to <see cref="KVObject"/>.</summary>
+        /// <summary>Implicit cast from <see cref="byte"/> to <see cref="KVObject"/>. The value is widened to <see cref="int"/>.</summary>
         public static implicit operator KVObject(byte value) => new((int)value);
 
-        /// <summary>Implicit cast from <see cref="sbyte"/> to <see cref="KVObject"/>.</summary>
+        /// <summary>Implicit cast from <see cref="sbyte"/> to <see cref="KVObject"/>. The value is widened to <see cref="int"/>.</summary>
         public static implicit operator KVObject(sbyte value) => new((int)value);
 
         /// <summary>Implicit cast from <see cref="IntPtr"/> to <see cref="KVObject"/>.</summary>
