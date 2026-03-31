@@ -127,8 +127,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                     break;
 
                 case KV1BinaryNodeType.Float32:
-                    var floatValue = BitConverter.ToSingle(reader.ReadBytes(4), 0);
-                    value = new KVObject(floatValue);
+                    value = new KVObject(reader.ReadSingle());
                     break;
 
                 case KV1BinaryNodeType.ProbablyBinary:
