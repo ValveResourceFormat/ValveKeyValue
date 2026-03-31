@@ -62,7 +62,7 @@ namespace ValveKeyValue.Serialization.KeyValues1
                     break;
 
                 case KVValueType.String:
-                    WriteNullTerminatedBytes(Encoding.UTF8.GetBytes((string)value));
+                    WriteNullTerminatedString((string)value);
                     break;
 
                 case KVValueType.UInt32:
@@ -75,11 +75,11 @@ namespace ValveKeyValue.Serialization.KeyValues1
                     break;
 
                 case KVValueType.Null:
-                    WriteNullTerminatedBytes([]);
+                    writer.Write((byte)0);
                     break;
 
                 case KVValueType.BinaryBlob:
-                    WriteNullTerminatedBytes(Encoding.UTF8.GetBytes(value.ToString(null)));
+                    WriteNullTerminatedString(value.ToString(null));
                     break;
 
                 default:
@@ -96,9 +96,9 @@ namespace ValveKeyValue.Serialization.KeyValues1
             writer.Write((byte)nodeType);
         }
 
-        void WriteNullTerminatedBytes(byte[] value)
+        void WriteNullTerminatedString(string value)
         {
-            writer.Write(value);
+            writer.Write(value.AsSpan());
             writer.Write((byte)0);
         }
 
@@ -110,7 +110,7 @@ namespace ValveKeyValue.Serialization.KeyValues1
             }
             else
             {
-                WriteNullTerminatedBytes(Encoding.UTF8.GetBytes(name));
+                WriteNullTerminatedString(name);
             }
         }
 

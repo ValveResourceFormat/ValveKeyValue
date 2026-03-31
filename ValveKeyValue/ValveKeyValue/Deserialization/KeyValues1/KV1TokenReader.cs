@@ -97,7 +97,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
             if (sb.Length > 0 && sb[^1] == '\r')
             {
-                sb.Remove(sb.Length - 1, 1);
+                sb.Length--;
             }
 
             var text = sb.ToString();
