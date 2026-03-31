@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Globalization;
 using System.Text;
 using ValveKeyValue.Abstraction;
@@ -6,6 +7,8 @@ namespace ValveKeyValue.Serialization.KeyValues3
 {
     sealed class KV3TextSerializer : IVisitationListener, IDisposable
     {
+        static readonly SearchValues<char> CharsToEscape = SearchValues.Create("\n\t\\\"");
+
         public KV3TextSerializer(Stream stream, KVHeader header = null)
         {
             ArgumentNullException.ThrowIfNull(stream);
@@ -379,9 +382,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
 
         void WriteText(string text)
         {
-            var isMultiline = text.Contains('\n', StringComparison.Ordinal);
-
-            if (isMultiline)
+            if (text.Contains('\n', StringComparison.Ordinal))
             {
                 text = text.Replace("\r\n", "\n", StringComparison.Ordinal);
                 text = text.Replace("\"\"\"", "\\\"\"\"", StringComparison.Ordinal);
@@ -389,6 +390,12 @@ namespace ValveKeyValue.Serialization.KeyValues3
                 writer.Write("\"\"\"\n");
                 writer.Write(text);
                 writer.Write("\n\"\"\"");
+            }
+            else if (!text.AsSpan().ContainsAny(CharsToEscape))
+            {
+                writer.Write('"');
+                writer.Write(text);
+                writer.Write('"');
             }
             else
             {
@@ -398,10 +405,6 @@ namespace ValveKeyValue.Serialization.KeyValues3
                 {
                     switch (@char)
                     {
-                        case '\n':
-                            writer.Write("\\n");
-                            break;
-
                         case '\t':
                             writer.Write("\\t");
                             break;
@@ -431,66 +434,61 @@ namespace ValveKeyValue.Serialization.KeyValues3
                 return;
             }
 
-            var escaped = key.Length == 0; // Quote empty strings
-            var sb = new StringBuilder(key.Length + 2);
-            sb.Append('"');
-
-            if (key.Length > 0 && key[0] >= '0' && key[0] <= '9')
-            {
-                // Quote when first character is a digit
-                escaped = true;
-            }
-
-            foreach (var @char in key)
-            {
-                switch (@char)
-                {
-                    case '\t':
-                        escaped = true;
-                        sb.Append('\\');
-                        sb.Append('t');
-                        break;
-
-                    case '\n':
-                        escaped = true;
-                        sb.Append('\\');
-                        sb.Append('n');
-                        break;
-
-                    case '"':
-                        escaped = true;
-                        sb.Append('\\');
-                        sb.Append('"');
-                        break;
-
-                    case '\\':
-                        escaped = true;
-                        sb.Append('\\');
-                        sb.Append('\\');
-                        break;
-
-                    default:
-                        if (@char != '.' && @char != '_' && !char.IsAsciiLetterOrDigit(@char))
-                        {
-                            escaped = true;
-                        }
-
-                        sb.Append(@char);
-                        break;
-                }
-            }
-
-            if (escaped)
-            {
-                sb.Append('"');
-                writer.Write(sb.ToString());
-            }
-            else
+            if (key.Length > 0 && !char.IsAsciiDigit(key[0]) && !NeedsQuoting(key))
             {
                 writer.Write(key);
             }
+            else
+            {
+                writer.Write('"');
+
+                foreach (var @char in key)
+                {
+                    switch (@char)
+                    {
+                        case '\t':
+                            writer.Write("\\t");
+                            break;
+
+                        case '\n':
+                            writer.Write("\\n");
+                            break;
+
+                        case '\'':
+                            writer.Write("\\'");
+                            break;
+
+                        case '"':
+                            writer.Write("\\\"");
+                            break;
+
+                        case '\\':
+                            writer.Write("\\\\");
+                            break;
+
+                        default:
+                            writer.Write(@char);
+                            break;
+                    }
+                }
+
+                writer.Write('"');
+            }
 
             writer.Write(" = ");
+        }
+
+        static bool NeedsQuoting(string key)
+        {
+            foreach (var c in key)
+            {
+                if (c != '.' && c != '_' && !char.IsAsciiLetterOrDigit(c))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         void WriteFlag(KVFlag kvFlag)

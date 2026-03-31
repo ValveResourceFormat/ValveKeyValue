@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Globalization;
 using System.Text;
 using ValveKeyValue.Abstraction;
@@ -6,6 +7,8 @@ namespace ValveKeyValue.Serialization.KeyValues1
 {
     sealed class KV1TextSerializer : IVisitationListener, IDisposable
     {
+        static readonly SearchValues<char> CharsToEscape = SearchValues.Create("\"\\");
+
         public KV1TextSerializer(Stream stream, KVSerializerOptions options)
         {
             ArgumentNullException.ThrowIfNull(stream);
@@ -128,21 +131,28 @@ namespace ValveKeyValue.Serialization.KeyValues1
         {
             writer.Write('"');
 
-            foreach (var @char in text)
+            if (!text.AsSpan().ContainsAny(CharsToEscape))
             {
-                switch (@char)
+                writer.Write(text);
+            }
+            else
+            {
+                foreach (var @char in text)
                 {
-                    case '"':
-                        writer.Write("\\\"");
-                        break;
+                    switch (@char)
+                    {
+                        case '"':
+                            writer.Write("\\\"");
+                            break;
 
-                    case '\\':
-                        writer.Write(options.HasEscapeSequences ? "\\\\" : "\\");
-                        break;
+                        case '\\':
+                            writer.Write(options.HasEscapeSequences ? "\\\\" : "\\");
+                            break;
 
-                    default:
-                        writer.Write(@char);
-                        break;
+                        default:
+                            writer.Write(@char);
+                            break;
+                    }
                 }
             }
 
