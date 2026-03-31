@@ -11,7 +11,7 @@ namespace ValveKeyValue
     /// Keys (names) are stored in the parent container, not on the child.
     /// </summary>
     [DebuggerDisplay("{DebuggerDescription}")]
-    public partial class KVObject : IEnumerable<KeyValuePair<string, KVObject>>
+    public partial class KVObject : IReadOnlyDictionary<string, KVObject>
     {
         #region Properties
 

@@ -2,6 +2,9 @@ root = true
 
 [*.cs]
 
+# CA1710: Identifiers should not have incorrect suffix (KVObject implements IReadOnlyDictionary but is not a dictionary)
+dotnet_diagnostic.CA1710.severity = none
+
 # CA1711: Identifiers should not have incorrect suffix
 dotnet_diagnostic.CA1711.severity = none
 

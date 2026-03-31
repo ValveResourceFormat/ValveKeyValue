@@ -2,7 +2,7 @@ using System.Collections;
 
 namespace ValveKeyValue
 {
-    public partial class KVObject : IEnumerable<KeyValuePair<string, KVObject>>
+    public partial class KVObject
     {
         /// <inheritdoc/>
         public IEnumerator<KeyValuePair<string, KVObject>> GetEnumerator()
