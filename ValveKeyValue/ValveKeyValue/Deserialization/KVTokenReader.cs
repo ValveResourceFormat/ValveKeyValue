@@ -11,7 +11,7 @@ namespace ValveKeyValue.Deserialization
 
         protected TextReader textReader;
         protected bool disposed;
-        protected int? peekedNext;
+        int peekedNext = -1;
 
         int lineOffset;
         int columnOffset;
@@ -40,10 +40,10 @@ namespace ValveKeyValue.Deserialization
         {
             int nextValue;
 
-            if (peekedNext.HasValue)
+            if (peekedNext != -1)
             {
-                nextValue = peekedNext.Value;
-                peekedNext = null;
+                nextValue = peekedNext;
+                peekedNext = -1;
             }
             else
             {
@@ -72,9 +72,9 @@ namespace ValveKeyValue.Deserialization
 
         protected int Peek()
         {
-            if (peekedNext.HasValue)
+            if (peekedNext != -1)
             {
-                return peekedNext.Value;
+                return peekedNext;
             }
 
             var next = textReader.Read();
