@@ -69,38 +69,6 @@ namespace ValveKeyValue.Test
         #region Cross-type conversions (store as X, read as Y)
 
         [Test]
-        public void IntToFloat()
-        {
-            KVObject v = 42;
-            float f = (float)v;
-            Assert.That(f, Is.EqualTo(42.0f));
-        }
-
-        [Test]
-        public void FloatToInt()
-        {
-            KVObject v = 3.14f;
-            int i = (int)v;
-            Assert.That(i, Is.EqualTo(3));
-        }
-
-        [Test]
-        public void IntToLong()
-        {
-            KVObject v = 42;
-            long l = (long)v;
-            Assert.That(l, Is.EqualTo(42L));
-        }
-
-        [Test]
-        public void IntToString()
-        {
-            KVObject v = 42;
-            string s = (string)v;
-            Assert.That(s, Is.EqualTo("42"));
-        }
-
-        [Test]
         public void StringToInt()
         {
             KVObject v = "123";
@@ -416,6 +384,289 @@ namespace ValveKeyValue.Test
         {
             var obj = KVObject.Null();
             Assert.That(obj.Values.Any(), Is.False);
+        }
+
+        #endregion
+
+        #region Native type cross-conversion: success paths
+
+        [Test]
+        public void BooleanConversions()
+        {
+            KVObject t = true;
+            KVObject f = false;
+
+            Assert.Multiple(() =>
+            {
+                Assert.That((bool)t, Is.True);
+                Assert.That((bool)f, Is.False);
+                Assert.That((int)t, Is.EqualTo(1));
+                Assert.That((int)f, Is.EqualTo(0));
+                Assert.That((long)t, Is.EqualTo(1L));
+                Assert.That((uint)t, Is.EqualTo(1U));
+                Assert.That((ulong)t, Is.EqualTo(1UL));
+                Assert.That((float)t, Is.EqualTo(1.0f));
+                Assert.That((double)t, Is.EqualTo(1.0));
+                Assert.That((string)t, Is.EqualTo("1"));
+                Assert.That((string)f, Is.EqualTo("0"));
+                Assert.That(t.ToDecimal(null), Is.EqualTo(1m));
+            });
+        }
+
+        [Test]
+        public void Int16Conversions()
+        {
+            KVObject v = (short)-42;
+
+            Assert.Multiple(() =>
+            {
+                Assert.That((short)v, Is.EqualTo((short)-42));
+                Assert.That((int)v, Is.EqualTo(-42));
+                Assert.That((long)v, Is.EqualTo(-42L));
+                Assert.That((float)v, Is.EqualTo(-42.0f));
+                Assert.That((double)v, Is.EqualTo(-42.0));
+                Assert.That((string)v, Is.EqualTo("-42"));
+                Assert.That(v.ToDecimal(null), Is.EqualTo(-42m));
+                Assert.That((bool)v, Is.True);
+            });
+        }
+
+        [Test]
+        public void UInt16Conversions()
+        {
+            KVObject v = (ushort)60000;
+
+            Assert.Multiple(() =>
+            {
+                Assert.That((ushort)v, Is.EqualTo((ushort)60000));
+                Assert.That((int)v, Is.EqualTo(60000));
+                Assert.That((long)v, Is.EqualTo(60000L));
+                Assert.That((uint)v, Is.EqualTo(60000U));
+                Assert.That((ulong)v, Is.EqualTo(60000UL));
+                Assert.That((float)v, Is.EqualTo(60000.0f));
+                Assert.That((double)v, Is.EqualTo(60000.0));
+                Assert.That((string)v, Is.EqualTo("60000"));
+                Assert.That(v.ToDecimal(null), Is.EqualTo(60000m));
+            });
+        }
+
+        [Test]
+        public void Int32Conversions()
+        {
+            KVObject v = -100;
+
+            Assert.Multiple(() =>
+            {
+                Assert.That((int)v, Is.EqualTo(-100));
+                Assert.That((long)v, Is.EqualTo(-100L));
+                Assert.That((short)v, Is.EqualTo((short)-100));
+                Assert.That((double)v, Is.EqualTo(-100.0));
+                Assert.That((string)v, Is.EqualTo("-100"));
+                Assert.That(v.ToDecimal(null), Is.EqualTo(-100m));
+                Assert.That((bool)v, Is.True);
+            });
+        }
+
+        [Test]
+        public void UInt32Conversions()
+        {
+            KVObject v = (uint)42;
+
+            Assert.Multiple(() =>
+            {
+                Assert.That((uint)v, Is.EqualTo(42U));
+                Assert.That((int)v, Is.EqualTo(42));
+                Assert.That((long)v, Is.EqualTo(42L));
+                Assert.That((ulong)v, Is.EqualTo(42UL));
+                Assert.That((float)v, Is.EqualTo(42.0f));
+                Assert.That((double)v, Is.EqualTo(42.0));
+                Assert.That((string)v, Is.EqualTo("42"));
+                Assert.That(v.ToDecimal(null), Is.EqualTo(42m));
+                Assert.That((bool)v, Is.True);
+            });
+        }
+
+        [Test]
+        public void Int64Conversions()
+        {
+            KVObject v = 100_000L;
+
+            Assert.Multiple(() =>
+            {
+                Assert.That((long)v, Is.EqualTo(100_000L));
+                Assert.That((int)v, Is.EqualTo(100_000));
+                Assert.That((float)v, Is.EqualTo(100_000.0f));
+                Assert.That((double)v, Is.EqualTo(100_000.0));
+                Assert.That((string)v, Is.EqualTo("100000"));
+                Assert.That(v.ToDecimal(null), Is.EqualTo(100_000m));
+                Assert.That((ulong)v, Is.EqualTo(100_000UL));
+            });
+        }
+
+        [Test]
+        public void UInt64Conversions()
+        {
+            KVObject v = (ulong)42;
+
+            Assert.Multiple(() =>
+            {
+                Assert.That((ulong)v, Is.EqualTo(42UL));
+                Assert.That((long)v, Is.EqualTo(42L));
+                Assert.That((int)v, Is.EqualTo(42));
+                Assert.That((float)v, Is.EqualTo(42.0f));
+                Assert.That((double)v, Is.EqualTo(42.0));
+                Assert.That((string)v, Is.EqualTo("42"));
+                Assert.That(v.ToDecimal(null), Is.EqualTo(42m));
+                Assert.That((bool)v, Is.True);
+            });
+        }
+
+        [Test]
+        public void LargeUInt64Conversions()
+        {
+            KVObject v = ulong.MaxValue;
+
+            Assert.Multiple(() =>
+            {
+                Assert.That((ulong)v, Is.EqualTo(ulong.MaxValue));
+                Assert.That((float)v, Is.EqualTo((float)ulong.MaxValue));
+                Assert.That((double)v, Is.EqualTo((double)ulong.MaxValue));
+                Assert.That((string)v, Is.EqualTo("18446744073709551615"));
+                Assert.That(v.ToDecimal(null), Is.EqualTo((decimal)ulong.MaxValue));
+                Assert.That((bool)v, Is.True);
+            });
+        }
+
+        [Test]
+        public void FloatingPointConversions()
+        {
+            KVObject v = 3.14f;
+
+            Assert.Multiple(() =>
+            {
+                Assert.That((float)v, Is.EqualTo(3.14f));
+                Assert.That((double)v, Is.EqualTo(3.14f).Within(0.001));
+                Assert.That((int)v, Is.EqualTo(3));
+                Assert.That((long)v, Is.EqualTo(3L));
+                Assert.That(v.ToDecimal(null), Is.EqualTo(3.14m).Within(0.01m));
+                Assert.That((bool)v, Is.True);
+                Assert.That((bool)(KVObject)0.0f, Is.False);
+            });
+        }
+
+        [Test]
+        public void FloatingPoint64Conversions()
+        {
+            KVObject v = 3.14159265;
+
+            Assert.Multiple(() =>
+            {
+                Assert.That((double)v, Is.EqualTo(3.14159265));
+                Assert.That((float)v, Is.EqualTo(3.14159265f).Within(0.0001f));
+                Assert.That((int)v, Is.EqualTo(3));
+                Assert.That((long)v, Is.EqualTo(3L));
+                Assert.That(v.ToDecimal(null), Is.EqualTo(3.14159265m).Within(0.0001m));
+                Assert.That((string)v, Does.Contain("3.14159"));
+                Assert.That((bool)v, Is.True);
+                Assert.That((bool)(KVObject)0.0, Is.False);
+            });
+        }
+
+        [Test]
+        public void PointerConversions()
+        {
+            KVObject v = new IntPtr(42);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That((IntPtr)v, Is.EqualTo(new IntPtr(42)));
+                Assert.That((int)v, Is.EqualTo(42));
+                Assert.That((long)v, Is.EqualTo(42L));
+                Assert.That((string)v, Is.EqualTo("42"));
+                Assert.That((bool)v, Is.True);
+            });
+        }
+
+        #endregion
+
+        #region Native type cross-conversion: overflow boundaries
+
+        [Test]
+        public void UInt32ToInt32ThrowsOnOverflow()
+        {
+            KVObject v = (uint)3_000_000_000;
+            Assert.That(() => (int)v, Throws.InstanceOf<OverflowException>());
+        }
+
+        [Test]
+        public void NegativeInt32ToUInt32ThrowsOnOverflow()
+        {
+            KVObject v = -1;
+            Assert.That(() => (uint)v, Throws.InstanceOf<OverflowException>());
+        }
+
+        [Test]
+        public void NegativeInt32ToUInt64ThrowsOnOverflow()
+        {
+            KVObject v = -1;
+            Assert.That(() => (ulong)v, Throws.InstanceOf<OverflowException>());
+        }
+
+        [Test]
+        public void NegativeInt64ToUInt64ThrowsOnOverflow()
+        {
+            KVObject v = (long)-1;
+            Assert.That(() => (ulong)v, Throws.InstanceOf<OverflowException>());
+        }
+
+        [Test]
+        public void NegativeInt16ToUInt32ThrowsOnOverflow()
+        {
+            KVObject v = (short)-1;
+            Assert.That(() => (uint)v, Throws.InstanceOf<OverflowException>());
+        }
+
+        [Test]
+        public void NegativeInt16ToUInt64ThrowsOnOverflow()
+        {
+            KVObject v = (short)-1;
+            Assert.That(() => (ulong)v, Throws.InstanceOf<OverflowException>());
+        }
+
+        [Test]
+        public void UInt16MaxToInt16ThrowsOnOverflow()
+        {
+            KVObject v = (ushort)65535;
+            Assert.That(() => (short)v, Throws.InstanceOf<OverflowException>());
+        }
+
+        [Test]
+        public void Int64MaxToInt32ThrowsOnOverflow()
+        {
+            KVObject v = long.MaxValue;
+            Assert.That(() => (int)v, Throws.InstanceOf<OverflowException>());
+        }
+
+        [Test]
+        public void LargeUInt64ToInt64ThrowsOnOverflow()
+        {
+            KVObject v = ulong.MaxValue;
+            Assert.That(() => (long)v, Throws.InstanceOf<OverflowException>());
+        }
+
+        [Test]
+        public void LargeUInt64ToInt32ThrowsOnOverflow()
+        {
+            KVObject v = ulong.MaxValue;
+            Assert.That(() => (int)v, Throws.InstanceOf<OverflowException>());
+        }
+
+        [Test]
+        public void LargeUInt64ToDecimalSucceeds()
+        {
+            var largeValue = (ulong)long.MaxValue + 1;
+            KVObject v = largeValue;
+            Assert.That(v.ToDecimal(null), Is.EqualTo((decimal)largeValue));
         }
 
         #endregion

@@ -159,6 +159,61 @@ namespace ValveKeyValue.Test.TextKV3
             Assert.That(text, Is.EqualTo(expected));
         }
 
+        [Test]
+        public void SerializesMultilineStringWithBackslashes()
+        {
+            var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
+            var root = KVObject.Collection();
+            root.Add("path", "C:\\Program Files\\hello\nworld");
+            var doc = new KVDocument(null, null, root);
+
+            var data2 = RoundTrip(kv, doc);
+
+            Assert.That((string)data2["path"], Is.EqualTo("C:\\Program Files\\hello\nworld"));
+        }
+
+        [Test]
+        public void SerializesPointerType()
+        {
+            var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
+            var root = KVObject.Collection();
+            root.Add("ptr", new IntPtr(12345));
+            var doc = new KVDocument(null, null, root);
+
+            string text;
+            using (var ms = new MemoryStream())
+            {
+                kv.Serialize(ms, doc);
+                ms.Seek(0, SeekOrigin.Begin);
+                using var reader = new StreamReader(ms);
+                text = reader.ReadToEnd();
+            }
+
+            Assert.That(text, Does.Contain("12345"));
+
+            var data2 = kv.Deserialize(text);
+            Assert.That((int)data2["ptr"], Is.EqualTo(12345));
+            Assert.That(data2["ptr"].ValueType, Is.EqualTo(KVValueType.UInt64));
+        }
+
+        [Test]
+        public void SerializesInt16AndUInt16()
+        {
+            var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
+            var root = KVObject.Collection();
+            root.Add("i16", (short)-42);
+            root.Add("u16", (ushort)60000);
+            var doc = new KVDocument(null, null, root);
+
+            var data2 = RoundTrip(kv, doc);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That((int)data2["i16"], Is.EqualTo(-42));
+                Assert.That((int)data2["u16"], Is.EqualTo(60000));
+            });
+        }
+
         static KVDocument RoundTrip(KVSerializer kv, KVDocument data)
         {
             using var ms = new MemoryStream();

@@ -108,6 +108,10 @@ namespace ValveKeyValue
                     childItems.Add(new KeyValuePair<string, KVObject>(entry.Key.ToString(), childObjectValue));
                 }
             }
+            else if (objectType == typeof(byte[]))
+            {
+                return KVObject.Blob((byte[])managedObject);
+            }
             else if (objectType.IsArray || typeof(IEnumerable).IsAssignableFrom(objectType))
             {
                 var counter = 0;
@@ -491,15 +495,16 @@ namespace ValveKeyValue
             return Type.GetTypeCode(type) switch
             {
                 TypeCode.Boolean => new KVObject((bool)value),
-                TypeCode.Byte => new KVObject((int)(byte)value), // There is no byte kv type
-                TypeCode.SByte => new KVObject((int)(sbyte)value), // There is no sbyte kv type
-                TypeCode.Int16 => new KVObject((int)(short)value), // There is no int16 kv type
+                TypeCode.Byte => new KVObject((int)(byte)value),
+                TypeCode.SByte => new KVObject((int)(sbyte)value),
+                TypeCode.Int16 => new KVObject((int)(short)value),
                 TypeCode.Int32 => new KVObject((int)value),
                 TypeCode.Int64 => new KVObject((long)value),
                 TypeCode.Single => new KVObject((float)value),
+                TypeCode.Double => new KVObject((double)value),
                 TypeCode.String => new KVObject((string)value),
-                TypeCode.UInt16 => new KVObject((ulong)(ushort)value), // There is no uint16 kv type
-                TypeCode.UInt32 => new KVObject((ulong)(uint)value), // There is no uint32 kv type
+                TypeCode.UInt16 => new KVObject((ulong)(ushort)value),
+                TypeCode.UInt32 => new KVObject((ulong)(uint)value),
                 TypeCode.UInt64 => new KVObject((ulong)value),
                 _ => null,
             };

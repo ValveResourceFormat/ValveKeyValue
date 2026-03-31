@@ -59,5 +59,36 @@ namespace ValveKeyValue.Test
             Assert.That((ulong)deserialized["lng"], Is.EqualTo(0x8877665544332211u));
             Assert.That((long)deserialized["i64"], Is.EqualTo(0x0102030405060708));
         }
+
+        [Test]
+        public void NewValueTypesAreWidenedInBinarySerialization()
+        {
+            var kvo = KVObject.ListCollection();
+            kvo.Add("bool", new KVObject(true));
+            kvo.Add("i16", (short)42);
+            kvo.Add("u16", (ushort)42);
+            kvo.Add("u32", (uint)42);
+            kvo.Add("f64", 3.14);
+            kvo.Add("blob", KVObject.Blob([0xAB, 0xCD]));
+            kvo.Add("null", KVObject.Null());
+            var doc = new KVDocument(null, "Test", kvo);
+
+            using var ms = new MemoryStream();
+            KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Serialize(ms, doc);
+
+            ms.Seek(0, SeekOrigin.Begin);
+            var deserialized = KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Deserialize(ms);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That((int)deserialized["bool"], Is.EqualTo(1));
+                Assert.That((int)deserialized["i16"], Is.EqualTo(42));
+                Assert.That((int)deserialized["u16"], Is.EqualTo(42));
+                Assert.That((ulong)deserialized["u32"], Is.EqualTo(42UL));
+                Assert.That((float)deserialized["f64"], Is.EqualTo(3.14f).Within(0.01));
+                Assert.That((string)deserialized["blob"], Is.EqualTo("AB CD"));
+                Assert.That((string)deserialized["null"], Is.EqualTo(string.Empty));
+            });
+        }
     }
 }

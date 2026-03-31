@@ -232,6 +232,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
                 case KVValueType.UInt16:
                 case KVValueType.UInt32:
                 case KVValueType.UInt64:
+                case KVValueType.Pointer:
                     writer.Write(value.ToString(null));
                     break;
                 default:

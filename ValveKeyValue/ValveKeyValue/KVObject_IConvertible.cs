@@ -47,11 +47,15 @@ namespace ValveKeyValue
         /// <inheritdoc cref="IConvertible.ToBoolean"/>
         public bool ToBoolean(IFormatProvider provider) => ValueType switch
         {
-            KVValueType.Boolean => _scalar != 0,
+            KVValueType.Boolean or KVValueType.Int16 or KVValueType.UInt16
+                or KVValueType.Int32 or KVValueType.UInt32 or KVValueType.Pointer
+                or KVValueType.Int64 or KVValueType.UInt64
+                => _scalar != 0,
+            KVValueType.FloatingPoint => BitConverter.Int32BitsToSingle((int)_scalar) != 0,
+            KVValueType.FloatingPoint64 => BitConverter.Int64BitsToDouble(_scalar) != 0,
+            KVValueType.String => ToInt32(provider) != 0,
             KVValueType.Null => throw new NotSupportedException("Cannot convert null to Boolean."),
-            KVValueType.Collection or KVValueType.Array or KVValueType.BinaryBlob
-                => throw new NotSupportedException($"Cannot convert {ValueType} to Boolean."),
-            _ => ToInt32(provider) != 0,
+            _ => throw new NotSupportedException($"Cannot convert {ValueType} to Boolean."),
         };
 
         /// <inheritdoc cref="IConvertible.ToByte"/>
@@ -72,6 +76,7 @@ namespace ValveKeyValue
             KVValueType.String => ConvertFromString<decimal>(provider),
             KVValueType.FloatingPoint => (decimal)BitConverter.Int32BitsToSingle((int)_scalar),
             KVValueType.FloatingPoint64 => (decimal)BitConverter.Int64BitsToDouble(_scalar),
+            KVValueType.UInt64 => (decimal)unchecked((ulong)_scalar),
             _ => (decimal)ToInt64(provider),
         };
 
@@ -81,6 +86,7 @@ namespace ValveKeyValue
             KVValueType.FloatingPoint => BitConverter.Int32BitsToSingle((int)_scalar),
             KVValueType.FloatingPoint64 => BitConverter.Int64BitsToDouble(_scalar),
             KVValueType.String => ConvertFromString<double>(provider),
+            KVValueType.UInt64 => (double)unchecked((ulong)_scalar),
             KVValueType.Null => throw new NotSupportedException("Cannot convert null to Double."),
             KVValueType.Collection or KVValueType.Array or KVValueType.BinaryBlob
                 => throw new NotSupportedException($"Cannot convert {ValueType} to Double."),
@@ -94,9 +100,10 @@ namespace ValveKeyValue
         public int ToInt32(IFormatProvider provider) => ValueType switch
         {
             KVValueType.Int32 or KVValueType.Pointer or KVValueType.Boolean
-                or KVValueType.Int16 or KVValueType.UInt16 or KVValueType.UInt32
+                or KVValueType.Int16 or KVValueType.UInt16
                 => (int)_scalar,
-            KVValueType.Int64 or KVValueType.UInt64 => checked((int)_scalar),
+            KVValueType.UInt32 or KVValueType.Int64 => checked((int)_scalar),
+            KVValueType.UInt64 => checked((int)unchecked((ulong)_scalar)),
             KVValueType.FloatingPoint => (int)BitConverter.Int32BitsToSingle((int)_scalar),
             KVValueType.FloatingPoint64 => (int)BitConverter.Int64BitsToDouble(_scalar),
             KVValueType.String => ConvertFromString<int>(provider),
@@ -110,7 +117,7 @@ namespace ValveKeyValue
             KVValueType.Int32 or KVValueType.Pointer or KVValueType.Boolean
                 or KVValueType.Int16 or KVValueType.UInt16 or KVValueType.UInt32
                 or KVValueType.Int64 => _scalar,
-            KVValueType.UInt64 => checked((long)(ulong)_scalar),
+            KVValueType.UInt64 => checked((long)unchecked((ulong)_scalar)),
             KVValueType.FloatingPoint => (long)BitConverter.Int32BitsToSingle((int)_scalar),
             KVValueType.FloatingPoint64 => (long)BitConverter.Int64BitsToDouble(_scalar),
             KVValueType.String => ConvertFromString<long>(provider),
@@ -127,6 +134,7 @@ namespace ValveKeyValue
             KVValueType.FloatingPoint => BitConverter.Int32BitsToSingle((int)_scalar),
             KVValueType.FloatingPoint64 => (float)BitConverter.Int64BitsToDouble(_scalar),
             KVValueType.String => ConvertFromString<float>(provider),
+            KVValueType.UInt64 => (float)unchecked((ulong)_scalar),
             KVValueType.Null => throw new NotSupportedException("Cannot convert null to Single."),
             KVValueType.Collection or KVValueType.Array or KVValueType.BinaryBlob
                 => throw new NotSupportedException($"Cannot convert {ValueType} to Single."),
@@ -159,9 +167,10 @@ namespace ValveKeyValue
         /// <inheritdoc cref="IConvertible.ToUInt32"/>
         public uint ToUInt32(IFormatProvider provider) => ValueType switch
         {
-            KVValueType.UInt32 or KVValueType.Int32 or KVValueType.Pointer
-                or KVValueType.Boolean or KVValueType.Int16 or KVValueType.UInt16
-                => unchecked((uint)_scalar),
+            KVValueType.UInt32 or KVValueType.UInt16 or KVValueType.Boolean
+                => (uint)_scalar,
+            KVValueType.Int32 or KVValueType.Pointer or KVValueType.Int16
+                => checked((uint)_scalar),
             KVValueType.String => ConvertFromString<uint>(provider),
             _ => checked((uint)ToUInt64(provider)),
         };
@@ -169,10 +178,12 @@ namespace ValveKeyValue
         /// <inheritdoc cref="IConvertible.ToUInt64"/>
         public ulong ToUInt64(IFormatProvider provider) => ValueType switch
         {
-            KVValueType.UInt64 or KVValueType.Int64 => unchecked((ulong)_scalar),
-            KVValueType.UInt32 or KVValueType.Int32 or KVValueType.Pointer
-                or KVValueType.Boolean or KVValueType.Int16 or KVValueType.UInt16
-                => unchecked((ulong)_scalar),
+            KVValueType.UInt64 => unchecked((ulong)_scalar),
+            KVValueType.Int64 => checked((ulong)_scalar),
+            KVValueType.UInt32 or KVValueType.UInt16 or KVValueType.Boolean
+                => (ulong)_scalar,
+            KVValueType.Int32 or KVValueType.Pointer or KVValueType.Int16
+                => checked((ulong)_scalar),
             KVValueType.FloatingPoint => (ulong)BitConverter.Int32BitsToSingle((int)_scalar),
             KVValueType.FloatingPoint64 => (ulong)BitConverter.Int64BitsToDouble(_scalar),
             KVValueType.String => ConvertFromString<ulong>(provider),

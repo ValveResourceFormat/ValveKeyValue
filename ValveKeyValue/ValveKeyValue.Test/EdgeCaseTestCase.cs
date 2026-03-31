@@ -512,5 +512,175 @@ namespace ValveKeyValue.Test
         }
 
         #endregion
+
+        #region Add(string, KVObject) on array throws
+
+        [Test]
+        public void AddNamedChildToArrayThrowsInvalidOperationException()
+        {
+            var arr = KVObject.Array();
+            arr.Add(1);
+
+            Assert.That(
+                () => arr.Add("key", "value"),
+                Throws.InstanceOf<InvalidOperationException>());
+        }
+
+        #endregion
+
+        #region String indexer set on scalar and array throws
+
+        [Test]
+        public void IndexerSetOnScalarThrowsInvalidOperationException()
+        {
+            var obj = new KVObject("hello");
+
+            Assert.That(
+                () => obj["key"] = "value",
+                Throws.InstanceOf<InvalidOperationException>());
+        }
+
+        [Test]
+        public void IndexerSetOnArrayThrowsInvalidOperationException()
+        {
+            var arr = KVObject.Array();
+            arr.Add(1);
+
+            Assert.That(
+                () => arr["key"] = "value",
+                Throws.InstanceOf<InvalidOperationException>());
+        }
+
+        #endregion
+
+        #region Remove on scalar and array returns false
+
+        [Test]
+        public void RemoveOnScalarReturnsFalse()
+        {
+            var obj = new KVObject("hello");
+
+            Assert.That(obj.Remove("anything"), Is.False);
+        }
+
+        [Test]
+        public void RemoveOnArrayReturnsFalse()
+        {
+            var arr = KVObject.Array();
+            arr.Add(1);
+
+            Assert.That(arr.Remove("anything"), Is.False);
+        }
+
+        #endregion
+
+        #region Remove duplicate keys from list-backed removes all
+
+        [Test]
+        public void RemoveDuplicateKeysFromListCollectionRemovesAll()
+        {
+            var obj = KVObject.ListCollection();
+            obj.Add("key", "first");
+            obj.Add("other", "keep");
+            obj.Add("key", "second");
+            obj.Add("key", "third");
+
+            var result = obj.Remove("key");
+
+            Assert.That(result, Is.True);
+            Assert.That(obj.Count, Is.EqualTo(1));
+            Assert.That((string)obj["other"], Is.EqualTo("keep"));
+        }
+
+        #endregion
+
+        #region SetChild null on dict-backed missing key is no-op
+
+        [Test]
+        public void IndexerSetNullOnMissingKeyInDictCollectionIsNoOp()
+        {
+            var obj = KVObject.Collection();
+            obj.Add("a", 1);
+
+            obj["nonexistent"] = null;
+
+            Assert.That(obj.Count, Is.EqualTo(1));
+            Assert.That((int)obj["a"], Is.EqualTo(1));
+        }
+
+        #endregion
+
+        #region Clear on scalar is no-op
+
+        [Test]
+        public void ClearOnScalarIsNoOp()
+        {
+            var obj = new KVObject(42);
+
+            obj.Clear();
+
+            Assert.That((int)obj, Is.EqualTo(42));
+            Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Int32));
+        }
+
+        #endregion
+
+        #region Dict and list backed collections behave consistently
+
+        [Test]
+        public void DictAndListCollectionsHaveConsistentBehavior()
+        {
+            var dict = KVObject.Collection();
+            dict.Add("a", 1);
+            dict.Add("b", 2);
+
+            var list = KVObject.ListCollection();
+            list.Add("a", 1);
+            list.Add("b", 2);
+
+            Assert.Multiple(() =>
+            {
+                // GetChild
+                Assert.That((int)dict.GetChild("a"), Is.EqualTo(1));
+                Assert.That((int)list.GetChild("a"), Is.EqualTo(1));
+                Assert.That(dict.GetChild("missing"), Is.Null);
+                Assert.That(list.GetChild("missing"), Is.Null);
+
+                // ContainsKey
+                Assert.That(dict.ContainsKey("a"), Is.True);
+                Assert.That(list.ContainsKey("a"), Is.True);
+                Assert.That(dict.ContainsKey("missing"), Is.False);
+                Assert.That(list.ContainsKey("missing"), Is.False);
+
+                // Keys
+                Assert.That(dict.Keys.ToList(), Has.Member("a").And.Member("b"));
+                Assert.That(list.Keys.ToList(), Has.Member("a").And.Member("b"));
+
+                // Values
+                Assert.That(dict.Values.Select(v => (int)v).ToList(), Has.Member(1).And.Member(2));
+                Assert.That(list.Values.Select(v => (int)v).ToList(), Has.Member(1).And.Member(2));
+
+                // Count
+                Assert.That(dict.Count, Is.EqualTo(2));
+                Assert.That(list.Count, Is.EqualTo(2));
+
+                // Integer indexer
+                Assert.That((int)dict[0], Is.EqualTo(1));
+                Assert.That((int)dict[1], Is.EqualTo(2));
+                Assert.That((int)list[0], Is.EqualTo(1));
+                Assert.That((int)list[1], Is.EqualTo(2));
+            });
+
+            // Remove
+            Assert.That(dict.Remove("a"), Is.True);
+            Assert.That(list.Remove("a"), Is.True);
+            Assert.That(dict.Remove("missing"), Is.False);
+            Assert.That(list.Remove("missing"), Is.False);
+
+            Assert.That(dict.Count, Is.EqualTo(1));
+            Assert.That(list.Count, Is.EqualTo(1));
+        }
+
+        #endregion
     }
 }

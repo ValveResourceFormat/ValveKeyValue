@@ -236,6 +236,11 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             {
                 while (true)
                 {
+                    if (IsEndOfFile(Peek()))
+                    {
+                        throw new InvalidDataException("Unterminated block comment.");
+                    }
+
                     next = Next();
 
                     if (next == '*' && Peek() == '/')

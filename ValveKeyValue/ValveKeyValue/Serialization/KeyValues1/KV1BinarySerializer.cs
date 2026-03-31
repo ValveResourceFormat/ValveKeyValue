@@ -49,9 +49,13 @@ namespace ValveKeyValue.Serialization.KeyValues1
             switch (value.ValueType)
             {
                 case KVValueType.FloatingPoint:
+                case KVValueType.FloatingPoint64:
                     writer.Write((float)value);
                     break;
 
+                case KVValueType.Boolean:
+                case KVValueType.Int16:
+                case KVValueType.UInt16:
                 case KVValueType.Int32:
                 case KVValueType.Pointer:
                     writer.Write((int)value);
@@ -61,12 +65,21 @@ namespace ValveKeyValue.Serialization.KeyValues1
                     WriteNullTerminatedBytes(Encoding.UTF8.GetBytes((string)value));
                     break;
 
+                case KVValueType.UInt32:
                 case KVValueType.UInt64:
                     writer.Write((ulong)value);
                     break;
 
                 case KVValueType.Int64:
                     writer.Write((long)value);
+                    break;
+
+                case KVValueType.Null:
+                    WriteNullTerminatedBytes([]);
+                    break;
+
+                case KVValueType.BinaryBlob:
+                    WriteNullTerminatedBytes(Encoding.UTF8.GetBytes(value.ToString(null)));
                     break;
 
                 default:
@@ -105,11 +118,13 @@ namespace ValveKeyValue.Serialization.KeyValues1
         {
             return type switch
             {
-                KVValueType.FloatingPoint => KV1BinaryNodeType.Float32,
-                KVValueType.Int32 => KV1BinaryNodeType.Int32,
+                KVValueType.FloatingPoint or KVValueType.FloatingPoint64 => KV1BinaryNodeType.Float32,
+                KVValueType.Boolean or KVValueType.Int16 or KVValueType.UInt16
+                    or KVValueType.Int32 => KV1BinaryNodeType.Int32,
                 KVValueType.Pointer => KV1BinaryNodeType.Pointer,
-                KVValueType.String => KV1BinaryNodeType.String,
-                KVValueType.UInt64 => KV1BinaryNodeType.UInt64,
+                KVValueType.Null or KVValueType.BinaryBlob
+                    or KVValueType.String => KV1BinaryNodeType.String,
+                KVValueType.UInt32 or KVValueType.UInt64 => KV1BinaryNodeType.UInt64,
                 KVValueType.Int64 => KV1BinaryNodeType.Int64,
                 _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unhandled value type."),
             };
