@@ -19,6 +19,8 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         // Dota 2 binary from 2017 used "+" as a terminate (for flagged values), but then they changed it to "|"
         static readonly SearchValues<char> TokenTerminators = SearchValues.Create("{}[]=, \t\n\r'\":|;");
 
+        readonly StringBuilder sb = new();
+
         public KV3TokenReader(TextReader textReader) : base(textReader)
         {
         }
@@ -112,8 +114,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             ReadChar(BinaryBlobMarker);
             ReadChar(ArrayStart); // TODO: Strictly speaking Valve allows bare # without [ to be read as literal value (but what would that be?)
 
-            var sb = new StringBuilder();
-
             while (true)
             {
                 var next = Next();
@@ -131,7 +131,9 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 sb.Append(next);
             }
 
-            return new KVToken(KVTokenType.BinaryBlob, sb.ToString());
+            var result = sb.ToString();
+            sb.Clear();
+            return new KVToken(KVTokenType.BinaryBlob, result);
         }
 
         public KVHeader ReadHeader()
@@ -307,8 +309,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 return ReadQuotedStringRaw((char)next);
             }
 
-            var sb = new StringBuilder();
-
             while (true)
             {
                 next = Peek();
@@ -321,7 +321,9 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 sb.Append(Next());
             }
 
-            return sb.ToString();
+            var result = sb.ToString();
+            sb.Clear();
+            return result;
         }
 
         string ReadQuotedStringRaw(char quotationMark)
@@ -329,8 +331,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             ReadChar(quotationMark);
 
             var isMultiline = false;
-
-            var sb = new StringBuilder();
 
             if (quotationMark == '"' && Peek() == '"')
             {
@@ -356,13 +356,22 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 }
             }
 
+            var escaped = false;
+
             if (isMultiline)
             {
                 while (true)
                 {
                     var next = Next();
 
-                    if (next == '"' && !IsEscaped(sb))
+                    if (next == '\\')
+                    {
+                        escaped = !escaped;
+                        sb.Append(next);
+                        continue;
+                    }
+
+                    if (next == '"' && !escaped)
                     {
                         // Check if this is the start of """
                         if (Peek() == '"')
@@ -382,96 +391,97 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                         }
                     }
 
+                    escaped = false;
                     sb.Append(next);
                 }
 
                 // Strip trailing newline (\n or \r\n)
                 if (sb.Length > 0 && sb[^1] == '\n')
                 {
-                    sb.Remove(sb.Length - 1, 1);
+                    sb.Length--;
 
                     if (sb.Length > 0 && sb[^1] == '\r')
                     {
-                        sb.Remove(sb.Length - 1, 1);
+                        sb.Length--;
                     }
                 }
+
+                var result = sb.ToString();
+                sb.Clear();
+                return result;
             }
             else
             {
+                var hasEscapes = false;
+
                 while (true)
                 {
                     var next = Next();
 
-                    if (next == quotationMark && !IsEscaped(sb))
+                    if (next == '\\')
+                    {
+                        escaped = !escaped;
+                        hasEscapes = true;
+                        sb.Append(next);
+                        continue;
+                    }
+
+                    if (next == quotationMark && !escaped)
                     {
                         break;
                     }
 
+                    escaped = false;
                     sb.Append(next);
                 }
 
-                return UnescapeString(sb);
-            }
+                if (!hasEscapes)
+                {
+                    var result = sb.ToString();
+                    sb.Clear();
+                    return result;
+                }
 
-            return sb.ToString();
+                return UnescapeString();
+            }
         }
 
-        static bool IsEscaped(StringBuilder sb)
+        string UnescapeString()
         {
-            var count = 0;
+            var length = sb.Length;
 
-            for (var i = sb.Length - 1; i >= 0 && sb[i] == '\\'; i--)
-            {
-                count++;
-            }
-
-            return count % 2 == 1;
-        }
-
-        static string UnescapeString(StringBuilder input)
-        {
-            if (input.Length == 0)
+            if (length == 0)
             {
                 return string.Empty;
             }
 
-            var result = new StringBuilder(input.Length);
-            var isEscaped = false;
+            // Unescape in-place by reading ahead and writing back
+            var write = 0;
 
-            for (var i = 0; i < input.Length; i++)
+            for (var read = 0; read < length; read++)
             {
-                var c = input[i];
+                var c = sb[read];
 
-                if (c == '\\' && !isEscaped)
+                if (c == '\\' && read + 1 < length)
                 {
-                    isEscaped = true;
-                    continue;
-                }
-
-                if (isEscaped)
-                {
-                    switch (c)
+                    read++;
+                    sb[write++] = sb[read] switch
                     {
-                        case 'n':
-                            result.Append('\n');
-                            break;
-                        case 't':
-                            result.Append('\t');
-                            break;
-                        default:
-                            result.Append(c);
-                            break;
-                    }
-
-                    isEscaped = false;
+                        'n' => '\n',
+                        't' => '\t',
+                        var x => x,
+                    };
                 }
                 else
                 {
-                    result.Append(c);
+                    sb[write++] = c;
                 }
             }
 
-            return result.ToString();
+            sb.Length = write;
+            var result = sb.ToString();
+            sb.Clear();
+            return result;
         }
     }
 }
