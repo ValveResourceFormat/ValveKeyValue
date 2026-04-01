@@ -23,11 +23,12 @@ namespace ValveKeyValue.Serialization.KeyValues1
             writer.Dispose();
         }
 
-        public void OnObjectStart(string name, KVFlag flag)
+        public bool OnObjectStart(string name, KVFlag flag, KVObject obj)
         {
             objectDepth++;
             Write(KV1BinaryNodeType.ChildObject);
             WriteKeyForNextValue(name);
+            return false;
         }
 
         public void OnObjectEnd()

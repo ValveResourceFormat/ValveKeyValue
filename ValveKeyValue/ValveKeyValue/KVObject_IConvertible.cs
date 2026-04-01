@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Numerics;
 using System.Text;
 
 namespace ValveKeyValue
@@ -177,9 +178,18 @@ namespace ValveKeyValue
             KVValueType.UInt32 => ((uint)_scalar).ToString(provider),
             KVValueType.Int16 => ((short)_scalar).ToString(provider),
             KVValueType.UInt16 => ((ushort)_scalar).ToString(provider),
+            KVValueType.Byte => ((byte)_scalar).ToString(provider),
             KVValueType.BinaryBlob => FormatBlob(),
             KVValueType.Collection => "[Collection]",
             KVValueType.Array => "[Array]",
+            KVValueType.Color => FormatColor(),
+            KVValueType.TimeSpan => FormatDmxTime(),
+            KVValueType.Vector2 => FormatVector2(provider),
+            KVValueType.Vector3 => FormatVector3(provider),
+            KVValueType.Vector4 => FormatVector4(provider),
+            KVValueType.QAngle => FormatQAngle(provider),
+            KVValueType.Quaternion => FormatQuaternion(provider),
+            KVValueType.Matrix4x4 => FormatMatrix4x4(provider),
             _ => string.Empty,
         };
 
@@ -243,6 +253,59 @@ namespace ValveKeyValue
             KVValueType.Null => null,
             _ => _ref,
         };
+
+        private string FormatColor()
+        {
+            var c = (DmxColor)_ref;
+            return $"{c.R} {c.G} {c.B} {c.A}";
+        }
+
+        private string FormatDmxTime()
+        {
+            var t = (DmxTime)_ref;
+            return t.Ticks.ToString(CultureInfo.InvariantCulture);
+        }
+
+        private string FormatVector2(IFormatProvider provider)
+        {
+            var v = (Vector2)_ref;
+            return $"{v.X.ToString(provider)} {v.Y.ToString(provider)}";
+        }
+
+        private string FormatVector3(IFormatProvider provider)
+        {
+            var v = (Vector3)_ref;
+            return $"{v.X.ToString(provider)} {v.Y.ToString(provider)} {v.Z.ToString(provider)}";
+        }
+
+        private string FormatVector4(IFormatProvider provider)
+        {
+            var v = (Vector4)_ref;
+            return $"{v.X.ToString(provider)} {v.Y.ToString(provider)} {v.Z.ToString(provider)} {v.W.ToString(provider)}";
+        }
+
+        private string FormatQAngle(IFormatProvider provider)
+        {
+            var a = (QAngle)_ref;
+            return $"{a.Pitch.ToString(provider)} {a.Yaw.ToString(provider)} {a.Roll.ToString(provider)}";
+        }
+
+        private string FormatQuaternion(IFormatProvider provider)
+        {
+            var q = (Quaternion)_ref;
+            return $"{q.X.ToString(provider)} {q.Y.ToString(provider)} {q.Z.ToString(provider)} {q.W.ToString(provider)}";
+        }
+
+        private string FormatMatrix4x4(IFormatProvider provider)
+        {
+            var m = (Matrix4x4)_ref;
+            return string.Join(' ', [
+                m.M11.ToString(provider), m.M12.ToString(provider), m.M13.ToString(provider), m.M14.ToString(provider),
+                m.M21.ToString(provider), m.M22.ToString(provider), m.M23.ToString(provider), m.M24.ToString(provider),
+                m.M31.ToString(provider), m.M32.ToString(provider), m.M33.ToString(provider), m.M34.ToString(provider),
+                m.M41.ToString(provider), m.M42.ToString(provider), m.M43.ToString(provider), m.M44.ToString(provider),
+            ]);
+        }
 
         private string FormatBlob()
         {

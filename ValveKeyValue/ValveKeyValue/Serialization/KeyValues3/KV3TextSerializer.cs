@@ -39,11 +39,12 @@ namespace ValveKeyValue.Serialization.KeyValues3
             writer.Dispose();
         }
 
-        public void OnObjectStart(string name, KVFlag flag)
+        public bool OnObjectStart(string name, KVFlag flag, KVObject obj)
         {
             context.Push(null);
 
             WriteStartObject(name, flag);
+            return false;
         }
 
         public void OnObjectEnd()

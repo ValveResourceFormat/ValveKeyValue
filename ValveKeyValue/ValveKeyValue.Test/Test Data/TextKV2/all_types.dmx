@@ -1,0 +1,98 @@
+<!-- dmx encoding keyvalues2 1 format dmx 1 -->
+// This file tests all DMX scalar and array types
+"DmElement"
+{
+	"id" "elementid" "10000000-0000-0000-0000-000000000001"
+	"name" "string" "all_types_root"
+	"intVal" "int" "42"
+	"floatVal" "float" "3.14"
+	"boolTrue" "bool" "1"
+	"boolFalse" "bool" "0"
+	"stringVal" "string" "hello"
+	"emptyString" "string" ""
+	"binaryVal" "binary" "DEADBEEF"
+	"timeVal" "time" "12345"
+	"colorVal" "color" "255 128 0 200"
+	"vec2Val" "vector2" "1.5 2.5"
+	"vec3Val" "vector3" "1 2 3"
+	"vec4Val" "vector4" "1 2 3 4"
+	"qangleVal" "qangle" "10 20 30"
+	"quatVal" "quaternion" "0.1 0.2 0.3 0.9"
+	"matrixVal" "matrix" "1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1"
+	"uint8Val" "uint8" "255"
+	"uint64Val" "uint64" "18446744073709551615"
+	"intArray" "int_array"
+	[
+		"10",
+		"20",
+		"30"
+	]
+	"floatArray" "float_array"
+	[
+		"1.5",
+		"2.5"
+	]
+	"boolArray" "bool_array"
+	[
+		"1",
+		"0",
+		"1"
+	]
+	"stringArray" "string_array"
+	[
+		"alpha",
+		"beta"
+	]
+	"emptyIntArray" "int_array"
+	[
+	]
+	"emptyStringArray" "string_array"
+	[
+	]
+	"singleElementArray" "int_array"
+	[
+		"42"
+	]
+	"vec3Array" "vector3_array"
+	[
+		"1 2 3",
+		"4 5 6"
+	]
+	"colorArray" "color_array"
+	[
+		"255 0 0 255",
+		"0 255 0 128"
+	]
+	"timeArray" "time_array"
+	[
+		"100",
+		"200"
+	]
+	"nullRef" "element" ""
+	"inlineChild" "DmeChild"
+	{
+		"id" "elementid" "20000000-0000-0000-0000-000000000001"
+		"name" "string" "child"
+		"value" "int" "99"
+		"nested" "DmeNested"
+		{
+			"id" "elementid" "20000000-0000-0000-0000-000000000002"
+			"name" "string" "nested_child"
+			"deep" "int" "7"
+		}
+	}
+	"emptyElementArray" "element_array"
+	[
+	]
+	"mixedElementArray" "element_array"
+	[
+		"element" "",
+		"DmeItem"
+		{
+			"id" "elementid" "30000000-0000-0000-0000-000000000001"
+			"name" "string" "array_item"
+			"score" "int" "100"
+		},
+		"element" ""
+	]
+}

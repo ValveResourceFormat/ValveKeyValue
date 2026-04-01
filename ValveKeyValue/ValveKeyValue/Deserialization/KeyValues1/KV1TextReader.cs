@@ -159,7 +159,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                 throw new InvalidOperationException($"Attempted to begin new object while in state {stateMachine.Current} at {tokenReader.PreviousTokenPosition}.");
             }
 
-            listener.OnObjectStart(stateMachine.CurrentName, KVFlag.None);
+            listener.OnObjectStart(stateMachine.CurrentName, KVFlag.None, null);
 
             stateMachine.PushObject();
             stateMachine.Push(KV1TextReaderState.InObjectBeforeKey);

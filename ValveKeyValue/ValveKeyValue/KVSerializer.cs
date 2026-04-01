@@ -2,8 +2,10 @@ using System.Diagnostics.CodeAnalysis;
 using ValveKeyValue.Abstraction;
 using ValveKeyValue.Deserialization;
 using ValveKeyValue.Deserialization.KeyValues1;
+using ValveKeyValue.Deserialization.KeyValues2;
 using ValveKeyValue.Deserialization.KeyValues3;
 using ValveKeyValue.Serialization.KeyValues1;
+using ValveKeyValue.Serialization.KeyValues2;
 using ValveKeyValue.Serialization.KeyValues3;
 
 namespace ValveKeyValue
@@ -37,6 +39,18 @@ namespace ValveKeyValue
         public KVDocument Deserialize(Stream stream, KVSerializerOptions options = null)
         {
             ArgumentNullException.ThrowIfNull(stream);
+
+            if (format == KVSerializationFormat.KeyValues2Text)
+            {
+                using var kv2Reader = new KV2TextReader(new StreamReader(stream, null, true, -1, leaveOpen: true));
+                return kv2Reader.Read();
+            }
+
+            if (format == KVSerializationFormat.KeyValues2Binary)
+            {
+                using var kv2BinaryReader = new KV2BinaryReader(stream);
+                return kv2BinaryReader.Read();
+            }
 
             var builder = new KVObjectBuilder(useDictionaryForCollections: format == KVSerializationFormat.KeyValues3Text);
 
@@ -74,10 +88,19 @@ namespace ValveKeyValue
         {
             ArgumentNullException.ThrowIfNull(data);
 
-            var name = (data as KVDocument)?.Name;
-            using var serializer = MakeSerializer(stream, options ?? KVSerializerOptions.DefaultOptions);
+            var doc = data as KVDocument;
+
+            // KV2 binary is standalone — flat element index doesn't fit the visitor pattern
+            if (format == KVSerializationFormat.KeyValues2Binary)
+            {
+                using var kv2Writer = new KV2BinaryWriter(stream, doc?.Header);
+                kv2Writer.Write(doc ?? new KVDocument(null, null, data));
+                return;
+            }
+
+            using var serializer = MakeSerializer(stream, options ?? KVSerializerOptions.DefaultOptions, doc?.Header);
             var visitor = new KVObjectVisitor(serializer);
-            visitor.Visit(name, data);
+            visitor.Visit(doc?.Name, data);
         }
 
         /// <summary>
@@ -89,6 +112,13 @@ namespace ValveKeyValue
         public void Serialize(Stream stream, KVDocument data, KVSerializerOptions options = null)
         {
             ArgumentNullException.ThrowIfNull(data);
+
+            if (format == KVSerializationFormat.KeyValues2Binary)
+            {
+                using var kv2Writer = new KV2BinaryWriter(stream, data.Header);
+                kv2Writer.Write(data);
+                return;
+            }
 
             using var serializer = MakeSerializer(stream, options ?? KVSerializerOptions.DefaultOptions, data.Header);
             var visitor = new KVObjectVisitor(serializer);
@@ -141,6 +171,7 @@ namespace ValveKeyValue
                 KVSerializationFormat.KeyValues1Text => new KV1TextSerializer(stream, options),
                 KVSerializationFormat.KeyValues1Binary => new KV1BinarySerializer(stream, options.StringTable),
                 KVSerializationFormat.KeyValues3Text => new KV3TextSerializer(stream, header),
+                KVSerializationFormat.KeyValues2Text => new KV2TextWriter(stream, header),
                 _ => throw new InvalidOperationException($"Invalid serialization format: {format}"),
             };
         }

@@ -1,6 +1,8 @@
+using System.Collections;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Numerics;
 
 namespace ValveKeyValue
 {
@@ -50,8 +52,14 @@ namespace ValveKeyValue
         {
             KVValueType.Collection => GetCollectionCount(),
             KVValueType.Array => GetArrayList().Count,
+            _ when IsTypedArray => (_ref as ICollection)?.Count ?? 0,
             _ => 0,
         };
+
+        /// <summary>
+        /// Gets a value indicating whether this value is a DMX typed array.
+        /// </summary>
+        public bool IsTypedArray => ValueType >= KVValueType.ElementArray && ValueType <= KVValueType.UInt64Array;
 
         #endregion
 
@@ -152,6 +160,84 @@ namespace ValveKeyValue
         {
             ValueType = KVValueType.Pointer;
             _scalar = value.ToInt32();
+        }
+
+        /// <summary>
+        /// Creates a DMX byte-valued <see cref="KVObject"/>.
+        /// </summary>
+        public static KVObject Byte(byte value)
+            => new(KVValueType.Byte, value, null, KVFlag.None);
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KVObject"/> class with a <see cref="DmxColor"/> value.
+        /// </summary>
+        public KVObject(DmxColor value)
+        {
+            ValueType = KVValueType.Color;
+            _ref = value;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KVObject"/> class with a <see cref="DmxTime"/> value.
+        /// </summary>
+        public KVObject(DmxTime value)
+        {
+            ValueType = KVValueType.TimeSpan;
+            _ref = value;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KVObject"/> class with a <see cref="Vector2"/> value.
+        /// </summary>
+        public KVObject(Vector2 value)
+        {
+            ValueType = KVValueType.Vector2;
+            _ref = value;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KVObject"/> class with a <see cref="Vector3"/> value.
+        /// </summary>
+        public KVObject(Vector3 value)
+        {
+            ValueType = KVValueType.Vector3;
+            _ref = value;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KVObject"/> class with a <see cref="Vector4"/> value.
+        /// </summary>
+        public KVObject(Vector4 value)
+        {
+            ValueType = KVValueType.Vector4;
+            _ref = value;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KVObject"/> class with a <see cref="QAngle"/> value.
+        /// </summary>
+        public KVObject(QAngle value)
+        {
+            ValueType = KVValueType.QAngle;
+            _ref = value;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KVObject"/> class with a <see cref="Quaternion"/> value.
+        /// </summary>
+        public KVObject(Quaternion value)
+        {
+            ValueType = KVValueType.Quaternion;
+            _ref = value;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KVObject"/> class with a <see cref="Matrix4x4"/> value.
+        /// </summary>
+        public KVObject(Matrix4x4 value)
+        {
+            ValueType = KVValueType.Matrix4x4;
+            _ref = value;
         }
 
         internal KVObject(KVValueType type, long scalar, object refValue = null, KVFlag flag = KVFlag.None)
@@ -491,6 +577,22 @@ namespace ValveKeyValue
 
         #endregion
 
+        #region Typed array access
+
+        /// <summary>Gets the typed array data as a <see cref="List{T}"/>.</summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1002")]
+        public List<T> GetArray<T>()
+        {
+            if (_ref is List<T> list)
+            {
+                return list;
+            }
+
+            throw new InvalidOperationException($"Cannot get List<{typeof(T).Name}> from a {ValueType} value.");
+        }
+
+        #endregion
+
         #region Internal accessors
 
         internal List<KVObject> GetArrayList()
@@ -603,6 +705,7 @@ namespace ValveKeyValue
             KVValueType.Null => "null",
             KVValueType.Collection => $"Collection ({GetCollectionCount()} items)",
             KVValueType.Array => $"Array ({GetArrayList().Count} items)",
+            _ when IsTypedArray => $"{ValueType} ({(_ref as ICollection)?.Count ?? 0} items)",
             _ => $"{ToString(CultureInfo.InvariantCulture)} ({ValueType})",
         };
 

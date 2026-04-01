@@ -31,8 +31,11 @@ namespace ValveKeyValue.Serialization.KeyValues1
             writer.Dispose();
         }
 
-        public void OnObjectStart(string name, KVFlag flag)
-            => WriteStartObject(name);
+        public bool OnObjectStart(string name, KVFlag flag, KVObject obj)
+        {
+            WriteStartObject(name);
+            return false;
+        }
 
         public void OnObjectEnd()
             => WriteEndObject();

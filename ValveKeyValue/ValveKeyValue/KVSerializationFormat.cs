@@ -20,5 +20,15 @@ namespace ValveKeyValue
         /// KeyValues 3 textual format. Used in the Source 2 engine.
         /// </summary>
         KeyValues3Text,
+
+        /// <summary>
+        /// KeyValues 2 (DMX) textual format. Used by Source engine tools (SFM, Hammer, model compiler, particle editor).
+        /// </summary>
+        KeyValues2Text,
+
+        /// <summary>
+        /// KeyValues 2 (DMX) binary format. Used by Source engine tools.
+        /// </summary>
+        KeyValues2Binary,
     }
 }

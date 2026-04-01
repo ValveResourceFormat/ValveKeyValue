@@ -23,6 +23,13 @@ namespace ValveKeyValue
             return data;
         }
 
+        public static string ByteArrayToHexString(byte[] data)
+        {
+            ArgumentNullException.ThrowIfNull(data);
+
+            return Convert.ToHexStringLower(data);
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static char HexToCharUpper(int value)
         {

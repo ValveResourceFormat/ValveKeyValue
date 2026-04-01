@@ -21,10 +21,12 @@ namespace ValveKeyValue.Abstraction
             switch (obj.ValueType)
             {
                 case KVValueType.Collection:
-                    listener.OnObjectStart(name, obj.Flag);
-                    foreach (var (childKey, child) in obj)
+                    if (!listener.OnObjectStart(name, obj.Flag, obj))
                     {
-                        VisitObject(childKey, child, false);
+                        foreach (var (childKey, child) in obj)
+                        {
+                            VisitObject(childKey, child, false);
+                        }
                     }
                     listener.OnObjectEnd();
                     break;
@@ -48,6 +50,12 @@ namespace ValveKeyValue.Abstraction
                     listener.OnArrayEnd();
                     break;
 
+                // Typed arrays (DMX) are passed as whole values — the listener
+                // knows the element type from KVValueType and handles serialization.
+                case >= KVValueType.ElementArray and <= KVValueType.UInt64Array:
+                    listener.OnKeyValuePair(name, obj);
+                    break;
+
                 case KVValueType.BinaryBlob:
                 case KVValueType.FloatingPoint:
                 case KVValueType.FloatingPoint64:
@@ -61,6 +69,15 @@ namespace ValveKeyValue.Abstraction
                 case KVValueType.Int64:
                 case KVValueType.Boolean:
                 case KVValueType.Null:
+                case KVValueType.Byte:
+                case KVValueType.Color:
+                case KVValueType.TimeSpan:
+                case KVValueType.Vector2:
+                case KVValueType.Vector3:
+                case KVValueType.Vector4:
+                case KVValueType.QAngle:
+                case KVValueType.Quaternion:
+                case KVValueType.Matrix4x4:
                     if (isArray)
                     {
                         listener.OnArrayValue(obj);
@@ -84,6 +101,15 @@ namespace ValveKeyValue.Abstraction
             KVValueType.UInt32 or
             KVValueType.UInt64 or
             KVValueType.FloatingPoint or
-            KVValueType.FloatingPoint64;
+            KVValueType.FloatingPoint64 or
+            KVValueType.Byte or
+            KVValueType.Color or
+            KVValueType.TimeSpan or
+            KVValueType.Vector2 or
+            KVValueType.Vector3 or
+            KVValueType.Vector4 or
+            KVValueType.QAngle or
+            KVValueType.Quaternion or
+            KVValueType.Matrix4x4;
     }
 }

@@ -16,6 +16,11 @@ namespace ValveKeyValue
         public string Name { get; }
 
         /// <summary>
+        /// Gets the original root object, preserving subclass identity (e.g. <see cref="KV2Element"/>).
+        /// </summary>
+        public KVObject Root { get; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="KVDocument"/> class.
         /// </summary>
         /// <param name="header">Header of the document.</param>
@@ -26,6 +31,7 @@ namespace ValveKeyValue
         {
             Header = header;
             Name = name;
+            Root = root;
         }
     }
 }

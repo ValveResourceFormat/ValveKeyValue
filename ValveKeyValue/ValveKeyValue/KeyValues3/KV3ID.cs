@@ -3,7 +3,7 @@ namespace ValveKeyValue.KeyValues3
     /// <summary>
     /// Represents a KeyValues3 identifier with a name and GUID.
     /// </summary>
-    public readonly record struct KV3ID(string Name, Guid Id)
+    public readonly record struct KV3ID(string Name, Guid Id = default, int Version = 0)
     {
         /// <inheritdoc/>
         /// <remarks>
@@ -11,7 +11,12 @@ namespace ValveKeyValue.KeyValues3
         /// </remarks>
         public override string ToString()
         {
-            return $"{Name}:version{{{Id}}}";
+            if (Id != default)
+            {
+                return $"{Name}:version{{{Id}}}";
+            }
+
+            return $"{Name} {Version}";
         }
     }
 }

@@ -104,7 +104,7 @@ namespace ValveKeyValue.Deserialization
             }
         }
 
-        public void OnObjectStart(string name, KVFlag flag)
+        public bool OnObjectStart(string name, KVFlag flag, KVObject obj)
         {
             var state = new KVPartialState
             {
@@ -112,6 +112,7 @@ namespace ValveKeyValue.Deserialization
                 Flag = flag,
             };
             StateStack.Push(state);
+            return false;
         }
 
         public void OnArrayStart(string name, KVFlag flag, int elementCount, bool allSimpleElements)

@@ -1,0 +1,17 @@
+<!-- dmx encoding keyvalues2 1 format dmx 1 -->
+"DmElement"
+{
+	"id" "elementid" "00000000-0000-0000-0000-000000000001"
+	"name" "string" "root"
+	"sharedElement" "DmeShared"
+	{
+		"id" "elementid" "00000000-0000-0000-0000-000000000002"
+		"name" "string" "shared"
+		"data" "int" "42"
+	}
+	"refToShared" "element" "00000000-0000-0000-0000-000000000002"
+	"arrayWithRefs" "element_array"
+	[
+		"element" "00000000-0000-0000-0000-000000000002"
+	]
+}

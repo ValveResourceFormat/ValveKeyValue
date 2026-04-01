@@ -2,7 +2,7 @@ namespace ValveKeyValue.Abstraction
 {
     interface IVisitationListener : IDisposable
     {
-        void OnObjectStart(string name, KVFlag flag);
+        bool OnObjectStart(string name, KVFlag flag, KVObject obj);
 
         void OnObjectEnd();
 

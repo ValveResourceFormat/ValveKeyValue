@@ -1,0 +1,49 @@
+<!-- dmx encoding keyvalues2 1 format dmx 1 -->
+"DmElement"
+{
+	"id" "elementid" "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+	"name" "string" "root"
+	"intVal" "int" "42"
+	"floatVal" "float" "3.14"
+	"boolVal" "bool" "1"
+	"stringVal" "string" "hello world"
+	"color" "color" "255 128 0 255"
+	"position" "vector3" "1.5 2.5 3.5"
+	"angles" "qangle" "10 20 30"
+	"rotation" "quaternion" "0 0 0 1"
+	"uv" "vector2" "0.5 0.75"
+	"vec4" "vector4" "1 2 3 4"
+	"time" "time" "100"
+	"child" "DmeChild"
+	{
+		"id" "elementid" "11111111-2222-3333-4444-555555555555"
+		"name" "string" "child1"
+		"value" "int" "99"
+	}
+	"nullRef" "element" ""
+	"intArray" "int_array"
+	[
+		"1",
+		"2",
+		"3"
+	]
+	"stringArray" "string_array"
+	[
+		"alpha",
+		"beta",
+		"gamma"
+	]
+	"elements" "element_array"
+	[
+		"DmeItem"
+		{
+			"id" "elementid" "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+			"name" "string" "item1"
+		},
+		"DmeItem"
+		{
+			"id" "elementid" "ffffffff-0000-1111-2222-333333333333"
+			"name" "string" "item2"
+		}
+	]
+}

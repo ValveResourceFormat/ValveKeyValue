@@ -251,7 +251,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 throw new InvalidOperationException($"Attempted to begin new object while in state {stateMachine.Current}.");
             }
 
-            listener.OnObjectStart(stateMachine.CurrentName, stateMachine.GetAndResetFlag());
+            listener.OnObjectStart(stateMachine.CurrentName, stateMachine.GetAndResetFlag(), null);
 
             stateMachine.PushObject();
             stateMachine.Push(KV3TextReaderState.InObjectBeforeKey);
