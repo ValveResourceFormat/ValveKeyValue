@@ -11,17 +11,17 @@ namespace ValveKeyValue
         Null,
 
         /// <summary>
-        /// This <see cref="KVObject"/> represents a collection of child <see cref="KVObject"/>s.
+        /// This <see cref="KVObject"/> represents a collection of named key-value pairs (like a dictionary or table).
         /// </summary>
         Collection,
 
         /// <summary>
-        /// This <see cref="KVObject"/> represents an array of child <see cref="KVObject"/>s.
+        /// This <see cref="KVObject"/> represents an ordered array of unnamed child <see cref="KVObject"/>s.
         /// </summary>
         Array,
 
         /// <summary>
-        /// This <see cref="KVObject"/> represents a blob of binary bytes.
+        /// This <see cref="KVObject"/> represents a binary blob (raw byte data).
         /// </summary>
         BinaryBlob,
 

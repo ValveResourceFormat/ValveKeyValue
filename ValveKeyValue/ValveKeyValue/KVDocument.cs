@@ -1,12 +1,12 @@
 namespace ValveKeyValue
 {
     /// <summary>
-    /// Represents a KeyValue document with a root name and header.
+    /// Represents a KeyValue document with a root key name and an optional header.
     /// </summary>
     public class KVDocument : KVObject
     {
         /// <summary>
-        /// Gets the header of this document containing encoding and format identifiers.
+        /// Gets the header containing encoding and format identifiers, or <c>null</c> for KV1 documents.
         /// </summary>
         public KVHeader Header { get; }
 

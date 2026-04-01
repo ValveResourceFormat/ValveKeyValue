@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 namespace ValveKeyValue
 {
     /// <summary>
-    /// Options to use when deserializing a KeyValues file.
+    /// Options to use when serializing or deserializing a KeyValues file.
     /// </summary>
     public sealed class KVSerializerOptions
     {

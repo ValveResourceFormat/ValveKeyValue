@@ -1,7 +1,9 @@
 namespace ValveKeyValue
 {
     /// <summary>
-    /// Provides a way to open any file referenced with <c>#include</c> or <c>#base</c>.
+    /// Provides a way to open any file referenced with <c>#include</c> or <c>#base</c> in a KV1 file.
+    /// <c>#include</c> appends the included keys into the current block.
+    /// <c>#base</c> loads a base file whose keys are recursively merged into the current file.
     /// </summary>
     public interface IIncludedFileLoader
     {

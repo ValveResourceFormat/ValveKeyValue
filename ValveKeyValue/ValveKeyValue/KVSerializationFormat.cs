@@ -7,6 +7,7 @@ namespace ValveKeyValue
     {
         /// <summary>
         /// KeyValues 1 textual format. Used often in Steam and the Source engine.
+        /// Supports <c>#include</c>, <c>#base</c> directives and conditional expressions (e.g. <c>[$WIN32]</c>).
         /// </summary>
         KeyValues1Text,
 

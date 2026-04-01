@@ -9,7 +9,7 @@ using ValveKeyValue.Serialization.KeyValues3;
 namespace ValveKeyValue
 {
     /// <summary>
-    /// Helper class to easily deserialize KeyValue objects.
+    /// Helper class to serialize and deserialize KeyValue objects.
     /// </summary>
     public class KVSerializer
     {
