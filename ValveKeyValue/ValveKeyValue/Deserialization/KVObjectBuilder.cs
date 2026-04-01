@@ -167,7 +167,7 @@ namespace ValveKeyValue.Deserialization
 
             if (state.IsArray)
             {
-                throw new InvalidCastException("Tried to make an object ouf of an array.");
+                throw new InvalidCastException("Tried to make an object out of an array.");
             }
 
             if (state.Value != null)

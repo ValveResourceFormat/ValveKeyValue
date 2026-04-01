@@ -16,7 +16,7 @@ namespace ValveKeyValue
 
         readonly ICollection<string> definedVariables;
 
-        public bool Evalute(string expressionText)
+        public bool Evaluate(string expressionText)
         {
             Expression expression;
             try
@@ -92,7 +92,7 @@ namespace ValveKeyValue
                 switch (token.TokenType)
                 {
                     case KVConditionTokenType.Value:
-                        return EvaluteVariableExpression((string)token.Value);
+                        return EvaluateVariableExpression((string)token.Value);
 
                     case KVConditionTokenType.PreprocessedExpression:
                         return (Expression)token.Value;
@@ -133,17 +133,17 @@ namespace ValveKeyValue
             }
 
             var subRange = tokens.Skip(startIndex + 1).Take(endIndex - startIndex - 1).ToList();
-            var evalutedExpression = CreateExpression(subRange);
+            var evaluatedExpression = CreateExpression(subRange);
 
             for (int i = 0; i < endIndex - startIndex + 1; i++)
             {
                 tokens.RemoveAt(startIndex);
             }
 
-            tokens.Insert(startIndex, new KVConditionToken(evalutedExpression));
+            tokens.Insert(startIndex, new KVConditionToken(evaluatedExpression));
         }
 
-        MethodCallExpression EvaluteVariableExpression(string variable)
+        MethodCallExpression EvaluateVariableExpression(string variable)
         {
             var instance = Expression.Constant(this);
             var method = typeof(KVConditionEvaluator)

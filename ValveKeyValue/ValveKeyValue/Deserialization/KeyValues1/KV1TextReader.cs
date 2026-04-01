@@ -216,7 +216,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                 throw new InvalidDataException($"Found conditional while in state {stateMachine.Current}.");
             }
 
-            if (!conditionEvaluator.Evalute(text))
+            if (!conditionEvaluator.Evaluate(text))
             {
                 stateMachine.SetDiscardCurrent();
             }
