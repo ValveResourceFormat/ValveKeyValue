@@ -72,6 +72,7 @@ namespace ValveKeyValue
         /// <param name="options">Options to use that can influence the serialization process.</param>
         public void Serialize(Stream stream, KVObject data, KVSerializerOptions? options = null)
         {
+            ArgumentNullException.ThrowIfNull(stream);
             ArgumentNullException.ThrowIfNull(data);
 
             var name = (data as KVDocument)?.Name;
@@ -88,6 +89,7 @@ namespace ValveKeyValue
         /// <param name="options">Options to use that can influence the serialization process.</param>
         public void Serialize(Stream stream, KVDocument data, KVSerializerOptions? options = null)
         {
+            ArgumentNullException.ThrowIfNull(stream);
             ArgumentNullException.ThrowIfNull(data);
 
             using var serializer = MakeSerializer(stream, options ?? KVSerializerOptions.DefaultOptions, data.Header);
