@@ -512,42 +512,29 @@ namespace ValveKeyValue
 
         private void SetChild(string key, KVObject value)
         {
+            value ??= Null();
+
             switch (_ref)
             {
                 case Dictionary<string, KVObject> dict:
-                    if (value == null)
-                    {
-                        dict.Remove(key);
-                    }
-                    else
-                    {
-                        dict[key] = value;
-                    }
-
+                    dict[key] = value;
                     break;
                 case List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection:
                     var firstIndex = list.FindIndex(c => c.Key == key);
                     if (firstIndex >= 0)
                     {
-                        if (value != null)
-                        {
-                            list[firstIndex] = new KeyValuePair<string, KVObject>(key, value);
+                        list[firstIndex] = new KeyValuePair<string, KVObject>(key, value);
 
-                            // Remove any remaining duplicates after the replaced entry
-                            for (var i = list.Count - 1; i > firstIndex; i--)
+                        // Remove any remaining duplicates after the replaced entry
+                        for (var i = list.Count - 1; i > firstIndex; i--)
+                        {
+                            if (list[i].Key == key)
                             {
-                                if (list[i].Key == key)
-                                {
-                                    list.RemoveAt(i);
-                                }
+                                list.RemoveAt(i);
                             }
                         }
-                        else
-                        {
-                            list.RemoveAll(c => c.Key == key);
-                        }
                     }
-                    else if (value != null)
+                    else
                     {
                         list.Add(new KeyValuePair<string, KVObject>(key, value));
                     }

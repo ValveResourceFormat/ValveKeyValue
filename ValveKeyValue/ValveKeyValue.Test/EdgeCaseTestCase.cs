@@ -80,7 +80,7 @@ namespace ValveKeyValue.Test
         #region Indexer set with null removes child
 
         [Test]
-        public void IndexerSetNullRemovesChildFromListCollection()
+        public void IndexerSetNullStoresNullValue()
         {
             var obj = KVObject.ListCollection();
             obj.Add("a", "1");
@@ -88,21 +88,22 @@ namespace ValveKeyValue.Test
 
             obj["a"] = null;
 
-            Assert.That(obj.ContainsKey("a"), Is.False);
-            Assert.That(obj.Count, Is.EqualTo(1));
+            Assert.That(obj.Count, Is.EqualTo(2));
+            Assert.That(obj["a"].IsNull, Is.True);
             Assert.That((string)obj["b"], Is.EqualTo("2"));
         }
 
         [Test]
-        public void IndexerSetNullOnMissingKeyDoesNotThrow()
+        public void IndexerSetNullOnMissingKeyStoresNullValue()
         {
             var obj = KVObject.ListCollection();
             obj.Add("a", "1");
 
             obj["nonexistent"] = null;
 
-            Assert.That(obj.Count, Is.EqualTo(1));
+            Assert.That(obj.Count, Is.EqualTo(2));
             Assert.That((string)obj["a"], Is.EqualTo("1"));
+            Assert.That(obj["nonexistent"].IsNull, Is.True);
         }
 
         #endregion
@@ -594,15 +595,16 @@ namespace ValveKeyValue.Test
         #region SetChild null on dict-backed missing key is no-op
 
         [Test]
-        public void IndexerSetNullOnMissingKeyInDictCollectionIsNoOp()
+        public void IndexerSetNullOnMissingKeyInDictCollectionStoresNullValue()
         {
             var obj = KVObject.Collection();
             obj.Add("a", 1);
 
             obj["nonexistent"] = null;
 
-            Assert.That(obj.Count, Is.EqualTo(1));
+            Assert.That(obj.Count, Is.EqualTo(2));
             Assert.That((int)obj["a"], Is.EqualTo(1));
+            Assert.That(obj["nonexistent"].IsNull, Is.True);
         }
 
         #endregion

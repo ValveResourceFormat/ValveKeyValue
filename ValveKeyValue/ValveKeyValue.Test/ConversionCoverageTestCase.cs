@@ -240,7 +240,7 @@ namespace ValveKeyValue.Test
         }
 
         [Test]
-        public void DictBackedCollectionSetNullRemovesKey()
+        public void DictBackedCollectionSetNullStoresNullValue()
         {
             var kv3Text = "<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->\n{\n\tkey1 = \"value1\"\n\tkey2 = 42\n}";
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(kv3Text));
@@ -250,8 +250,8 @@ namespace ValveKeyValue.Test
 
             data["key1"] = null;
 
-            Assert.That(data.ContainsKey("key1"), Is.False);
-            Assert.That(data.Count, Is.EqualTo(1));
+            Assert.That(data.Count, Is.EqualTo(2));
+            Assert.That(data["key1"].IsNull, Is.True);
             Assert.That((int)data["key2"], Is.EqualTo(42));
         }
 
