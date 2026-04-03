@@ -24,6 +24,28 @@ namespace ValveKeyValue.Test
                 Throws.ArgumentException.With.Message.EqualTo("Property set method not found."));
         }
 
+        [Test]
+        public void MissingRequiredInitStringPropertyIsDefault()
+        {
+            // VDF has FirstName/LastName/Age but not City
+            using var stream = TestDataHelper.OpenResource("Text.required_init_person.vdf");
+            var person = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<PersonWithExtraRequiredInit>(stream);
+
+            Assert.That(person.FirstName, Is.EqualTo("Alice"));
+            Assert.That(person.City, Is.Null);
+        }
+
+        [Test]
+        public void MissingRequiredInitIntPropertyIsDefault()
+        {
+            // VDF has FirstName/LastName/Age but not ZipCode
+            using var stream = TestDataHelper.OpenResource("Text.required_init_person.vdf");
+            var person = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<PersonWithExtraRequiredInit>(stream);
+
+            Assert.That(person.Age, Is.EqualTo(30));
+            Assert.That(person.ZipCode, Is.EqualTo(0));
+        }
+
         class PersonWithRequiredInit
         {
             public required string FirstName { get; init; }
@@ -40,6 +62,19 @@ namespace ValveKeyValue.Test
             public string LastName { get; } = string.Empty;
 
             public int Age { get; }
+        }
+
+        class PersonWithExtraRequiredInit
+        {
+            public required string FirstName { get; init; }
+
+            public required string LastName { get; init; }
+
+            public required int Age { get; init; }
+
+            public required string City { get; init; }
+
+            public required int ZipCode { get; init; }
         }
     }
 }

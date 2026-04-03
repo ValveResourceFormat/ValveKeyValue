@@ -1,0 +1,12 @@
+"object"
+{
+	"Name"		"TestName"
+	"Description"		"TestDescription"
+	"Age"		"42"
+	"Numbers"
+	{
+		"0"		"1"
+		"1"		"2"
+		"2"		"3"
+	}
+}

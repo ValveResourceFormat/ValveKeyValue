@@ -127,7 +127,7 @@ namespace ValveKeyValue
             {
                 foreach (var member in reflector.GetMembers(objectType, managedObject).OrderBy(p => p.Name, StringComparer.InvariantCulture))
                 {
-                    if (!member.MemberType.IsValueType && member.Value is null)
+                    if (member.Value is null)
                     {
                         continue;
                     }
@@ -402,6 +402,12 @@ namespace ValveKeyValue
             [DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] Type valueType,
             IObjectReflector reflector)
         {
+            var underlyingType = Nullable.GetUnderlyingType(valueType);
+            if (underlyingType != null)
+            {
+                valueType = underlyingType;
+            }
+
             if (value is KVObject kvObject)
             {
                 if (kvObject.ValueType == KVValueType.Collection)
@@ -434,19 +440,21 @@ namespace ValveKeyValue
                 return true;
             }
 
-            if (typeof(TValue).IsEnum)
+            var targetType = Nullable.GetUnderlyingType(typeof(TValue)) ?? typeof(TValue);
+
+            if (targetType.IsEnum)
             {
-                var underlyingType = Enum.GetUnderlyingType(typeof(TValue));
+                var underlyingType = Enum.GetUnderlyingType(targetType);
                 var underlyingValue = value.ToType(underlyingType, CultureInfo.InvariantCulture);
-                converted = (TValue)Enum.ToObject(typeof(TValue), underlyingValue);
+                converted = (TValue)Enum.ToObject(targetType, underlyingValue);
                 return true;
             }
 
-            if (CanConvertValueTo(typeof(TValue)))
+            if (CanConvertValueTo(targetType))
             {
                 try
                 {
-                    converted = (TValue)value.ToType(typeof(TValue), CultureInfo.InvariantCulture);
+                    converted = (TValue)value.ToType(targetType, CultureInfo.InvariantCulture);
                 }
                 catch (Exception e)
                 {
