@@ -190,9 +190,9 @@ namespace ValveKeyValue
         /// <inheritdoc cref="IConvertible.ToString"/>
         public string ToString(IFormatProvider provider) => ValueType switch
         {
-            KVValueType.String => (string)_ref ?? string.Empty,
+            KVValueType.String => (string)_ref,
             KVValueType.Boolean => _scalar != 0 ? "1" : "0",
-            KVValueType.Null => string.Empty,
+            KVValueType.Null => throw new NotSupportedException("Cannot convert null to String."),
             KVValueType.FloatingPoint => BitConverter.Int32BitsToSingle((int)_scalar).ToString(provider),
             KVValueType.FloatingPoint64 => BitConverter.Int64BitsToDouble(_scalar).ToString(provider),
             KVValueType.Int32 or KVValueType.Pointer => ((int)_scalar).ToString(provider),

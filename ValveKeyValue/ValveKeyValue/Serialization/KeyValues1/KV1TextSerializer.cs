@@ -107,7 +107,11 @@ namespace ValveKeyValue.Serialization.KeyValues1
             WriteText(name);
             writer.Write('\t');
 
-            if (value.ValueType == KVValueType.Boolean)
+            if (value.IsNull)
+            {
+                WriteText(string.Empty);
+            }
+            else if (value.ValueType == KVValueType.Boolean)
             {
                 WriteText(value.ToBoolean(null) ? "1" : "0");
             }
