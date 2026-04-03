@@ -732,9 +732,8 @@ namespace ValveKeyValue.Test
                 Assert.That(dict.Count, Is.EqualTo(2));
                 Assert.That(list.Count, Is.EqualTo(2));
 
-                // Integer indexer
-                Assert.That((int)dict[0], Is.EqualTo(1));
-                Assert.That((int)dict[1], Is.EqualTo(2));
+                // Integer indexer (list-backed only)
+                Assert.That(() => dict[0], Throws.InstanceOf<NotSupportedException>());
                 Assert.That((int)list[0], Is.EqualTo(1));
                 Assert.That((int)list[1], Is.EqualTo(2));
             });

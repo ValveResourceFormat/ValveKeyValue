@@ -197,7 +197,7 @@ namespace ValveKeyValue
         }
 
         /// <summary>
-        /// Gets a child by index (for arrays and collections by insertion order).
+        /// Gets a child by index (for arrays and list-backed collections).
         /// </summary>
         public KVObject this[int index]
         {
@@ -208,12 +208,12 @@ namespace ValveKeyValue
                     return GetArrayList()[index];
                 }
 
-                if (ValueType == KVValueType.Collection)
+                if (_ref is List<KeyValuePair<string, KVObject>> list && ValueType == KVValueType.Collection)
                 {
-                    return GetCollectionByIndex(index);
+                    return list[index].Value;
                 }
 
-                throw new NotSupportedException($"Integer indexer on a {nameof(KVObject)} can only be used when the value is an array or collection.");
+                throw new NotSupportedException($"Integer indexer on a {nameof(KVObject)} can only be used when the value is an array or list-backed collection.");
             }
         }
 
@@ -580,13 +580,6 @@ namespace ValveKeyValue
             Dictionary<string, KVObject> dict => dict,
             List<KeyValuePair<string, KVObject>> list => list,
             _ => [],
-        };
-
-        private KVObject GetCollectionByIndex(int index) => _ref switch
-        {
-            Dictionary<string, KVObject> dict => dict.Values.ElementAt(index),
-            List<KeyValuePair<string, KVObject>> list => list[index].Value,
-            _ => throw new InvalidOperationException("Not a collection."),
         };
 
         private IEnumerable<KeyValuePair<string, KVObject>> EnumerateArray()
