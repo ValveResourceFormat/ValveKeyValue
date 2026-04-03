@@ -41,7 +41,7 @@ static int Execute(
     return 0;
 }
 
-static void RecursivePrint(string name, KVObject obj, int indent = 0)
+static void RecursivePrint(string? name, KVObject obj, int indent = 0)
 {
     Console.Write(new string('\t', indent));
 
