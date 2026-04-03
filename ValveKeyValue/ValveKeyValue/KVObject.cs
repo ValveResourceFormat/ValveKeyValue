@@ -92,6 +92,24 @@ namespace ValveKeyValue
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="KVObject"/> class with a 16-bit integer value.
+        /// </summary>
+        public KVObject(short value)
+        {
+            ValueType = KVValueType.Int16;
+            _scalar = value;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KVObject"/> class with an unsigned 16-bit integer value.
+        /// </summary>
+        public KVObject(ushort value)
+        {
+            ValueType = KVValueType.UInt16;
+            _scalar = value;
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="KVObject"/> class with an integer value.
         /// </summary>
         public KVObject(int value)

@@ -6,7 +6,105 @@ namespace ValveKeyValue.Test
 {
     class ConversionCoverageTestCase
     {
-        #region Missing implicit operators (short, ushort, IntPtr)
+        #region Short and ushort constructors
+
+        [Test]
+        public void ShortConstructorPreservesType()
+        {
+            var obj = new KVObject((short)42);
+            Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Int16));
+            Assert.That((short)obj, Is.EqualTo((short)42));
+        }
+
+        [Test]
+        public void UShortConstructorPreservesType()
+        {
+            var obj = new KVObject((ushort)42);
+            Assert.That(obj.ValueType, Is.EqualTo(KVValueType.UInt16));
+            Assert.That((ushort)obj, Is.EqualTo((ushort)42));
+        }
+
+        [Test]
+        public void ShortConstructorMatchesImplicitOperator()
+        {
+            var fromCtor = new KVObject((short)-100);
+            KVObject fromOp = (short)-100;
+            Assert.That(fromCtor.ValueType, Is.EqualTo(fromOp.ValueType));
+            Assert.That((short)fromCtor, Is.EqualTo((short)fromOp));
+        }
+
+        [Test]
+        public void UShortConstructorMatchesImplicitOperator()
+        {
+            var fromCtor = new KVObject((ushort)500);
+            KVObject fromOp = (ushort)500;
+            Assert.That(fromCtor.ValueType, Is.EqualTo(fromOp.ValueType));
+            Assert.That((ushort)fromCtor, Is.EqualTo((ushort)fromOp));
+        }
+
+        #endregion
+
+        #region Convenience conversion overloads
+
+        [Test]
+        public void ToByte_FromInt()
+        {
+            KVObject obj = 42;
+            Assert.That(obj.ToByte(null), Is.EqualTo((byte)42));
+        }
+
+        [Test]
+        public void ToSByte_FromInt()
+        {
+            KVObject obj = -42;
+            Assert.That(obj.ToSByte(null), Is.EqualTo((sbyte)-42));
+        }
+
+        [Test]
+        public void ToChar_FromString()
+        {
+            KVObject obj = "A";
+            Assert.That(obj.ToChar(null), Is.EqualTo('A'));
+        }
+
+        [Test]
+        public void ToInt16_FromShort()
+        {
+            KVObject obj = (short)-1000;
+            Assert.That(obj.ToInt16(null), Is.EqualTo((short)-1000));
+        }
+
+        [Test]
+        public void ToUInt16_FromUShort()
+        {
+            KVObject obj = (ushort)1000;
+            Assert.That(obj.ToUInt16(null), Is.EqualTo((ushort)1000));
+        }
+
+        [Test]
+        public void ToUInt32_FromUInt()
+        {
+            KVObject obj = 42U;
+            Assert.That(obj.ToUInt32(null), Is.EqualTo(42U));
+        }
+
+        [Test]
+        public void ToUInt64_FromULong()
+        {
+            KVObject obj = 42UL;
+            Assert.That(obj.ToUInt64(null), Is.EqualTo(42UL));
+        }
+
+        [Test]
+        public void ToDecimal_FromString()
+        {
+            KVObject obj = "79228162514264337593543950335";
+            Assert.That(obj.ToDecimal(null), Is.EqualTo(79228162514264337593543950335m));
+        }
+
+        #endregion
+
+        #region Implicit operators (short, ushort, IntPtr)
 
         [Test]
         public void ImplicitShortToKVObject()
