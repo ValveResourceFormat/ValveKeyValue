@@ -205,6 +205,16 @@ namespace ValveKeyValue.Test
             Assert.That(obj.ToString(CultureInfo.InvariantCulture), Is.EqualTo("[Collection]"));
         }
 
+        [Test]
+        public void ToStringReturnsNullStringForNullValue()
+        {
+            var obj = KVObject.Null();
+            Assert.That(obj.ToString(CultureInfo.InvariantCulture), Is.EqualTo("null"));
+#pragma warning disable CA1305
+            Assert.That(obj.ToString(), Is.EqualTo("null"));
+#pragma warning restore CA1305
+        }
+
         #endregion
 
         #region Explicit operators to primitives
@@ -279,6 +289,34 @@ namespace ValveKeyValue.Test
         {
             var value = KVObject.Null();
             Assert.That(value.IsNull, Is.True);
+        }
+
+        [Test]
+        public void IsCollectionReturnsTrueForDictCollection()
+        {
+            var obj = KVObject.Collection();
+            Assert.That(obj.IsCollection, Is.True);
+        }
+
+        [Test]
+        public void IsCollectionReturnsTrueForListCollection()
+        {
+            var obj = KVObject.ListCollection();
+            Assert.That(obj.IsCollection, Is.True);
+        }
+
+        [Test]
+        public void IsCollectionReturnsFalseForScalar()
+        {
+            var obj = new KVObject(42);
+            Assert.That(obj.IsCollection, Is.False);
+        }
+
+        [Test]
+        public void IsCollectionReturnsFalseForArray()
+        {
+            var obj = KVObject.Array();
+            Assert.That(obj.IsCollection, Is.False);
         }
 
         [Test]

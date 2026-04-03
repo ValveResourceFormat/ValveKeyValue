@@ -232,6 +232,25 @@ namespace ValveKeyValue.Test
 
         #endregion
 
+        #region Explicit byte[] operator
+
+        [Test]
+        public void ExplicitByteArrayFromKVObject()
+        {
+            var obj = KVObject.Blob(new byte[] { 1, 2, 3 });
+            byte[] result = (byte[])obj;
+            Assert.That(result, Is.EqualTo(new byte[] { 1, 2, 3 }));
+        }
+
+        [Test]
+        public void ExplicitByteArrayFromNonBlobThrows()
+        {
+            var obj = new KVObject(42);
+            Assert.That(() => (byte[])obj, Throws.InstanceOf<InvalidOperationException>());
+        }
+
+        #endregion
+
         #region KVObject IConvertible (Convert.ChangeType works directly)
 
         [Test]

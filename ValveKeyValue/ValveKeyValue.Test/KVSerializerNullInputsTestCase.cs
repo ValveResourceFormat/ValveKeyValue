@@ -13,6 +13,25 @@ namespace ValveKeyValue.Test
                 .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("stream"));
         }
 
+        [TestCaseSource(nameof(Formats))]
+        public void SerializeWithNullStream(KVSerializationFormat format)
+        {
+            Assert.That(
+                () => KVSerializer.Create(format).Serialize(stream: null!, data: new KVObject()),
+                Throws.Exception.TypeOf<ArgumentNullException>()
+                .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("stream"));
+        }
+
+        [TestCaseSource(nameof(Formats))]
+        public void SerializeDocumentWithNullStream(KVSerializationFormat format)
+        {
+            var doc = new KVDocument(new KVHeader(), "test", new KVObject());
+            Assert.That(
+                () => KVSerializer.Create(format).Serialize(stream: null!, data: doc),
+                Throws.Exception.TypeOf<ArgumentNullException>()
+                .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("stream"));
+        }
+
         public static IEnumerable Formats => Enum.GetValues<KVSerializationFormat>();
     }
 }

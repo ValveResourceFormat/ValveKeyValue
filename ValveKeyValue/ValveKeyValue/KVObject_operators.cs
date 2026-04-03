@@ -95,6 +95,9 @@ namespace ValveKeyValue
         /// <summary>Explicit cast from <see cref="KVObject"/> to <see cref="IntPtr"/>.</summary>
         public static explicit operator IntPtr(KVObject obj) => new(obj.ToInt32(null));
 
+        /// <summary>Explicit cast from <see cref="KVObject"/> to <see langword="byte[]"/>.</summary>
+        public static explicit operator byte[](KVObject obj) => obj.AsBlob();
+
         #endregion
     }
 }

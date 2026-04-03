@@ -48,6 +48,7 @@ public class ValveKeyValue.KVDocument
     public ValveKeyValue.KVFlag get_Flag();
     public ValveKeyValue.KVHeader get_Header();
     public bool get_IsArray();
+    public bool get_IsCollection();
     public bool get_IsNull();
     public ValveKeyValue.KVObject get_Item(int index);
     public ValveKeyValue.KVObject get_Item(string key);
@@ -182,6 +183,7 @@ public class ValveKeyValue.KVObject
     public int get_Count();
     public ValveKeyValue.KVFlag get_Flag();
     public bool get_IsArray();
+    public bool get_IsCollection();
     public bool get_IsNull();
     public ValveKeyValue.KVObject get_Item(int index);
     public ValveKeyValue.KVObject get_Item(string key);
@@ -211,6 +213,7 @@ public class ValveKeyValue.KVObject
     public static sbyte op_Explicit(ValveKeyValue.KVObject obj);
     public static decimal op_Explicit(ValveKeyValue.KVObject obj);
     public static IntPtr op_Explicit(ValveKeyValue.KVObject obj);
+    public static byte[] op_Explicit(ValveKeyValue.KVObject obj);
     public static ValveKeyValue.KVObject op_Implicit(bool value);
     public static ValveKeyValue.KVObject op_Implicit(byte value);
     public static ValveKeyValue.KVObject op_Implicit(byte[] value);

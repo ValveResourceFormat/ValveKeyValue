@@ -44,6 +44,11 @@ namespace ValveKeyValue
         public bool IsArray => ValueType == KVValueType.Array;
 
         /// <summary>
+        /// Gets a value indicating whether this value is a collection.
+        /// </summary>
+        public bool IsCollection => ValueType == KVValueType.Collection;
+
+        /// <summary>
         /// Gets the number of children in this object's collection or array value.
         /// Returns 0 if the value is neither a collection nor an array.
         /// </summary>
