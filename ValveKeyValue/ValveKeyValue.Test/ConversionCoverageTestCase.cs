@@ -213,10 +213,9 @@ namespace ValveKeyValue.Test
         }
 
         [Test]
-        public void NullByteArrayToKVObjectIsNull()
+        public void NullByteArrayToKVObjectThrows()
         {
-            KVObject v = (byte[])null;
-            Assert.That(v.IsNull, Is.True);
+            Assert.That(() => { KVObject v = (byte[])null!; }, Throws.ArgumentNullException);
         }
 
         #endregion

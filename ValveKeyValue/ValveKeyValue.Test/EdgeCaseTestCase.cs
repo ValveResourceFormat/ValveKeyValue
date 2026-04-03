@@ -336,6 +336,16 @@ namespace ValveKeyValue.Test
             Assert.That(items, Is.Empty);
         }
 
+        [Test]
+        public void AddNullElementToArrayStoresNullType()
+        {
+            var obj = KVObject.Array();
+            obj.Add((KVObject)null!);
+
+            Assert.That(obj.Count, Is.EqualTo(1));
+            Assert.That(obj[0].IsNull, Is.True);
+        }
+
         #endregion
 
         #region KVObject flag mutation
@@ -499,6 +509,26 @@ namespace ValveKeyValue.Test
 
             Assert.That(obj.TryAdd("key", "value2"), Is.True);
             Assert.That(obj.Count, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void AddNullValueStoresNullType()
+        {
+            var obj = KVObject.ListCollection();
+            obj.Add("key", null!);
+
+            Assert.That(obj.Count, Is.EqualTo(1));
+            Assert.That(obj["key"].IsNull, Is.True);
+        }
+
+        [Test]
+        public void TryAddNullValueStoresNullType()
+        {
+            var obj = KVObject.Collection();
+            obj.TryAdd("key", null!);
+
+            Assert.That(obj.Count, Is.EqualTo(1));
+            Assert.That(obj["key"].IsNull, Is.True);
         }
 
         #endregion

@@ -44,15 +44,14 @@ namespace ValveKeyValue
         public static implicit operator KVObject(IntPtr value) => new(value);
 
         /// <summary>Implicit cast from <see langword="byte[]"/> to <see cref="KVObject"/>.</summary>
-        public static implicit operator KVObject(byte[] value)
-            => value is null ? Null() : Blob(value);
+        public static implicit operator KVObject(byte[] value) => Blob(value);
 
         #endregion
 
         #region Explicit operators (TO primitives)
 
         /// <summary>Explicit cast from <see cref="KVObject"/> to <see cref="string"/>.</summary>
-        public static explicit operator string?(KVObject obj) => obj?.ToString(null); // TODO: Perhaps this should throw like the rest of the operators
+        public static explicit operator string(KVObject obj) => obj.ToString(null);
 
         /// <summary>Explicit cast from <see cref="KVObject"/> to <see cref="int"/>.</summary>
         public static explicit operator int(KVObject obj) => obj.ToInt32(null);

@@ -69,16 +69,10 @@ namespace ValveKeyValue
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KVObject"/> class with a string value.
-        /// If <paramref name="value"/> is <c>null</c>, creates a null-valued instance.
         /// </summary>
         public KVObject(string value)
         {
-            if (value is null)
-            {
-                ValueType = KVValueType.Null;
-                return;
-            }
-
+            ArgumentNullException.ThrowIfNull(value);
             ValueType = KVValueType.String;
             _ref = value;
         }
@@ -322,7 +316,7 @@ namespace ValveKeyValue
         public void Add(string key, KVObject value)
         {
             ArgumentNullException.ThrowIfNull(key);
-            TryInsert(key, value, InsertionBehavior.ThrowOnExisting);
+            TryInsert(key, value ?? Null(), InsertionBehavior.ThrowOnExisting);
         }
 
         /// <summary>
@@ -333,7 +327,7 @@ namespace ValveKeyValue
         public bool TryAdd(string key, KVObject value)
         {
             ArgumentNullException.ThrowIfNull(key);
-            return TryInsert(key, value, InsertionBehavior.None);
+            return TryInsert(key, value ?? Null(), InsertionBehavior.None);
         }
 
         /// <summary>
@@ -346,7 +340,7 @@ namespace ValveKeyValue
                 throw new InvalidOperationException($"Cannot add an array element to a {ValueType} value.");
             }
 
-            GetArrayList().Add(value);
+            GetArrayList().Add(value ?? Null());
         }
 
         /// <summary>

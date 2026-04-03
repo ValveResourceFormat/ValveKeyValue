@@ -130,11 +130,9 @@ namespace ValveKeyValue.Test
         }
 
         [Test]
-        public void ConstructorWithNullString()
+        public void ConstructorWithNullStringThrows()
         {
-            var obj = new KVObject((string)null);
-            Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Null));
-            Assert.That(obj.IsNull, Is.True);
+            Assert.That(() => new KVObject((string)null!), Throws.ArgumentNullException);
         }
 
         #endregion
@@ -580,12 +578,9 @@ namespace ValveKeyValue.Test
         #region Null string handling
 
         [Test]
-        public void NullStringProducesNullTypedKVObject()
+        public void NullStringImplicitOperatorThrows()
         {
-            KVObject value = (string)null;
-
-            Assert.That(value.ValueType, Is.EqualTo(KVValueType.Null));
-            Assert.That(value.IsNull, Is.True);
+            Assert.That(() => { KVObject value = (string)null!; }, Throws.ArgumentNullException);
         }
 
         #endregion

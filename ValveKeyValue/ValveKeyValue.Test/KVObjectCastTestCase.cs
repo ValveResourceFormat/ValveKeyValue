@@ -264,6 +264,18 @@ namespace ValveKeyValue.Test
             }
         }
 
+        [Test]
+        public void CastingNullKVObjectToStringThrows()
+        {
+            Assert.That(() => (string)(KVObject)null!, Throws.InstanceOf<NullReferenceException>());
+        }
+
+        [Test]
+        public void CastingNullKVObjectToInt32Throws()
+        {
+            Assert.That(() => (int)(KVObject)null!, Throws.InstanceOf<NullReferenceException>());
+        }
+
         [TestCase(typeof(bool))]
         [TestCase(typeof(byte))]
         [TestCase(typeof(char))]
