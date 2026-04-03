@@ -34,7 +34,7 @@ namespace ValveKeyValue
         /// <param name="stream">The stream to deserialize from.</param>
         /// <param name="options">Options to use that can influence the deserialization process.</param>
         /// <returns>A <see cref="KVDocument"/> representing the KeyValues structure encoded in the stream.</returns>
-        public KVDocument Deserialize(Stream stream, KVSerializerOptions options = null)
+        public KVDocument Deserialize(Stream stream, KVSerializerOptions? options = null)
         {
             ArgumentNullException.ThrowIfNull(stream);
 
@@ -55,7 +55,7 @@ namespace ValveKeyValue
         /// <param name="options">Options to use that can influence the deserialization process.</param>
         /// <returns>A <typeparamref name="TObject" /> instance representing the KeyValues structure in the stream.</returns>
         /// <typeparam name="TObject">The type of object to deserialize.</typeparam>
-        public TObject Deserialize<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TObject>(Stream stream, KVSerializerOptions options = null)
+        public TObject Deserialize<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TObject>(Stream stream, KVSerializerOptions? options = null)
         {
             ArgumentNullException.ThrowIfNull(stream);
 
@@ -70,7 +70,7 @@ namespace ValveKeyValue
         /// <param name="stream">The stream to serialize into.</param>
         /// <param name="data">The data to serialize.</param>
         /// <param name="options">Options to use that can influence the serialization process.</param>
-        public void Serialize(Stream stream, KVObject data, KVSerializerOptions options = null)
+        public void Serialize(Stream stream, KVObject data, KVSerializerOptions? options = null)
         {
             ArgumentNullException.ThrowIfNull(data);
 
@@ -86,7 +86,7 @@ namespace ValveKeyValue
         /// <param name="stream">The stream to serialize into.</param>
         /// <param name="data">The data to serialize.</param>
         /// <param name="options">Options to use that can influence the serialization process.</param>
-        public void Serialize(Stream stream, KVDocument data, KVSerializerOptions options = null)
+        public void Serialize(Stream stream, KVDocument data, KVSerializerOptions? options = null)
         {
             ArgumentNullException.ThrowIfNull(data);
 
@@ -103,7 +103,7 @@ namespace ValveKeyValue
         /// <param name="name">The top-level object name.</param>
         /// <param name="options">Options to use that can influence the serialization process.</param>
         /// <typeparam name="TData">The type of object to serialize.</typeparam>
-        public void Serialize<[DynamicallyAccessedMembers(Trimming.Properties)] TData>(Stream stream, TData data, string name, KVSerializerOptions options = null)
+        public void Serialize<[DynamicallyAccessedMembers(Trimming.Properties)] TData>(Stream stream, TData data, string name, KVSerializerOptions? options = null)
         {
             ArgumentNullException.ThrowIfNull(stream);
             ArgumentNullException.ThrowIfNull(data);
@@ -125,13 +125,13 @@ namespace ValveKeyValue
             return format switch
             {
                 KVSerializationFormat.KeyValues1Text => new KV1TextReader(new StreamReader(stream, null, true, -1, leaveOpen: true), listener, options),
-                KVSerializationFormat.KeyValues1Binary => new KV1BinaryReader(stream, listener, options.StringTable),
+                KVSerializationFormat.KeyValues1Binary => new KV1BinaryReader(stream, listener, options.StringTable!),
                 KVSerializationFormat.KeyValues3Text => new KV3TextReader(new StreamReader(stream, null, true, -1, leaveOpen: true), listener),
                 _ => throw new InvalidOperationException($"Invalid serialization format: {format}"),
             };
         }
 
-        IVisitationListener MakeSerializer(Stream stream, KVSerializerOptions options, KVHeader header = null)
+        IVisitationListener MakeSerializer(Stream stream, KVSerializerOptions options, KVHeader? header = null)
         {
             ArgumentNullException.ThrowIfNull(stream);
             ArgumentNullException.ThrowIfNull(options);
@@ -139,7 +139,7 @@ namespace ValveKeyValue
             return format switch
             {
                 KVSerializationFormat.KeyValues1Text => new KV1TextSerializer(stream, options),
-                KVSerializationFormat.KeyValues1Binary => new KV1BinarySerializer(stream, options.StringTable),
+                KVSerializationFormat.KeyValues1Binary => new KV1BinarySerializer(stream, options.StringTable!),
                 KVSerializationFormat.KeyValues3Text => new KV3TextSerializer(stream, header),
                 _ => throw new InvalidOperationException($"Invalid serialization format: {format}"),
             };

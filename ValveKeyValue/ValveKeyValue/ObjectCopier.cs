@@ -104,8 +104,8 @@ namespace ValveKeyValue
                 {
                     var entry = enumerator.Entry;
 
-                    var childObjectValue = ConvertObjectToValue(entry.Value.GetType(), entry.Value, reflector, visitedObjects);
-                    childItems.Add(new KeyValuePair<string, KVObject>(entry.Key.ToString(), childObjectValue));
+                    var childObjectValue = ConvertObjectToValue(entry.Value!.GetType(), entry.Value, reflector, visitedObjects);
+                    childItems.Add(new KeyValuePair<string, KVObject>(entry.Key.ToString()!, childObjectValue));
                 }
             }
             else if (objectType == typeof(byte[]))
@@ -132,7 +132,7 @@ namespace ValveKeyValue
                         continue;
                     }
 
-                    var childValue = ConvertObjectToValue(member.Value.GetType(), member.Value, reflector, visitedObjects);
+                    var childValue = ConvertObjectToValue(member.Value!.GetType(), member.Value, reflector, visitedObjects);
                     childItems.Add(new KeyValuePair<string, KVObject>(member.Name, childValue));
                 }
             }
@@ -160,9 +160,9 @@ namespace ValveKeyValue
             }
         }
 
-        static bool IsArray(KVObject obj, out object[] values)
+        static bool IsArray(KVObject obj, [MaybeNullWhen(false)] out object[] values)
         {
-            values = null;
+            values = null!;
 
             if (obj.Any(kvp => !IsNumeric(kvp.Key)))
             {
@@ -186,9 +186,9 @@ namespace ValveKeyValue
             return true;
         }
 
-        static bool IsLookupWithStringKey(Type type, out Type valueType)
+        static bool IsLookupWithStringKey(Type type, [MaybeNullWhen(false)] out Type valueType)
         {
-            valueType = null;
+            valueType = null!;
 
             if (!type.IsConstructedGenericType)
             {
@@ -242,13 +242,13 @@ namespace ValveKeyValue
             Type type,
             object[] values,
             IObjectReflector reflector,
-            out object typedEnumerable)
+            [NotNullWhen(true)] out object? typedEnumerable)
         {
-            object listObject = null;
+            object? listObject = null;
 
             if (type.IsArray)
             {
-                var elementType = type.GetElementType();
+                var elementType = type.GetElementType()!;
                 var itemArray = Array.CreateInstance(elementType, values.Length);
 
                 for (int i = 0; i < itemArray.Length; i++)
@@ -267,7 +267,7 @@ namespace ValveKeyValue
                 }
             }
 
-            typedEnumerable = listObject;
+            typedEnumerable = listObject!;
             return listObject != null;
         }
 
@@ -305,7 +305,7 @@ namespace ValveKeyValue
 
             try
             {
-                return method.MakeGenericMethod(genericType).Invoke(null, parameters);
+                return method.MakeGenericMethod(genericType).Invoke(null, parameters)!;
             }
             catch (TargetInvocationException ex) when (ex.InnerException != null)
             {
@@ -371,14 +371,14 @@ namespace ValveKeyValue
             var genericArguments = type.GetGenericArguments();
 
             var method = typeof(ObjectCopier)
-                .GetMethod(nameof(FillDictionary), BindingFlags.Static | BindingFlags.NonPublic);
+                .GetMethod(nameof(FillDictionary), BindingFlags.Static | BindingFlags.NonPublic)!;
             method.MakeGenericMethod(genericArguments)
                 .Invoke(null, new[] { dictionary, kv, reflector });
 
-            return dictionary;
+            return dictionary!;
         }
 
-        static void FillDictionary<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TKey, [DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TValue>(Dictionary<TKey, TValue> dictionary, KVObject kv, IObjectReflector reflector)
+        static void FillDictionary<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TKey, [DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TValue>(Dictionary<TKey, TValue> dictionary, KVObject kv, IObjectReflector reflector) where TKey : notnull
         {
             foreach (var (childKey, child) in kv)
             {
@@ -420,7 +420,7 @@ namespace ValveKeyValue
             return Convert.ChangeType(value, valueType, CultureInfo.InvariantCulture);
         }
 
-        static bool TryConvertValueTo<TValue>(KVObject value, out TValue converted)
+        static bool TryConvertValueTo<TValue>(KVObject value, [MaybeNullWhen(false)] out TValue converted)
         {
             if (typeof(TValue) == typeof(IntPtr))
             {
@@ -456,7 +456,7 @@ namespace ValveKeyValue
                 return true;
             }
 
-            converted = default;
+            converted = default!;
             return false;
         }
 
@@ -479,7 +479,7 @@ namespace ValveKeyValue
                 type == typeof(string);
         }
 
-        static KVObject ConvertToKVObject(object value, Type type)
+        static KVObject? ConvertToKVObject(object value, Type type)
         {
             if (type == typeof(IntPtr))
             {

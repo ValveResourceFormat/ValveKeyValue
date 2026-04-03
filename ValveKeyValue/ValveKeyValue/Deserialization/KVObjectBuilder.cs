@@ -54,7 +54,7 @@ namespace ValveKeyValue.Deserialization
             if (StateStack.Count > 0)
             {
                 var state = StateStack.Peek();
-                state.Items.Add(new KeyValuePair<string, KVObject>(null, value));
+                state.Items.Add(new KeyValuePair<string, KVObject>(null!, value));
             }
             else
             {
@@ -76,7 +76,7 @@ namespace ValveKeyValue.Deserialization
 
             var state = StateStack.Pop();
             var completedObject = MakeObject(state);
-            StateStack.Peek().Items.Add(new KeyValuePair<string, KVObject>(state.Key, completedObject));
+            StateStack.Peek().Items.Add(new KeyValuePair<string, KVObject>(state.Key!, completedObject!));
         }
 
         public void OnArrayEnd()
@@ -88,7 +88,7 @@ namespace ValveKeyValue.Deserialization
 
             var state = StateStack.Pop();
             var completedObject = MakeArray(state);
-            StateStack.Peek().Items.Add(new KeyValuePair<string, KVObject>(state.Key, completedObject));
+            StateStack.Peek().Items.Add(new KeyValuePair<string, KVObject>(state.Key!, completedObject!));
         }
 
         public void DiscardCurrentObject()
@@ -104,7 +104,7 @@ namespace ValveKeyValue.Deserialization
             }
         }
 
-        public void OnObjectStart(string name, KVFlag flag)
+        public void OnObjectStart(string? name, KVFlag flag)
         {
             var state = new KVPartialState
             {
@@ -114,7 +114,7 @@ namespace ValveKeyValue.Deserialization
             StateStack.Push(state);
         }
 
-        public void OnArrayStart(string name, KVFlag flag, int elementCount, bool allSimpleElements)
+        public void OnArrayStart(string? name, KVFlag flag, int elementCount, bool allSimpleElements)
         {
             var state = new KVPartialState
             {
@@ -153,12 +153,12 @@ namespace ValveKeyValue.Deserialization
             }
         }
 
-        static KeyValuePair<string, KVObject> MakeResult(KVPartialState state, KVObject obj)
+        static KeyValuePair<string, KVObject> MakeResult(KVPartialState state, KVObject? obj)
         {
-            return new KeyValuePair<string, KVObject>(state.Key, obj);
+            return new KeyValuePair<string, KVObject>(state.Key!, obj!);
         }
 
-        KVObject MakeObject(KVPartialState state)
+        KVObject? MakeObject(KVPartialState state)
         {
             if (state.Discard)
             {
@@ -187,7 +187,7 @@ namespace ValveKeyValue.Deserialization
             return result;
         }
 
-        static KVObject MakeArray(KVPartialState state)
+        static KVObject? MakeArray(KVPartialState state)
         {
             if (state.Discard)
             {

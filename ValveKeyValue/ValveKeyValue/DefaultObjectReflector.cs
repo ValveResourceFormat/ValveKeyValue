@@ -36,6 +36,6 @@ namespace ValveKeyValue
         }
 
         static bool IsValueTupleType(Type type)
-            => type.IsGenericType && type.FullName.StartsWith("System.ValueTuple`", StringComparison.Ordinal);
+            => type.IsGenericType && type.FullName!.StartsWith("System.ValueTuple`", StringComparison.Ordinal);
     }
 }

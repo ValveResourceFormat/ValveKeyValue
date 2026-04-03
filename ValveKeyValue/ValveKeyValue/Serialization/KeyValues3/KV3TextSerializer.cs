@@ -9,7 +9,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
     {
         static readonly SearchValues<char> CharsToEscape = SearchValues.Create("\n\t\\\"");
 
-        public KV3TextSerializer(Stream stream, KVHeader header = null)
+        public KV3TextSerializer(Stream stream, KVHeader? header = null)
         {
             ArgumentNullException.ThrowIfNull(stream);
 
@@ -39,7 +39,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
             writer.Dispose();
         }
 
-        public void OnObjectStart(string name, KVFlag flag)
+        public void OnObjectStart(string? name, KVFlag flag)
         {
             context.Push(null);
 
@@ -56,7 +56,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
         public void OnKeyValuePair(string name, KVObject value)
             => WriteKeyValuePair(name, value);
 
-        public void OnArrayStart(string name, KVFlag flag, int elementCount, bool allSimpleElements)
+        public void OnArrayStart(string? name, KVFlag flag, int elementCount, bool allSimpleElements)
         {
             var isShort = elementCount <= 4 && allSimpleElements;
             context.Push((isShort, allSimpleElements, 0, elementCount));
@@ -152,7 +152,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
             throw new NotSupportedException("Discard not supported when writing.");
         }
 
-        void WriteStartObject(string name, KVFlag flag)
+        void WriteStartObject(string? name, KVFlag flag)
         {
             WriteIndentation();
 
@@ -427,7 +427,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
             }
         }
 
-        void WriteKey(string key)
+        void WriteKey(string? key)
         {
             if (key == null)
             {
@@ -512,7 +512,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
             writer.WriteLine();
         }
 
-        static string SerializeFlagName(KVFlag flag)
+        static string? SerializeFlagName(KVFlag flag)
         {
             return flag switch
             {

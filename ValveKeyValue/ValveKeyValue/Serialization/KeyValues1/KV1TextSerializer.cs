@@ -31,7 +31,7 @@ namespace ValveKeyValue.Serialization.KeyValues1
             writer.Dispose();
         }
 
-        public void OnObjectStart(string name, KVFlag flag)
+        public void OnObjectStart(string? name, KVFlag flag)
             => WriteStartObject(name);
 
         public void OnObjectEnd()
@@ -40,7 +40,7 @@ namespace ValveKeyValue.Serialization.KeyValues1
         public void OnKeyValuePair(string name, KVObject value)
             => WriteKeyValuePair(name, value);
 
-        public void OnArrayStart(string name, KVFlag flag, int elementCount, bool allSimpleElements)
+        public void OnArrayStart(string? name, KVFlag flag, int elementCount, bool allSimpleElements)
         {
             WriteStartObject(name);
             arrayCount.Push(0);
@@ -66,7 +66,7 @@ namespace ValveKeyValue.Serialization.KeyValues1
             throw new NotSupportedException("Discard not supported when writing.");
         }
 
-        void WriteStartObject(string name)
+        void WriteStartObject(string? name)
         {
             if (name == null)
             {

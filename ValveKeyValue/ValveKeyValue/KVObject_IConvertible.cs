@@ -23,22 +23,22 @@ namespace ValveKeyValue
             _ => TypeCode.Object,
         };
 
-        bool IConvertible.ToBoolean(IFormatProvider provider) => ToBoolean(provider);
-        byte IConvertible.ToByte(IFormatProvider provider) => ToByte(provider);
-        char IConvertible.ToChar(IFormatProvider provider) => ToChar(provider);
-        DateTime IConvertible.ToDateTime(IFormatProvider provider) => throw new NotSupportedException("Cannot convert KeyValue to DateTime.");
-        decimal IConvertible.ToDecimal(IFormatProvider provider) => ToDecimal(provider);
-        double IConvertible.ToDouble(IFormatProvider provider) => ToDouble(provider);
-        short IConvertible.ToInt16(IFormatProvider provider) => ToInt16(provider);
-        int IConvertible.ToInt32(IFormatProvider provider) => ToInt32(provider);
-        long IConvertible.ToInt64(IFormatProvider provider) => ToInt64(provider);
-        sbyte IConvertible.ToSByte(IFormatProvider provider) => ToSByte(provider);
-        float IConvertible.ToSingle(IFormatProvider provider) => ToSingle(provider);
-        string IConvertible.ToString(IFormatProvider provider) => ToString(provider);
-        object IConvertible.ToType(Type conversionType, IFormatProvider provider) => ToType(conversionType, provider);
-        ushort IConvertible.ToUInt16(IFormatProvider provider) => ToUInt16(provider);
-        uint IConvertible.ToUInt32(IFormatProvider provider) => ToUInt32(provider);
-        ulong IConvertible.ToUInt64(IFormatProvider provider) => ToUInt64(provider);
+        bool IConvertible.ToBoolean(IFormatProvider? provider) => ToBoolean(provider);
+        byte IConvertible.ToByte(IFormatProvider? provider) => ToByte(provider);
+        char IConvertible.ToChar(IFormatProvider? provider) => ToChar(provider);
+        DateTime IConvertible.ToDateTime(IFormatProvider? provider) => throw new NotSupportedException("Cannot convert KeyValue to DateTime.");
+        decimal IConvertible.ToDecimal(IFormatProvider? provider) => ToDecimal(provider);
+        double IConvertible.ToDouble(IFormatProvider? provider) => ToDouble(provider);
+        short IConvertible.ToInt16(IFormatProvider? provider) => ToInt16(provider);
+        int IConvertible.ToInt32(IFormatProvider? provider) => ToInt32(provider);
+        long IConvertible.ToInt64(IFormatProvider? provider) => ToInt64(provider);
+        sbyte IConvertible.ToSByte(IFormatProvider? provider) => ToSByte(provider);
+        float IConvertible.ToSingle(IFormatProvider? provider) => ToSingle(provider);
+        string IConvertible.ToString(IFormatProvider? provider) => ToString(provider);
+        object IConvertible.ToType(Type conversionType, IFormatProvider? provider) => ToType(conversionType, provider);
+        ushort IConvertible.ToUInt16(IFormatProvider? provider) => ToUInt16(provider);
+        uint IConvertible.ToUInt32(IFormatProvider? provider) => ToUInt32(provider);
+        ulong IConvertible.ToUInt64(IFormatProvider? provider) => ToUInt64(provider);
 
         #endregion
 
@@ -91,7 +91,7 @@ namespace ValveKeyValue
         #region Conversion methods
 
         /// <inheritdoc cref="IConvertible.ToBoolean"/>
-        public bool ToBoolean(IFormatProvider provider) => ValueType switch
+        public bool ToBoolean(IFormatProvider? provider) => ValueType switch
         {
             KVValueType.Boolean or KVValueType.Int16 or KVValueType.UInt16
                 or KVValueType.Int32 or KVValueType.UInt32 or KVValueType.Pointer
@@ -105,19 +105,19 @@ namespace ValveKeyValue
         };
 
         /// <inheritdoc cref="IConvertible.ToByte"/>
-        public byte ToByte(IFormatProvider provider) => checked((byte)ToInt64(provider));
+        public byte ToByte(IFormatProvider? provider) => checked((byte)ToInt64(provider));
 
         /// <inheritdoc cref="IConvertible.ToChar"/>
-        public char ToChar(IFormatProvider provider) => ValueType switch
+        public char ToChar(IFormatProvider? provider) => ValueType switch
         {
-            KVValueType.String => ((string)_ref).Length == 1
-                ? ((string)_ref)[0]
+            KVValueType.String => ((string)_ref!).Length == 1
+                ? ((string)_ref!)[0]
                 : throw new FormatException($"Cannot convert string \"{_ref}\" to Char."),
             _ => checked((char)ToInt64(provider)),
         };
 
         /// <inheritdoc cref="IConvertible.ToDecimal"/>
-        public decimal ToDecimal(IFormatProvider provider) => ValueType switch
+        public decimal ToDecimal(IFormatProvider? provider) => ValueType switch
         {
             KVValueType.String => ConvertFromString<decimal>(provider),
             KVValueType.FloatingPoint => (decimal)BitConverter.Int32BitsToSingle((int)_scalar),
@@ -127,7 +127,7 @@ namespace ValveKeyValue
         };
 
         /// <inheritdoc cref="IConvertible.ToDouble"/>
-        public double ToDouble(IFormatProvider provider) => ValueType switch
+        public double ToDouble(IFormatProvider? provider) => ValueType switch
         {
             KVValueType.FloatingPoint => BitConverter.Int32BitsToSingle((int)_scalar),
             KVValueType.FloatingPoint64 => BitConverter.Int64BitsToDouble(_scalar),
@@ -140,10 +140,10 @@ namespace ValveKeyValue
         };
 
         /// <inheritdoc cref="IConvertible.ToInt16"/>
-        public short ToInt16(IFormatProvider provider) => checked((short)ToInt64(provider));
+        public short ToInt16(IFormatProvider? provider) => checked((short)ToInt64(provider));
 
         /// <inheritdoc cref="IConvertible.ToInt32"/>
-        public int ToInt32(IFormatProvider provider) => ValueType switch
+        public int ToInt32(IFormatProvider? provider) => ValueType switch
         {
             KVValueType.Int32 or KVValueType.Pointer or KVValueType.Boolean
                 or KVValueType.Int16 or KVValueType.UInt16
@@ -158,7 +158,7 @@ namespace ValveKeyValue
         };
 
         /// <inheritdoc cref="IConvertible.ToInt64"/>
-        public long ToInt64(IFormatProvider provider) => ValueType switch
+        public long ToInt64(IFormatProvider? provider) => ValueType switch
         {
             KVValueType.Int32 or KVValueType.Pointer or KVValueType.Boolean
                 or KVValueType.Int16 or KVValueType.UInt16 or KVValueType.UInt32
@@ -172,10 +172,10 @@ namespace ValveKeyValue
         };
 
         /// <inheritdoc cref="IConvertible.ToSByte"/>
-        public sbyte ToSByte(IFormatProvider provider) => checked((sbyte)ToInt64(provider));
+        public sbyte ToSByte(IFormatProvider? provider) => checked((sbyte)ToInt64(provider));
 
         /// <inheritdoc cref="IConvertible.ToSingle"/>
-        public float ToSingle(IFormatProvider provider) => ValueType switch
+        public float ToSingle(IFormatProvider? provider) => ValueType switch
         {
             KVValueType.FloatingPoint => BitConverter.Int32BitsToSingle((int)_scalar),
             KVValueType.FloatingPoint64 => (float)BitConverter.Int64BitsToDouble(_scalar),
@@ -188,9 +188,9 @@ namespace ValveKeyValue
         };
 
         /// <inheritdoc cref="IConvertible.ToString"/>
-        public string ToString(IFormatProvider provider) => ValueType switch
+        public string ToString(IFormatProvider? provider) => ValueType switch
         {
-            KVValueType.String => (string)_ref,
+            KVValueType.String => (string)_ref!,
             KVValueType.Boolean => _scalar != 0 ? "1" : "0",
             KVValueType.Null => throw new NotSupportedException("Cannot convert null to String."),
             KVValueType.FloatingPoint => BitConverter.Int32BitsToSingle((int)_scalar).ToString(provider),
@@ -208,10 +208,10 @@ namespace ValveKeyValue
         };
 
         /// <inheritdoc cref="IConvertible.ToUInt16"/>
-        public ushort ToUInt16(IFormatProvider provider) => checked((ushort)ToUInt64(provider));
+        public ushort ToUInt16(IFormatProvider? provider) => checked((ushort)ToUInt64(provider));
 
         /// <inheritdoc cref="IConvertible.ToUInt32"/>
-        public uint ToUInt32(IFormatProvider provider) => ValueType switch
+        public uint ToUInt32(IFormatProvider? provider) => ValueType switch
         {
             KVValueType.UInt32 or KVValueType.UInt16 or KVValueType.Boolean
                 => (uint)_scalar,
@@ -222,7 +222,7 @@ namespace ValveKeyValue
         };
 
         /// <inheritdoc cref="IConvertible.ToUInt64"/>
-        public ulong ToUInt64(IFormatProvider provider) => ValueType switch
+        public ulong ToUInt64(IFormatProvider? provider) => ValueType switch
         {
             KVValueType.UInt64 => unchecked((ulong)_scalar),
             KVValueType.Int64 => checked((ulong)_scalar),
@@ -238,23 +238,23 @@ namespace ValveKeyValue
         };
 
         /// <inheritdoc cref="IConvertible.ToType"/>
-        public object ToType(Type conversionType, IFormatProvider provider)
-            => Convert.ChangeType(GetBoxedValue(), conversionType, provider);
+        public object ToType(Type conversionType, IFormatProvider? provider)
+            => Convert.ChangeType(GetBoxedValue(), conversionType, provider)!;
 
         #endregion
 
         #region Conversion helpers
 
-        private T ConvertFromString<T>(IFormatProvider provider) where T : IParsable<T>
+        private T ConvertFromString<T>(IFormatProvider? provider) where T : IParsable<T>
         {
-            var str = (string)_ref;
+            var str = (string)_ref!;
             return T.Parse(str, provider ?? CultureInfo.InvariantCulture);
         }
 
-        private object GetBoxedValue() => ValueType switch
+        private object? GetBoxedValue() => ValueType switch
         {
             KVValueType.Boolean => _scalar != 0,
-            KVValueType.String => (string)_ref,
+            KVValueType.String => (string)_ref!,
             KVValueType.Int16 => (short)_scalar,
             KVValueType.Int32 or KVValueType.Pointer => (int)_scalar,
             KVValueType.Int64 => _scalar,
@@ -263,14 +263,14 @@ namespace ValveKeyValue
             KVValueType.UInt64 => unchecked((ulong)_scalar),
             KVValueType.FloatingPoint => BitConverter.Int32BitsToSingle((int)_scalar),
             KVValueType.FloatingPoint64 => BitConverter.Int64BitsToDouble(_scalar),
-            KVValueType.BinaryBlob => (byte[])_ref,
+            KVValueType.BinaryBlob => (byte[])_ref!,
             KVValueType.Null => null,
             _ => _ref,
         };
 
         private string FormatBlob()
         {
-            var bytes = ((byte[])_ref).AsSpan();
+            var bytes = ((byte[])_ref!).AsSpan();
             var builder = new StringBuilder(bytes.Length * 3);
 
             for (var i = 0; i < bytes.Length; i++)

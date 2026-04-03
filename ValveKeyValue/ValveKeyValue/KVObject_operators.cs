@@ -52,7 +52,7 @@ namespace ValveKeyValue
         #region Explicit operators (TO primitives)
 
         /// <summary>Explicit cast from <see cref="KVObject"/> to <see cref="string"/>.</summary>
-        public static explicit operator string(KVObject obj) => obj != null ? obj.ToString(null) : null;
+        public static explicit operator string?(KVObject obj) => obj?.ToString(null); // TODO: Perhaps this should throw like the rest of the operators
 
         /// <summary>Explicit cast from <see cref="KVObject"/> to <see cref="int"/>.</summary>
         public static explicit operator int(KVObject obj) => obj.ToInt32(null);

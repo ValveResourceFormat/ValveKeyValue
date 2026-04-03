@@ -26,12 +26,12 @@ namespace ValveKeyValue
         [DynamicallyAccessedMembers(Trimming.Properties)]
         Type IObjectMember.MemberType => propertyInfo.PropertyType;
 
-        object IObjectMember.Value
+        object? IObjectMember.Value
         {
             get { return propertyInfo.GetValue(@object); }
             set { propertyInfo.SetValue(@object, value); }
         }
 
-        KVPropertyAttribute PropertyAttribute => propertyInfo.GetCustomAttribute<KVPropertyAttribute>();
+        KVPropertyAttribute? PropertyAttribute => propertyInfo.GetCustomAttribute<KVPropertyAttribute>();
     }
 }

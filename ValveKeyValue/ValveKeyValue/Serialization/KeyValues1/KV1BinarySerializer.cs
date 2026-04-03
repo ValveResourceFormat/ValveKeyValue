@@ -23,11 +23,11 @@ namespace ValveKeyValue.Serialization.KeyValues1
             writer.Dispose();
         }
 
-        public void OnObjectStart(string name, KVFlag flag)
+        public void OnObjectStart(string? name, KVFlag flag)
         {
             objectDepth++;
             Write(KV1BinaryNodeType.ChildObject);
-            WriteKeyForNextValue(name);
+            WriteKeyForNextValue(name!);
         }
 
         public void OnObjectEnd()
@@ -62,7 +62,7 @@ namespace ValveKeyValue.Serialization.KeyValues1
                     break;
 
                 case KVValueType.String:
-                    WriteNullTerminatedString((string)value);
+                    WriteNullTerminatedString((string)value!);
                     break;
 
                 case KVValueType.UInt32:
@@ -87,7 +87,7 @@ namespace ValveKeyValue.Serialization.KeyValues1
             }
         }
 
-        public void OnArrayStart(string name, KVFlag flag, int elementCount, bool allSimpleElements) => throw new NotImplementedException();
+        public void OnArrayStart(string? name, KVFlag flag, int elementCount, bool allSimpleElements) => throw new NotImplementedException();
         public void OnArrayValue(KVObject value) => throw new NotImplementedException();
         public void OnArrayEnd() => throw new NotImplementedException();
 

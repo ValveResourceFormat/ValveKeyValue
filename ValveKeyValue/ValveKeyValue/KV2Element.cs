@@ -16,7 +16,7 @@ namespace ValveKeyValue
         /// <summary>
         /// Gets or sets the class name (type descriptor) for this element.
         /// </summary>
-        public string ClassName { get; set; }
+        public string? ClassName { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KV2Element"/> class as an empty collection.

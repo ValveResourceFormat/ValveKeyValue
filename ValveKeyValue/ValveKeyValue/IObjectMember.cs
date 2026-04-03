@@ -11,6 +11,6 @@ namespace ValveKeyValue
         [DynamicallyAccessedMembers(Trimming.Properties)]
         Type MemberType { get; }
 
-        object Value { get; set; }
+        object? Value { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 
@@ -30,7 +31,7 @@ namespace ValveKeyValue
         internal readonly long _scalar;
 
         // Reference storage for heap types: string, byte[], List<KVObject>, Dictionary<string, KVObject>, etc.
-        internal readonly object _ref;
+        internal readonly object? _ref;
 
         /// <summary>
         /// Gets a value indicating whether this value is null.
@@ -172,7 +173,7 @@ namespace ValveKeyValue
             _scalar = value.ToInt32();
         }
 
-        internal KVObject(KVValueType type, long scalar, object refValue = null, KVFlag flag = KVFlag.None)
+        internal KVObject(KVValueType type, long scalar, object? refValue = null, KVFlag flag = KVFlag.None)
         {
             ValueType = type;
             Flag = flag;
@@ -242,7 +243,7 @@ namespace ValveKeyValue
         /// <summary>
         /// Tries to get a child <see cref="KVObject"/> by key.
         /// </summary>
-        public bool TryGetValue(string name, out KVObject child)
+        public bool TryGetValue(string name, [MaybeNullWhen(false)] out KVObject child)
         {
             ArgumentNullException.ThrowIfNull(name);
 
@@ -253,7 +254,7 @@ namespace ValveKeyValue
                 case List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection:
                     return TryFindInList(list, name, out child);
                 default:
-                    child = null;
+                    child = null!;
                     return false;
             }
         }
@@ -502,7 +503,7 @@ namespace ValveKeyValue
                 throw new InvalidOperationException($"Cannot get blob from a {ValueType} value.");
             }
 
-            return (byte[])_ref;
+            return (byte[])_ref!;
         }
 
         /// <summary>Gets the binary blob data as a span.</summary>
@@ -513,7 +514,7 @@ namespace ValveKeyValue
                 throw new InvalidOperationException($"Cannot get blob span from a {ValueType} value.");
             }
 
-            return ((byte[])_ref).AsSpan();
+            return ((byte[])_ref!).AsSpan();
         }
 
         #endregion
@@ -521,7 +522,7 @@ namespace ValveKeyValue
         #region Internal accessors
 
         internal List<KVObject> GetArrayList()
-            => (List<KVObject>)_ref;
+            => (List<KVObject>)_ref!;
 
         #endregion
 
@@ -605,11 +606,11 @@ namespace ValveKeyValue
             var list = GetArrayList();
             for (var i = 0; i < list.Count; i++)
             {
-                yield return new KeyValuePair<string, KVObject>(null, list[i]);
+                yield return new KeyValuePair<string, KVObject>(null!, list[i]);
             }
         }
 
-        private static bool TryFindInList(List<KeyValuePair<string, KVObject>> list, string name, out KVObject value)
+        private static bool TryFindInList(List<KeyValuePair<string, KVObject>> list, string name, [MaybeNullWhen(false)] out KVObject value)
         {
             foreach (var kvp in list)
             {
@@ -620,7 +621,7 @@ namespace ValveKeyValue
                 }
             }
 
-            value = null;
+            value = null!;
             return false;
         }
 

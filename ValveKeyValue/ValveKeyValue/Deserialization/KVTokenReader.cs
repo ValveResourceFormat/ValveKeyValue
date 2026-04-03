@@ -28,8 +28,6 @@ namespace ValveKeyValue.Deserialization
             if (!disposed)
             {
                 textReader.Dispose();
-                textReader = null;
-
                 disposed = true;
             }
         }

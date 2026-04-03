@@ -58,16 +58,16 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                         break;
 
                     case KVTokenType.Flag:
-                        ReadFlag(token.Value);
+                        ReadFlag(token.Value!);
                         break;
 
                     case KVTokenType.Identifier:
                     case KVTokenType.String:
-                        ReadText(token.Value);
+                        ReadText(token.Value!);
                         break;
 
                     case KVTokenType.BinaryBlob:
-                        ReadBinaryBlob(token.Value);
+                        ReadBinaryBlob(token.Value!);
                         break;
 
                     case KVTokenType.ObjectStart:
@@ -164,7 +164,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
                 case KV3TextReaderState.InObjectAfterKey:
                     {
-                        var name = stateMachine.CurrentName;
+                        var name = stateMachine.CurrentName!;
                         var value = ParseValue(text);
                         value.Flag = stateMachine.GetAndResetFlag();
                         listener.OnKeyValuePair(name, value);
@@ -194,7 +194,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
                 case KV3TextReaderState.InObjectAfterKey:
                     {
-                        var name = stateMachine.CurrentName;
+                        var name = stateMachine.CurrentName!;
                         listener.OnKeyValuePair(name, value);
 
                         stateMachine.Push(KV3TextReaderState.InObjectBeforeKey);

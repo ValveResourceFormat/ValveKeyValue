@@ -53,7 +53,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                 switch (token.TokenType)
                 {
                     case KVTokenType.String:
-                        ReadText(token.Value);
+                        ReadText(token.Value!);
                         break;
 
                     case KVTokenType.ObjectStart:
@@ -65,7 +65,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                         break;
 
                     case KVTokenType.Condition:
-                        HandleCondition(token.Value);
+                        HandleCondition(token.Value!);
                         break;
 
                     case KVTokenType.EndOfFile:
@@ -89,7 +89,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                             throw new KeyValueException($"Inclusions are only valid at the beginning of a file, but found one at {tokenReader.PreviousTokenPosition}.");
                         }
 
-                        stateMachine.AddItemForMerging(token.Value);
+                        stateMachine.AddItemForMerging(token.Value!);
                         break;
 
                     case KVTokenType.IncludeAndAppend:
@@ -98,7 +98,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                             throw new KeyValueException($"Inclusions are only valid at the beginning of a file, but found one at {tokenReader.PreviousTokenPosition}.");
                         }
 
-                        stateMachine.AddItemForAppending(token.Value);
+                        stateMachine.AddItemForAppending(token.Value!);
                         break;
 
                     default:
@@ -135,7 +135,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
                 case KV1TextReaderState.InObjectBetweenKeyAndValue:
                     var value = ParseValue(text);
-                    var name = stateMachine.CurrentName;
+                    var name = stateMachine.CurrentName!;
                     listener.OnKeyValuePair(name, value);
 
                     stateMachine.Push(KV1TextReaderState.InObjectAfterValue);

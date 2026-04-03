@@ -27,7 +27,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             states.Pop();
         }
 
-        public string CurrentName => CurrentObject.Key;
+        public string? CurrentName => CurrentObject.Key;
 
         public void SetName(string name) => CurrentObject.Key = name;
 

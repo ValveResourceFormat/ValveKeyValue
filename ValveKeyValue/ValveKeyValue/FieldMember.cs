@@ -25,7 +25,7 @@ namespace ValveKeyValue
         [DynamicallyAccessedMembers(Trimming.Properties)]
         public Type MemberType => fieldInfo.FieldType;
 
-        public object Value
+        public object? Value
         {
             get => fieldInfo.GetValue(@object);
             set => fieldInfo.SetValue(@object, value);

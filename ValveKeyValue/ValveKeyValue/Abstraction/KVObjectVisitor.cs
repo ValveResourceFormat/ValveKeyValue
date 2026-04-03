@@ -11,12 +11,12 @@ namespace ValveKeyValue.Abstraction
 
         readonly IVisitationListener listener;
 
-        public void Visit(string name, KVObject @object)
+        public void Visit(string? name, KVObject @object)
         {
             VisitObject(name, @object, false);
         }
 
-        void VisitObject(string name, KVObject obj, bool isArray)
+        void VisitObject(string? name, KVObject obj, bool isArray)
         {
             switch (obj.ValueType)
             {
@@ -66,7 +66,7 @@ namespace ValveKeyValue.Abstraction
                         listener.OnArrayValue(obj);
                         break;
                     }
-                    listener.OnKeyValuePair(name, obj);
+                    listener.OnKeyValuePair(name!, obj);
                     break;
 
                 default:

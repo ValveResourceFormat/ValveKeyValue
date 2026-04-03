@@ -4,7 +4,6 @@
     <TargetFramework>net10.0</TargetFramework>
     <RollForward>LatestMajor</RollForward>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
     <PublishAot>true</PublishAot>
   </PropertyGroup>
   <ItemGroup>

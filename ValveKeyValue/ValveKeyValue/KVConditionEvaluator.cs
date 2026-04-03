@@ -24,7 +24,7 @@ namespace ValveKeyValue
                 var tokens = new List<KVConditionToken>();
                 using (var reader = new StringReader(expressionText))
                 {
-                    KVConditionToken token;
+                    KVConditionToken? token;
                     while ((token = ReadToken(reader)) != null)
                     {
                         tokens.Add(token);
@@ -92,10 +92,10 @@ namespace ValveKeyValue
                 switch (token.TokenType)
                 {
                     case KVConditionTokenType.Value:
-                        return EvaluateVariableExpression((string)token.Value);
+                        return EvaluateVariableExpression((string)token.Value!);
 
                     case KVConditionTokenType.PreprocessedExpression:
-                        return (Expression)token.Value;
+                        return (Expression)token.Value!;
                 }
             }
 
@@ -148,10 +148,10 @@ namespace ValveKeyValue
             var instance = Expression.Constant(this);
             var method = typeof(KVConditionEvaluator)
                 .GetMethod(nameof(EvaluateVariable), BindingFlags.NonPublic | BindingFlags.Instance);
-            return Expression.Call(instance, method, new[] { Expression.Constant(variable) });
+            return Expression.Call(instance, method!, new[] { Expression.Constant(variable) });
         }
 
-        static KVConditionToken ReadToken(StringReader reader)
+        static KVConditionToken? ReadToken(StringReader reader)
         {
             SkipWhitespace(reader);
 
@@ -265,7 +265,7 @@ namespace ValveKeyValue
 
             public KVConditionTokenType TokenType { get; }
 
-            public object Value { get; }
+            public object? Value { get; }
 
             public static KVConditionToken Not
                 => new(KVConditionTokenType.Negation);
