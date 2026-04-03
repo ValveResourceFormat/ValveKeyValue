@@ -231,6 +231,9 @@ namespace ValveKeyValue
         {
             [typeof(List<>)] = (type, values, reflector) => InvokeGeneric(nameof(MakeList), type.GetGenericArguments()[0], new object[] { values, reflector }),
             [typeof(IList<>)] = (type, values, reflector) => InvokeGeneric(nameof(MakeList), type.GetGenericArguments()[0], new object[] { values, reflector }),
+            [typeof(IReadOnlyList<>)] = (type, values, reflector) => InvokeGeneric(nameof(MakeList), type.GetGenericArguments()[0], new object[] { values, reflector }),
+            [typeof(IReadOnlyCollection<>)] = (type, values, reflector) => InvokeGeneric(nameof(MakeList), type.GetGenericArguments()[0], new object[] { values, reflector }),
+            [typeof(IEnumerable<>)] = (type, values, reflector) => InvokeGeneric(nameof(MakeList), type.GetGenericArguments()[0], new object[] { values, reflector }),
             [typeof(Collection<>)] = (type, values, reflector) => InvokeGeneric(nameof(MakeCollection), type.GetGenericArguments()[0], new object[] { values, reflector }),
             [typeof(ICollection<>)] = (type, values, reflector) => InvokeGeneric(nameof(MakeCollection), type.GetGenericArguments()[0], new object[] { values, reflector }),
             [typeof(ObservableCollection<>)] = (type, values, reflector) => InvokeGeneric(nameof(MakeObservableCollection), type.GetGenericArguments()[0], new object[] { values, reflector }),
@@ -352,12 +355,9 @@ namespace ValveKeyValue
             }
 
             var genericType = type.GetGenericTypeDefinition();
-            if (genericType != typeof(Dictionary<,>))
-            {
-                return false;
-            }
-
-            return true;
+            return genericType == typeof(Dictionary<,>)
+                || genericType == typeof(IDictionary<,>)
+                || genericType == typeof(IReadOnlyDictionary<,>);
         }
 
         [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2060", Justification = "Analysis cannot follow MakeGenericMethod but we should be clear by here anyway.")]
@@ -367,8 +367,14 @@ namespace ValveKeyValue
             KVObject kv,
             IObjectReflector reflector)
         {
-            var dictionary = Activator.CreateInstance(type);
             var genericArguments = type.GetGenericArguments();
+
+            // For interface types (IDictionary<,>, IReadOnlyDictionary<,>), use concrete Dictionary<,>
+            var concreteType = type.GetGenericTypeDefinition() == typeof(Dictionary<,>)
+                ? type
+                : typeof(Dictionary<,>).MakeGenericType(genericArguments);
+
+            var dictionary = Activator.CreateInstance(concreteType);
 
             var method = typeof(ObjectCopier)
                 .GetMethod(nameof(FillDictionary), BindingFlags.Static | BindingFlags.NonPublic)!;

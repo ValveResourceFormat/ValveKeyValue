@@ -85,6 +85,34 @@ namespace ValveKeyValue.Test
 
         #endregion
 
+        #region Deserialization - non-nullable properties missing from data
+
+        [Test]
+        public void NonNullableStringPropertyIsNullWhenMissingFromData()
+        {
+            // Only "Name" is present, "Title" and "Count" are missing
+            var vdf = "\"object\"\n{\n\t\"Name\"\t\"hello\"\n}";
+            var obj = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<NonNullableObject>(vdf);
+
+            Assert.That(obj.Name, Is.EqualTo("hello"));
+
+            // GetUninitializedObject zeroes all memory, so non-nullable string is null
+            // This violates the non-nullable contract silently
+            Assert.That(obj.Title, Is.Null);
+        }
+
+        [Test]
+        public void NonNullableIntPropertyIsZeroWhenMissingFromData()
+        {
+            var vdf = "\"object\"\n{\n\t\"Name\"\t\"hello\"\n}";
+            var obj = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<NonNullableObject>(vdf);
+
+            // Non-nullable int defaults to 0 when missing
+            Assert.That(obj.Count, Is.EqualTo(0));
+        }
+
+        #endregion
+
         #region Serialization - nullable properties
 
         [Test]
@@ -210,6 +238,13 @@ namespace ValveKeyValue.Test
         {
             public required string RequiredName { get; set; }
             public string? Name { get; set; }
+        }
+
+        class NonNullableObject
+        {
+            public string Name { get; set; } = null!;
+            public string Title { get; set; } = null!;
+            public int Count { get; set; }
         }
 
         #endregion

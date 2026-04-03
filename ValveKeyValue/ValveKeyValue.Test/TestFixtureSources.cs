@@ -15,6 +15,9 @@ namespace ValveKeyValue.Test
                 yield return CreateTestFixtureDataForGenericTest(typeof(Collection<string>));
                 yield return CreateTestFixtureDataForGenericTest(typeof(IList<string>));
                 yield return CreateTestFixtureDataForGenericTest(typeof(ICollection<string>));
+                yield return CreateTestFixtureDataForGenericTest(typeof(IReadOnlyList<string>));
+                yield return CreateTestFixtureDataForGenericTest(typeof(IReadOnlyCollection<string>));
+                yield return CreateTestFixtureDataForGenericTest(typeof(IEnumerable<string>));
                 yield return CreateTestFixtureDataForGenericTest(typeof(ObservableCollection<string>));
             }
         }
