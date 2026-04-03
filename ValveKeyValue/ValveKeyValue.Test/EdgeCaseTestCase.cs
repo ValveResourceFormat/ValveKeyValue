@@ -431,6 +431,56 @@ namespace ValveKeyValue.Test
             Assert.That((string)obj["key1"], Is.EqualTo("value1"));
         }
 
+        [Test]
+        public void AddThrowsOnDuplicateKeyInDictCollection()
+        {
+            var obj = KVObject.Collection();
+            obj.Add("key", "value1");
+
+            Assert.That(() => obj.Add("key", "value2"), Throws.ArgumentException);
+        }
+
+        [Test]
+        public void AddAllowsDuplicateKeyInListCollection()
+        {
+            var obj = KVObject.ListCollection();
+            obj.Add("key", "value1");
+            obj.Add("key", "value2");
+
+            Assert.That(obj.Count, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void TryAddReturnsFalseOnDuplicateKeyInDictCollection()
+        {
+            var obj = KVObject.Collection();
+            obj.Add("key", "value1");
+
+            Assert.That(obj.TryAdd("key", "value2"), Is.False);
+            Assert.That(obj.Count, Is.EqualTo(1));
+            Assert.That((string)obj["key"], Is.EqualTo("value1"));
+        }
+
+        [Test]
+        public void TryAddReturnsTrueOnNewKeyInDictCollection()
+        {
+            var obj = KVObject.Collection();
+
+            Assert.That(obj.TryAdd("key", "value"), Is.True);
+            Assert.That(obj.Count, Is.EqualTo(1));
+            Assert.That((string)obj["key"], Is.EqualTo("value"));
+        }
+
+        [Test]
+        public void TryAddAlwaysReturnsTrueForListCollection()
+        {
+            var obj = KVObject.ListCollection();
+            obj.Add("key", "value1");
+
+            Assert.That(obj.TryAdd("key", "value2"), Is.True);
+            Assert.That(obj.Count, Is.EqualTo(2));
+        }
+
         #endregion
 
         #region CreateArray from KVObject enumerable

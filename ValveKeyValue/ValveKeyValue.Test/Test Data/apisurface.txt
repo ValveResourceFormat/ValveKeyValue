@@ -84,6 +84,7 @@ public class ValveKeyValue.KVDocument
     public ushort ToUInt16(IFormatProvider provider);
     public uint ToUInt32(IFormatProvider provider);
     public ulong ToUInt64(IFormatProvider provider);
+    public bool TryAdd(string key, ValveKeyValue.KVObject value);
     public bool TryGetValue(string name, out ValveKeyValue.KVObject& child);
 }
 
@@ -239,6 +240,7 @@ public class ValveKeyValue.KVObject
     public ushort ToUInt16(IFormatProvider provider);
     public uint ToUInt32(IFormatProvider provider);
     public ulong ToUInt64(IFormatProvider provider);
+    public bool TryAdd(string key, ValveKeyValue.KVObject value);
     public bool TryGetValue(string name, out ValveKeyValue.KVObject& child);
 }
 

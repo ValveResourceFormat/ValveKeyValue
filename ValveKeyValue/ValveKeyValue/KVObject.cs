@@ -192,7 +192,7 @@ namespace ValveKeyValue
             set
             {
                 ArgumentNullException.ThrowIfNull(key);
-                SetChild(key, value);
+                TryInsert(key, value ?? Null(), InsertionBehavior.OverwriteExisting);
             }
         }
 
@@ -296,22 +296,25 @@ namespace ValveKeyValue
 
         /// <summary>
         /// Adds a named child to this collection.
+        /// For dictionary-backed collections, throws if the key already exists.
+        /// For list-backed collections, always appends (duplicate keys are allowed).
         /// </summary>
+        /// <exception cref="ArgumentException">The key already exists in a dictionary-backed collection.</exception>
         public void Add(string key, KVObject value)
         {
             ArgumentNullException.ThrowIfNull(key);
+            TryInsert(key, value, InsertionBehavior.ThrowOnExisting);
+        }
 
-            switch (_ref)
-            {
-                case Dictionary<string, KVObject> dict:
-                    dict[key] = value;
-                    break;
-                case List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection:
-                    list.Add(new KeyValuePair<string, KVObject>(key, value));
-                    break;
-                default:
-                    throw new InvalidOperationException($"Cannot add a named child to a {ValueType} value.");
-            }
+        /// <summary>
+        /// Tries to add a named child to this collection.
+        /// Returns <c>false</c> if the key already exists in a dictionary-backed collection.
+        /// For list-backed collections, always succeeds (duplicate keys are allowed).
+        /// </summary>
+        public bool TryAdd(string key, KVObject value)
+        {
+            ArgumentNullException.ThrowIfNull(key);
+            return TryInsert(key, value, InsertionBehavior.None);
         }
 
         /// <summary>
@@ -500,48 +503,66 @@ namespace ValveKeyValue
         internal List<KVObject> GetArrayList()
             => (List<KVObject>)_ref;
 
-        internal Dictionary<string, KVObject> GetCollectionDict()
-            => (Dictionary<string, KVObject>)_ref;
-
-        internal List<KeyValuePair<string, KVObject>> GetCollectionList()
-            => (List<KeyValuePair<string, KVObject>>)_ref;
-
         #endregion
 
         #region Private helpers
 
-        private void SetChild(string key, KVObject value)
+        private enum InsertionBehavior
         {
-            value ??= Null();
+            None,
+            OverwriteExisting,
+            ThrowOnExisting,
+        }
 
+        private bool TryInsert(string key, KVObject value, InsertionBehavior behavior)
+        {
             switch (_ref)
             {
                 case Dictionary<string, KVObject> dict:
-                    dict[key] = value;
-                    break;
-                case List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection:
-                    var firstIndex = list.FindIndex(c => c.Key == key);
-                    if (firstIndex >= 0)
+                    if (behavior == InsertionBehavior.OverwriteExisting)
                     {
-                        list[firstIndex] = new KeyValuePair<string, KVObject>(key, value);
+                        dict[key] = value;
+                        return true;
+                    }
 
-                        // Remove any remaining duplicates after the replaced entry
-                        for (var i = list.Count - 1; i > firstIndex; i--)
+                    if (dict.TryAdd(key, value))
+                    {
+                        return true;
+                    }
+
+                    if (behavior == InsertionBehavior.ThrowOnExisting)
+                    {
+                        throw new ArgumentException($"An item with the same key has already been added. Key: {key}");
+                    }
+
+                    return false;
+
+                case List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection:
+                    if (behavior == InsertionBehavior.OverwriteExisting)
+                    {
+                        var firstIndex = list.FindIndex(c => c.Key == key);
+                        if (firstIndex >= 0)
                         {
-                            if (list[i].Key == key)
+                            list[firstIndex] = new KeyValuePair<string, KVObject>(key, value);
+
+                            // Remove any remaining duplicates after the replaced entry
+                            for (var i = list.Count - 1; i > firstIndex; i--)
                             {
-                                list.RemoveAt(i);
+                                if (list[i].Key == key)
+                                {
+                                    list.RemoveAt(i);
+                                }
                             }
+
+                            return true;
                         }
                     }
-                    else
-                    {
-                        list.Add(new KeyValuePair<string, KVObject>(key, value));
-                    }
 
-                    break;
+                    list.Add(new KeyValuePair<string, KVObject>(key, value));
+                    return true;
+
                 default:
-                    throw new InvalidOperationException($"Cannot set a child on a {ValueType} value.");
+                    throw new InvalidOperationException($"Cannot insert a named child into a {ValueType} value.");
             }
         }
 
