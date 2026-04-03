@@ -23,11 +23,11 @@ namespace ValveKeyValue.Test
         }
 
         [Test]
-        public void IndexerReturnsNullForMissingKey()
+        public void IndexerThrowsForMissingKey()
         {
             var obj = KVObject.ListCollection();
             obj.Add("key", "value");
-            Assert.That(obj["missing"], Is.Null);
+            Assert.That(() => obj["missing"], Throws.TypeOf<KeyNotFoundException>());
         }
 
         [Test]
@@ -327,7 +327,7 @@ namespace ValveKeyValue.Test
 
             Assert.That(removed, Is.True);
             Assert.That(obj.Count, Is.EqualTo(1));
-            Assert.That(obj["a"], Is.Null);
+            Assert.That(obj.ContainsKey("a"), Is.False);
         }
 
         [Test]
@@ -478,7 +478,7 @@ namespace ValveKeyValue.Test
             });
 
             Assert.That(obj.Count, Is.EqualTo(2));
-            // GetChild returns first match
+            // Indexer returns first match
             Assert.That((string)obj["key"], Is.EqualTo("first"));
         }
 

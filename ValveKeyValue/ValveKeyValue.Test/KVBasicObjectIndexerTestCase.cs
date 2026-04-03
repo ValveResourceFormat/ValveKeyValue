@@ -3,9 +3,9 @@ namespace ValveKeyValue.Test
     class KVBasicObjectIndexerTestCase
     {
         [Test]
-        public void IndexerOnValueNodeReturnsNull()
+        public void IndexerOnValueNodeThrows()
         {
-            Assert.That(data["baz"], Is.Null);
+            Assert.That(() => data["baz"], Throws.TypeOf<KeyNotFoundException>());
         }
 
         KVObject data;

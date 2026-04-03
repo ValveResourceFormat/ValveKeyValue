@@ -43,15 +43,13 @@ namespace ValveKeyValue.Test
         [TestCaseSource(nameof(GarbageItemsTestCaseData))]
         public void DoesNotHaveGarbageItems(string key)
         {
-            var value = data[key];
-            Assert.That(value, Is.Null);
+            Assert.That(data.ContainsKey(key), Is.False);
         }
 
         [TestCaseSource(nameof(GarbageItemsTestCaseData))]
         public void DoesNotHaveGarbageWithValueCast(string key)
         {
-            var value = data[key];
-            Assert.That((string)value, Is.Null);
+            Assert.That(data.TryGetValue(key, out _), Is.False);
         }
 
         static IEnumerable ItemsTestCaseData

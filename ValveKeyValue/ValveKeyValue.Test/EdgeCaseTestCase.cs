@@ -88,7 +88,7 @@ namespace ValveKeyValue.Test
 
             obj["a"] = null;
 
-            Assert.That(obj["a"], Is.Null);
+            Assert.That(obj.ContainsKey("a"), Is.False);
             Assert.That(obj.Count, Is.EqualTo(1));
             Assert.That((string)obj["b"], Is.EqualTo("2"));
         }
@@ -186,22 +186,22 @@ namespace ValveKeyValue.Test
 
         #endregion
 
-        #region GetChild on scalar returns null
+        #region TryGetValue on scalar returns false
 
         [Test]
-        public void GetChildOnScalarReturnsNull()
+        public void TryGetValueOnScalarReturnsFalse()
         {
             var obj = new KVObject("hello");
 
-            Assert.That(obj.GetChild("x"), Is.Null);
+            Assert.That(obj.TryGetValue("x", out _), Is.False);
         }
 
         [Test]
-        public void GetChildOnNullValuedObjectReturnsNull()
+        public void TryGetValueOnNullValuedObjectReturnsFalse()
         {
             var obj = KVObject.Null();
 
-            Assert.That(obj.GetChild("x"), Is.Null);
+            Assert.That(obj.TryGetValue("x", out _), Is.False);
         }
 
         #endregion
@@ -484,16 +484,13 @@ namespace ValveKeyValue.Test
         }
 
         [Test]
-        public void GetChildReturnsFistForDuplicateKeysInListCollection()
+        public void IndexerReturnsFirstForDuplicateKeysInListCollection()
         {
             var obj = KVObject.ListCollection();
             obj.Add("key", "first");
             obj.Add("key", "second");
 
-            var child = obj.GetChild("key");
-
-            Assert.That(child, Is.Not.Null);
-            Assert.That((string)child, Is.EqualTo("first"));
+            Assert.That((string)obj["key"], Is.EqualTo("first"));
         }
 
         [Test]
@@ -640,11 +637,13 @@ namespace ValveKeyValue.Test
 
             Assert.Multiple(() =>
             {
-                // GetChild
-                Assert.That((int)dict.GetChild("a"), Is.EqualTo(1));
-                Assert.That((int)list.GetChild("a"), Is.EqualTo(1));
-                Assert.That(dict.GetChild("missing"), Is.Null);
-                Assert.That(list.GetChild("missing"), Is.Null);
+                // TryGetValue
+                Assert.That(dict.TryGetValue("a", out var dictA), Is.True);
+                Assert.That((int)dictA, Is.EqualTo(1));
+                Assert.That(list.TryGetValue("a", out var listA), Is.True);
+                Assert.That((int)listA, Is.EqualTo(1));
+                Assert.That(dict.TryGetValue("missing", out _), Is.False);
+                Assert.That(list.TryGetValue("missing", out _), Is.False);
 
                 // ContainsKey
                 Assert.That(dict.ContainsKey("a"), Is.True);

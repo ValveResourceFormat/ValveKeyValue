@@ -55,7 +55,6 @@ public class ValveKeyValue.KVDocument
     public string get_Name();
     public System.Collections.Generic.IEnumerable`1[[ValveKeyValue.KVObject]] get_Values();
     public ValveKeyValue.KVValueType get_ValueType();
-    public ValveKeyValue.KVObject GetChild(string name);
     public System.Collections.Generic.IEnumerator`1[[System.Collections.Generic.KeyValuePair`2[[string, ValveKeyValue.KVObject]]]] GetEnumerator();
     public int GetHashCode();
     public Type GetType();
@@ -178,7 +177,6 @@ public class ValveKeyValue.KVObject
     public System.Collections.Generic.IEnumerable`1[[string]] get_Keys();
     public System.Collections.Generic.IEnumerable`1[[ValveKeyValue.KVObject]] get_Values();
     public ValveKeyValue.KVValueType get_ValueType();
-    public ValveKeyValue.KVObject GetChild(string name);
     public System.Collections.Generic.IEnumerator`1[[System.Collections.Generic.KeyValuePair`2[[string, ValveKeyValue.KVObject]]]] GetEnumerator();
     public int GetHashCode();
     public Type GetType();

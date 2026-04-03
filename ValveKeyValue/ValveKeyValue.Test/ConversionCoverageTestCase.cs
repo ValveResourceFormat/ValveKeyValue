@@ -251,7 +251,6 @@ namespace ValveKeyValue.Test
             data["key1"] = null;
 
             Assert.That(data.ContainsKey("key1"), Is.False);
-            Assert.That(data["key1"], Is.Null);
             Assert.That(data.Count, Is.EqualTo(1));
             Assert.That((int)data["key2"], Is.EqualTo(42));
         }

@@ -5,13 +5,18 @@ namespace ValveKeyValue.Test
         [TestCase("foo", ExpectedResult = "bar")]
         [TestCase("bar", ExpectedResult = "baz")]
         [TestCase("baz", ExpectedResult = "-")]
-        [TestCase("foobar", ExpectedResult = null)]
         public string IndexerReturnsChildValue(string key) => (string)data[key];
 
         [Test]
-        public void IndexerOnValueNodeReturnsNull()
+        public void IndexerThrowsForMissingKey()
         {
-            Assert.That(data["foo"]["bar"], Is.Null);
+            Assert.That(() => data["foobar"], Throws.TypeOf<KeyNotFoundException>());
+        }
+
+        [Test]
+        public void IndexerOnValueNodeThrows()
+        {
+            Assert.That(() => data["foo"]["bar"], Throws.TypeOf<KeyNotFoundException>());
         }
 
         KVObject data;

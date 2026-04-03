@@ -47,7 +47,7 @@ namespace ValveKeyValue.Test
             var conditions = new[] { "X360WIDE" };
             var data = ParseResource("Text.conditional.vdf", conditions);
 
-            Assert.That((string)data["ui type"], Is.Null);
+            Assert.That(data.ContainsKey("ui type"), Is.False);
         }
 
         [Test]

@@ -174,12 +174,21 @@ namespace ValveKeyValue
         #region Indexers
 
         /// <summary>
-        /// Gets or sets a child by key. Returns <c>null</c> if the key is not found.
+        /// Gets or sets a child by key.
         /// Setting a value creates or replaces the child with the given key.
         /// </summary>
+        /// <exception cref="KeyNotFoundException">The key was not found (getter only).</exception>
         public KVObject this[string key]
         {
-            get => GetChild(key);
+            get
+            {
+                if (!TryGetValue(key, out var child))
+                {
+                    throw new KeyNotFoundException($"The given key '{key}' was not present.");
+                }
+
+                return child;
+            }
             set
             {
                 ArgumentNullException.ThrowIfNull(key);
@@ -213,27 +222,22 @@ namespace ValveKeyValue
         #region Navigation
 
         /// <summary>
-        /// Gets a child <see cref="KVObject"/> by key.
-        /// </summary>
-        public KVObject GetChild(string name)
-        {
-            ArgumentNullException.ThrowIfNull(name);
-
-            return _ref switch
-            {
-                Dictionary<string, KVObject> dict => dict.GetValueOrDefault(name),
-                List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection => FindInList(list, name),
-                _ => null,
-            };
-        }
-
-        /// <summary>
         /// Tries to get a child <see cref="KVObject"/> by key.
         /// </summary>
         public bool TryGetValue(string name, out KVObject child)
         {
-            child = GetChild(name);
-            return child != null;
+            ArgumentNullException.ThrowIfNull(name);
+
+            switch (_ref)
+            {
+                case Dictionary<string, KVObject> dict:
+                    return dict.TryGetValue(name, out child);
+                case List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection:
+                    return TryFindInList(list, name, out child);
+                default:
+                    child = null;
+                    return false;
+            }
         }
 
         /// <summary>
@@ -246,7 +250,7 @@ namespace ValveKeyValue
             return _ref switch
             {
                 Dictionary<string, KVObject> dict => dict.ContainsKey(name),
-                List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection => FindInList(list, name) != null,
+                List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection => TryFindInList(list, name, out _),
                 _ => false,
             };
         }
@@ -584,17 +588,19 @@ namespace ValveKeyValue
             }
         }
 
-        private static KVObject FindInList(List<KeyValuePair<string, KVObject>> list, string name)
+        private static bool TryFindInList(List<KeyValuePair<string, KVObject>> list, string name, out KVObject value)
         {
             foreach (var kvp in list)
             {
                 if (kvp.Key == name)
                 {
-                    return kvp.Value;
+                    value = kvp.Value;
+                    return true;
                 }
             }
 
-            return null;
+            value = null;
+            return false;
         }
 
         private string DebuggerDescription => ValueType switch

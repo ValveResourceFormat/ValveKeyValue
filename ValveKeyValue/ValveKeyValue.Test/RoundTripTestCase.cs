@@ -221,7 +221,7 @@ namespace ValveKeyValue.Test
             {
                 Assert.That(result.Count, Is.EqualTo(2));
                 Assert.That((string)result["keep"], Is.EqualTo("yes"));
-                Assert.That(result["remove"], Is.Null);
+                Assert.That(result.ContainsKey("remove"), Is.False);
                 Assert.That((string)result["also_keep"], Is.EqualTo("yes"));
             });
         }
@@ -243,7 +243,7 @@ namespace ValveKeyValue.Test
             {
                 Assert.That(result.Count, Is.EqualTo(2));
                 Assert.That((string)result["keep"], Is.EqualTo("yes"));
-                Assert.That(result["remove"], Is.Null);
+                Assert.That(result.ContainsKey("remove"), Is.False);
                 Assert.That((string)result["also_keep"], Is.EqualTo("yes"));
             });
         }
