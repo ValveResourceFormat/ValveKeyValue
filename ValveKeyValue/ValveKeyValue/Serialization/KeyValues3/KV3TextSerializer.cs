@@ -9,7 +9,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
     {
         static readonly SearchValues<char> CharsToEscape = SearchValues.Create("\n\t\\\"");
 
-        public KV3TextSerializer(Stream stream, KVHeader? header = null)
+        public KV3TextSerializer(Stream stream, KVHeader? header = null, bool skipHeader = false)
         {
             ArgumentNullException.ThrowIfNull(stream);
 
@@ -18,13 +18,16 @@ namespace ValveKeyValue.Serialization.KeyValues3
                 NewLine = "\n"
             };
 
-            var defaultEncoding = new ValveKeyValue.KeyValues3.KV3ID("text", ValveKeyValue.KeyValues3.Encoding.Text);
-            var defaultFormat = new ValveKeyValue.KeyValues3.KV3ID("generic", ValveKeyValue.KeyValues3.Format.Generic);
+            if (!skipHeader)
+            {
+                var defaultEncoding = new ValveKeyValue.KeyValues3.KV3ID("text", ValveKeyValue.KeyValues3.Encoding.Text);
+                var defaultFormat = new ValveKeyValue.KeyValues3.KV3ID("generic", ValveKeyValue.KeyValues3.Format.Generic);
 
-            var encoding = header?.Encoding.Name != null ? header.Encoding : defaultEncoding;
-            var format = header?.Format.Name != null ? header.Format : defaultFormat;
+                var encoding = header?.Encoding.Name != null ? header.Encoding : defaultEncoding;
+                var format = header?.Format.Name != null ? header.Format : defaultFormat;
 
-            writer.WriteLine($"<!-- kv3 encoding:{encoding} format:{format} -->");
+                writer.WriteLine($"<!-- kv3 encoding:{encoding} format:{format} -->");
+            }
         }
 
         readonly StreamWriter writer;

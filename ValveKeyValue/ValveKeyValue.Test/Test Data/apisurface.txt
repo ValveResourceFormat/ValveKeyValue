@@ -323,6 +323,7 @@ public sealed class ValveKeyValue.KVSerializerOptions
     public bool get_EnableValveNullByteBugBehavior();
     public ValveKeyValue.IIncludedFileLoader get_FileLoader();
     public bool get_HasEscapeSequences();
+    public bool get_SkipHeader();
     public ValveKeyValue.StringTable get_StringTable();
     public int GetHashCode();
     public Type GetType();
@@ -330,6 +331,7 @@ public sealed class ValveKeyValue.KVSerializerOptions
     public void set_EnableValveNullByteBugBehavior(bool value);
     public void set_FileLoader(ValveKeyValue.IIncludedFileLoader value);
     public void set_HasEscapeSequences(bool value);
+    public void set_SkipHeader(bool value);
     public void set_StringTable(ValveKeyValue.StringTable value);
     public string ToString();
 }

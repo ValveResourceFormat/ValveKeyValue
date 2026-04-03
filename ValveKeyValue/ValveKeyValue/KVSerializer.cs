@@ -126,7 +126,7 @@ namespace ValveKeyValue
             {
                 KVSerializationFormat.KeyValues1Text => new KV1TextReader(new StreamReader(stream, null, true, -1, leaveOpen: true), listener, options),
                 KVSerializationFormat.KeyValues1Binary => new KV1BinaryReader(stream, listener, options.StringTable!),
-                KVSerializationFormat.KeyValues3Text => new KV3TextReader(new StreamReader(stream, null, true, -1, leaveOpen: true), listener),
+                KVSerializationFormat.KeyValues3Text => new KV3TextReader(new StreamReader(stream, null, true, -1, leaveOpen: true), listener, options.SkipHeader),
                 _ => throw new InvalidOperationException($"Invalid serialization format: {format}"),
             };
         }
@@ -140,7 +140,7 @@ namespace ValveKeyValue
             {
                 KVSerializationFormat.KeyValues1Text => new KV1TextSerializer(stream, options),
                 KVSerializationFormat.KeyValues1Binary => new KV1BinarySerializer(stream, options.StringTable!),
-                KVSerializationFormat.KeyValues3Text => new KV3TextSerializer(stream, header),
+                KVSerializationFormat.KeyValues3Text => new KV3TextSerializer(stream, header, options.SkipHeader),
                 _ => throw new InvalidOperationException($"Invalid serialization format: {format}"),
             };
         }

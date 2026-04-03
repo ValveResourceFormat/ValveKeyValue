@@ -5,12 +5,13 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 {
     sealed class KV3TextReader : IVisitingReader
     {
-        public KV3TextReader(TextReader textReader, IParsingVisitationListener listener)
+        public KV3TextReader(TextReader textReader, IParsingVisitationListener listener, bool skipHeader = false)
         {
             ArgumentNullException.ThrowIfNull(textReader);
             ArgumentNullException.ThrowIfNull(listener);
 
             this.listener = listener;
+            this.skipHeader = skipHeader;
 
             tokenReader = new KV3TokenReader(textReader);
             stateMachine = new KV3TextReaderStateMachine();
@@ -22,13 +23,14 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         readonly KV3TokenReader tokenReader;
         readonly KV3TextReaderStateMachine stateMachine;
+        readonly bool skipHeader;
         bool disposed;
 
         public KVHeader ReadHeader()
         {
             ObjectDisposedException.ThrowIf(disposed, this);
 
-            var header = tokenReader.ReadHeader();
+            var header = skipHeader ? new KVHeader() : tokenReader.ReadHeader();
 
             while (stateMachine.IsInObject)
             {
