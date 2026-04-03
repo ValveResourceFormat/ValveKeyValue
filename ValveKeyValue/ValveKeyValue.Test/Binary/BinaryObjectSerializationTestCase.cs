@@ -13,7 +13,7 @@ namespace ValveKeyValue.Test
             kvo.Add("ptr", new IntPtr(0x12345678));
             kvo.Add("lng", 0x8877665544332211u);
             kvo.Add("i64", 0x0102030405060708);
-            var doc = new KVDocument(null, "TestObject", kvo);
+            var doc = new KVDocument(null!, "TestObject", kvo);
 
             var expectedData = new byte[]
             {
@@ -71,7 +71,7 @@ namespace ValveKeyValue.Test
             kvo.Add("f64", 3.14);
             kvo.Add("blob", KVObject.Blob([0xAB, 0xCD]));
             kvo.Add("null", KVObject.Null());
-            var doc = new KVDocument(null, "Test", kvo);
+            var doc = new KVDocument(null!, "Test", kvo);
 
             using var ms = new MemoryStream();
             KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Serialize(ms, doc);

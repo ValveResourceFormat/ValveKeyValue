@@ -111,7 +111,7 @@ namespace ValveKeyValue.Test
         class DataObject
         {
             [KVProperty("test")]
-            public Dictionary<string, float[]> Test { get; set; }
+            public required Dictionary<string, float[]> Test { get; set; }
         }
     }
 }

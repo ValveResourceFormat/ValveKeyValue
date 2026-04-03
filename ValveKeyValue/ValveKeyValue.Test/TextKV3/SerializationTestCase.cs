@@ -165,7 +165,7 @@ namespace ValveKeyValue.Test.TextKV3
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
             var root = KVObject.Collection();
             root.Add("path", "C:\\Program Files\\hello\nworld");
-            var doc = new KVDocument(null, null, root);
+            var doc = new KVDocument(null!, null!, root);
 
             var data2 = RoundTrip(kv, doc);
 
@@ -178,7 +178,7 @@ namespace ValveKeyValue.Test.TextKV3
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
             var root = KVObject.Collection();
             root.Add("ptr", new IntPtr(12345));
-            var doc = new KVDocument(null, null, root);
+            var doc = new KVDocument(null!, null!, root);
 
             string text;
             using (var ms = new MemoryStream())
@@ -203,7 +203,7 @@ namespace ValveKeyValue.Test.TextKV3
             var root = KVObject.Collection();
             root.Add("i16", (short)-42);
             root.Add("u16", (ushort)60000);
-            var doc = new KVDocument(null, null, root);
+            var doc = new KVDocument(null!, null!, root);
 
             var data2 = RoundTrip(kv, doc);
 

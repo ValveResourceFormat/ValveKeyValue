@@ -9,13 +9,13 @@ namespace ValveKeyValue.Test
     {
         internal class RootObject<TCollection>
         {
-            public TCollection Numbers { get; set; }
+            public required TCollection Numbers { get; set; }
         }
 
         internal class SimpleObject
         {
-            public string Name { get; set; }
-            public string Value { get; set; }
+            public required string Name { get; set; }
+            public required string Value { get; set; }
         }
     }
 

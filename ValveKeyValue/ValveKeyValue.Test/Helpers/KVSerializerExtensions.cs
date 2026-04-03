@@ -2,19 +2,19 @@ namespace ValveKeyValue.Test
 {
     static class KVSerializerExtensions
     {
-        public static KVDocument Deserialize(this KVSerializer serializer, byte[] data, KVSerializerOptions options = null)
+        public static KVDocument Deserialize(this KVSerializer serializer, byte[] data, KVSerializerOptions? options = null)
         {
             using var ms = new MemoryStream(data);
             return serializer.Deserialize(ms, options);
         }
 
-        public static TObject Deserialize<TObject>(this KVSerializer serializer, byte[] data, KVSerializerOptions options = null)
+        public static TObject Deserialize<TObject>(this KVSerializer serializer, byte[] data, KVSerializerOptions? options = null)
         {
             using var ms = new MemoryStream(data);
             return serializer.Deserialize<TObject>(ms, options);
         }
 
-        public static KVDocument Deserialize(this KVSerializer serializer, string text, KVSerializerOptions options = null)
+        public static KVDocument Deserialize(this KVSerializer serializer, string text, KVSerializerOptions? options = null)
         {
             using var ms = new MemoryStream();
             using var writer = new StreamWriter(ms);
@@ -26,7 +26,7 @@ namespace ValveKeyValue.Test
             return serializer.Deserialize(ms, options);
         }
 
-        public static TObject Deserialize<TObject>(this KVSerializer serializer, string text, KVSerializerOptions options = null)
+        public static TObject Deserialize<TObject>(this KVSerializer serializer, string text, KVSerializerOptions? options = null)
         {
             using var ms = new MemoryStream();
             using var writer = new StreamWriter(ms);

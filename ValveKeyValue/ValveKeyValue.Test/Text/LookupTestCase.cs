@@ -40,7 +40,7 @@ namespace ValveKeyValue.Test
 
         class ContainerClass
         {
-            public ILookup<string, string> FooLookup { get; set; }
+            public required ILookup<string, string> FooLookup { get; set; }
         }
     }
 }

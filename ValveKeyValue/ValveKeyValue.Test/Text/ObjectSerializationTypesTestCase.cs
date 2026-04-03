@@ -53,7 +53,7 @@ namespace ValveKeyValue.Test
 
         class DataObject
         {
-            public string VString { get; set; }
+            public required string VString { get; set; }
             public int VInt { get; set; }
             public long VLong { get; set; }
             public ulong VULong { get; set; }
@@ -173,12 +173,12 @@ namespace ValveKeyValue.Test
             public ulong VULong { get; set; }
             public float VFloat { get; set; }
             public double VDouble { get; set; }
-            public string VString { get; set; }
+            public required string VString { get; set; }
         }
 
         class ByteArrayObject
         {
-            public byte[] VBlob { get; set; }
+            public required byte[] VBlob { get; set; }
         }
     }
 }

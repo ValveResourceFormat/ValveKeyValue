@@ -86,7 +86,7 @@ namespace ValveKeyValue.Test
             obj.Add("a", "1");
             obj.Add("b", "2");
 
-            obj["a"] = null;
+            obj["a"] = null!;
 
             Assert.That(obj.Count, Is.EqualTo(2));
             Assert.That(obj["a"].IsNull, Is.True);
@@ -99,7 +99,7 @@ namespace ValveKeyValue.Test
             var obj = KVObject.ListCollection();
             obj.Add("a", "1");
 
-            obj["nonexistent"] = null;
+            obj["nonexistent"] = null!;
 
             Assert.That(obj.Count, Is.EqualTo(2));
             Assert.That((string)obj["a"], Is.EqualTo("1"));
@@ -429,7 +429,7 @@ namespace ValveKeyValue.Test
 
             Assert.That(result, Is.True);
             Assert.That(child, Is.Not.Null);
-            Assert.That((string)child, Is.EqualTo("value"));
+            Assert.That((string)child!, Is.EqualTo("value"));
         }
 
         [Test]
@@ -440,7 +440,7 @@ namespace ValveKeyValue.Test
             var obj = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
 
             Assert.That(obj.TryGetValue("key1", out var found), Is.True);
-            Assert.That((string)found, Is.EqualTo("value1"));
+            Assert.That((string)found!, Is.EqualTo("value1"));
 
             Assert.That(obj.TryGetValue("missing", out var notFound), Is.False);
             Assert.That(notFound, Is.Null);
@@ -700,7 +700,7 @@ namespace ValveKeyValue.Test
             var obj = KVObject.Collection();
             obj.Add("a", 1);
 
-            obj["nonexistent"] = null;
+            obj["nonexistent"] = null!;
 
             Assert.That(obj.Count, Is.EqualTo(2));
             Assert.That((int)obj["a"], Is.EqualTo(1));
@@ -738,9 +738,9 @@ namespace ValveKeyValue.Test
             {
                 // TryGetValue
                 Assert.That(dict.TryGetValue("a", out var dictA), Is.True);
-                Assert.That((int)dictA, Is.EqualTo(1));
+                Assert.That((int)dictA!, Is.EqualTo(1));
                 Assert.That(list.TryGetValue("a", out var listA), Is.True);
-                Assert.That((int)listA, Is.EqualTo(1));
+                Assert.That((int)listA!, Is.EqualTo(1));
                 Assert.That(dict.TryGetValue("missing", out _), Is.False);
                 Assert.That(list.TryGetValue("missing", out _), Is.False);
 

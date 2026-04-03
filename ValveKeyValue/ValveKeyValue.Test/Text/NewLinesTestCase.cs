@@ -24,7 +24,7 @@ namespace ValveKeyValue.Test
         {
             KVObject convertedKv;
             var kv = new KVObject(value);
-            var doc = new KVDocument(null, "newLineTestCase", kv);
+            var doc = new KVDocument(null!, "newLineTestCase", kv);
             var options = new KVSerializerOptions { HasEscapeSequences = hasEscapeSequences };
 
             string text;

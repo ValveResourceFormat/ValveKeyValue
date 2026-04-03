@@ -47,13 +47,13 @@ namespace ValveKeyValue.Test
         class FirstObject
         {
             [KVProperty("firstkey")]
-            public string StringValue { get; set; }
+            public required string StringValue { get; set; }
         }
 
         class SecondObject
         {
             [KVProperty("secondkey")]
-            public string StringValue { get; set; }
+            public required string StringValue { get; set; }
         }
     }
 }

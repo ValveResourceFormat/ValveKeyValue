@@ -63,7 +63,7 @@ namespace ValveKeyValue.Test
         [TestCase("OSX")]
         [TestCase("LINUX")]
         [TestCase("PS3")]
-        public void ReadsValueWhenConditionalNotEqual(string condition)
+        public void ReadsValueWhenConditionalNotEqual(string? condition)
         {
             string[] conditions;
             if (condition == null)

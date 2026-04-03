@@ -51,17 +51,17 @@ namespace ValveKeyValue.Test
         {
             public int OGInt { get; set; }
 
-            public Foo FooObj { get; set; }
+            public required Foo FooObj { get; set; }
 
             internal class Foo
             {
-                public string FooStr { get; set; }
+                public required string FooStr { get; set; }
 
-                public Bar BarObj { get; set; }
+                public required Bar BarObj { get; set; }
 
                 internal class Bar
                 {
-                    public string Baz { get; set; }
+                    public required string Baz { get; set; }
                 }
             }
         }

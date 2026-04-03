@@ -24,10 +24,10 @@ namespace ValveKeyValue.Test
 
         class VKVConfig
         {
-            public List<string> GameSearchPaths { get; set; }
-            public string BackgroundColor { get; set; }
-            public string OpenDirectory { get; set; }
-            public string SaveDirectory { get; set; }
+            public required List<string> GameSearchPaths { get; set; }
+            public required string BackgroundColor { get; set; }
+            public required string OpenDirectory { get; set; }
+            public required string SaveDirectory { get; set; }
         }
     }
 }

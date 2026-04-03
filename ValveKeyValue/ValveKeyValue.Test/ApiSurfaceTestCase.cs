@@ -75,7 +75,7 @@ namespace ValveKeyValue.Test
                 var members = Enum.GetNames(type);
                 foreach (var member in members)
                 {
-                    var rawValue = type.GetField(member, BindingFlags.Public | BindingFlags.Static).GetValue(null);
+                    var rawValue = type.GetField(member, BindingFlags.Public | BindingFlags.Static)!.GetValue(null);
                     var convertedValue = Convert.ChangeType(rawValue, Enum.GetUnderlyingType(type), CultureInfo.InvariantCulture);
 
                     sb.Append("    ");
@@ -172,7 +172,7 @@ namespace ValveKeyValue.Test
 
         static bool IsHidingMember(MethodInfo method)
         {
-            var baseType = method.DeclaringType.GetTypeInfo().BaseType;
+            var baseType = method.DeclaringType!.GetTypeInfo().BaseType;
             if (baseType == null)
             {
                 return false;
@@ -233,7 +233,7 @@ namespace ValveKeyValue.Test
         {
             if (type.IsArray)
             {
-                var elementType = type.GetElementType();
+                var elementType = type.GetElementType()!;
                 var elementTypeAsString = GetTypeAsString(elementType);
                 return string.Format(CultureInfo.InvariantCulture, "{0}[]", elementTypeAsString);
             }

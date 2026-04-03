@@ -30,15 +30,15 @@ namespace ValveKeyValue.Test
 
         class DataObject
         {
-            public string Name { get; set; }
+            public required string Name { get; set; }
 
-            public string Developer { get; set; }
+            public required string Developer { get; set; }
 
             [KVProperty("description")]
-            public string Summary { get; set; }
+            public required string Summary { get; set; }
 
             [KVIgnore]
-            public string ExtraData { get; set; }
+            public required string ExtraData { get; set; }
         }
     }
 }

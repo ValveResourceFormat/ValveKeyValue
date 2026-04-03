@@ -50,7 +50,7 @@ namespace ValveKeyValue.Test
 
         class ContainerClass
         {
-            public Dictionary<int, string> Numbers { get; set; }
+            public required Dictionary<int, string> Numbers { get; set; }
         }
     }
 }

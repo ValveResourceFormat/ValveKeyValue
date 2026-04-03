@@ -38,10 +38,10 @@ namespace ValveKeyValue.Test
         class Person
         {
             [KVProperty("First Name")]
-            public string FirstName { get; set; }
+            public required string FirstName { get; set; }
 
             [KVIgnore]
-            public string LastName { get; set; }
+            public required string LastName { get; set; }
 
             [KVProperty("Can Fix It")]
             public bool CanFixIt { get; set; }

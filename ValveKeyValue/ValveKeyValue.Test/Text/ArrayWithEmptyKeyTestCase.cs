@@ -16,7 +16,7 @@ namespace ValveKeyValue.Test
 
         class SerializedType
         {
-            public TEnumerable Numbers { get; set; }
+            public required TEnumerable Numbers { get; set; }
         }
     }
 }

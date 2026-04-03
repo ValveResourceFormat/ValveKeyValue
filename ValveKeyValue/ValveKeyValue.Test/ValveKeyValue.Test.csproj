@@ -7,7 +7,6 @@
     <Description>Unit Tests for library to parse and write Valve KeyValue formats</Description>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>../ValveKeyValue/ValveKeyValue.snk</AssemblyOriginatorKeyFile>
-    <Nullable>disable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Test Data\**\*.txt" />

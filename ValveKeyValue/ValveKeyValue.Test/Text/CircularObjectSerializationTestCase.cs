@@ -55,9 +55,9 @@ namespace ValveKeyValue.Test
 
         class DataObject
         {
-            public string Name { get; set; }
+            public required string Name { get; set; }
 
-            public DataObject Other { get; set; }
+            public DataObject? Other { get; set; }
         }
 
         internal class DataObjectWithList

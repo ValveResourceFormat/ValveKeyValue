@@ -8,7 +8,7 @@ namespace ValveKeyValue.Test
         public void DeserializeWithNullStream(KVSerializationFormat format)
         {
             Assert.That(
-                () => KVSerializer.Create(format).Deserialize(stream: null),
+                () => KVSerializer.Create(format).Deserialize(stream: null!),
                 Throws.Exception.TypeOf<ArgumentNullException>()
                 .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("stream"));
         }

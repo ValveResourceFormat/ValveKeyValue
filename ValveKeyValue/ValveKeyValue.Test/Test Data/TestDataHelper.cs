@@ -19,7 +19,7 @@ namespace ValveKeyValue.Test
             using (var stream = OpenResource(name))
             using (var reader = new StreamReader(stream))
             {
-                string line;
+                string? line;
                 while ((line = reader.ReadLine()) != null)
                 {
                     builder.Append(line);

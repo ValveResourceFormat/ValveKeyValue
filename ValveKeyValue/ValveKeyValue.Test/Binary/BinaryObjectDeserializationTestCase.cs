@@ -81,10 +81,10 @@ namespace ValveKeyValue.Test
         class TestObject
         {
             [KVProperty("key")]
-            public string StringValue { get; set; }
+            public required string StringValue { get; set; }
 
             [KVProperty("key_utf8")]
-            public string StringUtf8Value { get; set; }
+            public required string StringUtf8Value { get; set; }
 
             [KVProperty("int")]
             public int TheIntegerValue { get; set; }

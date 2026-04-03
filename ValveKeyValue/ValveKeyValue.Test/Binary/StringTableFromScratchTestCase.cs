@@ -12,7 +12,7 @@ namespace ValveKeyValue.Test
             var kv = KVObject.ListCollection();
             kv.Add("key", "value");
             kv.Add("child", child);
-            var doc = new KVDocument(null, "root", kv);
+            var doc = new KVDocument(null!, "root", kv);
 
             var stringTable = new StringTable();
 

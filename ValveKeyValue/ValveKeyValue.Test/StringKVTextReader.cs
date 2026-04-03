@@ -9,13 +9,13 @@ namespace ValveKeyValue.Test
 
         readonly KVSerializer serializer;
 
-        KVObject IKVTextReader.Read(string resourceName, KVSerializerOptions options)
+        KVObject IKVTextReader.Read(string resourceName, KVSerializerOptions? options)
         {
             var text = TestDataHelper.ReadTextResource(resourceName);
             return serializer.Deserialize(text, options);
         }
 
-        T IKVTextReader.Read<T>(string resourceName, KVSerializerOptions options)
+        T IKVTextReader.Read<T>(string resourceName, KVSerializerOptions? options)
         {
             var text = TestDataHelper.ReadTextResource(resourceName);
             return serializer.Deserialize<T>(text, options);

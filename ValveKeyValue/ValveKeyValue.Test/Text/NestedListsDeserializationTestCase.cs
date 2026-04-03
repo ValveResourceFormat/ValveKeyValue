@@ -29,7 +29,7 @@ namespace ValveKeyValue.Test
 
         class DataObject
         {
-            public List<List<string>> Values { get; set; }
+            public required List<List<string>> Values { get; set; }
         }
     }
 }

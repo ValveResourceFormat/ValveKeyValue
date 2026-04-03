@@ -163,7 +163,7 @@ namespace ValveKeyValue.Test
             var root = KVObject.ListCollection();
             root.Add("key1", "value1");
             root.Add("key2", "value2");
-            var doc = new KVDocument(null, "Config", root);
+            var doc = new KVDocument(null!, "Config", root);
 
             var result = RoundTripKV1(doc);
 
@@ -182,7 +182,7 @@ namespace ValveKeyValue.Test
             var root = KVObject.ListCollection();
             root.Add("existing", "yes");
             root.Add("added", "dynamically");
-            var doc = new KVDocument(null, "root", root);
+            var doc = new KVDocument(null!, "root", root);
 
             var result = RoundTripKV3(doc);
 
