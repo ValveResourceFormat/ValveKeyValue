@@ -120,6 +120,26 @@ namespace ValveKeyValue.Test
                 Throws.InstanceOf<InvalidOperationException>());
         }
 
+        [Test]
+        public void RemoveFromScalarThrowsInvalidOperationException()
+        {
+            var obj = new KVObject("hello");
+
+            Assert.That(
+                () => obj.Remove("child"),
+                Throws.InstanceOf<InvalidOperationException>());
+        }
+
+        [Test]
+        public void ClearOnScalarThrowsInvalidOperationException()
+        {
+            var obj = new KVObject("hello");
+
+            Assert.That(
+                () => obj.Clear(),
+                Throws.InstanceOf<InvalidOperationException>());
+        }
+
         #endregion
 
         #region Add(KVObject) to non-array throws
@@ -601,23 +621,23 @@ namespace ValveKeyValue.Test
 
         #endregion
 
-        #region Remove on scalar and array returns false
+        #region Remove on scalar and array throws
 
         [Test]
-        public void RemoveOnScalarReturnsFalse()
+        public void RemoveOnScalarThrows()
         {
             var obj = new KVObject("hello");
 
-            Assert.That(obj.Remove("anything"), Is.False);
+            Assert.That(() => obj.Remove("anything"), Throws.InstanceOf<InvalidOperationException>());
         }
 
         [Test]
-        public void RemoveOnArrayReturnsFalse()
+        public void RemoveOnArrayThrows()
         {
             var arr = KVObject.Array();
             arr.Add(1);
 
-            Assert.That(arr.Remove("anything"), Is.False);
+            Assert.That(() => arr.Remove("anything"), Throws.InstanceOf<InvalidOperationException>());
         }
 
         #endregion
@@ -659,17 +679,14 @@ namespace ValveKeyValue.Test
 
         #endregion
 
-        #region Clear on scalar is no-op
+        #region Clear on scalar throws
 
         [Test]
-        public void ClearOnScalarIsNoOp()
+        public void ClearOnScalarThrows()
         {
             var obj = new KVObject(42);
 
-            obj.Clear();
-
-            Assert.That((int)obj, Is.EqualTo(42));
-            Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Int32));
+            Assert.That(() => obj.Clear(), Throws.InstanceOf<InvalidOperationException>());
         }
 
         #endregion

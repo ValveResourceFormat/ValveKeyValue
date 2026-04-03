@@ -342,7 +342,7 @@ namespace ValveKeyValue
                 Dictionary<string, KVObject> dict => dict.Remove(key),
                 // RemoveAll: removes all entries with this key, not just the first (list-backed collections allow duplicate keys)
                 List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection => list.RemoveAll(c => c.Key == key) > 0,
-                _ => false,
+                _ => throw new InvalidOperationException($"Cannot remove a named child from a {ValueType} value."),
             };
         }
 
@@ -375,6 +375,8 @@ namespace ValveKeyValue
                 case List<KVObject> list when ValueType == KVValueType.Array:
                     list.Clear();
                     break;
+                default:
+                    throw new InvalidOperationException($"Cannot clear a {ValueType} value.");
             }
         }
 
