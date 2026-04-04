@@ -37,8 +37,8 @@ public class ValveKeyValue.KVDocument
     public .ctor(ValveKeyValue.KVHeader header, string name, ValveKeyValue.KVObject root);
     public void Add(string key, ValveKeyValue.KVObject value);
     public void Add(ValveKeyValue.KVObject value);
+    public Span`1[[ValveKeyValue.KVObject]] AsArraySpan();
     public byte[] AsBlob();
-    public ReadOnlySpan`1[[byte]] AsSpan();
     public void Clear();
     public bool ContainsKey(string name);
     public bool Equals(object obj);
@@ -169,8 +169,8 @@ public class ValveKeyValue.KVObject
     public static ValveKeyValue.KVObject Array();
     public static ValveKeyValue.KVObject Array(int capacity);
     public static ValveKeyValue.KVObject Array(System.Collections.Generic.IEnumerable`1[[ValveKeyValue.KVObject]] elements);
+    public Span`1[[ValveKeyValue.KVObject]] AsArraySpan();
     public byte[] AsBlob();
-    public ReadOnlySpan`1[[byte]] AsSpan();
     public static ValveKeyValue.KVObject Blob(byte[] data);
     public void Clear();
     public static ValveKeyValue.KVObject Collection();

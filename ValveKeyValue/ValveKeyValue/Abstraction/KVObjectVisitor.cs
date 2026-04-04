@@ -30,7 +30,7 @@ namespace ValveKeyValue.Abstraction
                     break;
 
                 case KVValueType.Array:
-                    var arrayList = obj.GetArrayList();
+                    var arrayList = obj.AsArraySpan();
                     var allSimple = true;
                     foreach (var element in arrayList)
                     {
@@ -40,7 +40,7 @@ namespace ValveKeyValue.Abstraction
                             break;
                         }
                     }
-                    listener.OnArrayStart(name, obj.Flag, arrayList.Count, allSimple);
+                    listener.OnArrayStart(name, obj.Flag, arrayList.Length, allSimple);
                     foreach (var element in arrayList)
                     {
                         VisitObject(null, element, true);

@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace ValveKeyValue
 {
@@ -55,7 +56,7 @@ namespace ValveKeyValue
         public int Count => ValueType switch
         {
             KVValueType.Collection => GetCollectionCount(),
-            KVValueType.Array => GetArrayList().Count,
+            KVValueType.Array => ((List<KVObject>)_ref!).Count,
             _ => 0,
         };
 
@@ -223,10 +224,11 @@ namespace ValveKeyValue
             {
                 if (ValueType == KVValueType.Array)
                 {
-                    return GetArrayList()[index];
+                    var listArray = (List<KVObject>)_ref!;
+                    return listArray[index];
                 }
 
-                if (_ref is List<KeyValuePair<string, KVObject>> list && ValueType == KVValueType.Collection)
+                if (ValueType == KVValueType.Collection && _ref is List<KeyValuePair<string, KVObject>> list)
                 {
                     return list[index].Value;
                 }
@@ -280,7 +282,7 @@ namespace ValveKeyValue
         /// </summary>
         public IEnumerable<KeyValuePair<string, KVObject>> Children => ValueType switch
         {
-            KVValueType.Collection => GetCollectionChildren(),
+            KVValueType.Collection => EnumerateCollection(),
             KVValueType.Array => EnumerateArray(),
             _ => [],
         };
@@ -345,7 +347,8 @@ namespace ValveKeyValue
                 throw new InvalidOperationException($"Cannot add an array element to a {ValueType} value.");
             }
 
-            GetArrayList().Add(value ?? Null());
+            var list = (List<KVObject>)_ref!;
+            list.Add(value ?? Null());
         }
 
         /// <summary>
@@ -374,7 +377,8 @@ namespace ValveKeyValue
                 throw new InvalidOperationException($"Cannot remove by index from a {ValueType} value.");
             }
 
-            GetArrayList().RemoveAt(index);
+            var list = (List<KVObject>)_ref!;
+            list.RemoveAt(index);
         }
 
         /// <summary>
@@ -492,7 +496,7 @@ namespace ValveKeyValue
 
         #endregion
 
-        #region Blob access
+        #region Blob and list access
 
         /// <summary>Gets the binary blob data as a byte array.</summary>
         public byte[] AsBlob()
@@ -505,23 +509,16 @@ namespace ValveKeyValue
             return (byte[])_ref!;
         }
 
-        /// <summary>Gets the binary blob data as a span.</summary>
-        public ReadOnlySpan<byte> AsSpan()
+        /// <summary>Gets the array elements as a span.</summary>
+        public Span<KVObject> AsArraySpan()
         {
-            if (ValueType != KVValueType.BinaryBlob)
+            if (ValueType != KVValueType.Array)
             {
-                throw new InvalidOperationException($"Cannot get blob span from a {ValueType} value.");
+                throw new InvalidOperationException($"Cannot get list from a {ValueType} value.");
             }
 
-            return ((byte[])_ref!).AsSpan();
+            return CollectionsMarshal.AsSpan((List<KVObject>)_ref!);
         }
-
-        #endregion
-
-        #region Internal accessors
-
-        internal List<KVObject> GetArrayList()
-            => (List<KVObject>)_ref!;
 
         #endregion
 
@@ -593,7 +590,7 @@ namespace ValveKeyValue
             _ => 0,
         };
 
-        private IEnumerable<KeyValuePair<string, KVObject>> GetCollectionChildren() => _ref switch
+        private IEnumerable<KeyValuePair<string, KVObject>> EnumerateCollection() => _ref switch
         {
             Dictionary<string, KVObject> dict => dict,
             List<KeyValuePair<string, KVObject>> list => list,
@@ -602,10 +599,10 @@ namespace ValveKeyValue
 
         private IEnumerable<KeyValuePair<string, KVObject>> EnumerateArray()
         {
-            var list = GetArrayList();
-            for (var i = 0; i < list.Count; i++)
+            var list = (List<KVObject>)_ref!;
+            foreach (var item in list)
             {
-                yield return new KeyValuePair<string, KVObject>(null!, list[i]);
+                yield return new KeyValuePair<string, KVObject>(null!, item);
             }
         }
 
@@ -628,8 +625,8 @@ namespace ValveKeyValue
         {
             KVValueType.String => $"\"{_ref}\"",
             KVValueType.Null => "null",
-            KVValueType.Collection => $"Collection ({GetCollectionCount()} items)",
-            KVValueType.Array => $"Array ({GetArrayList().Count} items)",
+            KVValueType.Collection => $"Collection ({Count} items)",
+            KVValueType.Array => $"Array ({Count} items)",
             _ => $"{ToString(CultureInfo.InvariantCulture)} ({ValueType})",
         };
 

@@ -271,19 +271,24 @@ namespace ValveKeyValue
         private string FormatBlob()
         {
             var bytes = ((byte[])_ref!).AsSpan();
-            var builder = new StringBuilder(bytes.Length * 3);
+
+            if (bytes.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            var builder = new StringBuilder(bytes.Length * 3 - 1);
 
             for (var i = 0; i < bytes.Length; i++)
             {
+                if (i > 0)
+                {
+                    builder.Append(' ');
+                }
+
                 var b = bytes[i];
                 builder.Append(HexStringHelper.HexToCharUpper(b >> 4));
                 builder.Append(HexStringHelper.HexToCharUpper(b));
-                builder.Append(' ');
-            }
-
-            if (builder.Length > 1)
-            {
-                builder.Length -= 1;
             }
 
             return builder.ToString();

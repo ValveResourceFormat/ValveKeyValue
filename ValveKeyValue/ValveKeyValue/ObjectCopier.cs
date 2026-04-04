@@ -52,7 +52,7 @@ namespace ValveKeyValue
             }
             else if (keyValueObject.ValueType == KVValueType.Array)
             {
-                var arrayValues = keyValueObject.GetArrayList().Select(c => (object)c).ToArray();
+                var arrayValues = keyValueObject.Values.Select(c => (object)c).ToArray();
                 if (ConstructTypedEnumerable(typeof(TObject), arrayValues, reflector, out var enumerable))
                 {
                     return (TObject)enumerable;

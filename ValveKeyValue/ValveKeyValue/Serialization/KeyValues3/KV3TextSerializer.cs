@@ -304,7 +304,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
 
         void WriteBinaryBlob(KVObject value)
         {
-            var bytes = value.AsSpan();
+            var bytes = value.AsBlob();
 
             if (bytes.Length <= 32)
             {

@@ -132,13 +132,13 @@ namespace ValveKeyValue.Test.TextKV3
 
             var blob32 = data2["blob32"];
             Assert.That(blob32.AsBlob().Length, Is.EqualTo(32));
-            Assert.That(blob32.AsSpan()[0], Is.EqualTo(0x00));
-            Assert.That(blob32.AsSpan()[31], Is.EqualTo(0x1F));
+            Assert.That(blob32.AsBlob()[0], Is.EqualTo(0x00));
+            Assert.That(blob32.AsBlob()[31], Is.EqualTo(0x1F));
 
             var blob100 = data2["blob100"];
             Assert.That(blob100.AsBlob().Length, Is.EqualTo(100));
-            Assert.That(blob100.AsSpan()[0], Is.EqualTo(0x00));
-            Assert.That(blob100.AsSpan()[99], Is.EqualTo(0x63));
+            Assert.That(blob100.AsBlob()[0], Is.EqualTo(0x00));
+            Assert.That(blob100.AsBlob()[99], Is.EqualTo(0x63));
         }
 
         [Test]
@@ -345,8 +345,8 @@ namespace ValveKeyValue.Test.TextKV3
                 Assert.That(data2["small"].AsBlob(), Is.EqualTo(new byte[] { 0x11, 0xFF }));
                 var exact32 = data2["exact32"];
                 Assert.That(exact32.AsBlob().Length, Is.EqualTo(32));
-                Assert.That(exact32.AsSpan()[0], Is.EqualTo(0x00));
-                Assert.That(exact32.AsSpan()[31], Is.EqualTo(0x1F));
+                Assert.That(exact32.AsBlob()[0], Is.EqualTo(0x00));
+                Assert.That(exact32.AsBlob()[31], Is.EqualTo(0x1F));
             });
         }
 
