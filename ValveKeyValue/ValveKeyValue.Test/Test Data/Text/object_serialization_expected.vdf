@@ -1,0 +1,16 @@
+"test data"
+{
+	"0"
+	{
+		"Name"	"Dota 2"
+		"Developer"	"Valve Software"
+		"description"	"Dota 2 is a complex game where you get sworn at
+in Russian all the time."
+	}
+	"1"
+	{
+		"Name"	"Team Fortress 2"
+		"Developer"	"Valve Software"
+		"description"	"Known as \"America's #1 war-themed hat simulator\", this game lets you wear stupid items while killing people."
+	}
+}

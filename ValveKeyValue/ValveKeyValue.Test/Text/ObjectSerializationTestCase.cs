@@ -33,7 +33,7 @@ namespace ValveKeyValue.Test
                 text = reader.ReadToEnd();
             }
 
-            var expected = TestDataHelper.ReadTextResource("Text.serialization_expected.vdf");
+            var expected = TestDataHelper.ReadTextResource("Text.object_serialization_expected.vdf");
             Assert.That(text, Is.EqualTo(expected));
         }
 
