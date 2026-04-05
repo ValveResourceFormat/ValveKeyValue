@@ -82,14 +82,14 @@ namespace ValveKeyValue.Test.TextKV3
 
             var data2 = RoundTrip(kv, data);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That((string)data2["newline"], Is.EqualTo("hello\nworld"));
                 Assert.That((string)data2["tab"], Is.EqualTo("hello\tworld"));
                 Assert.That((string)data2["backslash"], Is.EqualTo("hello\\world"));
                 Assert.That((string)data2["quote"], Is.EqualTo("hello\"world"));
                 Assert.That((string)data2["combined"], Is.EqualTo("line1\nline2\ttab\\slash\"quote"));
-            });
+            }
         }
 
         [Test]
@@ -101,11 +101,11 @@ namespace ValveKeyValue.Test.TextKV3
 
             var data2 = RoundTrip(kv, data).Root;
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(data2["name"].Flag, Is.EqualTo(KVFlag.EntityName));
                 Assert.That((string)data2["name"], Is.EqualTo("some_entity"));
-            });
+            }
         }
 
         [Test]
@@ -131,8 +131,11 @@ namespace ValveKeyValue.Test.TextKV3
 
             using var arrayStream = TestDataHelper.OpenResource("TextKV3.root_array.kv3");
             var arrayData = RoundTrip(kv, kv.Deserialize(arrayStream)).Root;
-            Assert.That(arrayData.ValueType, Is.EqualTo(KVValueType.Array));
-            Assert.That(arrayData[0].ToString(CultureInfo.InvariantCulture), Is.EqualTo("a"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(arrayData.ValueType, Is.EqualTo(KVValueType.Array));
+                Assert.That(arrayData[0].ToString(CultureInfo.InvariantCulture), Is.EqualTo("a"));
+            }
         }
 
         [Test]
@@ -192,8 +195,11 @@ namespace ValveKeyValue.Test.TextKV3
             Assert.That(text, Does.Contain("12345"));
 
             var data2 = kv.Deserialize(text).Root;
-            Assert.That((int)data2["ptr"], Is.EqualTo(12345));
-            Assert.That(data2["ptr"].ValueType, Is.EqualTo(KVValueType.UInt64));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That((int)data2["ptr"], Is.EqualTo(12345));
+                Assert.That(data2["ptr"].ValueType, Is.EqualTo(KVValueType.UInt64));
+            }
         }
 
         [Test]
@@ -207,11 +213,11 @@ namespace ValveKeyValue.Test.TextKV3
 
             var data2 = RoundTrip(kv, doc).Root;
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That((int)data2["i16"], Is.EqualTo(-42));
                 Assert.That((int)data2["u16"], Is.EqualTo(60000));
-            });
+            }
         }
 
         static KVDocument RoundTrip(KVSerializer kv, KVDocument data)

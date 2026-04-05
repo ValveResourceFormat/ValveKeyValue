@@ -40,16 +40,26 @@ namespace ValveKeyValue.Test
             Assert.That(rootObject.Numbers, Is.InstanceOf<TDictionary>());
             Assert.That(rootObject.Numbers, Has.Count.EqualTo(3));
             Assert.That(rootObject.Numbers["0"], Is.Not.Null);
-            Assert.That(rootObject.Numbers["0"].Name, Is.EqualTo("zero"));
-            Assert.That(rootObject.Numbers["0"].Value, Is.EqualTo("nothing"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(rootObject.Numbers["0"].Name, Is.EqualTo("zero"));
+                Assert.That(rootObject.Numbers["0"].Value, Is.EqualTo("nothing"));
 
-            Assert.That(rootObject.Numbers["1"], Is.Not.Null);
-            Assert.That(rootObject.Numbers["1"].Name, Is.EqualTo("one"));
-            Assert.That(rootObject.Numbers["1"].Value, Is.EqualTo("a bit"));
+                Assert.That(rootObject.Numbers["1"], Is.Not.Null);
+            }
 
-            Assert.That(rootObject.Numbers["2"], Is.Not.Null);
-            Assert.That(rootObject.Numbers["2"].Name, Is.EqualTo("two"));
-            Assert.That(rootObject.Numbers["2"].Value, Is.EqualTo("a bit more"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(rootObject.Numbers["1"].Name, Is.EqualTo("one"));
+                Assert.That(rootObject.Numbers["1"].Value, Is.EqualTo("a bit"));
+
+                Assert.That(rootObject.Numbers["2"], Is.Not.Null);
+            }
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(rootObject.Numbers["2"].Name, Is.EqualTo("two"));
+                Assert.That(rootObject.Numbers["2"].Value, Is.EqualTo("a bit more"));
+            }
         }
     }
 
@@ -73,16 +83,26 @@ namespace ValveKeyValue.Test
             Assert.That(rootObject.Numbers, Is.InstanceOf<TDictionary>());
             Assert.That(rootObject.Numbers, Has.Count.EqualTo(3));
             Assert.That(rootObject.Numbers["0"], Is.Not.Null);
-            Assert.That(rootObject.Numbers["0"].Name, Is.EqualTo("zero"));
-            Assert.That(rootObject.Numbers["0"].Value, Is.EqualTo("nothing"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(rootObject.Numbers["0"].Name, Is.EqualTo("zero"));
+                Assert.That(rootObject.Numbers["0"].Value, Is.EqualTo("nothing"));
 
-            Assert.That(rootObject.Numbers["1"], Is.Not.Null);
-            Assert.That(rootObject.Numbers["1"].Name, Is.EqualTo("one"));
-            Assert.That(rootObject.Numbers["1"].Value, Is.EqualTo("a bit"));
+                Assert.That(rootObject.Numbers["1"], Is.Not.Null);
+            }
 
-            Assert.That(rootObject.Numbers["2"], Is.Not.Null);
-            Assert.That(rootObject.Numbers["2"].Name, Is.EqualTo("two"));
-            Assert.That(rootObject.Numbers["2"].Value, Is.EqualTo("a bit more"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(rootObject.Numbers["1"].Name, Is.EqualTo("one"));
+                Assert.That(rootObject.Numbers["1"].Value, Is.EqualTo("a bit"));
+
+                Assert.That(rootObject.Numbers["2"], Is.Not.Null);
+            }
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(rootObject.Numbers["2"].Name, Is.EqualTo("two"));
+                Assert.That(rootObject.Numbers["2"].Value, Is.EqualTo("a bit more"));
+            }
         }
     }
 
@@ -110,16 +130,26 @@ namespace ValveKeyValue.Test
             Assert.That(numbers, Has.Length.EqualTo(3));
 
             Assert.That(numbers[0], Is.Not.Null);
-            Assert.That(numbers[0].Name, Is.EqualTo("zero"));
-            Assert.That(numbers[0].Value, Is.EqualTo("nothing"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(numbers[0].Name, Is.EqualTo("zero"));
+                Assert.That(numbers[0].Value, Is.EqualTo("nothing"));
 
-            Assert.That(numbers[1], Is.Not.Null);
-            Assert.That(numbers[1].Name, Is.EqualTo("one"));
-            Assert.That(numbers[1].Value, Is.EqualTo("a bit"));
+                Assert.That(numbers[1], Is.Not.Null);
+            }
 
-            Assert.That(numbers[2], Is.Not.Null);
-            Assert.That(numbers[2].Name, Is.EqualTo("two"));
-            Assert.That(numbers[2].Value, Is.EqualTo("a bit more"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(numbers[1].Name, Is.EqualTo("one"));
+                Assert.That(numbers[1].Value, Is.EqualTo("a bit"));
+
+                Assert.That(numbers[2], Is.Not.Null);
+            }
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(numbers[2].Name, Is.EqualTo("two"));
+                Assert.That(numbers[2].Value, Is.EqualTo("a bit more"));
+            }
         }
     }
 }

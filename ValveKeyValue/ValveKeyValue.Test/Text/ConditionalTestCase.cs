@@ -98,8 +98,11 @@ namespace ValveKeyValue.Test
 
             var children = data.Children.ToArray();
             Assert.That(children, Has.Length.EqualTo(1));
-            Assert.That(children[0].Key, Is.EqualTo("operating system [$WIN32]"));
-            Assert.That((string)children[0].Value, Is.EqualTo("windows 32-bit"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(children[0].Key, Is.EqualTo("operating system [$WIN32]"));
+                Assert.That((string)children[0].Value, Is.EqualTo("windows 32-bit"));
+            }
         }
 
         [Test]
@@ -118,8 +121,11 @@ namespace ValveKeyValue.Test
 
             children = data.Children.ToArray();
             Assert.That(children, Has.Length.EqualTo(1));
-            Assert.That(children[0].Key, Is.EqualTo("operating system"));
-            Assert.That((string)children[0].Value, Is.EqualTo("windows 32-bit"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(children[0].Key, Is.EqualTo("operating system"));
+                Assert.That((string)children[0].Value, Is.EqualTo("windows 32-bit"));
+            }
         }
 
         [Test]
@@ -138,8 +144,11 @@ namespace ValveKeyValue.Test
 
             children = data.Children.ToArray();
             Assert.That(children, Has.Length.EqualTo(1));
-            Assert.That(children[0].Key, Is.EqualTo("operating system"));
-            Assert.That((string)children[0].Value, Is.EqualTo("windows 32-bit"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(children[0].Key, Is.EqualTo("operating system"));
+                Assert.That((string)children[0].Value, Is.EqualTo("windows 32-bit"));
+            }
         }
 
         [Test]
@@ -153,18 +162,16 @@ namespace ValveKeyValue.Test
 
         static KVObject ParseResource(string name, string[] conditions)
         {
-            using (var stream = TestDataHelper.OpenResource(name))
+            using var stream = TestDataHelper.OpenResource(name);
+            var options = new KVSerializerOptions();
+            options.Conditions.Clear();
+
+            foreach (var c in conditions)
             {
-                var options = new KVSerializerOptions();
-                options.Conditions.Clear();
-
-                foreach (var c in conditions)
-                {
-                    options.Conditions.Add(c);
-                }
-
-                return KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream, options).Root;
+                options.Conditions.Add(c);
             }
+
+            return KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream, options).Root;
         }
     }
 }

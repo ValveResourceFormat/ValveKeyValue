@@ -10,8 +10,11 @@ namespace ValveKeyValue.Test
             using var stream = TestDataHelper.OpenResource("Text.nullable_types.vdf");
             var obj = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<NullableObject>(stream);
 
-            Assert.That(obj.Name, Is.EqualTo("TestName"));
-            Assert.That(obj.Description, Is.EqualTo("TestDescription"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.Name, Is.EqualTo("TestName"));
+                Assert.That(obj.Description, Is.EqualTo("TestDescription"));
+            }
         }
 
         [Test]
@@ -31,9 +34,12 @@ namespace ValveKeyValue.Test
 
             Assert.That(obj.Numbers, Is.Not.Null);
             Assert.That(obj.Numbers, Has.Count.EqualTo(3));
-            Assert.That(obj.Numbers![0], Is.EqualTo(1));
-            Assert.That(obj.Numbers[1], Is.EqualTo(2));
-            Assert.That(obj.Numbers[2], Is.EqualTo(3));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.Numbers![0], Is.EqualTo(1));
+                Assert.That(obj.Numbers[1], Is.EqualTo(2));
+                Assert.That(obj.Numbers[2], Is.EqualTo(3));
+            }
         }
 
         #endregion
@@ -78,9 +84,12 @@ namespace ValveKeyValue.Test
             var vdf = "\"object\"\n{\n\t\"Name\"\t\"hello\"\n}";
             var obj = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<RequiredObject>(vdf);
 
-            // required is bypassed by GetUninitializedObject - property stays at default
-            Assert.That(obj.RequiredName, Is.Null);
-            Assert.That(obj.Name, Is.EqualTo("hello"));
+            using (Assert.EnterMultipleScope())
+            {
+                // required is bypassed by GetUninitializedObject - property stays at default
+                Assert.That(obj.RequiredName, Is.Null);
+                Assert.That(obj.Name, Is.EqualTo("hello"));
+            }
         }
 
         #endregion
@@ -94,11 +103,14 @@ namespace ValveKeyValue.Test
             var vdf = "\"object\"\n{\n\t\"Name\"\t\"hello\"\n}";
             var obj = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<NonNullableObject>(vdf);
 
-            Assert.That(obj.Name, Is.EqualTo("hello"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.Name, Is.EqualTo("hello"));
 
-            // GetUninitializedObject zeroes all memory, so non-nullable string is null
-            // This violates the non-nullable contract silently
-            Assert.That(obj.Title, Is.Null);
+                // GetUninitializedObject zeroes all memory, so non-nullable string is null
+                // This violates the non-nullable contract silently
+                Assert.That(obj.Title, Is.Null);
+            }
         }
 
         [Test]
@@ -108,7 +120,7 @@ namespace ValveKeyValue.Test
             var obj = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<NonNullableObject>(vdf);
 
             // Non-nullable int defaults to 0 when missing
-            Assert.That(obj.Count, Is.EqualTo(0));
+            Assert.That(obj, Is.Empty);
         }
 
         #endregion
@@ -211,12 +223,15 @@ namespace ValveKeyValue.Test
             ms.Seek(0, SeekOrigin.Begin);
             var deserialized = serializer.Deserialize<NullableObject>(ms);
 
-            Assert.That(deserialized.Name, Is.EqualTo("RoundTrip"));
-            Assert.That(deserialized.Age, Is.EqualTo(99));
-            Assert.That(deserialized.Numbers, Has.Count.EqualTo(3));
-            Assert.That(deserialized.Description, Is.Null);
-            Assert.That(deserialized.MissingInt, Is.Null);
-            Assert.That(deserialized.MissingList, Is.Null);
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(deserialized.Name, Is.EqualTo("RoundTrip"));
+                Assert.That(deserialized.Age, Is.EqualTo(99));
+                Assert.That(deserialized.Numbers, Has.Count.EqualTo(3));
+                Assert.That(deserialized.Description, Is.Null);
+                Assert.That(deserialized.MissingInt, Is.Null);
+                Assert.That(deserialized.MissingList, Is.Null);
+            }
         }
 
         #endregion

@@ -12,16 +12,22 @@ namespace ValveKeyValue.Test
         public void ShortConstructorPreservesType()
         {
             var obj = new KVObject((short)42);
-            Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Int16));
-            Assert.That((short)obj, Is.EqualTo((short)42));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Int16));
+                Assert.That((short)obj, Is.EqualTo((short)42));
+            }
         }
 
         [Test]
         public void UShortConstructorPreservesType()
         {
             var obj = new KVObject((ushort)42);
-            Assert.That(obj.ValueType, Is.EqualTo(KVValueType.UInt16));
-            Assert.That((ushort)obj, Is.EqualTo((ushort)42));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.ValueType, Is.EqualTo(KVValueType.UInt16));
+                Assert.That((ushort)obj, Is.EqualTo((ushort)42));
+            }
         }
 
         [Test]
@@ -29,8 +35,11 @@ namespace ValveKeyValue.Test
         {
             var fromCtor = new KVObject((short)-100);
             KVObject fromOp = (short)-100;
-            Assert.That(fromCtor.ValueType, Is.EqualTo(fromOp.ValueType));
-            Assert.That((short)fromCtor, Is.EqualTo((short)fromOp));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(fromCtor.ValueType, Is.EqualTo(fromOp.ValueType));
+                Assert.That((short)fromCtor, Is.EqualTo((short)fromOp));
+            }
         }
 
         [Test]
@@ -38,8 +47,11 @@ namespace ValveKeyValue.Test
         {
             var fromCtor = new KVObject((ushort)500);
             KVObject fromOp = (ushort)500;
-            Assert.That(fromCtor.ValueType, Is.EqualTo(fromOp.ValueType));
-            Assert.That((ushort)fromCtor, Is.EqualTo((ushort)fromOp));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(fromCtor.ValueType, Is.EqualTo(fromOp.ValueType));
+                Assert.That((ushort)fromCtor, Is.EqualTo((ushort)fromOp));
+            }
         }
 
         #endregion
@@ -110,24 +122,33 @@ namespace ValveKeyValue.Test
         public void ImplicitShortToKVObject()
         {
             KVObject v = (short)42;
-            Assert.That(v.ValueType, Is.EqualTo(KVValueType.Int16));
-            Assert.That((short)v, Is.EqualTo((short)42));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(v.ValueType, Is.EqualTo(KVValueType.Int16));
+                Assert.That((short)v, Is.EqualTo((short)42));
+            }
         }
 
         [Test]
         public void ImplicitUShortToKVObject()
         {
             KVObject v = (ushort)42;
-            Assert.That(v.ValueType, Is.EqualTo(KVValueType.UInt16));
-            Assert.That((ushort)v, Is.EqualTo((ushort)42));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(v.ValueType, Is.EqualTo(KVValueType.UInt16));
+                Assert.That((ushort)v, Is.EqualTo((ushort)42));
+            }
         }
 
         [Test]
         public void ImplicitIntPtrToKVObject()
         {
             KVObject v = new IntPtr(42);
-            Assert.That(v.ValueType, Is.EqualTo(KVValueType.Pointer));
-            Assert.That((int)v, Is.EqualTo(42));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(v.ValueType, Is.EqualTo(KVValueType.Pointer));
+                Assert.That((int)v, Is.EqualTo(42));
+            }
         }
 
         #endregion
@@ -208,8 +229,11 @@ namespace ValveKeyValue.Test
         public void ImplicitByteArrayToKVObject()
         {
             KVObject v = new byte[] { 1, 2, 3 };
-            Assert.That(v.ValueType, Is.EqualTo(KVValueType.BinaryBlob));
-            Assert.That(v.AsBlob(), Is.EqualTo(new byte[] { 1, 2, 3 }));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(v.ValueType, Is.EqualTo(KVValueType.BinaryBlob));
+                Assert.That(v.AsBlob(), Is.EqualTo(new byte[] { 1, 2, 3 }));
+            }
         }
 
         [Test]
@@ -226,8 +250,11 @@ namespace ValveKeyValue.Test
         public void KVObjectBlobFactory()
         {
             var obj = KVObject.Blob(new byte[] { 0xAB, 0xCD });
-            Assert.That(obj.ValueType, Is.EqualTo(KVValueType.BinaryBlob));
-            Assert.That(obj.AsBlob(), Is.EqualTo(new byte[] { 0xAB, 0xCD }));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.ValueType, Is.EqualTo(KVValueType.BinaryBlob));
+                Assert.That(obj.AsBlob(), Is.EqualTo(new byte[] { 0xAB, 0xCD }));
+            }
         }
 
         #endregion
@@ -292,8 +319,11 @@ namespace ValveKeyValue.Test
             root.Add("name", "world");
             root.Add("count", 7);
 
-            Assert.That(Convert.ToString(root["name"], CultureInfo.InvariantCulture), Is.EqualTo("world"));
-            Assert.That(Convert.ToInt32(root["count"], CultureInfo.InvariantCulture), Is.EqualTo(7));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(Convert.ToString(root["name"], CultureInfo.InvariantCulture), Is.EqualTo("world"));
+                Assert.That(Convert.ToInt32(root["count"], CultureInfo.InvariantCulture), Is.EqualTo(7));
+            }
         }
 
         [Test]
@@ -316,26 +346,35 @@ namespace ValveKeyValue.Test
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(kv3Text));
             var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream).Root;
 
-            // Verify initial state
-            Assert.That(data.ContainsKey("key1"), Is.True);
-            Assert.That((string)data["key1"], Is.EqualTo("value1"));
-            Assert.That((int)data["key2"], Is.EqualTo(42));
-            Assert.That(data.Count, Is.EqualTo(2));
+            using (Assert.EnterMultipleScope())
+            {
+                // Verify initial state
+                Assert.That(data.ContainsKey("key1"), Is.True);
+                Assert.That((string)data["key1"], Is.EqualTo("value1"));
+                Assert.That((int)data["key2"], Is.EqualTo(42));
+                Assert.That(data, Has.Count.EqualTo(2));
+            }
 
             // Add puts into dict
             data.Add("key3", "value3");
-            Assert.That(data.Count, Is.EqualTo(3));
-            Assert.That((string)data["key3"], Is.EqualTo("value3"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(data, Has.Count.EqualTo(3));
+                Assert.That((string)data["key3"], Is.EqualTo("value3"));
+            }
 
             // Remove removes from dict
             var removed = data.Remove("key1");
-            Assert.That(removed, Is.True);
-            Assert.That(data.ContainsKey("key1"), Is.False);
-            Assert.That(data.Count, Is.EqualTo(2));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(removed, Is.True);
+                Assert.That(data.ContainsKey("key1"), Is.False);
+                Assert.That(data, Has.Count.EqualTo(2));
+            }
 
             // Clear empties dict
             data.Clear();
-            Assert.That(data.Count, Is.EqualTo(0));
+            Assert.That(data, Is.Empty);
         }
 
         [Test]
@@ -351,8 +390,11 @@ namespace ValveKeyValue.Test
 
             // Set new key via indexer
             data["newkey"] = 99;
-            Assert.That((int)data["newkey"], Is.EqualTo(99));
-            Assert.That(data.Count, Is.EqualTo(2));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That((int)data["newkey"], Is.EqualTo(99));
+                Assert.That(data, Has.Count.EqualTo(2));
+            }
         }
 
         [Test]
@@ -362,13 +404,16 @@ namespace ValveKeyValue.Test
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(kv3Text));
             var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream).Root;
 
-            Assert.That(data.Count, Is.EqualTo(2));
+            Assert.That(data, Has.Count.EqualTo(2));
 
             data["key1"] = null!;
 
-            Assert.That(data.Count, Is.EqualTo(2));
-            Assert.That(data["key1"].IsNull, Is.True);
-            Assert.That((int)data["key2"], Is.EqualTo(42));
+            Assert.That(data, Has.Count.EqualTo(2));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(data["key1"].IsNull, Is.True);
+                Assert.That((int)data["key2"], Is.EqualTo(42));
+            }
         }
 
         #endregion
@@ -379,18 +424,24 @@ namespace ValveKeyValue.Test
         public void ImplicitByteToKVObject()
         {
             KVObject v = (byte)255;
-            Assert.That(v.ValueType, Is.EqualTo(KVValueType.Int32));
-            Assert.That((int)v, Is.EqualTo(255));
-            Assert.That((byte)v, Is.EqualTo((byte)255));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(v.ValueType, Is.EqualTo(KVValueType.Int32));
+                Assert.That((int)v, Is.EqualTo(255));
+                Assert.That((byte)v, Is.EqualTo((byte)255));
+            }
         }
 
         [Test]
         public void ImplicitSByteToKVObject()
         {
             KVObject v = (sbyte)-42;
-            Assert.That(v.ValueType, Is.EqualTo(KVValueType.Int32));
-            Assert.That((int)v, Is.EqualTo(-42));
-            Assert.That((sbyte)v, Is.EqualTo((sbyte)-42));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(v.ValueType, Is.EqualTo(KVValueType.Int32));
+                Assert.That((int)v, Is.EqualTo(-42));
+                Assert.That((sbyte)v, Is.EqualTo((sbyte)-42));
+            }
         }
 
         [Test]
@@ -427,9 +478,12 @@ namespace ValveKeyValue.Test
 
             var keys = obj.Keys.ToList();
             Assert.That(keys, Has.Count.EqualTo(3));
-            Assert.That(keys[0], Is.EqualTo("x"));
-            Assert.That(keys[1], Is.EqualTo("y"));
-            Assert.That(keys[2], Is.EqualTo("x"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(keys[0], Is.EqualTo("x"));
+                Assert.That(keys[1], Is.EqualTo("y"));
+                Assert.That(keys[2], Is.EqualTo("x"));
+            }
         }
 
         [Test]
@@ -468,8 +522,11 @@ namespace ValveKeyValue.Test
 
             var values = obj.Values.Select(v => (string)v).ToList();
             Assert.That(values, Has.Count.EqualTo(2));
-            Assert.That(values[0], Is.EqualTo("hello"));
-            Assert.That(values[1], Is.EqualTo("world"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(values[0], Is.EqualTo("hello"));
+                Assert.That(values[1], Is.EqualTo("world"));
+            }
         }
 
         [Test]
@@ -482,9 +539,12 @@ namespace ValveKeyValue.Test
 
             var values = arr.Values.Select(v => (int)v).ToList();
             Assert.That(values, Has.Count.EqualTo(3));
-            Assert.That(values[0], Is.EqualTo(10));
-            Assert.That(values[1], Is.EqualTo(20));
-            Assert.That(values[2], Is.EqualTo(30));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(values[0], Is.EqualTo(10));
+                Assert.That(values[1], Is.EqualTo(20));
+                Assert.That(values[2], Is.EqualTo(30));
+            }
         }
 
         [Test]
@@ -511,12 +571,12 @@ namespace ValveKeyValue.Test
             KVObject t = true;
             KVObject f = false;
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That((bool)t, Is.True);
                 Assert.That((bool)f, Is.False);
                 Assert.That((int)t, Is.EqualTo(1));
-                Assert.That((int)f, Is.EqualTo(0));
+                Assert.That((int)f, Is.Zero);
                 Assert.That((long)t, Is.EqualTo(1L));
                 Assert.That((uint)t, Is.EqualTo(1U));
                 Assert.That((ulong)t, Is.EqualTo(1UL));
@@ -525,7 +585,7 @@ namespace ValveKeyValue.Test
                 Assert.That((string)t, Is.EqualTo("1"));
                 Assert.That((string)f, Is.EqualTo("0"));
                 Assert.That(t.ToDecimal(null), Is.EqualTo(1m));
-            });
+            }
         }
 
         [Test]
@@ -533,7 +593,7 @@ namespace ValveKeyValue.Test
         {
             KVObject v = (short)-42;
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That((short)v, Is.EqualTo((short)-42));
                 Assert.That((int)v, Is.EqualTo(-42));
@@ -543,7 +603,7 @@ namespace ValveKeyValue.Test
                 Assert.That((string)v, Is.EqualTo("-42"));
                 Assert.That(v.ToDecimal(null), Is.EqualTo(-42m));
                 Assert.That((bool)v, Is.True);
-            });
+            }
         }
 
         [Test]
@@ -551,7 +611,7 @@ namespace ValveKeyValue.Test
         {
             KVObject v = (ushort)60000;
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That((ushort)v, Is.EqualTo((ushort)60000));
                 Assert.That((int)v, Is.EqualTo(60000));
@@ -562,7 +622,7 @@ namespace ValveKeyValue.Test
                 Assert.That((double)v, Is.EqualTo(60000.0));
                 Assert.That((string)v, Is.EqualTo("60000"));
                 Assert.That(v.ToDecimal(null), Is.EqualTo(60000m));
-            });
+            }
         }
 
         [Test]
@@ -570,7 +630,7 @@ namespace ValveKeyValue.Test
         {
             KVObject v = -100;
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That((int)v, Is.EqualTo(-100));
                 Assert.That((long)v, Is.EqualTo(-100L));
@@ -579,7 +639,7 @@ namespace ValveKeyValue.Test
                 Assert.That((string)v, Is.EqualTo("-100"));
                 Assert.That(v.ToDecimal(null), Is.EqualTo(-100m));
                 Assert.That((bool)v, Is.True);
-            });
+            }
         }
 
         [Test]
@@ -587,7 +647,7 @@ namespace ValveKeyValue.Test
         {
             KVObject v = (uint)42;
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That((uint)v, Is.EqualTo(42U));
                 Assert.That((int)v, Is.EqualTo(42));
@@ -598,7 +658,7 @@ namespace ValveKeyValue.Test
                 Assert.That((string)v, Is.EqualTo("42"));
                 Assert.That(v.ToDecimal(null), Is.EqualTo(42m));
                 Assert.That((bool)v, Is.True);
-            });
+            }
         }
 
         [Test]
@@ -606,7 +666,7 @@ namespace ValveKeyValue.Test
         {
             KVObject v = 100_000L;
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That((long)v, Is.EqualTo(100_000L));
                 Assert.That((int)v, Is.EqualTo(100_000));
@@ -615,7 +675,7 @@ namespace ValveKeyValue.Test
                 Assert.That((string)v, Is.EqualTo("100000"));
                 Assert.That(v.ToDecimal(null), Is.EqualTo(100_000m));
                 Assert.That((ulong)v, Is.EqualTo(100_000UL));
-            });
+            }
         }
 
         [Test]
@@ -623,7 +683,7 @@ namespace ValveKeyValue.Test
         {
             KVObject v = (ulong)42;
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That((ulong)v, Is.EqualTo(42UL));
                 Assert.That((long)v, Is.EqualTo(42L));
@@ -633,7 +693,7 @@ namespace ValveKeyValue.Test
                 Assert.That((string)v, Is.EqualTo("42"));
                 Assert.That(v.ToDecimal(null), Is.EqualTo(42m));
                 Assert.That((bool)v, Is.True);
-            });
+            }
         }
 
         [Test]
@@ -641,7 +701,7 @@ namespace ValveKeyValue.Test
         {
             KVObject v = ulong.MaxValue;
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That((ulong)v, Is.EqualTo(ulong.MaxValue));
                 Assert.That((float)v, Is.EqualTo((float)ulong.MaxValue));
@@ -649,7 +709,7 @@ namespace ValveKeyValue.Test
                 Assert.That((string)v, Is.EqualTo("18446744073709551615"));
                 Assert.That(v.ToDecimal(null), Is.EqualTo((decimal)ulong.MaxValue));
                 Assert.That((bool)v, Is.True);
-            });
+            }
         }
 
         [Test]
@@ -657,7 +717,7 @@ namespace ValveKeyValue.Test
         {
             KVObject v = 3.14f;
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That((float)v, Is.EqualTo(3.14f));
                 Assert.That((double)v, Is.EqualTo(3.14f).Within(0.001));
@@ -666,7 +726,7 @@ namespace ValveKeyValue.Test
                 Assert.That(v.ToDecimal(null), Is.EqualTo(3.14m).Within(0.01m));
                 Assert.That((bool)v, Is.True);
                 Assert.That((bool)(KVObject)0.0f, Is.False);
-            });
+            }
         }
 
         [Test]
@@ -674,7 +734,7 @@ namespace ValveKeyValue.Test
         {
             KVObject v = 3.14159265;
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That((double)v, Is.EqualTo(3.14159265));
                 Assert.That((float)v, Is.EqualTo(3.14159265f).Within(0.0001f));
@@ -684,7 +744,7 @@ namespace ValveKeyValue.Test
                 Assert.That((string)v, Does.Contain("3.14159"));
                 Assert.That((bool)v, Is.True);
                 Assert.That((bool)(KVObject)0.0, Is.False);
-            });
+            }
         }
 
         [Test]
@@ -692,14 +752,14 @@ namespace ValveKeyValue.Test
         {
             KVObject v = new IntPtr(42);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That((IntPtr)v, Is.EqualTo(new IntPtr(42)));
                 Assert.That((int)v, Is.EqualTo(42));
                 Assert.That((long)v, Is.EqualTo(42L));
                 Assert.That((string)v, Is.EqualTo("42"));
                 Assert.That((bool)v, Is.True);
-            });
+            }
         }
 
         #endregion

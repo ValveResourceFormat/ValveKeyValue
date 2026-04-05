@@ -18,13 +18,19 @@ namespace ValveKeyValue.Test
 
             Assert.That(dataObject.Values[0], Is.Not.Null);
             Assert.That(dataObject.Values[0], Has.Count.EqualTo(2));
-            Assert.That(dataObject.Values[0][0], Is.EqualTo("first"));
-            Assert.That(dataObject.Values[0][1], Is.EqualTo("second"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(dataObject.Values[0][0], Is.EqualTo("first"));
+                Assert.That(dataObject.Values[0][1], Is.EqualTo("second"));
 
-            Assert.That(dataObject.Values[1], Is.Not.Null);
+                Assert.That(dataObject.Values[1], Is.Not.Null);
+            }
             Assert.That(dataObject.Values[1], Has.Count.EqualTo(2));
-            Assert.That(dataObject.Values[1][0], Is.EqualTo("third"));
-            Assert.That(dataObject.Values[1][1], Is.EqualTo("fourth"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(dataObject.Values[1][0], Is.EqualTo("third"));
+                Assert.That(dataObject.Values[1][1], Is.EqualTo("fourth"));
+            }
         }
 
         class DataObject

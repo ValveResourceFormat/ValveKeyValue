@@ -17,11 +17,11 @@ namespace ValveKeyValue.Test
 
             var data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(text.ToString());
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(data.Root.Children.Count(), Is.EqualTo(1));
                 Assert.That((string)data["test"], Is.EqualTo("hello"));
-            });
+            }
         }
     }
 }

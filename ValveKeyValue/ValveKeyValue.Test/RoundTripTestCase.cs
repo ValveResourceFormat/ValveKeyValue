@@ -56,12 +56,12 @@ namespace ValveKeyValue.Test
 
             var result = RoundTripKV1(data);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result.Name, Is.EqualTo("Root"));
                 Assert.That((string)result["name"], Is.EqualTo("modified"));
                 Assert.That((string)result["version"], Is.EqualTo("1"));
-            });
+            }
         }
 
         #endregion
@@ -81,11 +81,11 @@ namespace ValveKeyValue.Test
 
             var result = RoundTripKV3(data);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That((string)result["name"], Is.EqualTo("updated"));
                 Assert.That((long)result["count"], Is.EqualTo(42));
-            });
+            }
         }
 
         #endregion
@@ -110,17 +110,17 @@ namespace ValveKeyValue.Test
 
             var data = DeserializeKV1(input);
             var items = data["items"];
-            Assert.That(items.Count, Is.EqualTo(3));
+            Assert.That(items, Has.Count.EqualTo(3));
 
             var result = RoundTripKV1(data);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
-                Assert.That(result["items"].Count, Is.EqualTo(3));
+                Assert.That(result["items"], Has.Count.EqualTo(3));
                 Assert.That((string)result["items"]["0"], Is.EqualTo("apple"));
                 Assert.That((string)result["items"]["1"], Is.EqualTo("banana"));
                 Assert.That((string)result["items"]["2"], Is.EqualTo("cherry"));
-            });
+            }
         }
 
         #endregion
@@ -134,23 +134,26 @@ namespace ValveKeyValue.Test
 
             var data = DeserializeKV3(input);
 
-            // KV3 deserializer uses dictionary-backed collections; verify dict lookup works
-            Assert.That(data.Root.ContainsKey("alpha"), Is.True);
-            Assert.That(data.Root.ContainsKey("nonexistent"), Is.False);
+            using (Assert.EnterMultipleScope())
+            {
+                // KV3 deserializer uses dictionary-backed collections; verify dict lookup works
+                Assert.That(data.Root.ContainsKey("alpha"), Is.True);
+                Assert.That(data.Root.ContainsKey("nonexistent"), Is.False);
 
-            Assert.That((string)data["alpha"], Is.EqualTo("one"));
-            Assert.That((long)data["beta"], Is.EqualTo(2));
-            Assert.That((bool)data["gamma"], Is.True);
+                Assert.That((string)data["alpha"], Is.EqualTo("one"));
+                Assert.That((long)data["beta"], Is.EqualTo(2));
+                Assert.That((bool)data["gamma"], Is.True);
+            }
 
             var result = RoundTripKV3(data);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result.Root.ContainsKey("alpha"), Is.True);
                 Assert.That((string)result["alpha"], Is.EqualTo("one"));
                 Assert.That((long)result["beta"], Is.EqualTo(2));
                 Assert.That((bool)result["gamma"], Is.True);
-            });
+            }
         }
 
         #endregion
@@ -167,13 +170,13 @@ namespace ValveKeyValue.Test
 
             var result = RoundTripKV1(doc);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result.Name, Is.EqualTo("Config"));
-                Assert.That(result.Root.Count, Is.EqualTo(2));
+                Assert.That(result.Root, Has.Count.EqualTo(2));
                 Assert.That((string)result.Root["key1"], Is.EqualTo("value1"));
                 Assert.That((string)result.Root["key2"], Is.EqualTo("value2"));
-            });
+            }
         }
 
         [Test]
@@ -186,11 +189,11 @@ namespace ValveKeyValue.Test
 
             var result = RoundTripKV3(doc);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That((string)result["existing"], Is.EqualTo("yes"));
                 Assert.That((string)result["added"], Is.EqualTo("dynamically"));
-            });
+            }
         }
 
         #endregion
@@ -210,20 +213,20 @@ namespace ValveKeyValue.Test
                 """;
 
             var data = DeserializeKV1(input);
-            Assert.That(data.Root.Count, Is.EqualTo(3));
+            Assert.That(data.Root, Has.Count.EqualTo(3));
 
             var removed = data.Root.Remove("remove");
             Assert.That(removed, Is.True);
 
             var result = RoundTripKV1(data).Root;
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
-                Assert.That(result.Count, Is.EqualTo(2));
+                Assert.That(result, Has.Count.EqualTo(2));
                 Assert.That((string)result["keep"], Is.EqualTo("yes"));
                 Assert.That(result.ContainsKey("remove"), Is.False);
                 Assert.That((string)result["also_keep"], Is.EqualTo("yes"));
-            });
+            }
         }
 
         [Test]
@@ -232,20 +235,20 @@ namespace ValveKeyValue.Test
             var input = "<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->\n{\n\tkeep = \"yes\"\n\tremove = \"no\"\n\talso_keep = \"yes\"\n}\n";
 
             var data = DeserializeKV3(input);
-            Assert.That(data.Root.Count, Is.EqualTo(3));
+            Assert.That(data.Root, Has.Count.EqualTo(3));
 
             var removed = data.Root.Remove("remove");
             Assert.That(removed, Is.True);
 
             var result = RoundTripKV3(data).Root;
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
-                Assert.That(result.Count, Is.EqualTo(2));
+                Assert.That(result, Has.Count.EqualTo(2));
                 Assert.That((string)result["keep"], Is.EqualTo("yes"));
                 Assert.That(result.ContainsKey("remove"), Is.False);
                 Assert.That((string)result["also_keep"], Is.EqualTo("yes"));
-            });
+            }
         }
 
         #endregion
@@ -277,11 +280,11 @@ namespace ValveKeyValue.Test
 
             var result = RoundTripKV1(data);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That((string)result["level1"]["level2"]["level3"]["deep_value"], Is.EqualTo("found"));
                 Assert.That((string)result["level1"]["sibling"], Is.EqualTo("here"));
-            });
+            }
         }
 
         [Test]
@@ -313,11 +316,11 @@ namespace ValveKeyValue.Test
 
             var result = RoundTripKV3(data);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result["blob"].ValueType, Is.EqualTo(KVValueType.BinaryBlob));
                 Assert.That(result["blob"].AsBlob(), Is.EqualTo(expectedBytes));
-            });
+            }
         }
 
         [Test]
@@ -330,11 +333,11 @@ namespace ValveKeyValue.Test
 
             var result = RoundTripKV3(data);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result["empty_blob"].ValueType, Is.EqualTo(KVValueType.BinaryBlob));
                 Assert.That(result["empty_blob"].AsBlob(), Is.EqualTo(Array.Empty<byte>()));
-            });
+            }
         }
 
         #endregion
@@ -348,7 +351,7 @@ namespace ValveKeyValue.Test
 
             var data = DeserializeKV3(input);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(data["resource_ref"].Flag, Is.EqualTo(KVFlag.Resource));
                 Assert.That(data["resource_name_ref"].Flag, Is.EqualTo(KVFlag.ResourceName));
@@ -357,11 +360,11 @@ namespace ValveKeyValue.Test
                 Assert.That(data["subclass_ref"].Flag, Is.EqualTo(KVFlag.SubClass));
                 Assert.That(data["entity_ref"].Flag, Is.EqualTo(KVFlag.EntityName));
                 Assert.That(data["no_flag"].Flag, Is.EqualTo(KVFlag.None));
-            });
+            }
 
             var result = RoundTripKV3(data).Root;
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result["resource_ref"].Flag, Is.EqualTo(KVFlag.Resource));
                 Assert.That((string)result["resource_ref"], Is.EqualTo("materials/default.vmat"));
@@ -383,7 +386,7 @@ namespace ValveKeyValue.Test
 
                 Assert.That(result["no_flag"].Flag, Is.EqualTo(KVFlag.None));
                 Assert.That((string)result["no_flag"], Is.EqualTo("plain_value"));
-            });
+            }
         }
 
         #endregion
@@ -397,21 +400,21 @@ namespace ValveKeyValue.Test
 
             var data = DeserializeKV3(input);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(data["nullable"].ValueType, Is.EqualTo(KVValueType.Null));
                 Assert.That(data["nullable"].IsNull, Is.True);
                 Assert.That((string)data["normal"], Is.EqualTo("exists"));
-            });
+            }
 
             var result = RoundTripKV3(data).Root;
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result["nullable"].ValueType, Is.EqualTo(KVValueType.Null));
                 Assert.That(result["nullable"].IsNull, Is.True);
                 Assert.That((string)result["normal"], Is.EqualTo("exists"));
-            });
+            }
         }
 
         #endregion

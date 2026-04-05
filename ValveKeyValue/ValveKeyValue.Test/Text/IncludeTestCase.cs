@@ -11,7 +11,7 @@ namespace ValveKeyValue.Test
         [Test]
         public void HasThreeItems()
         {
-            Assert.That(data.Count, Is.EqualTo(3));
+            Assert.That(data, Has.Count.EqualTo(3));
         }
 
         [TestCase("foo", "bar")]

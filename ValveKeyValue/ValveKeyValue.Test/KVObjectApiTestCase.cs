@@ -18,8 +18,11 @@ namespace ValveKeyValue.Test
             var child = obj["key"];
 
             Assert.That(child, Is.Not.Null);
-            Assert.That(child, Is.InstanceOf<KVObject>());
-            Assert.That((string)child, Is.EqualTo("value"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(child, Is.InstanceOf<KVObject>());
+                Assert.That((string)child, Is.EqualTo("value"));
+            }
         }
 
         [Test]
@@ -62,64 +65,88 @@ namespace ValveKeyValue.Test
         public void ConstructorWithString()
         {
             var obj = new KVObject("hello");
-            Assert.That(obj.ValueType, Is.EqualTo(KVValueType.String));
-            Assert.That((string)obj, Is.EqualTo("hello"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.ValueType, Is.EqualTo(KVValueType.String));
+                Assert.That((string)obj, Is.EqualTo("hello"));
+            }
         }
 
         [Test]
         public void ConstructorWithInt()
         {
             var obj = new KVObject(42);
-            Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Int32));
-            Assert.That((int)obj, Is.EqualTo(42));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Int32));
+                Assert.That((int)obj, Is.EqualTo(42));
+            }
         }
 
         [Test]
         public void ConstructorWithUInt()
         {
             var obj = new KVObject(42u);
-            Assert.That(obj.ValueType, Is.EqualTo(KVValueType.UInt32));
-            Assert.That((uint)obj, Is.EqualTo(42u));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.ValueType, Is.EqualTo(KVValueType.UInt32));
+                Assert.That((uint)obj, Is.EqualTo(42u));
+            }
         }
 
         [Test]
         public void ConstructorWithLong()
         {
             var obj = new KVObject(123456789012345L);
-            Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Int64));
-            Assert.That((long)obj, Is.EqualTo(123456789012345L));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Int64));
+                Assert.That((long)obj, Is.EqualTo(123456789012345L));
+            }
         }
 
         [Test]
         public void ConstructorWithULong()
         {
             var obj = new KVObject(0x8877665544332211UL);
-            Assert.That(obj.ValueType, Is.EqualTo(KVValueType.UInt64));
-            Assert.That((ulong)obj, Is.EqualTo(0x8877665544332211UL));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.ValueType, Is.EqualTo(KVValueType.UInt64));
+                Assert.That((ulong)obj, Is.EqualTo(0x8877665544332211UL));
+            }
         }
 
         [Test]
         public void ConstructorWithFloat()
         {
             var obj = new KVObject(3.14f);
-            Assert.That(obj.ValueType, Is.EqualTo(KVValueType.FloatingPoint));
-            Assert.That((float)obj, Is.EqualTo(3.14f));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.ValueType, Is.EqualTo(KVValueType.FloatingPoint));
+                Assert.That((float)obj, Is.EqualTo(3.14f));
+            }
         }
 
         [Test]
         public void ConstructorWithDouble()
         {
             var obj = new KVObject(3.14159265);
-            Assert.That(obj.ValueType, Is.EqualTo(KVValueType.FloatingPoint64));
-            Assert.That((double)obj, Is.EqualTo(3.14159265));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.ValueType, Is.EqualTo(KVValueType.FloatingPoint64));
+                Assert.That((double)obj, Is.EqualTo(3.14159265));
+            }
         }
 
         [Test]
         public void ConstructorWithBool()
         {
             var obj = new KVObject(true);
-            Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Boolean));
-            Assert.That((bool)obj, Is.True);
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Boolean));
+                Assert.That((bool)obj, Is.True);
+            }
         }
 
         [Test]
@@ -145,8 +172,11 @@ namespace ValveKeyValue.Test
             var obj = KVObject.ListCollection();
             obj.Add("key", 42);
 
-            Assert.That((int)obj["key"], Is.EqualTo(42));
-            Assert.That(obj["key"].ValueType, Is.EqualTo(KVValueType.Int32));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That((int)obj["key"], Is.EqualTo(42));
+                Assert.That(obj["key"].ValueType, Is.EqualTo(KVValueType.Int32));
+            }
         }
 
         [Test]
@@ -155,8 +185,11 @@ namespace ValveKeyValue.Test
             var obj = KVObject.ListCollection();
             obj.Add("key", "hello");
 
-            Assert.That((string)obj["key"], Is.EqualTo("hello"));
-            Assert.That(obj["key"].ValueType, Is.EqualTo(KVValueType.String));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That((string)obj["key"], Is.EqualTo("hello"));
+                Assert.That(obj["key"].ValueType, Is.EqualTo(KVValueType.String));
+            }
         }
 
         [Test]
@@ -165,8 +198,11 @@ namespace ValveKeyValue.Test
             var obj = KVObject.ListCollection();
             obj.Add("key", true);
 
-            Assert.That((bool)obj["key"], Is.True);
-            Assert.That(obj["key"].ValueType, Is.EqualTo(KVValueType.Boolean));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That((bool)obj["key"], Is.True);
+                Assert.That(obj["key"].ValueType, Is.EqualTo(KVValueType.Boolean));
+            }
         }
 
         [Test]
@@ -175,8 +211,11 @@ namespace ValveKeyValue.Test
             var obj = KVObject.ListCollection();
             obj.Add("key", 3.14f);
 
-            Assert.That((float)obj["key"], Is.EqualTo(3.14f));
-            Assert.That(obj["key"].ValueType, Is.EqualTo(KVValueType.FloatingPoint));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That((float)obj["key"], Is.EqualTo(3.14f));
+                Assert.That(obj["key"].ValueType, Is.EqualTo(KVValueType.FloatingPoint));
+            }
         }
 
         #endregion
@@ -209,9 +248,12 @@ namespace ValveKeyValue.Test
         public void ToStringReturnsNullStringForNullValue()
         {
             var obj = KVObject.Null();
-            Assert.That(obj.ToString(CultureInfo.InvariantCulture), Is.EqualTo("null"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.ToString(CultureInfo.InvariantCulture), Is.EqualTo("null"));
 #pragma warning disable CA1305
-            Assert.That(obj.ToString(), Is.EqualTo("null"));
+                Assert.That(obj.ToString(), Is.EqualTo("null"));
+            }
 #pragma warning restore CA1305
         }
 
@@ -276,8 +318,11 @@ namespace ValveKeyValue.Test
         public void DefaultConstructorCreatesEmptyCollection()
         {
             var obj = new KVObject();
-            Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Collection));
-            Assert.That(obj.Count, Is.EqualTo(0));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Collection));
+                Assert.That(obj, Has.Count.EqualTo(0));
+            }
         }
 
         #endregion
@@ -332,9 +377,12 @@ namespace ValveKeyValue.Test
             KVObject value = 42;
             value.Flag = KVFlag.Resource;
 
-            Assert.That(value.Flag, Is.EqualTo(KVFlag.Resource));
-            Assert.That(value.ValueType, Is.EqualTo(KVValueType.Int32));
-            Assert.That((int)value, Is.EqualTo(42));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(value.Flag, Is.EqualTo(KVFlag.Resource));
+                Assert.That(value.ValueType, Is.EqualTo(KVValueType.Int32));
+                Assert.That((int)value, Is.EqualTo(42));
+            }
         }
 
         #endregion
@@ -348,8 +396,11 @@ namespace ValveKeyValue.Test
             obj.Add("a", "1");
             obj.Add("b", "2");
 
-            Assert.That(obj.Count, Is.EqualTo(2));
-            Assert.That((string)obj["b"], Is.EqualTo("2"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj, Has.Count.EqualTo(2));
+                Assert.That((string)obj["b"], Is.EqualTo("2"));
+            }
         }
 
         [Test]
@@ -361,8 +412,11 @@ namespace ValveKeyValue.Test
 
             var removed = obj.Remove("a");
 
-            Assert.That(removed, Is.True);
-            Assert.That(obj.Count, Is.EqualTo(1));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(removed, Is.True);
+                Assert.That(obj, Has.Count.EqualTo(1));
+            }
             Assert.That(obj.ContainsKey("a"), Is.False);
         }
 
@@ -385,9 +439,12 @@ namespace ValveKeyValue.Test
 
             arr.RemoveAt(1);
 
-            Assert.That(arr.Count, Is.EqualTo(2));
-            Assert.That((string)arr[0], Is.EqualTo("x"));
-            Assert.That((string)arr[1], Is.EqualTo("z"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(arr, Has.Count.EqualTo(2));
+                Assert.That((string)arr[0], Is.EqualTo("x"));
+                Assert.That((string)arr[1], Is.EqualTo("z"));
+            }
         }
 
         [Test]
@@ -399,7 +456,7 @@ namespace ValveKeyValue.Test
 
             obj.Clear();
 
-            Assert.That(obj.Count, Is.EqualTo(0));
+            Assert.That(obj, Has.Count.EqualTo(0));
         }
 
         [Test]
@@ -412,7 +469,7 @@ namespace ValveKeyValue.Test
 
             arr.Clear();
 
-            Assert.That(arr.Count, Is.EqualTo(0));
+            Assert.That(arr, Has.Count.EqualTo(0));
         }
 
         #endregion
@@ -427,8 +484,11 @@ namespace ValveKeyValue.Test
                 "b",
             ]);
 
-            Assert.That(arr.IsArray, Is.True);
-            Assert.That(arr.ValueType, Is.EqualTo(KVValueType.Array));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(arr.IsArray, Is.True);
+                Assert.That(arr.ValueType, Is.EqualTo(KVValueType.Array));
+            }
         }
 
         [Test]
@@ -440,10 +500,13 @@ namespace ValveKeyValue.Test
                 "third",
             ]);
 
-            Assert.That((string)arr[0], Is.EqualTo("first"));
-            Assert.That((string)arr[1], Is.EqualTo("second"));
-            Assert.That((string)arr[2], Is.EqualTo("third"));
-            Assert.That(arr.Count, Is.EqualTo(3));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That((string)arr[0], Is.EqualTo("first"));
+                Assert.That((string)arr[1], Is.EqualTo("second"));
+                Assert.That((string)arr[2], Is.EqualTo("third"));
+                Assert.That(arr, Has.Count.EqualTo(3));
+            }
         }
 
         #endregion
@@ -455,8 +518,11 @@ namespace ValveKeyValue.Test
         {
             var obj = KVObject.Collection();
 
-            Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Collection));
-            Assert.That(obj.Count, Is.EqualTo(0));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Collection));
+                Assert.That(obj, Has.Count.EqualTo(0));
+            }
 
             obj.Add("key", "value");
             Assert.That((string)obj["key"], Is.EqualTo("value"));
@@ -465,16 +531,18 @@ namespace ValveKeyValue.Test
         [Test]
         public void CollectionFactoryWithChildrenCreatesDictBacked()
         {
-            var obj = KVObject.Collection(new[]
-            {
+            var obj = KVObject.Collection([
                 new KeyValuePair<string, KVObject>("a", "1"),
                 new KeyValuePair<string, KVObject>("b", "2"),
-            });
+            ]);
 
-            Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Collection));
-            Assert.That(obj.Count, Is.EqualTo(2));
-            Assert.That((string)obj["a"], Is.EqualTo("1"));
-            Assert.That((string)obj["b"], Is.EqualTo("2"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Collection));
+                Assert.That(obj, Has.Count.EqualTo(2));
+                Assert.That((string)obj["a"], Is.EqualTo("1"));
+                Assert.That((string)obj["b"], Is.EqualTo("2"));
+            }
         }
 
         [Test]
@@ -482,8 +550,11 @@ namespace ValveKeyValue.Test
         {
             var obj = KVObject.ListCollection();
 
-            Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Collection));
-            Assert.That(obj.Count, Is.EqualTo(0));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Collection));
+                Assert.That(obj, Has.Count.EqualTo(0));
+            }
 
             obj.Add("key", "value");
             Assert.That((string)obj["key"], Is.EqualTo("value"));
@@ -492,30 +563,34 @@ namespace ValveKeyValue.Test
         [Test]
         public void ListCollectionFactoryWithChildrenCreatesListBacked()
         {
-            var obj = KVObject.ListCollection(new[]
-            {
+            var obj = KVObject.ListCollection([
                 new KeyValuePair<string, KVObject>("a", "1"),
                 new KeyValuePair<string, KVObject>("b", "2"),
-            });
+            ]);
 
-            Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Collection));
-            Assert.That(obj.Count, Is.EqualTo(2));
-            Assert.That((string)obj["a"], Is.EqualTo("1"));
-            Assert.That((string)obj["b"], Is.EqualTo("2"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Collection));
+                Assert.That(obj, Has.Count.EqualTo(2));
+                Assert.That((string)obj["a"], Is.EqualTo("1"));
+                Assert.That((string)obj["b"], Is.EqualTo("2"));
+            }
         }
 
         [Test]
         public void ListCollectionAllowsDuplicateKeys()
         {
-            var obj = KVObject.ListCollection(new[]
-            {
+            var obj = KVObject.ListCollection([
                 new KeyValuePair<string, KVObject>("key", "first"),
                 new KeyValuePair<string, KVObject>("key", "second"),
-            });
+            ]);
 
-            Assert.That(obj.Count, Is.EqualTo(2));
-            // Indexer returns first match
-            Assert.That((string)obj["key"], Is.EqualTo("first"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj, Has.Count.EqualTo(2));
+                // Indexer returns first match
+                Assert.That((string)obj["key"], Is.EqualTo("first"));
+            }
         }
 
         [Test]
@@ -523,13 +598,19 @@ namespace ValveKeyValue.Test
         {
             var arr = KVObject.Array();
 
-            Assert.That(arr.IsArray, Is.True);
-            Assert.That(arr.ValueType, Is.EqualTo(KVValueType.Array));
-            Assert.That(arr.Count, Is.EqualTo(0));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(arr.IsArray, Is.True);
+                Assert.That(arr.ValueType, Is.EqualTo(KVValueType.Array));
+                Assert.That(arr, Has.Count.EqualTo(0));
+            }
 
             arr.Add("element");
-            Assert.That(arr.Count, Is.EqualTo(1));
-            Assert.That((string)arr[0], Is.EqualTo("element"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(arr, Has.Count.EqualTo(1));
+                Assert.That((string)arr[0], Is.EqualTo("element"));
+            }
         }
 
         [Test]
@@ -537,13 +618,16 @@ namespace ValveKeyValue.Test
         {
             var arr = KVObject.Array(4);
 
-            Assert.That(arr.IsArray, Is.True);
-            Assert.That(arr.ValueType, Is.EqualTo(KVValueType.Array));
-            Assert.That(arr.Count, Is.EqualTo(0));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(arr.IsArray, Is.True);
+                Assert.That(arr.ValueType, Is.EqualTo(KVValueType.Array));
+                Assert.That(arr, Has.Count.EqualTo(0));
+            }
 
             arr.Add("a");
             arr.Add("b");
-            Assert.That(arr.Count, Is.EqualTo(2));
+            Assert.That(arr, Has.Count.EqualTo(2));
         }
 
         [Test]
@@ -551,12 +635,18 @@ namespace ValveKeyValue.Test
         {
             var obj = KVObject.Collection(4);
 
-            Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Collection));
-            Assert.That(obj.Count, Is.EqualTo(0));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Collection));
+                Assert.That(obj, Has.Count.EqualTo(0));
+            }
 
             obj.Add("key", "value");
-            Assert.That(obj.Count, Is.EqualTo(1));
-            Assert.That((string)obj["key"], Is.EqualTo("value"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj, Has.Count.EqualTo(1));
+                Assert.That((string)obj["key"], Is.EqualTo("value"));
+            }
         }
 
         [Test]
@@ -564,12 +654,18 @@ namespace ValveKeyValue.Test
         {
             var obj = KVObject.ListCollection(4);
 
-            Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Collection));
-            Assert.That(obj.Count, Is.EqualTo(0));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Collection));
+                Assert.That(obj, Has.Count.EqualTo(0));
+            }
 
             obj.Add("key", "value");
-            Assert.That(obj.Count, Is.EqualTo(1));
-            Assert.That((string)obj["key"], Is.EqualTo("value"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj, Has.Count.EqualTo(1));
+                Assert.That((string)obj["key"], Is.EqualTo("value"));
+            }
         }
 
         [Test]
@@ -581,9 +677,12 @@ namespace ValveKeyValue.Test
             obj.Add("x", "1");
             obj.Add("y", "2");
 
-            Assert.That(obj.Count, Is.EqualTo(2));
-            Assert.That((string)obj["x"], Is.EqualTo("1"));
-            Assert.That((string)obj["y"], Is.EqualTo("2"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj, Has.Count.EqualTo(2));
+                Assert.That((string)obj["x"], Is.EqualTo("1"));
+                Assert.That((string)obj["y"], Is.EqualTo("2"));
+            }
         }
 
         #endregion
@@ -596,8 +695,11 @@ namespace ValveKeyValue.Test
             using var stream = TestDataHelper.OpenResource("TextKV3.basic.kv3");
             var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream).Root;
 
-            Assert.That(data.ContainsKey("foo"), Is.True);
-            Assert.That(data.ContainsKey("nonexistent"), Is.False);
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(data.ContainsKey("foo"), Is.True);
+                Assert.That(data.ContainsKey("nonexistent"), Is.False);
+            }
         }
 
         [Test]
@@ -634,7 +736,7 @@ namespace ValveKeyValue.Test
             obj.Add("c", "3");
 
             var names = new List<string>();
-            foreach (var (key, value) in obj)
+            foreach (var (key, _) in obj)
             {
                 names.Add(key);
             }
@@ -651,7 +753,7 @@ namespace ValveKeyValue.Test
             ]);
 
             var values = new List<string>();
-            foreach (var (key, value) in arr)
+            foreach (var (_, value) in arr)
             {
                 values.Add((string)value);
             }
@@ -665,7 +767,7 @@ namespace ValveKeyValue.Test
             var obj = new KVObject("hello");
 
             var items = new List<KVObject>();
-            foreach (var (key, value) in obj)
+            foreach (var (_, value) in obj)
             {
                 items.Add(value);
             }

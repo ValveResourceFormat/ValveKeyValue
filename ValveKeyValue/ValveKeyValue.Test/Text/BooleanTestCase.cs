@@ -10,12 +10,12 @@ namespace ValveKeyValue.Test
             using var stream = TestDataHelper.OpenResource("Text.boolean.vdf");
             var data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That((bool)data["test1_false"], Is.False, "test1_false");
                 Assert.That((bool)data["test2_true"], Is.True, "test2_true");
                 Assert.That((bool)data["test3_oob"], Is.True, "test3_oob");
-            });
+            }
         }
 
         [Test]
@@ -24,12 +24,12 @@ namespace ValveKeyValue.Test
             using var stream = TestDataHelper.OpenResource("Text.boolean.vdf");
             var data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<SerializedType>(stream);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(data.test1_false, Is.False, nameof(data.test1_false));
                 Assert.That(data.test2_true, Is.True, nameof(data.test2_true));
                 Assert.That(data.test3_oob, Is.True, nameof(data.test3_oob));
-            });
+            }
         }
 
         [Test]

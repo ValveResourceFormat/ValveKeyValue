@@ -66,12 +66,15 @@ namespace ValveKeyValue.Test.TextKV3
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
             var data = kv.Deserialize(stream);
 
-            Assert.That((double)data["positiveInf"], Is.EqualTo(double.PositiveInfinity));
-            Assert.That((double)data["positiveInf2"], Is.EqualTo(double.PositiveInfinity));
-            Assert.That((double)data["negativeInf"], Is.EqualTo(double.NegativeInfinity));
-            Assert.That((double)data["nan"], Is.NaN);
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That((double)data["positiveInf"], Is.EqualTo(double.PositiveInfinity));
+                Assert.That((double)data["positiveInf2"], Is.EqualTo(double.PositiveInfinity));
+                Assert.That((double)data["negativeInf"], Is.EqualTo(double.NegativeInfinity));
+                Assert.That((double)data["nan"], Is.NaN);
 
-            Assert.That(SerializeToString(kv, data), Is.EqualTo(expected));
+                Assert.That(SerializeToString(kv, data), Is.EqualTo(expected));
+            }
         }
 
         [Test]
@@ -125,20 +128,29 @@ namespace ValveKeyValue.Test.TextKV3
 
             var data2 = RoundTrip(kv, data);
 
-            Assert.That(data2["emptyBlob"].AsBlob().Length, Is.EqualTo(0));
-            Assert.That(data2["smallBlob"].AsBlob(), Is.EqualTo(new byte[] { 0x11, 0xFF }));
-            Assert.That(data2["flaggedBlob"].AsBlob(), Is.EqualTo(new byte[] { 0xAA, 0xBB, 0xCC }));
-            Assert.That(data2["blob15"].AsBlob(), Is.EqualTo(new byte[] { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xFF }));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(data2["emptyBlob"].AsBlob(), Has.Length.EqualTo(0));
+                Assert.That(data2["smallBlob"].AsBlob(), Is.EqualTo(new byte[] { 0x11, 0xFF }));
+                Assert.That(data2["flaggedBlob"].AsBlob(), Is.EqualTo(new byte[] { 0xAA, 0xBB, 0xCC }));
+                Assert.That(data2["blob15"].AsBlob(), Is.EqualTo(new byte[] { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xFF }));
+            }
 
             var blob32 = data2["blob32"];
-            Assert.That(blob32.AsBlob().Length, Is.EqualTo(32));
-            Assert.That(blob32.AsBlob()[0], Is.EqualTo(0x00));
-            Assert.That(blob32.AsBlob()[31], Is.EqualTo(0x1F));
+            Assert.That(blob32.AsBlob(), Has.Length.EqualTo(32));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(blob32.AsBlob()[0], Is.Zero);
+                Assert.That(blob32.AsBlob()[31], Is.EqualTo(0x1F));
+            }
 
             var blob100 = data2["blob100"];
-            Assert.That(blob100.AsBlob().Length, Is.EqualTo(100));
-            Assert.That(blob100.AsBlob()[0], Is.EqualTo(0x00));
-            Assert.That(blob100.AsBlob()[99], Is.EqualTo(0x63));
+            Assert.That(blob100.AsBlob(), Has.Length.EqualTo(100));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(blob100.AsBlob()[0], Is.Zero);
+                Assert.That(blob100.AsBlob()[99], Is.EqualTo(0x63));
+            }
         }
 
         [Test]
@@ -238,7 +250,7 @@ namespace ValveKeyValue.Test.TextKV3
             var doc = new KVDocument(null, null, root);
 
             var result = SerializeToString(kv, doc);
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result, Does.Contain("\tsimple = \"a\""));
                 Assert.That(result, Does.Contain("\twith.dot = \"b\""));
@@ -251,7 +263,7 @@ namespace ValveKeyValue.Test.TextKV3
                 Assert.That(result, Does.Contain("\t\"has\\\\backslash\" = \"i\""));
                 Assert.That(result, Does.Contain("\t\"has\\nnewline\" = \"j\""));
                 Assert.That(result, Does.Contain("\t\"has\\ttab\" = \"k\""));
-            });
+            }
         }
 
         [Test]
@@ -268,14 +280,14 @@ namespace ValveKeyValue.Test.TextKV3
             var doc = new KVDocument(null, null, root);
 
             var result = SerializeToString(kv, doc);
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 // Single-line strings with \n get the \n escaped
                 // But "hello\nworld" is multiline, so uses """ syntax
                 Assert.That(result, Does.Contain("tab = \"a\\tb\""));
                 Assert.That(result, Does.Contain("backslash = \"a\\\\b\""));
                 Assert.That(result, Does.Contain("quote = \"a\\\"b\""));
-            });
+            }
         }
 
         [Test]
@@ -308,20 +320,20 @@ namespace ValveKeyValue.Test.TextKV3
 
             var data2 = RoundTrip(kv, data);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
-                Assert.That(data2["empty"].Count, Is.EqualTo(0));
+                Assert.That(data2["empty"], Has.Count.EqualTo(0));
                 Assert.That((int)data2["one_int"][0], Is.EqualTo(1));
-                Assert.That(data2["four_ints"].Count, Is.EqualTo(4));
-                Assert.That(data2["nine_ints"].Count, Is.EqualTo(9));
-                Assert.That(data2["matrix4x4"].Count, Is.EqualTo(16));
-                Assert.That(data2["vector3"].Count, Is.EqualTo(3));
+                Assert.That(data2["four_ints"], Has.Count.EqualTo(4));
+                Assert.That(data2["nine_ints"], Has.Count.EqualTo(9));
+                Assert.That(data2["matrix4x4"], Has.Count.EqualTo(16));
+                Assert.That(data2["vector3"], Has.Count.EqualTo(3));
                 Assert.That((double)data2["vector3"][2], Is.EqualTo(3.14159).Within(0.00001));
-                Assert.That(data2["matrix_as_vectors"].Count, Is.EqualTo(4));
-                Assert.That(data2["matrix_as_vectors"][0].Count, Is.EqualTo(4));
-                Assert.That(data2["empty_arrays"].Count, Is.EqualTo(3));
-                Assert.That(data2["empty_arrays"][0].Count, Is.EqualTo(0));
-            });
+                Assert.That(data2["matrix_as_vectors"], Has.Count.EqualTo(4));
+                Assert.That(data2["matrix_as_vectors"][0], Has.Count.EqualTo(4));
+                Assert.That(data2["empty_arrays"], Has.Count.EqualTo(3));
+                Assert.That(data2["empty_arrays"][0], Has.Count.EqualTo(0));
+            }
         }
 
         [Test]
@@ -333,21 +345,21 @@ namespace ValveKeyValue.Test.TextKV3
             var root = KVObject.Collection();
             root.Add("empty", KVObject.Blob([]));
             root.Add("small", KVObject.Blob([0x11, 0xFF]));
-            root.Add("exact32", KVObject.Blob(Enumerable.Range(0, 32).Select(i => (byte)i).ToArray()));
+            root.Add("exact32", KVObject.Blob([.. Enumerable.Range(0, 32).Select(i => (byte)i)]));
             var doc = new KVDocument(null, null, root);
 
             // Serialize (produces inline format) -> deserialize -> verify
             var data2 = RoundTrip(kv, doc);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
-                Assert.That(data2["empty"].AsBlob().Length, Is.EqualTo(0));
+                Assert.That(data2["empty"].AsBlob(), Has.Length.EqualTo(0));
                 Assert.That(data2["small"].AsBlob(), Is.EqualTo(new byte[] { 0x11, 0xFF }));
                 var exact32 = data2["exact32"];
-                Assert.That(exact32.AsBlob().Length, Is.EqualTo(32));
-                Assert.That(exact32.AsBlob()[0], Is.EqualTo(0x00));
+                Assert.That(exact32.AsBlob(), Has.Length.EqualTo(32));
+                Assert.That(exact32.AsBlob()[0], Is.Zero);
                 Assert.That(exact32.AsBlob()[31], Is.EqualTo(0x1F));
-            });
+            }
         }
 
         [Test]
@@ -360,7 +372,7 @@ namespace ValveKeyValue.Test.TextKV3
 
             var data2 = RoundTrip(kv, data);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That((bool)data2["boolFalseValue"], Is.False);
                 Assert.That((bool)data2["boolTrueValue"], Is.True);
@@ -373,7 +385,7 @@ namespace ValveKeyValue.Test.TextKV3
                 Assert.That((string)data2["empty.string"], Is.EqualTo(""));
                 Assert.That((string)data2["singleQuotes"], Is.EqualTo("string"));
                 Assert.That((string)data2["singleQuotesWithQuotesInside"], Is.EqualTo("string is \"pretty\" cool"));
-            });
+            }
         }
 
         static string SerializeToString(KVSerializer kv, KVDocument data)

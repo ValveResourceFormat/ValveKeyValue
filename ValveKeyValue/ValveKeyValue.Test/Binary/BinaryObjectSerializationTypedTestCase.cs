@@ -71,7 +71,7 @@ namespace ValveKeyValue.Test
 
             ms.Seek(0, SeekOrigin.Begin);
             var deserialized = KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Deserialize<TestObject>(ms);
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(deserialized.ptr, Is.EqualTo(kvo.ptr));
                 Assert.That(deserialized.key, Is.EqualTo(kvo.key));
@@ -80,7 +80,7 @@ namespace ValveKeyValue.Test
                 Assert.That(deserialized.flt, Is.EqualTo(kvo.flt));
                 Assert.That(deserialized.lng, Is.EqualTo(kvo.lng));
                 Assert.That(deserialized.i64, Is.EqualTo(kvo.i64));
-            });
+            }
         }
     }
 }

@@ -8,9 +8,12 @@ namespace ValveKeyValue.Test
             using var stream = TestDataHelper.OpenResource("Text.required_init_person.vdf");
             var person = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<PersonWithRequiredInit>(stream);
 
-            Assert.That(person.FirstName, Is.EqualTo("Alice"));
-            Assert.That(person.LastName, Is.EqualTo("Smith"));
-            Assert.That(person.Age, Is.EqualTo(30));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(person.FirstName, Is.EqualTo("Alice"));
+                Assert.That(person.LastName, Is.EqualTo("Smith"));
+                Assert.That(person.Age, Is.EqualTo(30));
+            }
         }
 
         [Test]
@@ -31,8 +34,11 @@ namespace ValveKeyValue.Test
             using var stream = TestDataHelper.OpenResource("Text.required_init_person.vdf");
             var person = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<PersonWithExtraRequiredInit>(stream);
 
-            Assert.That(person.FirstName, Is.EqualTo("Alice"));
-            Assert.That(person.City, Is.Null);
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(person.FirstName, Is.EqualTo("Alice"));
+                Assert.That(person.City, Is.Null);
+            }
         }
 
         [Test]
@@ -42,8 +48,11 @@ namespace ValveKeyValue.Test
             using var stream = TestDataHelper.OpenResource("Text.required_init_person.vdf");
             var person = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<PersonWithExtraRequiredInit>(stream);
 
-            Assert.That(person.Age, Is.EqualTo(30));
-            Assert.That(person.ZipCode, Is.EqualTo(0));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(person.Age, Is.EqualTo(30));
+                Assert.That(person.ZipCode, Is.Zero);
+            }
         }
 
         class PersonWithRequiredInit

@@ -21,12 +21,12 @@ namespace ValveKeyValue.Test.TextKV3
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
             var data = kv.Deserialize("{\n\tkey = \"value\"\n}\n", options);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(data.Header, Is.Not.Null);
                 Assert.That(data.Header!.Encoding.Name, Is.Null);
                 Assert.That(data.Header.Format.Name, Is.Null);
-            });
+            }
         }
 
         [Test]
@@ -66,11 +66,11 @@ namespace ValveKeyValue.Test.TextKV3
             ms.Seek(0, SeekOrigin.Begin);
             var data = kv.Deserialize(ms, options);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That((string)data["key"], Is.EqualTo("value"));
                 Assert.That((int)data["number"], Is.EqualTo(42));
-            });
+            }
         }
 
         [Test]

@@ -50,14 +50,17 @@ namespace ValveKeyValue.Test
 
             ms.Seek(0, SeekOrigin.Begin);
             var deserialized = KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Deserialize(ms);
-            Assert.That(deserialized.Name, Is.EqualTo("TestObject"));
-            Assert.That((string)deserialized["key"], Is.EqualTo("value"));
-            Assert.That((string)deserialized["key_utf8"], Is.EqualTo("邪恶的战"));
-            Assert.That((int)deserialized["int"], Is.EqualTo(0x10203040));
-            Assert.That((float)deserialized["flt"], Is.EqualTo(1234.5678f));
-            Assert.That((IntPtr)deserialized["ptr"], Is.EqualTo(new IntPtr(0x12345678)));
-            Assert.That((ulong)deserialized["lng"], Is.EqualTo(0x8877665544332211u));
-            Assert.That((long)deserialized["i64"], Is.EqualTo(0x0102030405060708));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(deserialized.Name, Is.EqualTo("TestObject"));
+                Assert.That((string)deserialized["key"], Is.EqualTo("value"));
+                Assert.That((string)deserialized["key_utf8"], Is.EqualTo("邪恶的战"));
+                Assert.That((int)deserialized["int"], Is.EqualTo(0x10203040));
+                Assert.That((float)deserialized["flt"], Is.EqualTo(1234.5678f));
+                Assert.That((IntPtr)deserialized["ptr"], Is.EqualTo(new IntPtr(0x12345678)));
+                Assert.That((ulong)deserialized["lng"], Is.EqualTo(0x8877665544332211u));
+                Assert.That((long)deserialized["i64"], Is.EqualTo(0x0102030405060708));
+            }
         }
 
         [Test]
@@ -79,7 +82,7 @@ namespace ValveKeyValue.Test
             ms.Seek(0, SeekOrigin.Begin);
             var deserialized = KVSerializer.Create(KVSerializationFormat.KeyValues1Binary).Deserialize(ms);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That((int)deserialized["bool"], Is.EqualTo(1));
                 Assert.That((int)deserialized["i16"], Is.EqualTo(42));
@@ -88,7 +91,7 @@ namespace ValveKeyValue.Test
                 Assert.That((float)deserialized["f64"], Is.EqualTo(3.14f).Within(0.01));
                 Assert.That((string)deserialized["blob"], Is.EqualTo("AB CD"));
                 Assert.That((string)deserialized["null"], Is.EqualTo(string.Empty));
-            });
+            }
         }
     }
 }

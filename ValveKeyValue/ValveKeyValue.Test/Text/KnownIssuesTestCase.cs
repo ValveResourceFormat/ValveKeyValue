@@ -13,13 +13,13 @@ namespace ValveKeyValue.Test
             }
 
             Assert.That(config, Is.Not.Null);
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(config.BackgroundColor, Is.EqualTo("#3C3C3C"));
                 Assert.That(config.OpenDirectory, Is.EqualTo(@"D:\SteamLibrary\steamapps\common\The Lab\RobotRepair\vr"));
                 Assert.That(config.SaveDirectory, Is.EqualTo(@"D:\SteamLibrary\steamapps\common\The Lab\RobotRepair\vr"));
                 Assert.That(config.GameSearchPaths, Is.Not.Null & Has.Count.Zero);
-            });
+            }
         }
 
         class VKVConfig

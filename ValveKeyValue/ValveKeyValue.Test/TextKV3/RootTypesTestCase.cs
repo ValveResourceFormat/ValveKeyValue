@@ -8,11 +8,11 @@ namespace ValveKeyValue.Test.TextKV3
             using var stream = TestDataHelper.OpenResource("TextKV3.root_null.kv3");
             var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(data.Name, Is.Null);
                 Assert.That(data.Root.ValueType, Is.EqualTo(KVValueType.Null));
-            });
+            }
         }
 
         [Test]
@@ -21,12 +21,12 @@ namespace ValveKeyValue.Test.TextKV3
             using var stream = TestDataHelper.OpenResource("TextKV3.root_string.kv3");
             var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(data.Name, Is.Null);
                 Assert.That(data.Root.ValueType, Is.EqualTo(KVValueType.String));
                 Assert.That((string)data.Root, Is.EqualTo("cool 123 string"));
-            });
+            }
         }
 
         [Test]
@@ -35,11 +35,11 @@ namespace ValveKeyValue.Test.TextKV3
             using var stream = TestDataHelper.OpenResource("TextKV3.root_multiline.kv3");
             var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(data.Name, Is.Null);
                 Assert.That((string)data.Root, Is.EqualTo("First line of a multi-line string literal.\nSecond line of a multi-line string literal."));
-            });
+            }
         }
 
         [Test]
@@ -48,13 +48,13 @@ namespace ValveKeyValue.Test.TextKV3
             using var stream = TestDataHelper.OpenResource("TextKV3.root_flagged_string.kv3");
             var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(data.Name, Is.Null);
                 Assert.That(data.Root.ValueType, Is.EqualTo(KVValueType.String));
                 Assert.That(data.Root.Flag, Is.EqualTo(KVFlag.Resource));
                 Assert.That((string)data.Root, Is.EqualTo("cool_resource.txt"));
-            });
+            }
         }
 
         [Test]
@@ -63,14 +63,14 @@ namespace ValveKeyValue.Test.TextKV3
             using var stream = TestDataHelper.OpenResource("TextKV3.root_flagged_object.kv3");
             var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(data.Name, Is.Null);
                 Assert.That(data.Root.ValueType, Is.EqualTo(KVValueType.Collection));
                 Assert.That(data.Root.Flag, Is.EqualTo(KVFlag.Panorama));
                 Assert.That(data["foo"].Flag, Is.EqualTo(KVFlag.Resource));
                 Assert.That((string)data["foo"], Is.EqualTo("bar"));
-            });
+            }
         }
 
         [Test]
@@ -79,7 +79,7 @@ namespace ValveKeyValue.Test.TextKV3
             using var stream = TestDataHelper.OpenResource("TextKV3.root_binary_blob.kv3");
             var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(data.Name, Is.Null);
                 Assert.That(data.Root.ValueType, Is.EqualTo(KVValueType.BinaryBlob));
@@ -88,7 +88,7 @@ namespace ValveKeyValue.Test.TextKV3
                     0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
                     0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xFF
                 }));
-            });
+            }
         }
 
         [Test]
@@ -97,12 +97,12 @@ namespace ValveKeyValue.Test.TextKV3
             using var stream = TestDataHelper.OpenResource("TextKV3.root_number.kv3");
             var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(data.Name, Is.Null);
                 Assert.That(data.Root.ValueType, Is.EqualTo(KVValueType.UInt64));
                 Assert.That((int)data.Root, Is.EqualTo(1234567890));
-            });
+            }
         }
 
         [Test]
@@ -111,12 +111,12 @@ namespace ValveKeyValue.Test.TextKV3
             using var stream = TestDataHelper.OpenResource("TextKV3.root_number_negative.kv3");
             var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(data.Name, Is.Null);
                 Assert.That(data.Root.ValueType, Is.EqualTo(KVValueType.Int64));
                 Assert.That((int)data.Root, Is.EqualTo(-1234567890));
-            });
+            }
         }
 
         [Test]
@@ -125,12 +125,12 @@ namespace ValveKeyValue.Test.TextKV3
             using var stream = TestDataHelper.OpenResource("TextKV3.root_float.kv3");
             var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(data.Name, Is.Null);
                 Assert.That(data.Root.ValueType, Is.EqualTo(KVValueType.FloatingPoint64));
                 Assert.That((float)data.Root, Is.EqualTo(-1337.401f));
-            });
+            }
         }
 
         [Test]

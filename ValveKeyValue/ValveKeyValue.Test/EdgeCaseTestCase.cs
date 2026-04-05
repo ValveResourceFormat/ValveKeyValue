@@ -20,9 +20,12 @@ namespace ValveKeyValue.Test
 
             obj["a"]["b"] = 42;
 
-            Assert.That((int)obj["a"]["b"], Is.EqualTo(42));
-            Assert.That((string)obj["a"]["existing"], Is.EqualTo("yes"));
-            Assert.That(obj["a"].Count, Is.EqualTo(2));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That((int)obj["a"]["b"], Is.EqualTo(42));
+                Assert.That((string)obj["a"]["existing"], Is.EqualTo("yes"));
+                Assert.That(obj["a"], Has.Count.EqualTo(2));
+            }
         }
 
         #endregion
@@ -40,8 +43,11 @@ namespace ValveKeyValue.Test
             obj["b"] = "updated";
 
             var names = obj.Children.Select(c => c.Key).ToList();
-            Assert.That(names, Is.EqualTo(ExpectedOrderABC));
-            Assert.That((string)obj["b"], Is.EqualTo("updated"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(names, Is.EqualTo(ExpectedOrderABC));
+                Assert.That((string)obj["b"], Is.EqualTo("updated"));
+            }
         }
 
         [Test]
@@ -52,10 +58,13 @@ namespace ValveKeyValue.Test
 
             obj["b"] = "2";
 
-            Assert.That(obj.Count, Is.EqualTo(2));
+            Assert.That(obj, Has.Count.EqualTo(2));
             var names = obj.Children.Select(c => c.Key).ToList();
-            Assert.That(names, Is.EqualTo(ExpectedOrderAB));
-            Assert.That((string)obj["b"], Is.EqualTo("2"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(names, Is.EqualTo(ExpectedOrderAB));
+                Assert.That((string)obj["b"], Is.EqualTo("2"));
+            }
         }
 
         [Test]
@@ -69,10 +78,13 @@ namespace ValveKeyValue.Test
 
             obj["b"] = "replaced";
 
-            Assert.That(obj.Count, Is.EqualTo(3));
+            Assert.That(obj, Has.Count.EqualTo(3));
             var names = obj.Children.Select(c => c.Key).ToList();
-            Assert.That(names, Is.EqualTo(ExpectedOrderABC));
-            Assert.That((string)obj["b"], Is.EqualTo("replaced"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(names, Is.EqualTo(ExpectedOrderABC));
+                Assert.That((string)obj["b"], Is.EqualTo("replaced"));
+            }
         }
 
         #endregion
@@ -88,9 +100,12 @@ namespace ValveKeyValue.Test
 
             obj["a"] = null!;
 
-            Assert.That(obj.Count, Is.EqualTo(2));
-            Assert.That(obj["a"].IsNull, Is.True);
-            Assert.That((string)obj["b"], Is.EqualTo("2"));
+            Assert.That(obj, Has.Count.EqualTo(2));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj["a"].IsNull, Is.True);
+                Assert.That((string)obj["b"], Is.EqualTo("2"));
+            }
         }
 
         [Test]
@@ -101,9 +116,12 @@ namespace ValveKeyValue.Test
 
             obj["nonexistent"] = null!;
 
-            Assert.That(obj.Count, Is.EqualTo(2));
-            Assert.That((string)obj["a"], Is.EqualTo("1"));
-            Assert.That(obj["nonexistent"].IsNull, Is.True);
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj, Has.Count.EqualTo(2));
+                Assert.That((string)obj["a"], Is.EqualTo("1"));
+                Assert.That(obj["nonexistent"].IsNull, Is.True);
+            }
         }
 
         #endregion
@@ -252,8 +270,11 @@ namespace ValveKeyValue.Test
             obj.Add("a", "1");
             obj.Add("b", "2");
 
-            Assert.That(obj.ContainsKey("a"), Is.True);
-            Assert.That(obj.ContainsKey("missing"), Is.False);
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.ContainsKey("a"), Is.True);
+                Assert.That(obj.ContainsKey("missing"), Is.False);
+            }
         }
 
         #endregion
@@ -265,7 +286,7 @@ namespace ValveKeyValue.Test
         {
             var obj = new KVObject("hello");
 
-            Assert.That(obj.Count, Is.EqualTo(0));
+            Assert.That(obj, Is.Empty);
         }
 
         [Test]
@@ -273,7 +294,7 @@ namespace ValveKeyValue.Test
         {
             var obj = KVObject.Null();
 
-            Assert.That(obj.Count, Is.EqualTo(0));
+            Assert.That(obj, Is.Empty);
         }
 
         #endregion
@@ -285,7 +306,7 @@ namespace ValveKeyValue.Test
         {
             var obj = KVObject.ListCollection();
 
-            Assert.That(obj.Count, Is.EqualTo(0));
+            Assert.That(obj, Is.Empty);
         }
 
         [Test]
@@ -302,8 +323,11 @@ namespace ValveKeyValue.Test
         {
             var obj = KVObject.ListCollection();
 
-            Assert.That(obj.IsArray, Is.False);
-            Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Collection));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.IsArray, Is.False);
+                Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Collection));
+            }
         }
 
         #endregion
@@ -315,7 +339,7 @@ namespace ValveKeyValue.Test
         {
             var obj = KVObject.Array();
 
-            Assert.That(obj.Count, Is.EqualTo(0));
+            Assert.That(obj, Is.Empty);
         }
 
         [Test]
@@ -323,8 +347,11 @@ namespace ValveKeyValue.Test
         {
             var obj = KVObject.Array();
 
-            Assert.That(obj.IsArray, Is.True);
-            Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Array));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.IsArray, Is.True);
+                Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Array));
+            }
         }
 
         [Test]
@@ -342,7 +369,7 @@ namespace ValveKeyValue.Test
             var obj = KVObject.Array();
             obj.Add((KVObject)null!);
 
-            Assert.That(obj.Count, Is.EqualTo(1));
+            Assert.That(obj, Has.Count.EqualTo(1));
             Assert.That(obj[0].IsNull, Is.True);
         }
 
@@ -356,9 +383,12 @@ namespace ValveKeyValue.Test
             KVObject val = 42;
             val.Flag = KVFlag.Resource;
 
-            Assert.That(val.Flag, Is.EqualTo(KVFlag.Resource));
-            Assert.That(val.ValueType, Is.EqualTo(KVValueType.Int32));
-            Assert.That((int)val, Is.EqualTo(42));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(val.Flag, Is.EqualTo(KVFlag.Resource));
+                Assert.That(val.ValueType, Is.EqualTo(KVValueType.Int32));
+                Assert.That((int)val, Is.EqualTo(42));
+            }
         }
 
         [Test]
@@ -367,9 +397,12 @@ namespace ValveKeyValue.Test
             KVObject val = "hello";
             val.Flag = KVFlag.SoundEvent;
 
-            Assert.That(val.Flag, Is.EqualTo(KVFlag.SoundEvent));
-            Assert.That(val.ValueType, Is.EqualTo(KVValueType.String));
-            Assert.That((string)val, Is.EqualTo("hello"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(val.Flag, Is.EqualTo(KVFlag.SoundEvent));
+                Assert.That(val.ValueType, Is.EqualTo(KVValueType.String));
+                Assert.That((string)val, Is.EqualTo("hello"));
+            }
         }
 
         [Test]
@@ -381,11 +414,14 @@ namespace ValveKeyValue.Test
             KVObject withBoth = 99;
             withBoth.Flag = KVFlag.EntityName;
 
-            // Each is a separate object
-            Assert.That(val.Flag, Is.EqualTo(KVFlag.None));
-            Assert.That(withResource.Flag, Is.EqualTo(KVFlag.Panorama));
-            Assert.That(withBoth.Flag, Is.EqualTo(KVFlag.EntityName));
-            Assert.That((int)withBoth, Is.EqualTo(99));
+            using (Assert.EnterMultipleScope())
+            {
+                // Each is a separate object
+                Assert.That(val.Flag, Is.EqualTo(KVFlag.None));
+                Assert.That(withResource.Flag, Is.EqualTo(KVFlag.Panorama));
+                Assert.That(withBoth.Flag, Is.EqualTo(KVFlag.EntityName));
+                Assert.That((int)withBoth, Is.EqualTo(99));
+            }
         }
 
         #endregion
@@ -400,8 +436,11 @@ namespace ValveKeyValue.Test
 
             var result = obj.TryGetValue("missing", out var child);
 
-            Assert.That(result, Is.False);
-            Assert.That(child, Is.Null);
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(result, Is.False);
+                Assert.That(child, Is.Null);
+            }
         }
 
         [Test]
@@ -411,8 +450,11 @@ namespace ValveKeyValue.Test
 
             var result = obj.TryGetValue("anything", out var child);
 
-            Assert.That(result, Is.False);
-            Assert.That(child, Is.Null);
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(result, Is.False);
+                Assert.That(child, Is.Null);
+            }
         }
 
         #endregion
@@ -427,9 +469,12 @@ namespace ValveKeyValue.Test
 
             var result = obj.TryGetValue("existing", out var child);
 
-            Assert.That(result, Is.True);
-            Assert.That(child, Is.Not.Null);
-            Assert.That((string)child!, Is.EqualTo("value"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(result, Is.True);
+                Assert.That(child, Is.Not.Null);
+                Assert.That((string)child!, Is.EqualTo("value"));
+            }
         }
 
         [Test]
@@ -439,11 +484,14 @@ namespace ValveKeyValue.Test
             using var stream = new System.IO.MemoryStream(System.Text.Encoding.UTF8.GetBytes(kv3Text));
             var obj = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream).Root;
 
-            Assert.That(obj.TryGetValue("key1", out var found), Is.True);
-            Assert.That((string)found!, Is.EqualTo("value1"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.TryGetValue("key1", out var found), Is.True);
+                Assert.That((string)found!, Is.EqualTo("value1"));
 
-            Assert.That(obj.TryGetValue("missing", out var notFound), Is.False);
-            Assert.That(notFound, Is.Null);
+                Assert.That(obj.TryGetValue("missing", out var notFound), Is.False);
+                Assert.That(notFound, Is.Null);
+            }
         }
 
         #endregion
@@ -457,8 +505,11 @@ namespace ValveKeyValue.Test
 
             obj.Add("key1", "value1");
 
-            Assert.That(obj.Count, Is.EqualTo(1));
-            Assert.That((string)obj["key1"], Is.EqualTo("value1"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj, Has.Count.EqualTo(1));
+                Assert.That((string)obj["key1"], Is.EqualTo("value1"));
+            }
         }
 
         [Test]
@@ -477,7 +528,7 @@ namespace ValveKeyValue.Test
             obj.Add("key", "value1");
             obj.Add("key", "value2");
 
-            Assert.That(obj.Count, Is.EqualTo(2));
+            Assert.That(obj, Has.Count.EqualTo(2));
         }
 
         [Test]
@@ -486,9 +537,12 @@ namespace ValveKeyValue.Test
             var obj = KVObject.Collection();
             obj.Add("key", "value1");
 
-            Assert.That(obj.TryAdd("key", "value2"), Is.False);
-            Assert.That(obj.Count, Is.EqualTo(1));
-            Assert.That((string)obj["key"], Is.EqualTo("value1"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.TryAdd("key", "value2"), Is.False);
+                Assert.That(obj, Has.Count.EqualTo(1));
+                Assert.That((string)obj["key"], Is.EqualTo("value1"));
+            }
         }
 
         [Test]
@@ -496,9 +550,12 @@ namespace ValveKeyValue.Test
         {
             var obj = KVObject.Collection();
 
-            Assert.That(obj.TryAdd("key", "value"), Is.True);
-            Assert.That(obj.Count, Is.EqualTo(1));
-            Assert.That((string)obj["key"], Is.EqualTo("value"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.TryAdd("key", "value"), Is.True);
+                Assert.That(obj, Has.Count.EqualTo(1));
+                Assert.That((string)obj["key"], Is.EqualTo("value"));
+            }
         }
 
         [Test]
@@ -507,8 +564,11 @@ namespace ValveKeyValue.Test
             var obj = KVObject.ListCollection();
             obj.Add("key", "value1");
 
-            Assert.That(obj.TryAdd("key", "value2"), Is.True);
-            Assert.That(obj.Count, Is.EqualTo(2));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.TryAdd("key", "value2"), Is.True);
+                Assert.That(obj, Has.Count.EqualTo(2));
+            }
         }
 
         [Test]
@@ -517,7 +577,7 @@ namespace ValveKeyValue.Test
             var obj = KVObject.ListCollection();
             obj.Add("key", null!);
 
-            Assert.That(obj.Count, Is.EqualTo(1));
+            Assert.That(obj, Has.Count.EqualTo(1));
             Assert.That(obj["key"].IsNull, Is.True);
         }
 
@@ -527,7 +587,7 @@ namespace ValveKeyValue.Test
             var obj = KVObject.Collection();
             obj.TryAdd("key", null!);
 
-            Assert.That(obj.Count, Is.EqualTo(1));
+            Assert.That(obj, Has.Count.EqualTo(1));
             Assert.That(obj["key"].IsNull, Is.True);
         }
 
@@ -541,11 +601,14 @@ namespace ValveKeyValue.Test
             KVObject[] values = ["alpha", "beta", "gamma"];
             var arr = KVObject.Array(values);
 
-            Assert.That(arr.IsArray, Is.True);
-            Assert.That(arr.Count, Is.EqualTo(3));
-            Assert.That((string)arr[0], Is.EqualTo("alpha"));
-            Assert.That((string)arr[1], Is.EqualTo("beta"));
-            Assert.That((string)arr[2], Is.EqualTo("gamma"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(arr.IsArray, Is.True);
+                Assert.That(arr, Has.Count.EqualTo(3));
+                Assert.That((string)arr[0], Is.EqualTo("alpha"));
+                Assert.That((string)arr[1], Is.EqualTo("beta"));
+                Assert.That((string)arr[2], Is.EqualTo("gamma"));
+            }
         }
 
         [Test]
@@ -554,7 +617,7 @@ namespace ValveKeyValue.Test
             KVObject[] values = [1, 2];
             var arr = KVObject.Array(values);
 
-            foreach (var (key, value) in arr)
+            foreach (var (key, _) in arr)
             {
                 Assert.That(key, Is.Null);
             }
@@ -565,8 +628,11 @@ namespace ValveKeyValue.Test
         {
             var arr = KVObject.Array(Array.Empty<KVObject>());
 
-            Assert.That(arr.IsArray, Is.True);
-            Assert.That(arr.Count, Is.EqualTo(0));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(arr.IsArray, Is.True);
+                Assert.That(arr, Is.Empty);
+            }
         }
 
         #endregion
@@ -581,7 +647,7 @@ namespace ValveKeyValue.Test
             obj.Add("key", "second");
             obj.Add("other", "value");
 
-            Assert.That(obj.Count, Is.EqualTo(3));
+            Assert.That(obj, Has.Count.EqualTo(3));
         }
 
         [Test]
@@ -685,9 +751,12 @@ namespace ValveKeyValue.Test
 
             var result = obj.Remove("key");
 
-            Assert.That(result, Is.True);
-            Assert.That(obj.Count, Is.EqualTo(1));
-            Assert.That((string)obj["other"], Is.EqualTo("keep"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(result, Is.True);
+                Assert.That(obj, Has.Count.EqualTo(1));
+                Assert.That((string)obj["other"], Is.EqualTo("keep"));
+            }
         }
 
         #endregion
@@ -702,9 +771,12 @@ namespace ValveKeyValue.Test
 
             obj["nonexistent"] = null!;
 
-            Assert.That(obj.Count, Is.EqualTo(2));
-            Assert.That((int)obj["a"], Is.EqualTo(1));
-            Assert.That(obj["nonexistent"].IsNull, Is.True);
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj, Has.Count.EqualTo(2));
+                Assert.That((int)obj["a"], Is.EqualTo(1));
+                Assert.That(obj["nonexistent"].IsNull, Is.True);
+            }
         }
 
         #endregion
@@ -734,7 +806,7 @@ namespace ValveKeyValue.Test
             list.Add("a", 1);
             list.Add("b", 2);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 // TryGetValue
                 Assert.That(dict.TryGetValue("a", out var dictA), Is.True);
@@ -759,23 +831,26 @@ namespace ValveKeyValue.Test
                 Assert.That(list.Values.Select(v => (int)v).ToList(), Has.Member(1).And.Member(2));
 
                 // Count
-                Assert.That(dict.Count, Is.EqualTo(2));
-                Assert.That(list.Count, Is.EqualTo(2));
+                Assert.That(dict, Has.Count.EqualTo(2));
+                Assert.That(list, Has.Count.EqualTo(2));
 
                 // Integer indexer (list-backed only)
                 Assert.That(() => dict[0], Throws.InstanceOf<NotSupportedException>());
                 Assert.That((int)list[0], Is.EqualTo(1));
                 Assert.That((int)list[1], Is.EqualTo(2));
-            });
+            }
 
-            // Remove
-            Assert.That(dict.Remove("a"), Is.True);
-            Assert.That(list.Remove("a"), Is.True);
-            Assert.That(dict.Remove("missing"), Is.False);
-            Assert.That(list.Remove("missing"), Is.False);
+            using (Assert.EnterMultipleScope())
+            {
+                // Remove
+                Assert.That(dict.Remove("a"), Is.True);
+                Assert.That(list.Remove("a"), Is.True);
+                Assert.That(dict.Remove("missing"), Is.False);
+                Assert.That(list.Remove("missing"), Is.False);
 
-            Assert.That(dict.Count, Is.EqualTo(1));
-            Assert.That(list.Count, Is.EqualTo(1));
+                Assert.That(dict, Has.Count.EqualTo(1));
+                Assert.That(list, Has.Count.EqualTo(1));
+            }
         }
 
         #endregion

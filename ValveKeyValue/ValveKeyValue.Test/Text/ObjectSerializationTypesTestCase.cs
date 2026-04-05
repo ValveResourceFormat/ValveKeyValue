@@ -38,17 +38,20 @@ namespace ValveKeyValue.Test
 
             var deserialized = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<DataObject[]>(text);
             Assert.That(deserialized, Has.Length.EqualTo(1));
-            Assert.That(deserialized[0].VString, Is.EqualTo(dataObject[0].VString));
-            Assert.That(deserialized[0].VInt, Is.EqualTo(dataObject[0].VInt));
-            Assert.That(deserialized[0].VFloat, Is.EqualTo(dataObject[0].VFloat));
-            Assert.That(deserialized[0].VLong, Is.EqualTo(dataObject[0].VLong));
-            Assert.That(deserialized[0].VULong, Is.EqualTo(dataObject[0].VULong));
-            Assert.That(deserialized[0].VEnum, Is.EqualTo(dataObject[0].VEnum));
-            Assert.That(deserialized[0].VFlags, Is.EqualTo(dataObject[0].VFlags));
-            Assert.That(deserialized[0].VByteEnum, Is.EqualTo(dataObject[0].VByteEnum));
-            Assert.That(deserialized[0].VShortEnum, Is.EqualTo(dataObject[0].VShortEnum));
-            Assert.That(deserialized[0].VLongEnum, Is.EqualTo(dataObject[0].VLongEnum));
-            Assert.That(deserialized[0].VULongEnum, Is.EqualTo(dataObject[0].VULongEnum));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(deserialized[0].VString, Is.EqualTo(dataObject[0].VString));
+                Assert.That(deserialized[0].VInt, Is.EqualTo(dataObject[0].VInt));
+                Assert.That(deserialized[0].VFloat, Is.EqualTo(dataObject[0].VFloat));
+                Assert.That(deserialized[0].VLong, Is.EqualTo(dataObject[0].VLong));
+                Assert.That(deserialized[0].VULong, Is.EqualTo(dataObject[0].VULong));
+                Assert.That(deserialized[0].VEnum, Is.EqualTo(dataObject[0].VEnum));
+                Assert.That(deserialized[0].VFlags, Is.EqualTo(dataObject[0].VFlags));
+                Assert.That(deserialized[0].VByteEnum, Is.EqualTo(dataObject[0].VByteEnum));
+                Assert.That(deserialized[0].VShortEnum, Is.EqualTo(dataObject[0].VShortEnum));
+                Assert.That(deserialized[0].VLongEnum, Is.EqualTo(dataObject[0].VLongEnum));
+                Assert.That(deserialized[0].VULongEnum, Is.EqualTo(dataObject[0].VULongEnum));
+            }
         }
 
         class DataObject
@@ -127,9 +130,9 @@ namespace ValveKeyValue.Test
             ms.Seek(0, SeekOrigin.Begin);
             var d = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<AllScalarsObject>(ms);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
-                Assert.That(d.VBool, Is.EqualTo(true));
+                Assert.That(d.VBool, Is.True);
                 Assert.That(d.VByte, Is.EqualTo((byte)255));
                 Assert.That(d.VSByte, Is.EqualTo((sbyte)-128));
                 Assert.That(d.VShort, Is.EqualTo(short.MinValue));
@@ -141,7 +144,7 @@ namespace ValveKeyValue.Test
                 Assert.That(d.VFloat, Is.EqualTo(-1234.5678f));
                 Assert.That(d.VDouble, Is.EqualTo(3.14159265358979).Within(0.0000001));
                 Assert.That(d.VString, Is.EqualTo("hello world"));
-            });
+            }
         }
 
         [Test]

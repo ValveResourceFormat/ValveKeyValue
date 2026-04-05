@@ -11,7 +11,7 @@ namespace ValveKeyValue.Test
         [Test]
         public void HasFourItems()
         {
-            Assert.That(data.Count, Is.EqualTo(4));
+            Assert.That(data, Has.Count.EqualTo(4));
         }
 
         [TestCase("foo", "bar")]

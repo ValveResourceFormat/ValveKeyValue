@@ -8,7 +8,7 @@ namespace ValveKeyValue.Test
             using var stream = TestDataHelper.OpenResource("Text.numbers.vdf");
             var data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream).Root;
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That((string)data["0"], Is.EqualTo("12,34"));
                 Assert.That((string)data["1"], Is.EqualTo("12, 34"));
@@ -73,7 +73,7 @@ namespace ValveKeyValue.Test
                 Assert.That(data["28"].ValueType, Is.EqualTo(KVValueType.String));
                 Assert.That(data["29"].ValueType, Is.EqualTo(KVValueType.FloatingPoint));
                 Assert.That(data["30"].ValueType, Is.EqualTo(KVValueType.FloatingPoint));
-            });
+            }
         }
     }
 }
