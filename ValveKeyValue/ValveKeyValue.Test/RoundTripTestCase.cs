@@ -52,7 +52,8 @@ namespace ValveKeyValue.Test
             Assert.That((string)data["name"], Is.EqualTo("original"));
 
             // Mutate via indexer
-            data.Root["name"] = "modified";
+            var root = data.Root;
+            root["name"] = "modified";
 
             var result = RoundTripKV1(data);
 
@@ -77,7 +78,8 @@ namespace ValveKeyValue.Test
             Assert.That((string)data["name"], Is.EqualTo("original"));
 
             // Mutate
-            data.Root["name"] = "updated";
+            var root = data.Root;
+            root["name"] = "updated";
 
             var result = RoundTripKV3(data);
 

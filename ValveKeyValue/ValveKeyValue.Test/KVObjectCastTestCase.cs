@@ -265,15 +265,15 @@ namespace ValveKeyValue.Test
         }
 
         [Test]
-        public void CastingNullKVObjectToStringThrows()
+        public void CastingNullKVObjectToStringReturnsNullString()
         {
-            Assert.That(() => (string)(KVObject)null!, Throws.InstanceOf<NullReferenceException>());
+            Assert.That((string)KVObject.Null(), Is.EqualTo("null"));
         }
 
         [Test]
         public void CastingNullKVObjectToInt32Throws()
         {
-            Assert.That(() => (int)(KVObject)null!, Throws.InstanceOf<NullReferenceException>());
+            Assert.That(() => (int)KVObject.Null(), Throws.InstanceOf<NotSupportedException>());
         }
 
         [TestCase(typeof(bool))]

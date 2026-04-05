@@ -6,8 +6,13 @@ namespace ValveKeyValue
     /// Represents a KV2/DMX element with a unique identifier and class name.
     /// Used for KeyValues2 format where each element carries a GUID and type descriptor.
     /// </summary>
-    class KV2Element : KVObject
+    class KV2Element
     {
+        /// <summary>
+        /// Gets or sets the underlying KVObject for this element.
+        /// </summary>
+        public KVObject Object { get; set; }
+
         /// <summary>
         /// Gets or sets the unique identifier for this element within its datamodel.
         /// </summary>
@@ -21,15 +26,17 @@ namespace ValveKeyValue
         /// <summary>
         /// Initializes a new instance of the <see cref="KV2Element"/> class as an empty collection.
         /// </summary>
-        public KV2Element() : base()
+        public KV2Element()
         {
+            Object = KVObject.Collection();
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KV2Element"/> class as a collection from children.
         /// </summary>
-        internal KV2Element(List<KeyValuePair<string, KVObject>> items) : base(KVValueType.Collection, items)
+        internal KV2Element(List<KeyValuePair<string, KVObject>> items)
         {
+            Object = KVObject.ListCollection(items);
         }
     }
 }

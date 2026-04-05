@@ -18,7 +18,8 @@ namespace ValveKeyValue.Test
             var obj = KVObject.ListCollection();
             obj.Add("a", inner);
 
-            obj["a"]["b"] = 42;
+            var a = obj["a"];
+            a["b"] = 42;
 
             using (Assert.EnterMultipleScope())
             {
@@ -98,7 +99,7 @@ namespace ValveKeyValue.Test
             obj.Add("a", "1");
             obj.Add("b", "2");
 
-            obj["a"] = null!;
+            obj["a"] = KVObject.Null();
 
             Assert.That(obj, Has.Count.EqualTo(2));
             using (Assert.EnterMultipleScope())
@@ -114,7 +115,7 @@ namespace ValveKeyValue.Test
             var obj = KVObject.ListCollection();
             obj.Add("a", "1");
 
-            obj["nonexistent"] = null!;
+            obj["nonexistent"] = KVObject.Null();
 
             using (Assert.EnterMultipleScope())
             {
@@ -367,7 +368,7 @@ namespace ValveKeyValue.Test
         public void AddNullElementToArrayStoresNullType()
         {
             var obj = KVObject.Array();
-            obj.Add((KVObject)null!);
+            obj.Add(KVObject.Null());
 
             Assert.That(obj, Has.Count.EqualTo(1));
             Assert.That(obj[0].IsNull, Is.True);
@@ -380,8 +381,7 @@ namespace ValveKeyValue.Test
         [Test]
         public void FlagMutationPreservesIntValue()
         {
-            KVObject val = 42;
-            val.Flag = KVFlag.Resource;
+            KVObject val = new KVObject(42).WithFlag(KVFlag.Resource);
 
             using (Assert.EnterMultipleScope())
             {
@@ -394,8 +394,7 @@ namespace ValveKeyValue.Test
         [Test]
         public void FlagMutationPreservesStringValue()
         {
-            KVObject val = "hello";
-            val.Flag = KVFlag.SoundEvent;
+            KVObject val = new KVObject("hello").WithFlag(KVFlag.SoundEvent);
 
             using (Assert.EnterMultipleScope())
             {
@@ -409,10 +408,8 @@ namespace ValveKeyValue.Test
         public void FlagMutationOnSeparateObjects()
         {
             KVObject val = 99;
-            KVObject withResource = 99;
-            withResource.Flag = KVFlag.Panorama;
-            KVObject withBoth = 99;
-            withBoth.Flag = KVFlag.EntityName;
+            KVObject withResource = new KVObject(99).WithFlag(KVFlag.Panorama);
+            KVObject withBoth = new KVObject(99).WithFlag(KVFlag.EntityName);
 
             using (Assert.EnterMultipleScope())
             {
@@ -439,7 +436,7 @@ namespace ValveKeyValue.Test
             using (Assert.EnterMultipleScope())
             {
                 Assert.That(result, Is.False);
-                Assert.That(child, Is.Null);
+                Assert.That(child.IsNull, Is.True);
             }
         }
 
@@ -453,7 +450,7 @@ namespace ValveKeyValue.Test
             using (Assert.EnterMultipleScope())
             {
                 Assert.That(result, Is.False);
-                Assert.That(child, Is.Null);
+                Assert.That(child.IsNull, Is.True);
             }
         }
 
@@ -472,8 +469,8 @@ namespace ValveKeyValue.Test
             using (Assert.EnterMultipleScope())
             {
                 Assert.That(result, Is.True);
-                Assert.That(child, Is.Not.Null);
-                Assert.That((string)child!, Is.EqualTo("value"));
+                Assert.That(child.IsNull, Is.False);
+                Assert.That((string)child, Is.EqualTo("value"));
             }
         }
 
@@ -487,10 +484,10 @@ namespace ValveKeyValue.Test
             using (Assert.EnterMultipleScope())
             {
                 Assert.That(obj.TryGetValue("key1", out var found), Is.True);
-                Assert.That((string)found!, Is.EqualTo("value1"));
+                Assert.That((string)found, Is.EqualTo("value1"));
 
                 Assert.That(obj.TryGetValue("missing", out var notFound), Is.False);
-                Assert.That(notFound, Is.Null);
+                Assert.That(notFound.IsNull, Is.True);
             }
         }
 
@@ -575,7 +572,7 @@ namespace ValveKeyValue.Test
         public void AddNullValueStoresNullType()
         {
             var obj = KVObject.ListCollection();
-            obj.Add("key", null!);
+            obj.Add("key", KVObject.Null());
 
             Assert.That(obj, Has.Count.EqualTo(1));
             Assert.That(obj["key"].IsNull, Is.True);
@@ -585,7 +582,7 @@ namespace ValveKeyValue.Test
         public void TryAddNullValueStoresNullType()
         {
             var obj = KVObject.Collection();
-            obj.TryAdd("key", null!);
+            obj.TryAdd("key", KVObject.Null());
 
             Assert.That(obj, Has.Count.EqualTo(1));
             Assert.That(obj["key"].IsNull, Is.True);
@@ -769,7 +766,7 @@ namespace ValveKeyValue.Test
             var obj = KVObject.Collection();
             obj.Add("a", 1);
 
-            obj["nonexistent"] = null!;
+            obj["nonexistent"] = KVObject.Null();
 
             using (Assert.EnterMultipleScope())
             {

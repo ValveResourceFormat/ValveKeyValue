@@ -3,7 +3,7 @@ using System.Text;
 
 namespace ValveKeyValue
 {
-    public partial class KVObject : IConvertible
+    public readonly partial struct KVObject : IConvertible
     {
         #region IConvertible (explicit interface)
 

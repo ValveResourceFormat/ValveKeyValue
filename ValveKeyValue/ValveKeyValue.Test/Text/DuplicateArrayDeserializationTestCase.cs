@@ -7,28 +7,28 @@ namespace ValveKeyValue.Test
         [Test]
         public void IsNotNull()
         {
-            Assert.That(data, Is.Not.Null);
+            Assert.That(data.IsNull, Is.False);
         }
 
         [Test]
         public void HasTwoChildren()
         {
-            Assert.That(data.Children?.Count(), Is.EqualTo(2));
+            Assert.That(data.Children.Count(), Is.EqualTo(2));
         }
 
         [Test]
         public void IndexerUsesFirstChild()
         {
             var child = data["Values"];
-            Assert.That(child?.ValueType, Is.EqualTo(KVValueType.Collection));
+            Assert.That(child.ValueType, Is.EqualTo(KVValueType.Collection));
 
-            var valueObjects = child!.ToArray();
+            var valueObjects = child.ToArray();
             using (Assert.EnterMultipleScope())
             {
                 Assert.That(valueObjects, Has.Length.EqualTo(2));
 
-                Assert.That((string)valueObjects[0].Value!["name"]!, Is.EqualTo("first"));
-                Assert.That((string)valueObjects[1].Value!["name"]!, Is.EqualTo("second"));
+                Assert.That((string)valueObjects[0].Value["name"], Is.EqualTo("first"));
+                Assert.That((string)valueObjects[1].Value["name"], Is.EqualTo("second"));
             }
         }
 
@@ -39,25 +39,25 @@ namespace ValveKeyValue.Test
             Assert.That(children, Has.Length.EqualTo(2));
 
             var firstNode = children[0].Value;
-            Assert.That(firstNode, Is.Not.Null);
+            Assert.That(firstNode.IsNull, Is.False);
 
-            var firstArray = firstNode!.ToArray();
+            var firstArray = firstNode.ToArray();
             using (Assert.EnterMultipleScope())
             {
                 Assert.That(firstArray, Has.Length.EqualTo(2));
-                Assert.That((string)firstArray[0].Value!["name"]!, Is.EqualTo("first"));
-                Assert.That((string)firstArray[1].Value!["name"]!, Is.EqualTo("second"));
+                Assert.That((string)firstArray[0].Value["name"], Is.EqualTo("first"));
+                Assert.That((string)firstArray[1].Value["name"], Is.EqualTo("second"));
             }
 
             var secondNode = children[1].Value;
-            Assert.That(secondNode, Is.Not.Null);
+            Assert.That(secondNode.IsNull, Is.False);
 
-            var secondArray = secondNode!.ToArray();
+            var secondArray = secondNode.ToArray();
             using (Assert.EnterMultipleScope())
             {
                 Assert.That(secondArray, Has.Length.EqualTo(2));
-                Assert.That((string)secondArray[0].Value!["name"]!, Is.EqualTo("third"));
-                Assert.That((string)secondArray[1].Value!["name"]!, Is.EqualTo("fourth"));
+                Assert.That((string)secondArray[0].Value["name"], Is.EqualTo("third"));
+                Assert.That((string)secondArray[1].Value["name"], Is.EqualTo("fourth"));
             }
         }
 

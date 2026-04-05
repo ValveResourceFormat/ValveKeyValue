@@ -76,7 +76,7 @@ namespace ValveKeyValue.Deserialization
 
             var state = StateStack.Pop();
             var completedObject = MakeObject(state);
-            StateStack.Peek().Items.Add(new KeyValuePair<string, KVObject>(state.Key!, completedObject!));
+            StateStack.Peek().Items.Add(new KeyValuePair<string, KVObject>(state.Key!, completedObject ?? default));
         }
 
         public void OnArrayEnd()
@@ -88,7 +88,7 @@ namespace ValveKeyValue.Deserialization
 
             var state = StateStack.Pop();
             var completedObject = MakeArray(state);
-            StateStack.Peek().Items.Add(new KeyValuePair<string, KVObject>(state.Key!, completedObject!));
+            StateStack.Peek().Items.Add(new KeyValuePair<string, KVObject>(state.Key!, completedObject ?? default));
         }
 
         public void DiscardCurrentObject()
@@ -155,7 +155,7 @@ namespace ValveKeyValue.Deserialization
 
         static KeyValuePair<string, KVObject> MakeResult(KVPartialState state, KVObject? obj)
         {
-            return new KeyValuePair<string, KVObject>(state.Key!, obj!);
+            return new KeyValuePair<string, KVObject>(state.Key!, obj ?? default);
         }
 
         KVObject? MakeObject(KVPartialState state)
@@ -181,7 +181,7 @@ namespace ValveKeyValue.Deserialization
 
             if (state.Flag != KVFlag.None)
             {
-                result.Flag = state.Flag;
+                result = result.WithFlag(state.Flag);
             }
 
             return result;
@@ -210,12 +210,7 @@ namespace ValveKeyValue.Deserialization
                 arrayItems.Add(kvp.Value);
             }
 
-            var result = new KVObject(KVValueType.Array, arrayItems);
-
-            if (state.Flag != KVFlag.None)
-            {
-                result.Flag = state.Flag;
-            }
+            var result = new KVObject(KVValueType.Array, arrayItems, flag: state.Flag);
 
             return result;
         }

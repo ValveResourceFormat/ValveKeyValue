@@ -93,7 +93,7 @@ namespace ValveKeyValue.Test
         public void ConditionalInKey()
         {
             var data = ParseResource("Text.conditional_in_key.vdf");
-            Assert.That(data, Is.Not.Null);
+            Assert.That(data.IsNull, Is.False);
             Assert.That(data.ValueType, Is.EqualTo(KVValueType.Collection));
 
             var children = data.Children.ToArray();
@@ -109,14 +109,14 @@ namespace ValveKeyValue.Test
         public void ConditionalBeforeObject()
         {
             var data = ParseResource("Text.conditional_before_object_value.vdf");
-            Assert.That(data, Is.Not.Null);
+            Assert.That(data.IsNull, Is.False);
             Assert.That(data.ValueType, Is.EqualTo(KVValueType.Collection));
 
             var children = data.Children.ToArray();
             Assert.That(children, Has.Length.EqualTo(0));
 
             data = ParseResource("Text.conditional_before_object_value.vdf", ["WIN32"]);
-            Assert.That(data, Is.Not.Null);
+            Assert.That(data.IsNull, Is.False);
             Assert.That(data.ValueType, Is.EqualTo(KVValueType.Collection));
 
             children = data.Children.ToArray();
@@ -132,14 +132,14 @@ namespace ValveKeyValue.Test
         public void ConditionalBetweenKeyAndValue()
         {
             var data = ParseResource("Text.conditional_between_key_and_value.vdf");
-            Assert.That(data, Is.Not.Null);
+            Assert.That(data.IsNull, Is.False);
             Assert.That(data.ValueType, Is.EqualTo(KVValueType.Collection));
 
             var children = data.Children.ToArray();
             Assert.That(children, Has.Length.EqualTo(0));
 
             data = ParseResource("Text.conditional_between_key_and_value.vdf", ["WIN32"]);
-            Assert.That(data, Is.Not.Null);
+            Assert.That(data.IsNull, Is.False);
             Assert.That(data.ValueType, Is.EqualTo(KVValueType.Collection));
 
             children = data.Children.ToArray();

@@ -17,10 +17,9 @@ namespace ValveKeyValue.Test
             obj.Add("key", "value");
             var child = obj["key"];
 
-            Assert.That(child, Is.Not.Null);
             using (Assert.EnterMultipleScope())
             {
-                Assert.That(child, Is.InstanceOf<KVObject>());
+                Assert.That(child.IsNull, Is.False);
                 Assert.That((string)child, Is.EqualTo("value"));
             }
         }
@@ -52,7 +51,8 @@ namespace ValveKeyValue.Test
             var obj = KVObject.ListCollection();
             obj.Add("a", inner);
 
-            obj["a"]["b"] = 42;
+            var a = obj["a"];
+            a["b"] = 42;
 
             Assert.That((int)obj["a"]["b"], Is.EqualTo(42));
         }
@@ -374,8 +374,7 @@ namespace ValveKeyValue.Test
         [Test]
         public void FlagMutationPreservesValueType()
         {
-            KVObject value = 42;
-            value.Flag = KVFlag.Resource;
+            KVObject value = new KVObject(42).WithFlag(KVFlag.Resource);
 
             using (Assert.EnterMultipleScope())
             {

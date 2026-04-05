@@ -1,6 +1,6 @@
 namespace ValveKeyValue
 {
-    public partial class KVObject
+    public readonly partial struct KVObject
     {
         #region Implicit operators (FROM primitives)
 

@@ -7,7 +7,7 @@ namespace ValveKeyValue.Test
         [Test]
         public void IsNotNull()
         {
-            Assert.That(data, Is.Not.Null);
+            Assert.That(data.IsNull, Is.False);
         }
 
         [TestCase(KVValueType.String, TypeCode.String, "string", "123foo")]
@@ -21,7 +21,7 @@ namespace ValveKeyValue.Test
         {
             var actualValue = data[key];
 
-            Assert.That(actualValue, Is.Not.Null);
+            Assert.That(actualValue.IsNull, Is.False);
             using (Assert.EnterMultipleScope())
             {
                 Assert.That(actualValue.ValueType, Is.EqualTo(expectedType), nameof(KVValueType));

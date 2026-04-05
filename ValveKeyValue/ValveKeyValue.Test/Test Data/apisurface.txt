@@ -101,7 +101,7 @@ public sealed class ValveKeyValue.KVIgnoreAttribute : Attribute
     public string ToString();
 }
 
-public class ValveKeyValue.KVObject : IConvertible, System.Collections.Generic.IReadOnlyDictionary`2[[string, ValveKeyValue.KVObject]]
+public sealed struct ValveKeyValue.KVObject : IConvertible, IEquatable`1[[ValveKeyValue.KVObject]], System.Collections.Generic.IReadOnlyDictionary`2[[string, ValveKeyValue.KVObject]]
 {
     public .ctor();
     public .ctor(bool value);
@@ -129,6 +129,7 @@ public class ValveKeyValue.KVObject : IConvertible, System.Collections.Generic.I
     public static ValveKeyValue.KVObject Collection(System.Collections.Generic.IEnumerable`1[[System.Collections.Generic.KeyValuePair`2[[string, ValveKeyValue.KVObject]]]] children);
     public bool ContainsKey(string name);
     public bool Equals(object obj);
+    public bool Equals(ValveKeyValue.KVObject other);
     protected void Finalize();
     public System.Collections.Generic.IEnumerable`1[[System.Collections.Generic.KeyValuePair`2[[string, ValveKeyValue.KVObject]]]] get_Children();
     public int get_Count();
@@ -149,6 +150,7 @@ public class ValveKeyValue.KVObject : IConvertible, System.Collections.Generic.I
     public static ValveKeyValue.KVObject ListCollection(System.Collections.Generic.IEnumerable`1[[System.Collections.Generic.KeyValuePair`2[[string, ValveKeyValue.KVObject]]]] children);
     protected object MemberwiseClone();
     public static ValveKeyValue.KVObject Null();
+    public static bool op_Equality(ValveKeyValue.KVObject left, ValveKeyValue.KVObject right);
     public static string op_Explicit(ValveKeyValue.KVObject obj);
     public static int op_Explicit(ValveKeyValue.KVObject obj);
     public static bool op_Explicit(ValveKeyValue.KVObject obj);
@@ -179,9 +181,9 @@ public class ValveKeyValue.KVObject : IConvertible, System.Collections.Generic.I
     public static ValveKeyValue.KVObject op_Implicit(uint value);
     public static ValveKeyValue.KVObject op_Implicit(ulong value);
     public static ValveKeyValue.KVObject op_Implicit(ushort value);
+    public static bool op_Inequality(ValveKeyValue.KVObject left, ValveKeyValue.KVObject right);
     public bool Remove(string key);
     public void RemoveAt(int index);
-    public void set_Flag(ValveKeyValue.KVFlag value);
     public void set_Item(string key, ValveKeyValue.KVObject value);
     public bool ToBoolean();
     public bool ToBoolean(IFormatProvider provider);
@@ -214,6 +216,7 @@ public class ValveKeyValue.KVObject : IConvertible, System.Collections.Generic.I
     public ulong ToUInt64(IFormatProvider provider);
     public bool TryAdd(string key, ValveKeyValue.KVObject value);
     public bool TryGetValue(string name, out ValveKeyValue.KVObject& child);
+    public ValveKeyValue.KVObject WithFlag(ValveKeyValue.KVFlag flag);
 }
 
 public sealed class ValveKeyValue.KVPropertyAttribute : Attribute

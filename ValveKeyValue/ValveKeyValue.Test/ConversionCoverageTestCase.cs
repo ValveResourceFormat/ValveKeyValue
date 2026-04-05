@@ -406,7 +406,7 @@ namespace ValveKeyValue.Test
 
             Assert.That(data, Has.Count.EqualTo(2));
 
-            data["key1"] = null!;
+            data["key1"] = KVObject.Null();
 
             Assert.That(data, Has.Count.EqualTo(2));
             using (Assert.EnterMultipleScope())

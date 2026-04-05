@@ -154,8 +154,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             {
                 case KV3TextReaderState.InArray:
                     {
-                        var value = ParseValue(text);
-                        value.Flag = stateMachine.GetAndResetFlag();
+                        var value = ParseValue(text).WithFlag(stateMachine.GetAndResetFlag());
                         listener.OnArrayValue(value);
                         break;
                     }
@@ -167,8 +166,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 case KV3TextReaderState.InObjectAfterKey:
                     {
                         var name = stateMachine.CurrentName!;
-                        var value = ParseValue(text);
-                        value.Flag = stateMachine.GetAndResetFlag();
+                        var value = ParseValue(text).WithFlag(stateMachine.GetAndResetFlag());
                         listener.OnKeyValuePair(name, value);
 
                         stateMachine.Push(KV3TextReaderState.InObjectBeforeKey);
@@ -183,8 +181,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         void ReadBinaryBlob(string text)
         {
             var bytes = HexStringHelper.ParseHexStringAsByteArray(text);
-            var value = KVObject.Blob(bytes);
-            value.Flag = stateMachine.GetAndResetFlag();
+            var value = KVObject.Blob(bytes).WithFlag(stateMachine.GetAndResetFlag());
 
             switch (stateMachine.Current)
             {

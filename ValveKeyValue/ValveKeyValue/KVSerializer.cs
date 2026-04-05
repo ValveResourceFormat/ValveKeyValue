@@ -74,7 +74,6 @@ namespace ValveKeyValue
         public void Serialize(Stream stream, KVObject data, string name, KVSerializerOptions? options = null)
         {
             ArgumentNullException.ThrowIfNull(stream);
-            ArgumentNullException.ThrowIfNull(data);
 
             using var serializer = MakeSerializer(stream, options ?? KVSerializerOptions.DefaultOptions);
             var visitor = new KVObjectVisitor(serializer);

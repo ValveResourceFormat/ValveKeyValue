@@ -13,7 +13,7 @@ namespace ValveKeyValue
     /// Keys (names) are stored in the parent container, not on the child.
     /// </summary>
     [DebuggerDisplay("{DebuggerDescription}")]
-    public partial class KVObject : IReadOnlyDictionary<string, KVObject>
+    public readonly partial struct KVObject : IReadOnlyDictionary<string, KVObject>, IEquatable<KVObject>
     {
         #region Properties
 
@@ -23,9 +23,9 @@ namespace ValveKeyValue
         public KVValueType ValueType { get; }
 
         /// <summary>
-        /// Gets or sets the flags of this object.
+        /// Gets the flags of this object.
         /// </summary>
-        public KVFlag Flag { get; set; }
+        public KVFlag Flag { get; }
 
         // Inline storage for scalar types (no boxing).
         // Interpretation depends on ValueType.
@@ -188,6 +188,11 @@ namespace ValveKeyValue
             _ref = refValue;
         }
 
+        /// <summary>
+        /// Returns a copy of this object with the specified flag.
+        /// </summary>
+        public KVObject WithFlag(KVFlag flag) => new(ValueType, _scalar, _ref, flag);
+
         #endregion
 
         #region Indexers
@@ -211,7 +216,7 @@ namespace ValveKeyValue
             set
             {
                 ArgumentNullException.ThrowIfNull(key);
-                TryInsert(key, value ?? Null(), InsertionBehavior.OverwriteExisting);
+                TryInsert(key, value, InsertionBehavior.OverwriteExisting);
             }
         }
 
@@ -244,7 +249,7 @@ namespace ValveKeyValue
         /// <summary>
         /// Tries to get a child <see cref="KVObject"/> by key.
         /// </summary>
-        public bool TryGetValue(string name, [MaybeNullWhen(false)] out KVObject child)
+        public bool TryGetValue(string name, out KVObject child)
         {
             ArgumentNullException.ThrowIfNull(name);
 
@@ -255,7 +260,7 @@ namespace ValveKeyValue
                 case List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection:
                     return TryFindInList(list, name, out child);
                 default:
-                    child = null!;
+                    child = default;
                     return false;
             }
         }
@@ -323,7 +328,7 @@ namespace ValveKeyValue
         public void Add(string key, KVObject value)
         {
             ArgumentNullException.ThrowIfNull(key);
-            TryInsert(key, value ?? Null(), InsertionBehavior.ThrowOnExisting);
+            TryInsert(key, value, InsertionBehavior.ThrowOnExisting);
         }
 
         /// <summary>
@@ -334,7 +339,7 @@ namespace ValveKeyValue
         public bool TryAdd(string key, KVObject value)
         {
             ArgumentNullException.ThrowIfNull(key);
-            return TryInsert(key, value ?? Null(), InsertionBehavior.None);
+            return TryInsert(key, value, InsertionBehavior.None);
         }
 
         /// <summary>
@@ -348,7 +353,7 @@ namespace ValveKeyValue
             }
 
             var list = (List<KVObject>)_ref!;
-            list.Add(value ?? Null());
+            list.Add(value);
         }
 
         /// <summary>
@@ -606,7 +611,7 @@ namespace ValveKeyValue
             }
         }
 
-        private static bool TryFindInList(List<KeyValuePair<string, KVObject>> list, string name, [MaybeNullWhen(false)] out KVObject value)
+        private static bool TryFindInList(List<KeyValuePair<string, KVObject>> list, string name, out KVObject value)
         {
             foreach (var kvp in list)
             {
@@ -617,9 +622,24 @@ namespace ValveKeyValue
                 }
             }
 
-            value = null!;
+            value = default;
             return false;
         }
+
+        /// <inheritdoc/>
+        public override bool Equals(object? obj) => obj is KVObject other && Equals(other);
+
+        /// <summary>Determines whether two KVObjects are equal.</summary>
+        public bool Equals(KVObject other) => ValueType == other.ValueType && Flag == other.Flag && _scalar == other._scalar && _ref == other._ref;
+
+        /// <inheritdoc/>
+        public override int GetHashCode() => HashCode.Combine(ValueType, Flag, _scalar, _ref);
+
+        /// <summary>Equality operator.</summary>
+        public static bool operator ==(KVObject left, KVObject right) => left.Equals(right);
+
+        /// <summary>Inequality operator.</summary>
+        public static bool operator !=(KVObject left, KVObject right) => !left.Equals(right);
 
         private string DebuggerDescription => ValueType switch
         {

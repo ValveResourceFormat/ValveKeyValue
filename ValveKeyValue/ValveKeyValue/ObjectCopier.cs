@@ -22,7 +22,6 @@ namespace ValveKeyValue
         [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2062", Justification = "If the lookup value type exists at runtime then it should have enough for us to introspect.")]
         public static TObject MakeObject<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TObject>(KVObject keyValueObject, IObjectReflector reflector)
         {
-            ArgumentNullException.ThrowIfNull(keyValueObject);
             ArgumentNullException.ThrowIfNull(reflector);
 
             if (keyValueObject.ValueType == KVValueType.Collection)
@@ -89,9 +88,9 @@ namespace ValveKeyValue
             }
 
             var attemptedKvValue = ConvertToKVObject(managedObject, objectType);
-            if (attemptedKvValue != null)
+            if (attemptedKvValue is KVObject kvValue)
             {
-                return attemptedKvValue;
+                return kvValue;
             }
 
             var childItems = new List<KeyValuePair<string, KVObject>>();
@@ -142,7 +141,6 @@ namespace ValveKeyValue
 
         static void CopyObject(KVObject kv, [DynamicallyAccessedMembers(Trimming.Properties)] Type objectType, object obj, IObjectReflector reflector)
         {
-            ArgumentNullException.ThrowIfNull(kv);
             ArgumentNullException.ThrowIfNull(obj);
             ArgumentNullException.ThrowIfNull(reflector);
 
@@ -520,7 +518,7 @@ namespace ValveKeyValue
                 TypeCode.UInt16 => new KVObject((ulong)(ushort)value),
                 TypeCode.UInt32 => new KVObject((ulong)(uint)value),
                 TypeCode.UInt64 => new KVObject((ulong)value),
-                _ => null,
+                _ => (KVObject?)null,
             };
         }
     }
