@@ -52,7 +52,7 @@ namespace ValveKeyValue.Test
             Assert.That((string)data["name"], Is.EqualTo("original"));
 
             // Mutate via indexer
-            data["name"] = "modified";
+            data.Root["name"] = "modified";
 
             var result = RoundTripKV1(data);
 
@@ -77,7 +77,7 @@ namespace ValveKeyValue.Test
             Assert.That((string)data["name"], Is.EqualTo("original"));
 
             // Mutate
-            data["name"] = "updated";
+            data.Root["name"] = "updated";
 
             var result = RoundTripKV3(data);
 
@@ -135,8 +135,8 @@ namespace ValveKeyValue.Test
             var data = DeserializeKV3(input);
 
             // KV3 deserializer uses dictionary-backed collections; verify dict lookup works
-            Assert.That(data.ContainsKey("alpha"), Is.True);
-            Assert.That(data.ContainsKey("nonexistent"), Is.False);
+            Assert.That(data.Root.ContainsKey("alpha"), Is.True);
+            Assert.That(data.Root.ContainsKey("nonexistent"), Is.False);
 
             Assert.That((string)data["alpha"], Is.EqualTo("one"));
             Assert.That((long)data["beta"], Is.EqualTo(2));
@@ -146,7 +146,7 @@ namespace ValveKeyValue.Test
 
             Assert.Multiple(() =>
             {
-                Assert.That(result.ContainsKey("alpha"), Is.True);
+                Assert.That(result.Root.ContainsKey("alpha"), Is.True);
                 Assert.That((string)result["alpha"], Is.EqualTo("one"));
                 Assert.That((long)result["beta"], Is.EqualTo(2));
                 Assert.That((bool)result["gamma"], Is.True);
@@ -163,16 +163,16 @@ namespace ValveKeyValue.Test
             var root = KVObject.ListCollection();
             root.Add("key1", "value1");
             root.Add("key2", "value2");
-            var doc = new KVDocument(null!, "Config", root);
+            var doc = new KVDocument(null, "Config", root);
 
             var result = RoundTripKV1(doc);
 
             Assert.Multiple(() =>
             {
                 Assert.That(result.Name, Is.EqualTo("Config"));
-                Assert.That(result.Count, Is.EqualTo(2));
-                Assert.That((string)result["key1"], Is.EqualTo("value1"));
-                Assert.That((string)result["key2"], Is.EqualTo("value2"));
+                Assert.That(result.Root.Count, Is.EqualTo(2));
+                Assert.That((string)result.Root["key1"], Is.EqualTo("value1"));
+                Assert.That((string)result.Root["key2"], Is.EqualTo("value2"));
             });
         }
 
@@ -182,7 +182,7 @@ namespace ValveKeyValue.Test
             var root = KVObject.ListCollection();
             root.Add("existing", "yes");
             root.Add("added", "dynamically");
-            var doc = new KVDocument(null!, "root", root);
+            var doc = new KVDocument(null, "root", root);
 
             var result = RoundTripKV3(doc);
 
@@ -210,12 +210,12 @@ namespace ValveKeyValue.Test
                 """;
 
             var data = DeserializeKV1(input);
-            Assert.That(data.Count, Is.EqualTo(3));
+            Assert.That(data.Root.Count, Is.EqualTo(3));
 
-            var removed = data.Remove("remove");
+            var removed = data.Root.Remove("remove");
             Assert.That(removed, Is.True);
 
-            var result = RoundTripKV1(data);
+            var result = RoundTripKV1(data).Root;
 
             Assert.Multiple(() =>
             {
@@ -232,12 +232,12 @@ namespace ValveKeyValue.Test
             var input = "<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->\n{\n\tkeep = \"yes\"\n\tremove = \"no\"\n\talso_keep = \"yes\"\n}\n";
 
             var data = DeserializeKV3(input);
-            Assert.That(data.Count, Is.EqualTo(3));
+            Assert.That(data.Root.Count, Is.EqualTo(3));
 
-            var removed = data.Remove("remove");
+            var removed = data.Root.Remove("remove");
             Assert.That(removed, Is.True);
 
-            var result = RoundTripKV3(data);
+            var result = RoundTripKV3(data).Root;
 
             Assert.Multiple(() =>
             {
@@ -359,7 +359,7 @@ namespace ValveKeyValue.Test
                 Assert.That(data["no_flag"].Flag, Is.EqualTo(KVFlag.None));
             });
 
-            var result = RoundTripKV3(data);
+            var result = RoundTripKV3(data).Root;
 
             Assert.Multiple(() =>
             {
@@ -404,7 +404,7 @@ namespace ValveKeyValue.Test
                 Assert.That((string)data["normal"], Is.EqualTo("exists"));
             });
 
-            var result = RoundTripKV3(data);
+            var result = RoundTripKV3(data).Root;
 
             Assert.Multiple(() =>
             {

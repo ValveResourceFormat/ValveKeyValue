@@ -17,39 +17,39 @@ namespace ValveKeyValue.Test
         [Test]
         public void Name()
         {
-            Assert.That(((KVDocument)data).Name, Is.EqualTo("depots"));
+            Assert.That(data.Name, Is.EqualTo("depots"));
         }
 
         [Test]
         public void HasFourItems()
         {
-            Assert.That(data.Children.Count(), Is.EqualTo(4));
+            Assert.That(data.Root.Children.Count(), Is.EqualTo(4));
         }
 
         [TestCaseSource(nameof(ItemsTestCaseData))]
         public void HasItems(string key, string expectedValue)
         {
-            var value = data[key];
+            var value = data.Root[key];
             Assert.That((string)value, Is.EqualTo(expectedValue));
         }
 
         [TestCaseSource(nameof(ItemsTestCaseData))]
         public void HasItemWithValueCast(string key, string expectedValue)
         {
-            var value = data[key];
+            var value = data.Root[key];
             Assert.That((string)value, Is.EqualTo(expectedValue));
         }
 
         [TestCaseSource(nameof(GarbageItemsTestCaseData))]
         public void DoesNotHaveGarbageItems(string key)
         {
-            Assert.That(data.ContainsKey(key), Is.False);
+            Assert.That(data.Root.ContainsKey(key), Is.False);
         }
 
         [TestCaseSource(nameof(GarbageItemsTestCaseData))]
         public void DoesNotHaveGarbageWithValueCast(string key)
         {
-            Assert.That(data.TryGetValue(key, out _), Is.False);
+            Assert.That(data.Root.TryGetValue(key, out _), Is.False);
         }
 
         static IEnumerable ItemsTestCaseData
@@ -74,7 +74,7 @@ namespace ValveKeyValue.Test
             }
         }
 
-        KVObject data;
+        KVDocument data;
 
         [OneTimeSetUp]
         public void SetUp()

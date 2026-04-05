@@ -84,7 +84,7 @@ namespace ValveKeyValue.Test.TextKV3
             root.Add("positiveInf", float.PositiveInfinity);
             root.Add("negativeInf", float.NegativeInfinity);
             root.Add("nan", float.NaN);
-            var doc = new KVDocument(null!, null!, root);
+            var doc = new KVDocument(null, null, root);
 
             Assert.That(SerializeToString(kv, doc), Is.EqualTo(expected));
         }
@@ -99,7 +99,7 @@ namespace ValveKeyValue.Test.TextKV3
             root.Add("positiveInf", double.PositiveInfinity);
             root.Add("negativeInf", double.NegativeInfinity);
             root.Add("nan", double.NaN);
-            var doc = new KVDocument(null!, null!, root);
+            var doc = new KVDocument(null, null, root);
 
             Assert.That(SerializeToString(kv, doc), Is.EqualTo(expected));
         }
@@ -191,7 +191,7 @@ namespace ValveKeyValue.Test.TextKV3
 
             var root = KVObject.Collection();
             root.Add("special", shortArray);
-            var doc = new KVDocument(null!, null!, root);
+            var doc = new KVDocument(null, null, root);
 
             var result = SerializeToString(kv, doc);
             Assert.That(result, Does.Contain("special = [ 1.0, inf, -inf, nan ]"));
@@ -210,7 +210,7 @@ namespace ValveKeyValue.Test.TextKV3
 
             var root = KVObject.Collection();
             root.Add("blobs", array);
-            var doc = new KVDocument(null!, null!, root);
+            var doc = new KVDocument(null, null, root);
 
             var result = SerializeToString(kv, doc);
             // Blobs are NOT simple, so array must be multiline even with <=4 elements
@@ -235,7 +235,7 @@ namespace ValveKeyValue.Test.TextKV3
             root.Add("has\\backslash", "i");
             root.Add("has\nnewline", "j");
             root.Add("has\ttab", "k");
-            var doc = new KVDocument(null!, null!, root);
+            var doc = new KVDocument(null, null, root);
 
             var result = SerializeToString(kv, doc);
             Assert.Multiple(() =>
@@ -265,7 +265,7 @@ namespace ValveKeyValue.Test.TextKV3
             root.Add("backslash", "a\\b");
             root.Add("quote", "a\"b");
             root.Add("all", "\n\t\\\"");
-            var doc = new KVDocument(null!, null!, root);
+            var doc = new KVDocument(null, null, root);
 
             var result = SerializeToString(kv, doc);
             Assert.Multiple(() =>
@@ -292,7 +292,7 @@ namespace ValveKeyValue.Test.TextKV3
 
             var root = KVObject.Collection();
             root.Add("nulls", nulls);
-            var doc = new KVDocument(null!, null!, root);
+            var doc = new KVDocument(null, null, root);
 
             var result = SerializeToString(kv, doc);
             // Nulls are simple, 4 elements -> short
@@ -334,7 +334,7 @@ namespace ValveKeyValue.Test.TextKV3
             root.Add("empty", KVObject.Blob([]));
             root.Add("small", KVObject.Blob([0x11, 0xFF]));
             root.Add("exact32", KVObject.Blob(Enumerable.Range(0, 32).Select(i => (byte)i).ToArray()));
-            var doc = new KVDocument(null!, null!, root);
+            var doc = new KVDocument(null, null, root);
 
             // Serialize (produces inline format) -> deserialize -> verify
             var data2 = RoundTrip(kv, doc);

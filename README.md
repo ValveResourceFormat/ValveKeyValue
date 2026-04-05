@@ -12,8 +12,8 @@ KeyValues is a simple key-value pair format used by Valve in Steam and the Sourc
 
 The library is built around a single type:
 
-- **`KVObject`** (class) -- a value node. Can be a scalar (string, int, float, bool, etc.), a binary blob, an array, or a named collection of children. Keys (names) are stored in the parent container, not on the child -- similar to how JSON works.
-- **`KVDocument`** (class, extends `KVObject`) -- a deserialized document with a root key `Name` and optional `Header`.
+- **`KVObject`** (class) -- a value node. Can be a scalar (string, int, float, bool, etc.), a binary blob, an array, or a named collection of children. Keys (names) are stored in the parent container, not on the child -- similar to how JSON works. Implements `IReadOnlyDictionary<string, KVObject>` and `IConvertible`.
+- **`KVDocument`** (class) -- a deserialized document containing a `Root` KVObject, a root key `Name`, and an optional `Header`. Has a read-only string indexer that delegates to `Root`, and an implicit conversion to `KVObject`.
 
 All types are shared across KV1 and KV3 -- you can deserialize from one format and serialize to another. However, not all value types are supported by all formats:
 
@@ -71,7 +71,7 @@ var nul = KVObject.Null();
 KVDocument data = kv.Deserialize(stream);
 
 // Root key name (only on KVDocument)
-string rootName = data.Name;
+string? rootName = data.Name;
 
 // String indexer returns KVObject (supports chaining)
 string name = (string)data["config"]["name"];
@@ -82,40 +82,43 @@ bool enabled = (bool)data["settings"]["enabled"];
 // Array elements by index
 float x = (float)data["position"][0];
 
-// Check existence
-if (data.ContainsKey("optional")) { ... }
-if (data.TryGetValue("optional", out var child)) { ... }
+// Access the root KVObject for full API (mutations, ContainsKey, etc.)
+KVObject root = data.Root;
 
-// Null-safe (indexer returns null for missing keys)
-KVObject val = data["missing"]; // null
+// Check existence (on the root KVObject)
+if (data.Root.ContainsKey("optional")) { ... }
+if (data.Root.TryGetValue("optional", out var child)) { ... }
 
-// Direct access to value properties
-KVValueType type = data.ValueType;
+// Indexer throws KeyNotFoundException for missing keys
+// Use TryGetValue for safe access
+
+// Direct access to value properties (on KVObject)
+KVValueType type = data.Root.ValueType;
 KVFlag flag = data["texture"].Flag;
-ReadOnlySpan<byte> bytes = data["blob"].AsSpan();
+byte[] bytes = data["blob"].AsBlob();
 ```
 
 ### Modifying
 
 ```csharp
-// Set scalar (implicit conversion)
-data["name"] = "new name";
-data["count"] = 42;
+// Mutations require the Root KVObject (KVDocument indexer is read-only)
+data.Root["name"] = "new name";
+data.Root["count"] = 42;
 
-// Chained writes work (reference semantics)
+// Chained writes work (reference semantics, first lookup goes through KVDocument indexer)
 data["config"]["resolution"] = "1920x1080";
 
 // Add children to collections
-data.Add("newprop", 42);           // implicit int -> KVObject
-data.Add("text", "value");         // implicit string -> KVObject
+data.Root.Add("newprop", 42);      // implicit int -> KVObject
+data.Root.Add("text", "value");    // implicit string -> KVObject
 
 // Add elements to arrays
 arr.Add(3.14f);                    // implicit float -> KVObject
 
 // Remove
-data.Remove("deprecated");
+data.Root.Remove("deprecated");
 arr.RemoveAt(2);
-data.Clear();
+data.Root.Clear();
 
 // Set flags directly
 data["texture"].Flag = KVFlag.Resource;
@@ -124,16 +127,16 @@ data["texture"].Flag = KVFlag.Resource;
 ### Enumerating
 
 ```csharp
-// KVObject implements IEnumerable<KeyValuePair<string, KVObject>>
+// KVObject implements IReadOnlyDictionary<string, KVObject>
 // Keys are the child names, values are the child KVObjects
-foreach (var (key, child) in data)
+foreach (var (key, child) in data.Root)
 {
     Console.WriteLine($"{key} = {(string)child}");
 }
 
 // Keys and Values properties
-var keys = data.Keys;            // IEnumerable<string>
-var values = data.Values;        // IEnumerable<KVObject>
+var keys = data.Root.Keys;       // IEnumerable<string>
+var values = data.Root.Values;   // IEnumerable<KVObject>
 
 // Array elements have null keys
 foreach (var (key, element) in arrayObj)
@@ -179,7 +182,7 @@ public class SimpleObject
 var stream = File.OpenRead("file.vdf"); // or any other Stream
 
 var kv = KVSerializer.Create(KVSerializationFormat.KeyValues1Text);
-KVObject data = kv.Deserialize<SimpleObject>(stream);
+SimpleObject data = kv.Deserialize<SimpleObject>(stream);
 ```
 
 ### Options
@@ -193,6 +196,7 @@ By default, operating system specific conditionals are enabled based on the OS t
 * `HasEscapeSequences` - Whether the parser should translate escape sequences (e.g. `\n`, `\t`).
 * `EnableValveNullByteBugBehavior` - Whether invalid escape sequences should truncate strings rather than throwing an `InvalidDataException`.
 * `FileLoader` - Provider for referenced files with `#include` or `#base` directives.
+* `SkipHeader` - Whether to skip writing the KV3 header comment during serialization.
 
 ```csharp
 var options = new KVSerializerOptions
@@ -214,6 +218,20 @@ Essentially the same as text, just change `KeyValues1Text` to `KeyValues1Binary`
 
 ## Serializing to text
 
+### Dynamic serialization
+```csharp
+var root = KVObject.ListCollection();
+root.Add("Developer", "Valve Software");
+root.Add("Name", "Dota 2");
+var doc = new KVDocument(null, "root object name", root);
+
+using var stream = File.OpenWrite("file.vdf");
+
+var kv = KVSerializer.Create(KVSerializationFormat.KeyValues1Text);
+kv.Serialize(stream, doc);
+```
+
+### Typed serialization
 ```csharp
 class DataObject
 {

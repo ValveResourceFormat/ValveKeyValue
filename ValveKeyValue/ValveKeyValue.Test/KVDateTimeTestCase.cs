@@ -19,7 +19,7 @@ namespace ValveKeyValue.Test
             using var ms = new MemoryStream();
             var serializer = KVSerializer.Create(KVSerializationFormat.KeyValues1Text);
 
-            serializer.Serialize(ms, new KVDocument(null!, "test", obj));
+            serializer.Serialize(ms, new KVDocument(null, "test", obj));
             ms.Seek(0, SeekOrigin.Begin);
 
             Assert.That(

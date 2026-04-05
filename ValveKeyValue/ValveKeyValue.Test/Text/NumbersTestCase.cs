@@ -6,7 +6,7 @@ namespace ValveKeyValue.Test
         public void CorrectlyDeserializesNumbers()
         {
             using var stream = TestDataHelper.OpenResource("Text.numbers.vdf");
-            var data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream);
+            var data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream).Root;
 
             Assert.Multiple(() =>
             {

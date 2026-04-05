@@ -19,7 +19,7 @@ namespace ValveKeyValue.Test
 
             Assert.Multiple(() =>
             {
-                Assert.That(data.Children.Count(), Is.EqualTo(1));
+                Assert.That(data.Root.Children.Count(), Is.EqualTo(1));
                 Assert.That((string)data["test"], Is.EqualTo("hello"));
             });
         }

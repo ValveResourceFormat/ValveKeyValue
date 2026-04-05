@@ -175,7 +175,8 @@ namespace ValveKeyValue.Test.TextKV3
         public void DeserializesBasicTypes()
         {
             using var stream = TestDataHelper.OpenResource("TextKV3.types.kv3");
-            var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
+            var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream).Root;
+
             Assert.Multiple(() =>
             {
                 Assert.That(data["boolFalseValue"].ValueType, Is.EqualTo(KVValueType.Boolean));

@@ -24,7 +24,7 @@ namespace ValveKeyValue.Test.TextKV3
             Assert.Multiple(() =>
             {
                 Assert.That(data.Header, Is.Not.Null);
-                Assert.That(data.Header.Encoding.Name, Is.Null);
+                Assert.That(data.Header!.Encoding.Name, Is.Null);
                 Assert.That(data.Header.Format.Name, Is.Null);
             });
         }
@@ -36,7 +36,7 @@ namespace ValveKeyValue.Test.TextKV3
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
             var root = KVObject.Collection();
             root.Add("key", "value");
-            var doc = new KVDocument(null!, null!, root);
+            var doc = new KVDocument(null, null, root);
 
             string text;
             using (var ms = new MemoryStream())
@@ -59,7 +59,7 @@ namespace ValveKeyValue.Test.TextKV3
             var root = KVObject.Collection();
             root.Add("key", "value");
             root.Add("number", 42);
-            var doc = new KVDocument(null!, null!, root);
+            var doc = new KVDocument(null, null, root);
 
             using var ms = new MemoryStream();
             kv.Serialize(ms, doc, options);
@@ -98,7 +98,7 @@ namespace ValveKeyValue.Test.TextKV3
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
             var root = KVObject.Collection();
             root.Add("key", "value");
-            var doc = new KVDocument(null!, null!, root);
+            var doc = new KVDocument(null, null, root);
 
             string text;
             using (var ms = new MemoryStream())

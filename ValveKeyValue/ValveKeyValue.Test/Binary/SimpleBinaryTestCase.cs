@@ -15,11 +15,11 @@ namespace ValveKeyValue.Test
 
         [Test]
         public void IsObjectWithChildren()
-            => Assert.That(obj.ValueType, Is.EqualTo(KVValueType.Collection));
+            => Assert.That(obj.Root.ValueType, Is.EqualTo(KVValueType.Collection));
 
         [TestCase(ExpectedResult = 7)]
         public int HasChildren()
-            => obj.Children.Count();
+            => obj.Root.Children.Count();
 
         [TestCase("key", "value", typeof(string))]
         [TestCase("int", 0x01020304, typeof(int))]

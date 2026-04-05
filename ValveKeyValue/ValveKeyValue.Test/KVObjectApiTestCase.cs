@@ -594,7 +594,7 @@ namespace ValveKeyValue.Test
         public void KV3DeserializationContainsKeyWorks()
         {
             using var stream = TestDataHelper.OpenResource("TextKV3.basic.kv3");
-            var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
+            var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream).Root;
 
             Assert.That(data.ContainsKey("foo"), Is.True);
             Assert.That(data.ContainsKey("nonexistent"), Is.False);
@@ -604,7 +604,7 @@ namespace ValveKeyValue.Test
         public void KV3DeserializationChildrenIterable()
         {
             using var stream = TestDataHelper.OpenResource("TextKV3.basic.kv3");
-            var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
+            var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream).Root;
 
             var children = data.Children.ToList();
             Assert.That(children, Has.Count.GreaterThanOrEqualTo(1));

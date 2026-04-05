@@ -22,9 +22,9 @@ namespace ValveKeyValue.Test
 
         static string PerformNewLineTest(string value, bool hasEscapeSequences)
         {
-            KVObject convertedKv;
+            KVDocument convertedKv;
             var kv = new KVObject(value);
-            var doc = new KVDocument(null!, "newLineTestCase", kv);
+            var doc = new KVDocument(null, "newLineTestCase", kv);
             var options = new KVSerializerOptions { HasEscapeSequences = hasEscapeSequences };
 
             string text;
@@ -41,7 +41,7 @@ namespace ValveKeyValue.Test
                 convertedKv = serializer.Deserialize(ms, options);
             }
 
-            Assert.That((string)convertedKv, Is.EqualTo(value));
+            Assert.That((string)convertedKv.Root, Is.EqualTo(value));
 
             return text;
         }

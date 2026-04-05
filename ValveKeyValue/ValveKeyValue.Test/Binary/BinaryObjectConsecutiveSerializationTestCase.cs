@@ -7,11 +7,11 @@ namespace ValveKeyValue.Test
         {
             var firstObj = KVObject.ListCollection();
             firstObj.Add("firstkey", "firstvalue");
-            var first = new KVDocument(null!, "FirstObject", firstObj);
+            var first = new KVDocument(null, "FirstObject", firstObj);
 
             var secondObj = KVObject.ListCollection();
             secondObj.Add("secondkey", "secondvalue");
-            var second = new KVDocument(null!, "SecondObject", secondObj);
+            var second = new KVDocument(null, "SecondObject", secondObj);
 
             var expectedData = new byte[]
             {

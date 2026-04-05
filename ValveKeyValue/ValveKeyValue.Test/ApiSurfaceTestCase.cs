@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -44,9 +45,17 @@ namespace ValveKeyValue.Test
 
             sb.Append("public ");
 
-            if (typeInfo.IsSealed)
+            if (typeInfo.IsAbstract && typeInfo.IsSealed && typeInfo.IsClass)
+            {
+                sb.Append("static ");
+            }
+            else if (typeInfo.IsSealed)
             {
                 sb.Append("sealed ");
+            }
+            else if (typeInfo.IsAbstract && !typeInfo.IsInterface)
+            {
+                sb.Append("abstract ");
             }
 
             if (typeInfo.IsClass)
@@ -68,6 +77,33 @@ namespace ValveKeyValue.Test
 
             sb.Append(' ');
             sb.Append(GetTypeAsString(type));
+
+            var baseTypes = new List<string>();
+
+            if (typeInfo.BaseType != null && typeInfo.BaseType != typeof(object) && typeInfo.BaseType != typeof(ValueType) && typeInfo.BaseType != typeof(Enum))
+            {
+                baseTypes.Add(GetTypeAsString(typeInfo.BaseType));
+            }
+
+            var directInterfaces = type.GetInterfaces()
+                .Except(typeInfo.BaseType?.GetInterfaces() ?? Type.EmptyTypes)
+                .ToArray();
+
+            var ifaceChildren = directInterfaces.ToDictionary(i => i, i => (ICollection<Type>)i.GetInterfaces());
+
+            foreach (var iface in directInterfaces
+                .Where(i => !directInterfaces.Any(other => other != i && ifaceChildren[other].Contains(i)))
+                .OrderBy(i => GetTypeAsString(i), StringComparer.InvariantCulture))
+            {
+                baseTypes.Add(GetTypeAsString(iface));
+            }
+
+            if (baseTypes.Count > 0)
+            {
+                sb.Append(" : ");
+                sb.Append(string.Join(", ", baseTypes));
+            }
+
             sb.Append("\n{\n");
 
             if (typeInfo.IsEnum)
@@ -86,6 +122,48 @@ namespace ValveKeyValue.Test
                 }
 
                 sb.Append('\n');
+            }
+
+            if (!typeInfo.IsEnum)
+            {
+                var fields = type
+                    .GetFields(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                    .Where(t => !t.IsPrivate && !t.IsAssembly && !t.IsFamilyAndAssembly)
+                    .OrderBy(t => t.Name, StringComparer.InvariantCulture);
+
+                foreach (var field in fields)
+                {
+                    sb.Append("    ");
+
+                    if (field.IsPublic)
+                    {
+                        sb.Append("public");
+                    }
+                    else
+                    {
+                        sb.Append("protected");
+                    }
+
+                    if (field.IsStatic)
+                    {
+                        sb.Append(" static");
+                    }
+
+                    if (field.IsLiteral)
+                    {
+                        sb.Append(" const");
+                    }
+                    else if (field.IsInitOnly)
+                    {
+                        sb.Append(" readonly");
+                    }
+
+                    sb.Append(' ');
+                    sb.Append(GetTypeAsString(field.FieldType));
+                    sb.Append(' ');
+                    sb.Append(field.Name);
+                    sb.Append(";\n");
+                }
             }
 
             var constructors = type

@@ -11,7 +11,7 @@ namespace ValveKeyValue.Test
         [Test]
         public void Name()
         {
-            Assert.That(((KVDocument)data).Name, Is.EqualTo("TestDocument"));
+            Assert.That(data.Name, Is.EqualTo("TestDocument"));
         }
 
         [Test]
@@ -25,7 +25,7 @@ namespace ValveKeyValue.Test
         [TestCase("Key3", ExpectedResult = "Value3")]
         public string UnquotedChildValue(string key) => (string)data["UnquotedChild"][key];
 
-        KVObject data;
+        KVDocument data;
 
         [OneTimeSetUp]
         public void SetUp()

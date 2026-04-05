@@ -60,7 +60,7 @@ namespace ValveKeyValue
             ArgumentNullException.ThrowIfNull(stream);
 
             var @object = Deserialize(stream, options ?? KVSerializerOptions.DefaultOptions);
-            var typedObject = ObjectCopier.MakeObject<TObject>(@object);
+            var typedObject = ObjectCopier.MakeObject<TObject>(@object.Root);
             return typedObject;
         }
 
@@ -69,13 +69,13 @@ namespace ValveKeyValue
         /// </summary>
         /// <param name="stream">The stream to serialize into.</param>
         /// <param name="data">The data to serialize.</param>
+        /// <param name="name">The top-level object name.</param>
         /// <param name="options">Options to use that can influence the serialization process.</param>
-        public void Serialize(Stream stream, KVObject data, KVSerializerOptions? options = null)
+        public void Serialize(Stream stream, KVObject data, string name, KVSerializerOptions? options = null)
         {
             ArgumentNullException.ThrowIfNull(stream);
             ArgumentNullException.ThrowIfNull(data);
 
-            var name = (data as KVDocument)?.Name;
             using var serializer = MakeSerializer(stream, options ?? KVSerializerOptions.DefaultOptions);
             var visitor = new KVObjectVisitor(serializer);
             visitor.Visit(name, data);
@@ -94,7 +94,7 @@ namespace ValveKeyValue
 
             using var serializer = MakeSerializer(stream, options ?? KVSerializerOptions.DefaultOptions, data.Header);
             var visitor = new KVObjectVisitor(serializer);
-            visitor.Visit(data.Name, data);
+            visitor.Visit(data.Name, data.Root);
         }
 
         /// <summary>

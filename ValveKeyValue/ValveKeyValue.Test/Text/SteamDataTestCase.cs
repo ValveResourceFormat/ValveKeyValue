@@ -8,7 +8,7 @@ namespace ValveKeyValue.Test
             KVObject data;
             using (var stream = TestDataHelper.OpenResource($"Text.steam_440.vdf"))
             {
-                data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream);
+                data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream).Root;
             }
 
             Assert.That(

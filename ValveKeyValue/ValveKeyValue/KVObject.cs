@@ -29,10 +29,10 @@ namespace ValveKeyValue
 
         // Inline storage for scalar types (no boxing).
         // Interpretation depends on ValueType.
-        internal readonly long _scalar;
+        private readonly long _scalar;
 
         // Reference storage for heap types: string, byte[], List<KVObject>, Dictionary<string, KVObject>, etc.
-        internal readonly object? _ref;
+        private readonly object? _ref;
 
         /// <summary>
         /// Gets a value indicating whether this value is null.

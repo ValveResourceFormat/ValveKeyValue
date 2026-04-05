@@ -18,7 +18,7 @@ namespace ValveKeyValue.Test
             var kv = KVObject.ListCollection();
             kv.Add("0", item0);
             kv.Add("1", item1);
-            var doc = new KVDocument(null!, "test data", kv);
+            var doc = new KVDocument(null, "test data", kv);
 
             string text;
             using (var ms = new MemoryStream())

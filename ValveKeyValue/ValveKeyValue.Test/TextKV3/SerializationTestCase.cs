@@ -13,7 +13,7 @@ namespace ValveKeyValue.Test.TextKV3
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
             var data = kv.Deserialize(stream);
 
-            data.Add("multiLineString", "hello\nworld");
+            data.Root.Add("multiLineString", "hello\nworld");
 
             string text;
             using (var ms = new MemoryStream())
@@ -37,7 +37,7 @@ namespace ValveKeyValue.Test.TextKV3
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
             var data = kv.Deserialize(stream);
 
-            data.Add("test", "success");
+            data.Root.Add("test", "success");
 
             string text;
             using (var ms = new MemoryStream())
@@ -99,7 +99,7 @@ namespace ValveKeyValue.Test.TextKV3
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
             var data = kv.Deserialize(stream);
 
-            var data2 = RoundTrip(kv, data);
+            var data2 = RoundTrip(kv, data).Root;
 
             Assert.Multiple(() =>
             {
@@ -114,23 +114,23 @@ namespace ValveKeyValue.Test.TextKV3
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
 
             using var nullStream = TestDataHelper.OpenResource("TextKV3.root_null.kv3");
-            var nullData = RoundTrip(kv, kv.Deserialize(nullStream));
+            var nullData = RoundTrip(kv, kv.Deserialize(nullStream)).Root;
             Assert.That(nullData.ValueType, Is.EqualTo(KVValueType.Null));
 
             using var stringStream = TestDataHelper.OpenResource("TextKV3.root_string.kv3");
-            var stringData = RoundTrip(kv, kv.Deserialize(stringStream));
+            var stringData = RoundTrip(kv, kv.Deserialize(stringStream)).Root;
             Assert.That((string)stringData, Is.EqualTo("cool 123 string"));
 
             using var numberStream = TestDataHelper.OpenResource("TextKV3.root_number.kv3");
-            var numberData = RoundTrip(kv, kv.Deserialize(numberStream));
+            var numberData = RoundTrip(kv, kv.Deserialize(numberStream)).Root;
             Assert.That((int)numberData, Is.EqualTo(1234567890));
 
             using var floatStream = TestDataHelper.OpenResource("TextKV3.root_float.kv3");
-            var floatData = RoundTrip(kv, kv.Deserialize(floatStream));
+            var floatData = RoundTrip(kv, kv.Deserialize(floatStream)).Root;
             Assert.That((float)floatData, Is.EqualTo(-1337.401f));
 
             using var arrayStream = TestDataHelper.OpenResource("TextKV3.root_array.kv3");
-            var arrayData = RoundTrip(kv, kv.Deserialize(arrayStream));
+            var arrayData = RoundTrip(kv, kv.Deserialize(arrayStream)).Root;
             Assert.That(arrayData.ValueType, Is.EqualTo(KVValueType.Array));
             Assert.That(arrayData[0].ToString(CultureInfo.InvariantCulture), Is.EqualTo("a"));
         }
@@ -144,7 +144,7 @@ namespace ValveKeyValue.Test.TextKV3
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
             var data = kv.Deserialize(stream);
 
-            data.Add("test", "success");
+            data.Root.Add("test", "success");
 
             string text;
             using (var ms = new MemoryStream())
@@ -165,7 +165,7 @@ namespace ValveKeyValue.Test.TextKV3
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
             var root = KVObject.Collection();
             root.Add("path", "C:\\Program Files\\hello\nworld");
-            var doc = new KVDocument(null!, null!, root);
+            var doc = new KVDocument(null, null, root);
 
             var data2 = RoundTrip(kv, doc);
 
@@ -178,7 +178,7 @@ namespace ValveKeyValue.Test.TextKV3
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
             var root = KVObject.Collection();
             root.Add("ptr", new IntPtr(12345));
-            var doc = new KVDocument(null!, null!, root);
+            var doc = new KVDocument(null, null, root);
 
             string text;
             using (var ms = new MemoryStream())
@@ -191,7 +191,7 @@ namespace ValveKeyValue.Test.TextKV3
 
             Assert.That(text, Does.Contain("12345"));
 
-            var data2 = kv.Deserialize(text);
+            var data2 = kv.Deserialize(text).Root;
             Assert.That((int)data2["ptr"], Is.EqualTo(12345));
             Assert.That(data2["ptr"].ValueType, Is.EqualTo(KVValueType.UInt64));
         }
@@ -203,9 +203,9 @@ namespace ValveKeyValue.Test.TextKV3
             var root = KVObject.Collection();
             root.Add("i16", (short)-42);
             root.Add("u16", (ushort)60000);
-            var doc = new KVDocument(null!, null!, root);
+            var doc = new KVDocument(null, null, root);
 
-            var data2 = RoundTrip(kv, doc);
+            var data2 = RoundTrip(kv, doc).Root;
 
             Assert.Multiple(() =>
             {

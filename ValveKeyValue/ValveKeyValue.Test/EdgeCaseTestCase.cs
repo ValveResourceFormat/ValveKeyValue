@@ -437,7 +437,7 @@ namespace ValveKeyValue.Test
         {
             var kv3Text = "<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->\n{\n\tkey1 = \"value1\"\n}";
             using var stream = new System.IO.MemoryStream(System.Text.Encoding.UTF8.GetBytes(kv3Text));
-            var obj = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
+            var obj = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream).Root;
 
             Assert.That(obj.TryGetValue("key1", out var found), Is.True);
             Assert.That((string)found!, Is.EqualTo("value1"));

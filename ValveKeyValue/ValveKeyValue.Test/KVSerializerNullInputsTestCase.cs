@@ -17,7 +17,7 @@ namespace ValveKeyValue.Test
         public void SerializeWithNullStream(KVSerializationFormat format)
         {
             Assert.That(
-                () => KVSerializer.Create(format).Serialize(stream: null!, data: new KVObject()),
+                () => KVSerializer.Create(format).Serialize(stream: null!, data: new KVObject(), "test"),
                 Throws.Exception.TypeOf<ArgumentNullException>()
                 .With.Property(nameof(ArgumentNullException.ParamName)).EqualTo("stream"));
         }

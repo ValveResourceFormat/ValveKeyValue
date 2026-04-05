@@ -38,7 +38,7 @@ namespace ValveKeyValue.Test
             var data = KVObject.ListCollection();
             data.Add("test1_false", false);
             data.Add("test2_true", true);
-            var doc = new KVDocument(null!, "object", data);
+            var doc = new KVDocument(null, "object", data);
 
             var expected = TestDataHelper.ReadTextResource("Text.boolean_serialization.vdf");
 

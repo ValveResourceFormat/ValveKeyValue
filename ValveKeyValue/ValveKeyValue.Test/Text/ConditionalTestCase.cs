@@ -153,7 +153,6 @@ namespace ValveKeyValue.Test
 
         static KVObject ParseResource(string name, string[] conditions)
         {
-            KVObject data;
             using (var stream = TestDataHelper.OpenResource(name))
             {
                 var options = new KVSerializerOptions();
@@ -164,10 +163,8 @@ namespace ValveKeyValue.Test
                     options.Conditions.Add(c);
                 }
 
-                data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream, options);
+                return KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream, options).Root;
             }
-
-            return data;
         }
     }
 }

@@ -3,7 +3,7 @@ public interface ValveKeyValue.IIncludedFileLoader
     public System.IO.Stream OpenFile(string filePath);
 }
 
-public class ValveKeyValue.KeyValueException
+public class ValveKeyValue.KeyValueException : Exception
 {
     public .ctor();
     public .ctor(string message);
@@ -35,66 +35,17 @@ public class ValveKeyValue.KeyValueException
 public class ValveKeyValue.KVDocument
 {
     public .ctor(ValveKeyValue.KVHeader header, string name, ValveKeyValue.KVObject root);
-    public void Add(string key, ValveKeyValue.KVObject value);
-    public void Add(ValveKeyValue.KVObject value);
-    public Span`1[[ValveKeyValue.KVObject]] AsArraySpan();
-    public byte[] AsBlob();
-    public void Clear();
-    public bool ContainsKey(string name);
     public bool Equals(object obj);
     protected void Finalize();
-    public System.Collections.Generic.IEnumerable`1[[System.Collections.Generic.KeyValuePair`2[[string, ValveKeyValue.KVObject]]]] get_Children();
-    public int get_Count();
-    public ValveKeyValue.KVFlag get_Flag();
     public ValveKeyValue.KVHeader get_Header();
-    public bool get_IsArray();
-    public bool get_IsCollection();
-    public bool get_IsNull();
-    public ValveKeyValue.KVObject get_Item(int index);
     public ValveKeyValue.KVObject get_Item(string key);
-    public System.Collections.Generic.IEnumerable`1[[string]] get_Keys();
     public string get_Name();
-    public System.Collections.Generic.IEnumerable`1[[ValveKeyValue.KVObject]] get_Values();
-    public ValveKeyValue.KVValueType get_ValueType();
-    public System.Collections.Generic.IEnumerator`1[[System.Collections.Generic.KeyValuePair`2[[string, ValveKeyValue.KVObject]]]] GetEnumerator();
+    public ValveKeyValue.KVObject get_Root();
     public int GetHashCode();
     public Type GetType();
     protected object MemberwiseClone();
-    public bool Remove(string key);
-    public void RemoveAt(int index);
-    public void set_Flag(ValveKeyValue.KVFlag value);
-    public void set_Item(string key, ValveKeyValue.KVObject value);
-    public bool ToBoolean();
-    public bool ToBoolean(IFormatProvider provider);
-    public byte ToByte();
-    public byte ToByte(IFormatProvider provider);
-    public char ToChar();
-    public char ToChar(IFormatProvider provider);
-    public decimal ToDecimal();
-    public decimal ToDecimal(IFormatProvider provider);
-    public double ToDouble();
-    public double ToDouble(IFormatProvider provider);
-    public short ToInt16();
-    public short ToInt16(IFormatProvider provider);
-    public int ToInt32();
-    public int ToInt32(IFormatProvider provider);
-    public long ToInt64();
-    public long ToInt64(IFormatProvider provider);
-    public sbyte ToSByte();
-    public sbyte ToSByte(IFormatProvider provider);
-    public float ToSingle();
-    public float ToSingle(IFormatProvider provider);
+    public static ValveKeyValue.KVObject op_Implicit(ValveKeyValue.KVDocument document);
     public string ToString();
-    public string ToString(IFormatProvider provider);
-    public object ToType(Type conversionType, IFormatProvider provider);
-    public ushort ToUInt16();
-    public ushort ToUInt16(IFormatProvider provider);
-    public uint ToUInt32();
-    public uint ToUInt32(IFormatProvider provider);
-    public ulong ToUInt64();
-    public ulong ToUInt64(IFormatProvider provider);
-    public bool TryAdd(string key, ValveKeyValue.KVObject value);
-    public bool TryGetValue(string name, out ValveKeyValue.KVObject& child);
 }
 
 public sealed enum ValveKeyValue.KVFlag
@@ -136,7 +87,7 @@ public class ValveKeyValue.KVHeader
     public string ToString();
 }
 
-public sealed class ValveKeyValue.KVIgnoreAttribute
+public sealed class ValveKeyValue.KVIgnoreAttribute : Attribute
 {
     public .ctor();
     public bool Equals(object obj);
@@ -150,7 +101,7 @@ public sealed class ValveKeyValue.KVIgnoreAttribute
     public string ToString();
 }
 
-public class ValveKeyValue.KVObject
+public class ValveKeyValue.KVObject : IConvertible, System.Collections.Generic.IReadOnlyDictionary`2[[string, ValveKeyValue.KVObject]]
 {
     public .ctor();
     public .ctor(bool value);
@@ -265,7 +216,7 @@ public class ValveKeyValue.KVObject
     public bool TryGetValue(string name, out ValveKeyValue.KVObject& child);
 }
 
-public sealed class ValveKeyValue.KVPropertyAttribute
+public sealed class ValveKeyValue.KVPropertyAttribute : Attribute
 {
     public .ctor(string propertyName);
     public bool Equals(object obj);
@@ -311,7 +262,7 @@ public class ValveKeyValue.KVSerializer
     public Type GetType();
     protected object MemberwiseClone();
     public void Serialize(System.IO.Stream stream, ValveKeyValue.KVDocument data, ValveKeyValue.KVSerializerOptions options);
-    public void Serialize(System.IO.Stream stream, ValveKeyValue.KVObject data, ValveKeyValue.KVSerializerOptions options);
+    public void Serialize(System.IO.Stream stream, ValveKeyValue.KVObject data, string name, ValveKeyValue.KVSerializerOptions options);
     public void Serialize<ValveKeyValue.TData>(System.IO.Stream stream, ValveKeyValue.TData data, string name, ValveKeyValue.KVSerializerOptions options);
     public string ToString();
 }
@@ -388,7 +339,7 @@ public sealed class ValveKeyValue.StringTable
     public string ToString();
 }
 
-public sealed class ValveKeyValue.KeyValues3.Encoding
+public static class ValveKeyValue.KeyValues3.Encoding
 {
     public bool Equals(object obj);
     protected void Finalize();
@@ -404,7 +355,7 @@ public sealed class ValveKeyValue.KeyValues3.Encoding
     public string ToString();
 }
 
-public sealed class ValveKeyValue.KeyValues3.Format
+public static class ValveKeyValue.KeyValues3.Format
 {
     public bool Equals(object obj);
     protected void Finalize();
@@ -415,7 +366,7 @@ public sealed class ValveKeyValue.KeyValues3.Format
     public string ToString();
 }
 
-public sealed struct ValveKeyValue.KeyValues3.KV3ID
+public sealed struct ValveKeyValue.KeyValues3.KV3ID : IEquatable`1[[ValveKeyValue.KeyValues3.KV3ID]]
 {
     public .ctor(string Name, Guid Id);
     public void Deconstruct(out String& Name, out Guid& Id);

@@ -15,7 +15,7 @@ namespace ValveKeyValue.Test
             text.AppendLine(@"""test""	""hello""");
             text.AppendLine("}");
 
-            var data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(text.ToString());
+            var data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(text.ToString()).Root;
 
             Assert.Multiple(() =>
             {
