@@ -23,6 +23,15 @@ namespace ValveKeyValue.Test.TextKV3
         }
 
         [Test]
+        public void QuotedFlagPrefixThrows()
+        {
+            const string text = "<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->\n{\n\tfoo = \"resource\":\"path/to/file.vmdl\"\n}\n";
+
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(text));
+            Assert.Throws<InvalidOperationException>(() => KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream));
+        }
+
+        [Test]
         public void DeserializesFlaggedValues()
         {
             using var stream = TestDataHelper.OpenResource("TextKV3.flagged_value.kv3");

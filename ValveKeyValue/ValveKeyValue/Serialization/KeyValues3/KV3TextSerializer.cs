@@ -5,42 +5,45 @@ using ValveKeyValue.Abstraction;
 
 namespace ValveKeyValue.Serialization.KeyValues3
 {
-    sealed class KV3TextSerializer : IVisitationListener, IDisposable
+    sealed class KV3TextSerializer : KVTextSerializerBase, IVisitationListener
     {
         static readonly SearchValues<char> CharsToEscape = SearchValues.Create("\n\t\\\"");
 
         public KV3TextSerializer(Stream stream, KVHeader? header = null, bool skipHeader = false)
+            : base(stream)
         {
-            ArgumentNullException.ThrowIfNull(stream);
-
-            writer = new StreamWriter(stream, new UTF8Encoding(), bufferSize: 1024, leaveOpen: true)
-            {
-                NewLine = "\n"
-            };
-
-            if (!skipHeader)
-            {
-                var defaultEncoding = new ValveKeyValue.KeyValues3.KV3ID("text", ValveKeyValue.KeyValues3.Encoding.Text);
-                var defaultFormat = new ValveKeyValue.KeyValues3.KV3ID("generic", ValveKeyValue.KeyValues3.Format.Generic);
-
-                var encoding = header?.Encoding.Name != null ? header.Encoding : defaultEncoding;
-                var format = header?.Format.Name != null ? header.Format : defaultFormat;
-
-                writer.WriteLine($"<!-- kv3 encoding:{encoding} format:{format} -->");
-            }
+            WriteHeaderIfNeeded(header, skipHeader);
         }
 
-        readonly StreamWriter writer;
-        int indentation;
+        public KV3TextSerializer(StringBuilder sb, List<KvSourceSpan> sourceMap, KVHeader? header = null, bool skipHeader = false)
+            : base(sb, sourceMap)
+        {
+            WriteHeaderIfNeeded(header, skipHeader);
+        }
+
+        void WriteHeaderIfNeeded(KVHeader? header, bool skipHeader)
+        {
+            if (skipHeader)
+            {
+                return;
+            }
+
+            var defaultEncoding = new ValveKeyValue.KeyValues3.KV3ID("text", ValveKeyValue.KeyValues3.Encoding.Text);
+            var defaultFormat = new ValveKeyValue.KeyValues3.KV3ID("generic", ValveKeyValue.KeyValues3.Format.Generic);
+
+            var encoding = header?.Encoding.Name != null ? header.Encoding : defaultEncoding;
+            var format = header?.Format.Name != null ? header.Format : defaultFormat;
+
+            var s = Position;
+            writer.Write($"<!-- kv3 encoding:{encoding} format:{format} -->");
+            Record(s, KVTokenType.Header);
+            writer.WriteLine();
+        }
+
         // Tracks nesting: null for objects, tuple for arrays
         readonly Stack<(bool isShort, bool allSimple, int index, int count)?> context = new();
 
         bool IsInArray => context.Count > 0 && context.Peek() != null;
-
-        public void Dispose()
-        {
-            writer.Dispose();
-        }
 
         public void OnObjectStart(string? name, KVFlag flag)
         {
@@ -71,7 +74,8 @@ namespace ValveKeyValue.Serialization.KeyValues3
 
             if (isShort)
             {
-                writer.Write("[ ");
+                Record(KVTokenType.ArrayStart, '[');
+                writer.Write(' ');
             }
             else
             {
@@ -83,7 +87,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
                     WriteIndentation();
                 }
 
-                writer.Write('[');
+                Record(KVTokenType.ArrayStart, '[');
                 indentation++;
                 writer.WriteLine();
             }
@@ -133,13 +137,14 @@ namespace ValveKeyValue.Serialization.KeyValues3
 
             if (isShort)
             {
-                writer.Write(" ]");
+                writer.Write(' ');
+                Record(KVTokenType.ArrayEnd, ']');
             }
             else
             {
                 indentation--;
                 WriteIndentation();
-                writer.Write(']');
+                Record(KVTokenType.ArrayEnd, ']');
             }
 
             if (IsInArray)
@@ -174,7 +179,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
                 WriteIndentation();
             }
 
-            writer.Write('{');
+            Record(KVTokenType.ObjectStart, '{');
             indentation++;
             WriteLine();
         }
@@ -183,7 +188,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
         {
             indentation--;
             WriteIndentation();
-            writer.Write('}');
+            Record(KVTokenType.ObjectEnd, '}');
 
             if (IsInArray)
             {
@@ -208,10 +213,14 @@ namespace ValveKeyValue.Serialization.KeyValues3
         {
             WriteFlag(value.Flag);
 
+            var s = Position;
+            var type = KVTokenType.Identifier;
+
             switch (value.ValueType)
             {
                 case KVValueType.BinaryBlob:
                     WriteBinaryBlob(value);
+                    type = KVTokenType.BinaryBlob;
                     break;
                 case KVValueType.Boolean:
                     if ((bool)value)
@@ -243,8 +252,11 @@ namespace ValveKeyValue.Serialization.KeyValues3
                     break;
                 default:
                     WriteText(value.ToString(null));
+                    type = KVTokenType.String;
                     break;
             }
+
+            Record(s, type);
         }
 
         void WriteFloat(float value)
@@ -375,14 +387,6 @@ namespace ValveKeyValue.Serialization.KeyValues3
             writer.Write(HexStringHelper.HexToCharUpper(b));
         }
 
-        void WriteIndentation()
-        {
-            for (var i = 0; i < indentation; i++)
-            {
-                writer.Write('\t');
-            }
-        }
-
         void WriteText(string text)
         {
             if (text.Contains('\n', StringComparison.Ordinal))
@@ -437,6 +441,8 @@ namespace ValveKeyValue.Serialization.KeyValues3
                 return;
             }
 
+            var s = Position;
+
             if (key.Length > 0 && !char.IsAsciiDigit(key[0]) && !NeedsQuoting(key))
             {
                 writer.Write(key);
@@ -478,7 +484,11 @@ namespace ValveKeyValue.Serialization.KeyValues3
                 writer.Write('"');
             }
 
-            writer.Write(" = ");
+            Record(s, KVTokenType.Key);
+
+            writer.Write(' ');
+            Record(KVTokenType.Assignment, '=');
+            writer.Write(' ');
         }
 
         static bool NeedsQuoting(string key)
@@ -505,8 +515,10 @@ namespace ValveKeyValue.Serialization.KeyValues3
 
             if (name != null)
             {
+                var s = Position;
                 writer.Write(name);
                 writer.Write(':');
+                Record(s, KVTokenType.Flag);
             }
         }
 

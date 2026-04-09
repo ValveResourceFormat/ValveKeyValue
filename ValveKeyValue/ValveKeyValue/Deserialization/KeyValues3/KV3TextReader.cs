@@ -5,13 +5,14 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 {
     sealed class KV3TextReader : IVisitingReader
     {
-        public KV3TextReader(TextReader textReader, IParsingVisitationListener listener, bool skipHeader = false)
+        public KV3TextReader(TextReader textReader, IParsingVisitationListener listener, bool skipHeader = false, List<KvSourceSpan>? sourceMap = null)
         {
             ArgumentNullException.ThrowIfNull(textReader);
             ArgumentNullException.ThrowIfNull(listener);
 
             this.listener = listener;
             this.skipHeader = skipHeader;
+            this.sourceMap = sourceMap;
 
             tokenReader = new KV3TokenReader(textReader);
             stateMachine = new KV3TextReaderStateMachine();
@@ -24,13 +25,19 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         readonly KV3TokenReader tokenReader;
         readonly KV3TextReaderStateMachine stateMachine;
         readonly bool skipHeader;
+        readonly List<KvSourceSpan>? sourceMap;
         bool disposed;
 
         public KVHeader ReadHeader()
         {
             ObjectDisposedException.ThrowIf(disposed, this);
 
+            var headerStart = tokenReader.CharOffset;
             var header = skipHeader ? new KVHeader() : tokenReader.ReadHeader();
+            if (sourceMap != null && !skipHeader)
+            {
+                sourceMap.Add(new KvSourceSpan(headerStart, tokenReader.CharOffset, KVTokenType.Header));
+            }
 
             while (stateMachine.IsInObject)
             {
@@ -47,6 +54,17 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 catch (EndOfStreamException ex)
                 {
                     throw new KeyValueException("Found end of file while trying to read token.", ex);
+                }
+
+                if (sourceMap != null && token.TokenType != KVTokenType.EndOfFile)
+                {
+                    // Strings and identifiers in key position are recorded as KVTokenType.Key.
+                    // The lexer cannot make that distinction; the parser knows from the state.
+                    var resolved = (token.TokenType == KVTokenType.String || token.TokenType == KVTokenType.Identifier)
+                        && stateMachine.Current == KV3TextReaderState.InObjectBeforeKey
+                        ? KVTokenType.Key
+                        : token.TokenType;
+                    sourceMap.Add(new KvSourceSpan(tokenReader.LastTokenStart, tokenReader.LastTokenEnd, resolved));
                 }
 
                 switch (token.TokenType)

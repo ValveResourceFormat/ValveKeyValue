@@ -5,31 +5,26 @@ using ValveKeyValue.Abstraction;
 
 namespace ValveKeyValue.Serialization.KeyValues1
 {
-    sealed class KV1TextSerializer : IVisitationListener, IDisposable
+    sealed class KV1TextSerializer : KVTextSerializerBase, IVisitationListener
     {
         static readonly SearchValues<char> CharsToEscape = SearchValues.Create("\"\\");
 
         public KV1TextSerializer(Stream stream, KVSerializerOptions options)
+            : base(stream)
         {
-            ArgumentNullException.ThrowIfNull(stream);
             ArgumentNullException.ThrowIfNull(options);
-
             this.options = options;
-            writer = new StreamWriter(stream, new UTF8Encoding(), bufferSize: 1024, leaveOpen: true)
-            {
-                NewLine = "\n"
-            };
+        }
+
+        public KV1TextSerializer(StringBuilder sb, List<KvSourceSpan> sourceMap, KVSerializerOptions options)
+            : base(sb, sourceMap)
+        {
+            ArgumentNullException.ThrowIfNull(options);
+            this.options = options;
         }
 
         readonly KVSerializerOptions options;
-        readonly StreamWriter writer;
-        int indentation;
         readonly Stack<int> arrayCount = new();
-
-        public void Dispose()
-        {
-            writer.Dispose();
-        }
 
         public void OnObjectStart(string? name, KVFlag flag)
             => WriteStartObject(name);
@@ -85,10 +80,12 @@ namespace ValveKeyValue.Serialization.KeyValues1
             }
 
             WriteIndentation();
+            var keyStart = Position;
             WriteText(name);
+            Record(keyStart, KVTokenType.Key);
             WriteLine();
             WriteIndentation();
-            writer.Write('{');
+            Record(KVTokenType.ObjectStart, '{');
             indentation++;
             WriteLine();
         }
@@ -97,16 +94,19 @@ namespace ValveKeyValue.Serialization.KeyValues1
         {
             indentation--;
             WriteIndentation();
-            writer.Write('}');
+            Record(KVTokenType.ObjectEnd, '}');
             writer.WriteLine();
         }
 
         void WriteKeyValuePair(string name, KVObject value)
         {
             WriteIndentation();
+            var keyStart = Position;
             WriteText(name);
+            Record(keyStart, KVTokenType.Key);
             writer.Write('\t');
 
+            var valueStart = Position;
             if (value.IsNull)
             {
                 WriteText(string.Empty);
@@ -119,16 +119,9 @@ namespace ValveKeyValue.Serialization.KeyValues1
             {
                 WriteText(value.ToString(CultureInfo.InvariantCulture));
             }
+            Record(valueStart, KVTokenType.String);
 
             WriteLine();
-        }
-
-        void WriteIndentation()
-        {
-            for (var i = 0; i < indentation; i++)
-            {
-                writer.Write('\t');
-            }
         }
 
         void WriteText(string text)

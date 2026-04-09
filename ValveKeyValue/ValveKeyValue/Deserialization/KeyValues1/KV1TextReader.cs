@@ -5,7 +5,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 {
     sealed class KV1TextReader : IVisitingReader
     {
-        public KV1TextReader(TextReader textReader, IParsingVisitationListener listener, KVSerializerOptions options)
+        public KV1TextReader(TextReader textReader, IParsingVisitationListener listener, KVSerializerOptions options, List<KvSourceSpan>? sourceMap = null)
         {
             ArgumentNullException.ThrowIfNull(textReader);
             ArgumentNullException.ThrowIfNull(listener);
@@ -13,6 +13,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
             this.listener = listener;
             this.options = options;
+            this.sourceMap = sourceMap;
 
             conditionEvaluator = new KVConditionEvaluator(options.Conditions);
             tokenReader = new KV1TokenReader(textReader, options);
@@ -23,6 +24,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         readonly IParsingVisitationListener listener;
 #pragma warning restore CA2213
         readonly KVSerializerOptions options;
+        readonly List<KvSourceSpan>? sourceMap;
 
         readonly KVConditionEvaluator conditionEvaluator;
         readonly KV1TokenReader tokenReader;
@@ -48,6 +50,20 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                 catch (EndOfStreamException ex)
                 {
                     throw new KeyValueException("Found end of file while trying to read token.", ex);
+                }
+
+                if (sourceMap != null && token.TokenType != KVTokenType.EndOfFile)
+                {
+                    // KV1 keys are always quoted strings. They appear either at the start of
+                    // an object (InObjectBeforeKey) or right after the previous value
+                    // (InObjectAfterValue), since the state machine only flips back to
+                    // BeforeKey once ReadText runs and decides the token starts a new pair.
+                    var state = stateMachine.Current;
+                    var resolved = token.TokenType == KVTokenType.String
+                        && (state == KV1TextReaderState.InObjectBeforeKey || state == KV1TextReaderState.InObjectAfterValue)
+                        ? KVTokenType.Key
+                        : token.TokenType;
+                    sourceMap.Add(new KvSourceSpan(tokenReader.LastTokenStart, tokenReader.LastTokenEnd, resolved));
                 }
 
                 switch (token.TokenType)

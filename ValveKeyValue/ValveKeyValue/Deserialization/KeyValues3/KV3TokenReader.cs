@@ -25,11 +25,8 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         {
         }
 
-        public KVToken ReadNextToken()
+        protected override KVToken ReadNextTokenInner()
         {
-            ObjectDisposedException.ThrowIf(disposed, this);
-            SwallowWhitespace();
-
             var nextChar = Peek();
             if (IsEndOfFile(nextChar))
             {
@@ -90,13 +87,24 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         {
             SwallowWhitespace();
 
+            // The token type follows what the source actually looks like, not the contents:
+            // a quoted token is always String (so "42" stays a String for the source map),
+            // an unquoted identifier-shaped token is Identifier, and an unquoted token with
+            // a trailing : or | is a Flag.
+            var first = Peek();
+            var isQuoted = first == '"' || first == '\'';
+
             var token = ReadToken();
-            var type = KVTokenType.String;
 
-            if (IsIdentifier(token))
+            if (isQuoted)
             {
-                type = KVTokenType.Identifier;
+                return new KVToken(KVTokenType.String, token);
+            }
 
+            var type = IsIdentifier(token) ? KVTokenType.Identifier : KVTokenType.String;
+
+            if (type == KVTokenType.Identifier)
+            {
                 var next = Peek();
 
                 if (next == ':' || next == '|')

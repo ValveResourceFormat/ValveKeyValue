@@ -22,15 +22,8 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         readonly StringBuilder sb = new();
         readonly KVSerializerOptions options;
 
-        public KVToken ReadNextToken()
+        protected override KVToken ReadNextTokenInner()
         {
-            ObjectDisposedException.ThrowIf(disposed, this);
-
-            SwallowWhitespace();
-
-            PreviousTokenStartLine = Line;
-            PreviousTokenStartColumn = Column;
-
             var nextChar = Peek();
             if (IsEndOfFile(nextChar))
             {

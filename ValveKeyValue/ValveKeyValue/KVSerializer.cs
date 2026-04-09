@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using ValveKeyValue.Abstraction;
 using ValveKeyValue.Deserialization;
 using ValveKeyValue.Deserialization.KeyValues1;
@@ -116,6 +117,96 @@ namespace ValveKeyValue
             using var serializer = MakeSerializer(stream, options ?? KVSerializerOptions.DefaultOptions);
             var visitor = new KVObjectVisitor(serializer);
             visitor.Visit(name, kvObjectTree);
+        }
+
+        /// <summary>
+        /// Deserializes a KeyValues document from a text string and produces a per-token source
+        /// map describing where each token sits in the input. The span offsets index directly
+        /// into the supplied <paramref name="text"/>, so the same string can be displayed
+        /// verbatim and highlighted using the returned spans.
+        /// Only text formats are supported.
+        /// </summary>
+        /// <param name="text">The KeyValues text to parse.</param>
+        /// <param name="options">Options to use that can influence the deserialization process.</param>
+        /// <returns>The parsed document and a list of <see cref="KvSourceSpan"/> records covering each token in the input.</returns>
+        public (KVDocument Document, IReadOnlyList<KvSourceSpan> Spans) DeserializeWithSourceMap(string text, KVSerializerOptions? options = null)
+        {
+            ArgumentNullException.ThrowIfNull(text);
+
+            var resolvedOptions = options ?? KVSerializerOptions.DefaultOptions;
+            var spans = new List<KvSourceSpan>();
+            var builder = new KVObjectBuilder(useDictionaryForCollections: format == KVSerializationFormat.KeyValues3Text);
+
+            using var stringReader = new StringReader(text);
+            using var reader = MakeSourceMapReader(stringReader, builder, resolvedOptions, spans);
+
+            var header = reader.ReadHeader();
+            var result = builder.GetObject();
+            var document = new KVDocument(header, result.Key, result.Value);
+
+            return (document, spans);
+        }
+
+        IVisitingReader MakeSourceMapReader(TextReader textReader, IParsingVisitationListener listener, KVSerializerOptions options, List<KvSourceSpan> spans)
+        {
+            return format switch
+            {
+                KVSerializationFormat.KeyValues1Text => new KV1TextReader(textReader, listener, options, spans),
+                KVSerializationFormat.KeyValues3Text => new KV3TextReader(textReader, listener, options.SkipHeader, spans),
+                _ => throw new InvalidOperationException($"Source maps are only supported for text formats, not {format}."),
+            };
+        }
+
+        /// <summary>
+        /// Serializes a KeyValue document to text and produces a per-token source map alongside it.
+        /// Intended for syntax highlighters that want exact token boundaries instead of regex
+        /// approximations. Only text formats are supported. Header (for KV3) is preserved.
+        /// </summary>
+        /// <param name="data">The document to serialize.</param>
+        /// <param name="options">Options to use that can influence the serialization process.</param>
+        /// <returns>The serialized text and a list of <see cref="KvSourceSpan"/> records covering each token.</returns>
+        public (string Text, IReadOnlyList<KvSourceSpan> Spans) SerializeWithSourceMap(KVDocument data, KVSerializerOptions? options = null)
+        {
+            ArgumentNullException.ThrowIfNull(data);
+            return SerializeWithSourceMapCore(data.Root, data.Name, data.Header, options);
+        }
+
+        /// <summary>
+        /// Serializes a KeyValue object to text and produces a per-token source map alongside it.
+        /// Intended for syntax highlighters that want exact token boundaries instead of regex
+        /// approximations. Only text formats are supported.
+        /// </summary>
+        /// <param name="data">The object to serialize.</param>
+        /// <param name="name">The top-level object name.</param>
+        /// <param name="options">Options to use that can influence the serialization process.</param>
+        /// <returns>The serialized text and a list of <see cref="KvSourceSpan"/> records covering each token.</returns>
+        public (string Text, IReadOnlyList<KvSourceSpan> Spans) SerializeWithSourceMap(KVObject data, string? name = null, KVSerializerOptions? options = null)
+        {
+            ArgumentNullException.ThrowIfNull(data);
+            return SerializeWithSourceMapCore(data, name, header: null, options);
+        }
+
+        (string Text, IReadOnlyList<KvSourceSpan> Spans) SerializeWithSourceMapCore(KVObject root, string? name, KVHeader? header, KVSerializerOptions? options)
+        {
+            var resolvedOptions = options ?? KVSerializerOptions.DefaultOptions;
+            var sb = new StringBuilder();
+            var spans = new List<KvSourceSpan>();
+
+            using var serializer = MakeSourceMapSerializer(sb, spans, resolvedOptions, header);
+            var visitor = new KVObjectVisitor(serializer);
+            visitor.Visit(name, root);
+
+            return (sb.ToString(), spans);
+        }
+
+        IVisitationListener MakeSourceMapSerializer(StringBuilder sb, List<KvSourceSpan> spans, KVSerializerOptions options, KVHeader? header)
+        {
+            return format switch
+            {
+                KVSerializationFormat.KeyValues1Text => new KV1TextSerializer(sb, spans, options),
+                KVSerializationFormat.KeyValues3Text => new KV3TextSerializer(sb, spans, header, options.SkipHeader),
+                _ => throw new InvalidOperationException($"Source maps are only supported for text formats, not {format}."),
+            };
         }
 
         IVisitingReader MakeReader(Stream stream, IParsingVisitationListener listener, KVSerializerOptions options)
