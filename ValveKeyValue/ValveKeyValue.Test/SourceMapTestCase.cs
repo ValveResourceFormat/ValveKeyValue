@@ -100,6 +100,55 @@ namespace ValveKeyValue.Test
         }
 
         [Test]
+        public void Kv1TypedSerializerSpansLineUpWithEmittedText()
+        {
+            var person = new Person { FirstName = "Alice", Age = 30 };
+
+            var (text, spans) = KVSerializer.Create(KVSerializationFormat.KeyValues1Text)
+                .SerializeWithSourceMap(person, name: "person");
+
+            AssertSpansAreWellFormed(text, spans);
+
+            AssertSpanExists(text, spans, KVTokenType.Key, "\"person\"");
+            AssertSpanExists(text, spans, KVTokenType.Key, "\"FirstName\"");
+            AssertSpanExists(text, spans, KVTokenType.Key, "\"Age\"");
+            AssertSpanExists(text, spans, KVTokenType.String, "\"Alice\"");
+            AssertSpanExists(text, spans, KVTokenType.String, "\"30\"");
+
+            Assert.That(spans.Any(s => s.TokenType == KVTokenType.ObjectStart && text[s.Start] == '{'), Is.True);
+            Assert.That(spans.Any(s => s.TokenType == KVTokenType.ObjectEnd && text[s.Start] == '}'), Is.True);
+        }
+
+        [Test]
+        public void Kv3TypedSerializerSpansLineUpWithEmittedText()
+        {
+            var person = new Person { FirstName = "Alice", Age = 30 };
+
+            var (text, spans) = KVSerializer.Create(KVSerializationFormat.KeyValues3Text)
+                .SerializeWithSourceMap(person, name: "person");
+
+            AssertSpansAreWellFormed(text, spans);
+
+            // Header is emitted by the KV3 serializer regardless of input shape.
+            Assert.That(spans[0].TokenType, Is.EqualTo(KVTokenType.Header));
+            Assert.That(text.AsSpan(spans[0].Start, spans[0].End - spans[0].Start).StartsWith("<!--"), Is.True);
+
+            AssertSpanExists(text, spans, KVTokenType.Key, "FirstName");
+            AssertSpanExists(text, spans, KVTokenType.Key, "Age");
+            AssertSpanExists(text, spans, KVTokenType.String, "\"Alice\"");
+            AssertSpanExists(text, spans, KVTokenType.Identifier, "30");
+
+            Assert.That(spans.Any(s => s.TokenType == KVTokenType.ObjectStart && text[s.Start] == '{'), Is.True);
+            Assert.That(spans.Any(s => s.TokenType == KVTokenType.ObjectEnd && text[s.Start] == '}'), Is.True);
+        }
+
+        class Person
+        {
+            public required string FirstName { get; set; }
+            public int Age { get; set; }
+        }
+
+        [Test]
         public void Kv1ParserSpansLineUpWithInputText()
         {
             const string text = "\"root\"\n{\n\t\"name\"\t\"hello\"\n\t\"count\"\t\"7\"\n}\n";

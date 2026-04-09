@@ -186,6 +186,25 @@ namespace ValveKeyValue
             return SerializeWithSourceMapCore(data, name, header: null, options);
         }
 
+        /// <summary>
+        /// Serializes a typed object to KeyValues text and produces a per-token source map alongside it.
+        /// Intended for syntax highlighters that want exact token boundaries instead of regex
+        /// approximations. Only text formats are supported.
+        /// </summary>
+        /// <param name="data">The object to serialize.</param>
+        /// <param name="name">The top-level object name.</param>
+        /// <param name="options">Options to use that can influence the serialization process.</param>
+        /// <typeparam name="TData">The type of object to serialize.</typeparam>
+        /// <returns>The serialized text and a list of <see cref="KvSourceSpan"/> records covering each token.</returns>
+        public (string Text, IReadOnlyList<KvSourceSpan> Spans) SerializeWithSourceMap<[DynamicallyAccessedMembers(Trimming.Properties)] TData>(TData data, string name, KVSerializerOptions? options = null)
+        {
+            ArgumentNullException.ThrowIfNull(data);
+            ArgumentNullException.ThrowIfNull(name);
+
+            var kvObjectTree = ObjectCopier.FromObject(typeof(TData), data);
+            return SerializeWithSourceMapCore(kvObjectTree, name, header: null, options);
+        }
+
         (string Text, IReadOnlyList<KvSourceSpan> Spans) SerializeWithSourceMapCore(KVObject root, string? name, KVHeader? header, KVSerializerOptions? options)
         {
             var resolvedOptions = options ?? KVSerializerOptions.DefaultOptions;
