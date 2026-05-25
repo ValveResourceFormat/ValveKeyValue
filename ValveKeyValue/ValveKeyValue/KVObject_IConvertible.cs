@@ -188,24 +188,32 @@ namespace ValveKeyValue
         };
 
         /// <inheritdoc cref="IConvertible.ToString"/>
-        public string ToString(IFormatProvider? provider) => ValueType switch
+        public string ToString(IFormatProvider? provider)
         {
-            KVValueType.String => (string)_ref!,
-            KVValueType.Boolean => _scalar != 0 ? "1" : "0",
-            KVValueType.Null => "null",
-            KVValueType.FloatingPoint => BitConverter.Int32BitsToSingle((int)_scalar).ToString(provider),
-            KVValueType.FloatingPoint64 => BitConverter.Int64BitsToDouble(_scalar).ToString(provider),
-            KVValueType.Int32 or KVValueType.Pointer => ((int)_scalar).ToString(provider),
-            KVValueType.Int64 => _scalar.ToString(provider),
-            KVValueType.UInt64 => ((ulong)_scalar).ToString(provider),
-            KVValueType.UInt32 => ((uint)_scalar).ToString(provider),
-            KVValueType.Int16 => ((short)_scalar).ToString(provider),
-            KVValueType.UInt16 => ((ushort)_scalar).ToString(provider),
-            KVValueType.BinaryBlob => FormatBlob(),
-            KVValueType.Collection => "[Collection]",
-            KVValueType.Array => "[Array]",
-            _ => string.Empty,
-        };
+            // Default to invariant culture so callers passing null (the (string) cast operator and
+            // the text serializers) never emit locale-specific separators or digits. Mirrors the
+            // parse-side fallback in ConvertFromString.
+            provider ??= CultureInfo.InvariantCulture;
+
+            return ValueType switch
+            {
+                KVValueType.String => (string)_ref!,
+                KVValueType.Boolean => _scalar != 0 ? "1" : "0",
+                KVValueType.Null => "null",
+                KVValueType.FloatingPoint => BitConverter.Int32BitsToSingle((int)_scalar).ToString(provider),
+                KVValueType.FloatingPoint64 => BitConverter.Int64BitsToDouble(_scalar).ToString(provider),
+                KVValueType.Int32 or KVValueType.Pointer => ((int)_scalar).ToString(provider),
+                KVValueType.Int64 => _scalar.ToString(provider),
+                KVValueType.UInt64 => ((ulong)_scalar).ToString(provider),
+                KVValueType.UInt32 => ((uint)_scalar).ToString(provider),
+                KVValueType.Int16 => ((short)_scalar).ToString(provider),
+                KVValueType.UInt16 => ((ushort)_scalar).ToString(provider),
+                KVValueType.BinaryBlob => FormatBlob(),
+                KVValueType.Collection => "[Collection]",
+                KVValueType.Array => "[Array]",
+                _ => string.Empty,
+            };
+        }
 
         /// <inheritdoc cref="IConvertible.ToUInt16"/>
         public ushort ToUInt16(IFormatProvider? provider) => checked((ushort)ToUInt64(provider));
@@ -239,7 +247,7 @@ namespace ValveKeyValue
 
         /// <inheritdoc cref="IConvertible.ToType"/>
         public object ToType(Type conversionType, IFormatProvider? provider)
-            => Convert.ChangeType(GetBoxedValue(), conversionType, provider)!;
+            => Convert.ChangeType(GetBoxedValue(), conversionType, provider ?? CultureInfo.InvariantCulture)!;
 
         #endregion
 

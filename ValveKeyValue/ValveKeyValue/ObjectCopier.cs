@@ -105,7 +105,7 @@ namespace ValveKeyValue
                     var entry = enumerator.Entry;
 
                     var childObjectValue = ConvertObjectToValue(entry.Value!.GetType(), entry.Value, reflector, visitedObjects);
-                    childItems.Add(new KeyValuePair<string, KVObject>(entry.Key.ToString()!, childObjectValue));
+                    childItems.Add(new KeyValuePair<string, KVObject>(Convert.ToString(entry.Key, CultureInfo.InvariantCulture)!, childObjectValue));
                 }
             }
             else if (objectType == typeof(byte[]))
