@@ -53,7 +53,6 @@ namespace ValveKeyValue.Test
             Assert.That(ex.Message, Does.Contain("Found data after the root object at line 4, column 1"));
         }
 
-        // A stray '}' used to end the read loop early, silently discarding everything after it.
         [Test]
         public void SecondRootObjectAfterStrayObjectEndInTextThrows()
         {
@@ -62,6 +61,18 @@ namespace ValveKeyValue.Test
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(text));
             Assert.Throws<KeyValueException>(
                 () => KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream));
+        }
+
+        [TestCase("[$NEVERDEFINED]")]
+        [TestCase("[!$NEVERDEFINED]")]
+        public void TrailingConditionalAfterRootInTextThrows(string conditional)
+        {
+            var text = "\"a\"\n{\n\t\"k\" \"v\"\n}\n" + conditional + "\n";
+
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(text));
+            var ex = Assert.Throws<KeyValueException>(
+                () => KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream));
+            Assert.That(ex.Message, Does.Contain("Found data after the root object at line 5, column 1"));
         }
 
         [Test]

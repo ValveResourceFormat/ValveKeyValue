@@ -240,6 +240,13 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                 throw tokenReader.MakeSyntaxException($"Found conditional while in state {stateMachine.Current} at {tokenReader.TokenStartPosition}.");
             }
 
+            // A conditional between a root object's name and its '{' is valid and applies to that
+            // object, but after the root has closed it would otherwise discard the entire document.
+            if (stateMachine.Current == KV1TextReaderState.InObjectAfterValue && stateMachine.IsAtDocumentLevel)
+            {
+                throw tokenReader.MakeSyntaxException($"Found data after the root object at {tokenReader.TokenStartPosition}, documents with multiple root objects are not supported.");
+            }
+
             bool matches;
 
             try
