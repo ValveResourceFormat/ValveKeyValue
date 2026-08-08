@@ -283,7 +283,7 @@ namespace ValveKeyValue.Test
         [Test]
         public void ConditionalBeforeKey()
         {
-            Assert.Throws<InvalidDataException>(() => { ParseResource("Text.conditional_before_key.vdf"); });
+            Assert.Throws<KeyValueException>(() => { ParseResource("Text.conditional_before_key.vdf"); });
         }
 
         static KVObject ParseResource(string name)

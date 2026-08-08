@@ -24,7 +24,19 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
         // Whether a backslash-quote (\") was read while escape sequences were disabled. If parsing
         // subsequently fails, this is the likely cause, and the error message suggests enabling them.
-        public bool EncounteredPossibleEscapeSequence { get; private set; }
+        bool encounteredPossibleEscapeSequence;
+
+        // Creates the exception for a syntax error. Messages carry their own precise position;
+        // the escape-sequences hint is appended when a stray \" suggests the file needs it.
+        public KeyValueException MakeSyntaxException(string message, Exception? innerException = null)
+        {
+            if (encounteredPossibleEscapeSequence)
+            {
+                message += " A backslash-escaped quotation mark (\\\") was read, but escape sequences are disabled - consider enabling KVSerializerOptions.HasEscapeSequences.";
+            }
+
+            return new KeyValueException(message, innerException);
+        }
 
         protected override KVToken ReadNextTokenInner()
         {
@@ -127,12 +139,14 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                 return new KVToken(KVTokenType.IncludeAndMerge, value);
             }
 
-            throw new InvalidDataException($"Unrecognized term after '#' symbol (line {Line}, column {Column}).");
+            throw MakeSyntaxException($"Unrecognized term after '#' symbol at {TokenStartPosition}.");
         }
 
         string ReadUntil(Func<int, bool> isTerminator)
         {
             var escapeNext = false;
+            var escapeLine = 0;
+            var escapeColumn = 0;
 
             while (escapeNext || !isTerminator(Peek()))
             {
@@ -143,6 +157,9 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                     if (!escapeNext && next == '\\')
                     {
                         escapeNext = true;
+                        // Only the backslash has been consumed, so it sits one column back on this line.
+                        escapeLine = Line;
+                        escapeColumn = Column - 1;
                         continue;
                     }
 
@@ -162,7 +179,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                             '\'' => '\'',
                             '"' => '"',
                             _ when options.EnableValveNullByteBugBehavior => '\0',
-                            _ => throw new InvalidDataException($"Unknown escape sequence '\\{next}' at line {Line}, column {Column - 2}."),
+                            _ => throw MakeSyntaxException($"Unknown escape sequence '\\{next}' at line {escapeLine}, column {escapeColumn}."),
                         };
 
                         escapeNext = false;
@@ -170,7 +187,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                 }
                 else if (next == '\\' && Peek() == QuotationMark)
                 {
-                    EncounteredPossibleEscapeSequence = true;
+                    encounteredPossibleEscapeSequence = true;
                 }
 
                 sb.Append(next);

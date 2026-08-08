@@ -20,7 +20,6 @@ namespace ValveKeyValue.Test
             Assert.That(
                 () => KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream),
                 Throws.Exception.TypeOf<KeyValueException>()
-                .With.InnerException.TypeOf<InvalidDataException>()
                 .With.Message.Contains("Unrecognized term after '#' symbol")
                 .And.Message.Contains("KVSerializerOptions.HasEscapeSequences"));
         }

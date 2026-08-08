@@ -150,7 +150,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
             if (str != "<!--")
             {
-                throw new InvalidDataException($"The header is incorrect, expected '<!--' but got '{str}'.");
+                throw new KeyValueException($"The header is incorrect, expected '<!--' but got '{str}' at {TokenStartPosition}.");
             }
 
             SwallowWhitespace();
@@ -158,7 +158,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
             if (!str.Equals("kv3", StringComparison.OrdinalIgnoreCase))
             {
-                throw new InvalidDataException($"The header is incorrect, expected 'kv3' but got '{str}'.");
+                throw new KeyValueException($"The header is incorrect, expected 'kv3' but got '{str}' at {TokenStartPosition}.");
             }
 
             SwallowWhitespace();
@@ -166,7 +166,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
             if (!str.Equals("encoding", StringComparison.OrdinalIgnoreCase))
             {
-                throw new InvalidDataException($"The header is incorrect, expected 'encoding' but got '{str}'.");
+                throw new KeyValueException($"The header is incorrect, expected 'encoding' but got '{str}' at {TokenStartPosition}.");
             }
 
             ReadChar(':');
@@ -177,11 +177,11 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
             if (!str.Equals("version", StringComparison.OrdinalIgnoreCase))
             {
-                throw new InvalidDataException($"The header is incorrect, expected 'version' but got '{str}'.");
+                throw new KeyValueException($"The header is incorrect, expected 'version' but got '{str}' at {TokenStartPosition}.");
             }
 
             ReadChar('{');
-            var encoding = new Guid(ReadToken());
+            var encoding = ReadVersionGuid();
             ReadChar('}');
 
             SwallowWhitespace();
@@ -190,7 +190,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
             if (!str.Equals("format", StringComparison.OrdinalIgnoreCase))
             {
-                throw new InvalidDataException($"The header is incorrect, expected 'format' but got '{str}'.");
+                throw new KeyValueException($"The header is incorrect, expected 'format' but got '{str}' at {TokenStartPosition}.");
             }
 
             ReadChar(':');
@@ -201,11 +201,11 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
             if (!str.Equals("version", StringComparison.OrdinalIgnoreCase))
             {
-                throw new InvalidDataException($"The header is incorrect, expected 'version' but got '{str}'.");
+                throw new KeyValueException($"The header is incorrect, expected 'version' but got '{str}' at {TokenStartPosition}.");
             }
 
             ReadChar('{');
-            var format = new Guid(ReadToken());
+            var format = ReadVersionGuid();
             ReadChar('}');
 
             SwallowWhitespace();
@@ -214,17 +214,17 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
             if (str != "-->")
             {
-                throw new InvalidDataException($"The header is incorrect, expected '-->' but got '{str}'.");
+                throw new KeyValueException($"The header is incorrect, expected '-->' but got '{str}' at {TokenStartPosition}.");
             }
 
             if (encodingType.Equals("text", StringComparison.OrdinalIgnoreCase) && encoding != Encoding.Text)
             {
-                throw new InvalidDataException($"Unrecognized encoding version, expected '{Encoding.Text}' but got '{encoding}'.");
+                throw new KeyValueException($"Unrecognized encoding version, expected '{Encoding.Text}' but got '{encoding}'.");
             }
 
             if (formatType.Equals("generic", StringComparison.OrdinalIgnoreCase) && format != Format.Generic)
             {
-                throw new InvalidDataException($"Unrecognized format version, expected '{Format.Generic}' but got '{format}'.");
+                throw new KeyValueException($"Unrecognized format version, expected '{Format.Generic}' but got '{format}'.");
             }
 
             return new KVHeader
@@ -232,6 +232,18 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 Encoding = new KV3ID(encodingType, encoding),
                 Format = new KV3ID(formatType, format),
             };
+        }
+
+        Guid ReadVersionGuid()
+        {
+            var str = ReadToken();
+
+            if (!Guid.TryParse(str, out var guid))
+            {
+                throw new KeyValueException($"The header is incorrect, expected a version GUID but got '{str}' at {TokenStartPosition}.");
+            }
+
+            return guid;
         }
 
         KVToken ReadComment()
@@ -246,7 +258,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 {
                     if (IsEndOfFile(Peek()))
                     {
-                        throw new InvalidDataException("Unterminated block comment.");
+                        throw new KeyValueException($"Unterminated block comment starting at {TokenStartPosition}.");
                     }
 
                     next = Next();
@@ -274,7 +286,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             }
             else
             {
-                throw new InvalidDataException($"The syntax is incorrect, expected comment but got '/{next}'.");
+                throw new KeyValueException($"The syntax is incorrect, expected comment but got '/{next}' at {TokenStartPosition}.");
             }
 
             return new KVToken(KVTokenType.Comment);
@@ -310,6 +322,8 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         string ReadToken()
         {
+            MarkTokenStart();
+
             var next = Peek();
 
             if (next == '"' || next == '\'')

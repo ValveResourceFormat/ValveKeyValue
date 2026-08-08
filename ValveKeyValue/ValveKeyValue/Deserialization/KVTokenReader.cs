@@ -31,17 +31,24 @@ namespace ValveKeyValue.Deserialization
         public int LastTokenStart { get; private set; }
         public int LastTokenEnd { get; private set; }
 
-        public int PreviousTokenStartLine { get; private set; }
-        public int PreviousTokenStartColumn { get; private set; }
-        public string PreviousTokenPosition => $"line {PreviousTokenStartLine}, column {PreviousTokenStartColumn}";
+        public int TokenStartLine { get; private set; }
+        public int TokenStartColumn { get; private set; }
+        public string TokenStartPosition => $"line {TokenStartLine}, column {TokenStartColumn}";
+
+        // Records the current position as the start of the token being read, so that errors can
+        // point at the token even after its characters have been consumed.
+        protected void MarkTokenStart()
+        {
+            TokenStartLine = Line;
+            TokenStartColumn = Column;
+        }
 
         public KVToken ReadNextToken()
         {
             ObjectDisposedException.ThrowIf(disposed, this);
             SwallowWhitespace();
 
-            PreviousTokenStartLine = Line;
-            PreviousTokenStartColumn = Column;
+            MarkTokenStart();
 
             LastTokenStart = charOffset;
             var token = ReadNextTokenInner();
@@ -112,10 +119,14 @@ namespace ValveKeyValue.Deserialization
 
         protected void ReadChar(char expectedChar)
         {
+            // Capture the position before consuming, so the error points at the offending character.
+            var line = Line;
+            var column = Column;
+
             var next = Next();
             if (next != expectedChar)
             {
-                throw new InvalidDataException($"The syntax is incorrect, expected '{expectedChar}' but got '{next}' at line {Line}, column {Column}.");
+                throw new KeyValueException($"The syntax is incorrect, expected '{expectedChar}' but got '{next}' at line {line}, column {column}.");
             }
         }
 

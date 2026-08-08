@@ -70,7 +70,7 @@ namespace ValveKeyValue.Abstraction
                     break;
 
                 default:
-                    throw new InvalidOperationException($"Unhandled value type: {obj.ValueType}");
+                    throw new InvalidOperationException($"Unhandled value type: {obj.ValueType}.");
             }
         }
 

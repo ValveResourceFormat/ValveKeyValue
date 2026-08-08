@@ -83,7 +83,7 @@ namespace ValveKeyValue.Serialization.KeyValues1
                     break;
 
                 default:
-                    throw new InvalidOperationException($"Unhandled value type: {value.ValueType}");
+                    throw new InvalidOperationException($"Unhandled value type: {value.ValueType}.");
             }
         }
 

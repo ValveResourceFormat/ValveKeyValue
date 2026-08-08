@@ -23,7 +23,7 @@ namespace ValveKeyValue.Test.TextKV3
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(value));
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
 
-            Assert.That(() => kv.Deserialize(stream), Throws.Exception.TypeOf<InvalidDataException>().Or.TypeOf<EndOfStreamException>());
+            Assert.That(() => kv.Deserialize(stream), Throws.Exception.TypeOf<KeyValueException>());
         }
 
         [Test]
@@ -33,7 +33,7 @@ namespace ValveKeyValue.Test.TextKV3
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(value));
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
 
-            Assert.That(() => kv.Deserialize(stream), Throws.Exception.TypeOf<InvalidDataException>());
+            Assert.That(() => kv.Deserialize(stream), Throws.Exception.TypeOf<KeyValueException>());
         }
 
         [Test]
@@ -43,7 +43,7 @@ namespace ValveKeyValue.Test.TextKV3
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(value));
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
 
-            Assert.That(() => kv.Deserialize(stream), Throws.Exception.TypeOf<InvalidDataException>());
+            Assert.That(() => kv.Deserialize(stream), Throws.Exception.TypeOf<KeyValueException>());
         }
 
         [TestCase("<!-- kv3 encoding:text:version{abc} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->")]
@@ -55,7 +55,7 @@ namespace ValveKeyValue.Test.TextKV3
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(value));
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
 
-            Assert.That(() => kv.Deserialize(stream), Throws.Exception.TypeOf<FormatException>());
+            Assert.That(() => kv.Deserialize(stream), Throws.Exception.TypeOf<KeyValueException>());
         }
 
         [TestCase("<!-- KV3 ENCODING:TEXT:VERSION{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} FORMAT:GENERIC:VERSION{7412167c-06e9-4698-aff2-e63eb59037e7} -->\n{}")]

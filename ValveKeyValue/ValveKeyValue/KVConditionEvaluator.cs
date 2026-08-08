@@ -28,22 +28,15 @@ namespace ValveKeyValue
             this.expressionText = expressionText;
             position = 0;
 
-            try
-            {
-                var result = EvaluateExpression(depth: 0);
+            var result = EvaluateExpression(depth: 0);
 
-                SkipWhitespace();
-                if (position < expressionText.Length)
-                {
-                    throw new InvalidOperationException($"Unexpected '{expressionText[position]}' after end of expression.");
-                }
-
-                return result;
-            }
-            catch (InvalidOperationException ex)
+            SkipWhitespace();
+            if (position < expressionText.Length)
             {
-                throw new InvalidDataException($"Invalid conditional syntax \"{expressionText}\"", ex);
+                throw new InvalidOperationException($"Unexpected '{expressionText[position]}' after end of expression.");
             }
+
+            return result;
         }
 
         // expression := term { ('&&' | '||') term }

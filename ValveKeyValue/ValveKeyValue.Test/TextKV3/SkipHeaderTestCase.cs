@@ -89,7 +89,7 @@ namespace ValveKeyValue.Test.TextKV3
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
             var input = "{\n\tkey = \"value\"\n}\n";
 
-            Assert.That(() => kv.Deserialize(input), Throws.Exception.TypeOf<InvalidDataException>());
+            Assert.That(() => kv.Deserialize(input), Throws.Exception.TypeOf<KeyValueException>());
         }
 
         [Test]

@@ -43,13 +43,9 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                 {
                     token = tokenReader.ReadNextToken();
                 }
-                catch (InvalidDataException ex)
-                {
-                    throw MakeSyntaxException(ex.Message, ex);
-                }
                 catch (EndOfStreamException ex)
                 {
-                    throw MakeSyntaxException($"Found end of file while trying to read token starting at {tokenReader.PreviousTokenPosition}.", ex);
+                    throw tokenReader.MakeSyntaxException($"Found end of file while trying to read the token that started at {tokenReader.TokenStartPosition}.", ex);
                 }
 
                 if (sourceMap != null && token.TokenType != KVTokenType.EndOfFile)
@@ -91,7 +87,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                         }
                         catch (InvalidOperationException ex)
                         {
-                            throw MakeSyntaxException("Found end of file when another token type was expected.", ex);
+                            throw tokenReader.MakeSyntaxException($"Found end of file when another token type was expected at {tokenReader.TokenStartPosition}.", ex);
                         }
 
                         break;
@@ -102,7 +98,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                     case KVTokenType.IncludeAndMerge:
                         if (!stateMachine.IsAtStart)
                         {
-                            throw MakeSyntaxException($"Inclusions are only valid at the beginning of a file, but found one at {tokenReader.PreviousTokenPosition}.");
+                            throw tokenReader.MakeSyntaxException($"Inclusions are only valid at the beginning of a file, but found one at {tokenReader.TokenStartPosition}.");
                         }
 
                         stateMachine.AddItemForMerging(token.Value!);
@@ -111,7 +107,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                     case KVTokenType.IncludeAndAppend:
                         if (!stateMachine.IsAtStart)
                         {
-                            throw MakeSyntaxException($"Inclusions are only valid at the beginning of a file, but found one at {tokenReader.PreviousTokenPosition}.");
+                            throw tokenReader.MakeSyntaxException($"Inclusions are only valid at the beginning of a file, but found one at {tokenReader.TokenStartPosition}.");
                         }
 
                         stateMachine.AddItemForAppending(token.Value!);
@@ -134,16 +130,6 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             }
         }
 
-        KeyValueException MakeSyntaxException(string message, Exception? innerException = null)
-        {
-            if (tokenReader.EncounteredPossibleEscapeSequence)
-            {
-                message += " A backslash-escaped quotation mark (\\\") was read, but escape sequences are disabled - consider enabling KVSerializerOptions.HasEscapeSequences.";
-            }
-
-            return new KeyValueException(message, innerException);
-        }
-
         void ReadText(string text)
         {
             switch (stateMachine.Current)
@@ -152,7 +138,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                 case KV1TextReaderState.InObjectAfterValue:
                     if (stateMachine.IsAtDocumentLevel)
                     {
-                        throw MakeSyntaxException($"Found data after the root object at {tokenReader.PreviousTokenPosition}, documents with multiple root objects are not supported.");
+                        throw tokenReader.MakeSyntaxException($"Found data after the root object at {tokenReader.TokenStartPosition}, documents with multiple root objects are not supported.");
                     }
 
                     FinalizeCurrentObject(@explicit: false);
@@ -173,7 +159,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                     break;
 
                 default:
-                    throw new InvalidOperationException($"Unhandled text reader state: {stateMachine.Current} at {tokenReader.PreviousTokenPosition}.");
+                    throw new InvalidOperationException($"Unhandled text reader state: {stateMachine.Current} at {tokenReader.TokenStartPosition}.");
             }
         }
 
@@ -187,7 +173,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         {
             if (stateMachine.Current != KV1TextReaderState.InObjectBetweenKeyAndValue)
             {
-                throw new InvalidOperationException($"Attempted to begin new object while in state {stateMachine.Current} at {tokenReader.PreviousTokenPosition}.");
+                throw new InvalidOperationException($"Attempted to begin new object while in state {stateMachine.Current} at {tokenReader.TokenStartPosition}.");
             }
 
             listener.OnObjectStart(stateMachine.CurrentName, KVFlag.None);
@@ -200,7 +186,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         {
             if (stateMachine.Current != KV1TextReaderState.InObjectBeforeKey && stateMachine.Current != KV1TextReaderState.InObjectAfterValue)
             {
-                throw new InvalidOperationException($"Attempted to finalize object while in state {stateMachine.Current} at {tokenReader.PreviousTokenPosition}.");
+                throw new InvalidOperationException($"Attempted to finalize object while in state {stateMachine.Current} at {tokenReader.TokenStartPosition}.");
             }
 
             stateMachine.PopObject(out var discard);
@@ -244,10 +230,21 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         {
             if (stateMachine.Current != KV1TextReaderState.InObjectAfterValue && stateMachine.Current != KV1TextReaderState.InObjectBetweenKeyAndValue)
             {
-                throw new InvalidDataException($"Found conditional while in state {stateMachine.Current}.");
+                throw tokenReader.MakeSyntaxException($"Found conditional while in state {stateMachine.Current} at {tokenReader.TokenStartPosition}.");
             }
 
-            if (!conditionEvaluator.Evaluate(text))
+            bool matches;
+
+            try
+            {
+                matches = conditionEvaluator.Evaluate(text);
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw tokenReader.MakeSyntaxException($"Invalid conditional syntax \"{text}\" at {tokenReader.TokenStartPosition}.", ex);
+            }
+
+            if (!matches)
             {
                 stateMachine.SetDiscardCurrent();
             }
