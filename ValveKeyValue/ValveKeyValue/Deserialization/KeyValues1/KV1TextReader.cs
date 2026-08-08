@@ -73,6 +73,13 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                         break;
 
                     case KVTokenType.ObjectEnd:
+                        // A '}' at document level after the root has closed would otherwise pop the
+                        // document pseudo-object and silently ignore all remaining data.
+                        if (stateMachine.IsAtDocumentLevel && stateMachine.Current == KV1TextReaderState.InObjectAfterValue)
+                        {
+                            throw tokenReader.MakeSyntaxException($"Found data after the root object at {tokenReader.TokenStartPosition}, documents with multiple root objects are not supported.");
+                        }
+
                         FinalizeCurrentObject(@explicit: true);
                         break;
 

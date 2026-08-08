@@ -31,6 +31,8 @@ namespace ValveKeyValue.Test
         [TestCase("[1, 2]", TestName = "Kv3SecondRootArrayThrows")]
         [TestCase("#[00112233]", TestName = "Kv3TrailingBinaryBlobThrows")]
         [TestCase("resource:\"path/to/file.vmdl\"", TestName = "Kv3TrailingFlaggedValueThrows")]
+        [TestCase("}", TestName = "Kv3TrailingObjectEndThrows")]
+        [TestCase("]", TestName = "Kv3TrailingArrayEndThrows")]
         public void DataAfterRootValueInKV3Throws(string trailer)
         {
             var text = Kv3Header + "{\n\ta = 1\n}\n" + trailer + "\n";
@@ -38,6 +40,28 @@ namespace ValveKeyValue.Test
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(text));
             Assert.Throws<KeyValueException>(
                 () => KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream));
+        }
+
+        [Test]
+        public void StrayObjectEndInTextThrows()
+        {
+            const string text = "\"a\"\n{\n}\n}\n";
+
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(text));
+            var ex = Assert.Throws<KeyValueException>(
+                () => KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream));
+            Assert.That(ex.Message, Does.Contain("Found data after the root object at line 4, column 1"));
+        }
+
+        // A stray '}' used to end the read loop early, silently discarding everything after it.
+        [Test]
+        public void SecondRootObjectAfterStrayObjectEndInTextThrows()
+        {
+            const string text = "\"a\"\n{\n}\n}\n\"b\"\n{\n}\n";
+
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(text));
+            Assert.Throws<KeyValueException>(
+                () => KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream));
         }
 
         [Test]

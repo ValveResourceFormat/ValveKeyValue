@@ -101,6 +101,9 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                         break;
 
                     case KVTokenType.ObjectEnd:
+                        // A '}' at document level after the root value would otherwise pop the
+                        // document pseudo-object and silently ignore all remaining data.
+                        ThrowIfAfterRootValue();
                         FinalizeCurrentObject(@explicit: true);
                         break;
 
@@ -109,6 +112,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                         break;
 
                     case KVTokenType.ArrayEnd:
+                        ThrowIfAfterRootValue();
                         FinalizeCurrentArray();
                         break;
 
