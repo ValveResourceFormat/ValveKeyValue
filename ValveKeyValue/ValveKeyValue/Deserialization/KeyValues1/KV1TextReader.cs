@@ -45,11 +45,11 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                 }
                 catch (InvalidDataException ex)
                 {
-                    throw new KeyValueException(ex.Message, ex);
+                    throw MakeSyntaxException(ex.Message, ex);
                 }
                 catch (EndOfStreamException ex)
                 {
-                    throw new KeyValueException("Found end of file while trying to read token.", ex);
+                    throw MakeSyntaxException($"Found end of file while trying to read token starting at {tokenReader.PreviousTokenPosition}.", ex);
                 }
 
                 if (sourceMap != null && token.TokenType != KVTokenType.EndOfFile)
@@ -91,7 +91,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                         }
                         catch (InvalidOperationException ex)
                         {
-                            throw new KeyValueException("Found end of file when another token type was expected.", ex);
+                            throw MakeSyntaxException("Found end of file when another token type was expected.", ex);
                         }
 
                         break;
@@ -102,7 +102,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                     case KVTokenType.IncludeAndMerge:
                         if (!stateMachine.IsAtStart)
                         {
-                            throw new KeyValueException($"Inclusions are only valid at the beginning of a file, but found one at {tokenReader.PreviousTokenPosition}.");
+                            throw MakeSyntaxException($"Inclusions are only valid at the beginning of a file, but found one at {tokenReader.PreviousTokenPosition}.");
                         }
 
                         stateMachine.AddItemForMerging(token.Value!);
@@ -111,7 +111,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                     case KVTokenType.IncludeAndAppend:
                         if (!stateMachine.IsAtStart)
                         {
-                            throw new KeyValueException($"Inclusions are only valid at the beginning of a file, but found one at {tokenReader.PreviousTokenPosition}.");
+                            throw MakeSyntaxException($"Inclusions are only valid at the beginning of a file, but found one at {tokenReader.PreviousTokenPosition}.");
                         }
 
                         stateMachine.AddItemForAppending(token.Value!);
@@ -134,6 +134,16 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             }
         }
 
+        KeyValueException MakeSyntaxException(string message, Exception? innerException = null)
+        {
+            if (tokenReader.EncounteredPossibleEscapeSequence)
+            {
+                message += " A backslash-escaped quotation mark (\\\") was read, but escape sequences are disabled - consider enabling KVSerializerOptions.HasEscapeSequences.";
+            }
+
+            return new KeyValueException(message, innerException);
+        }
+
         void ReadText(string text)
         {
             switch (stateMachine.Current)
@@ -142,7 +152,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                 case KV1TextReaderState.InObjectAfterValue:
                     if (stateMachine.IsAtDocumentLevel)
                     {
-                        throw new KeyValueException($"Found data after the root object at {tokenReader.PreviousTokenPosition}, documents with multiple root objects are not supported.");
+                        throw MakeSyntaxException($"Found data after the root object at {tokenReader.PreviousTokenPosition}, documents with multiple root objects are not supported.");
                     }
 
                     FinalizeCurrentObject(@explicit: false);

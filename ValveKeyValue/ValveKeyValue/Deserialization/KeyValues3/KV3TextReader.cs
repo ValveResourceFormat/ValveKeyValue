@@ -53,7 +53,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 }
                 catch (EndOfStreamException ex)
                 {
-                    throw new KeyValueException("Found end of file while trying to read token.", ex);
+                    throw new KeyValueException($"Found end of file while trying to read token starting at {tokenReader.PreviousTokenPosition}.", ex);
                 }
 
                 if (sourceMap != null && token.TokenType != KVTokenType.EndOfFile)

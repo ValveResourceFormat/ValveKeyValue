@@ -26,7 +26,7 @@ namespace ValveKeyValue
         /// </summary>
         /// <param name="message">The message that describes the error.</param>
         /// <param name="inner">The exception that is the cause of the current exception, or a null reference (Nothing in Visual Basic) if no inner exception is specified.</param>
-        public KeyValueException(string message, Exception inner)
+        public KeyValueException(string message, Exception? inner)
             : base(message, inner)
         {
         }

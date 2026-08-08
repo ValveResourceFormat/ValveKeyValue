@@ -22,6 +22,10 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         readonly StringBuilder sb = new();
         readonly KVSerializerOptions options;
 
+        // Whether a backslash-quote (\") was read while escape sequences were disabled. If parsing
+        // subsequently fails, this is the likely cause, and the error message suggests enabling them.
+        public bool EncounteredPossibleEscapeSequence { get; private set; }
+
         protected override KVToken ReadNextTokenInner()
         {
             var nextChar = Peek();
@@ -123,7 +127,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                 return new KVToken(KVTokenType.IncludeAndMerge, value);
             }
 
-            throw new InvalidDataException($"Unrecognized term after '#' symbol (line {Line}, column {Column})");
+            throw new InvalidDataException($"Unrecognized term after '#' symbol (line {Line}, column {Column}).");
         }
 
         string ReadUntil(Func<int, bool> isTerminator)
@@ -163,6 +167,10 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
                         escapeNext = false;
                     }
+                }
+                else if (next == '\\' && Peek() == QuotationMark)
+                {
+                    EncounteredPossibleEscapeSequence = true;
                 }
 
                 sb.Append(next);
