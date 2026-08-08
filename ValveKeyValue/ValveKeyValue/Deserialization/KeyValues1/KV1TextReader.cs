@@ -282,22 +282,33 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
         static KVObject ParseValue(string text)
         {
-            // "0x" + 2 digits per byte. Long is 8 bytes, so s + 16 = 18.
-            // Expressed this way for readability, rather than using a magic value.
+            // "0x" followed by 16 hex digits (2 per byte of a long) is parsed as a uint64.
+            // Valve only accepts a lowercase "x", and does not validate the digits: characters
+            // outside [0-9A-Fa-f] are run through the same offset math and produce garbage
+            // values rather than a parse failure.
             const int HexStringLengthForUnsignedLong = 2 + sizeof(long) * 2;
 
-            if (text.Length == HexStringLengthForUnsignedLong && text.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+            if (text.Length == HexStringLengthForUnsignedLong && text.StartsWith("0x", StringComparison.Ordinal))
             {
-                var hexadecimalString = text[2..];
-                var data = HexStringHelper.ParseHexStringAsByteArray(hexadecimalString);
+                var value = 0L;
 
-                if (BitConverter.IsLittleEndian)
+                for (var i = 2; i < HexStringLengthForUnsignedLong; i++)
                 {
-                    Array.Reverse(data);
+                    int digit = text[i];
+
+                    if (digit >= 'a')
+                    {
+                        digit -= 'a' - ('9' + 1);
+                    }
+                    else if (digit >= 'A')
+                    {
+                        digit -= 'A' - ('9' + 1);
+                    }
+
+                    value = (value * 16) + (digit - '0');
                 }
 
-                var value = BitConverter.ToUInt64(data, 0);
-                return new KVObject(value);
+                return new KVObject((ulong)value);
             }
 
             const NumberStyles IntegerNumberStyles =

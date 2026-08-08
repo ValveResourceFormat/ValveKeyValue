@@ -1,0 +1,15 @@
+"object"
+{
+	"valid_lowercase"		"0x1122334455667788"
+	"valid_uppercase_digits"	"0x1122AABBCCDDEEFF"
+	"valid_mixed_case_digits"	"0xAaBbCcDdEeFf0011"
+	"garbage_brackets"		"0x11223344556677[]"
+	"garbage_above_f"		"0xzzzzzzzzzzzzzzzz"
+	"garbage_minus"			"0x-122334455667788"
+	"garbage_overflow"		"0xg000000000000000"
+	"garbage_below_zero"	"0x////////////////"
+	"uppercase_x"			"0X1122334455667788"
+	"too_short"				"0x112233445566778"
+	"too_long"				"0x11223344556677889"
+	"garbage_second_x"		"0xx000000000000000"
+}
