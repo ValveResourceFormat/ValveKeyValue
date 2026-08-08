@@ -1,10 +1,9 @@
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-
 namespace ValveKeyValue
 {
+    // Evaluates C style infix parenthetic logical expressions, e.g. ($WIN32 || $X360) && !$GERMAN.
+    // Supports $<identifier>, numeric literals (0 is false, non-zero is true), !, ||, &&, ().
+    // Modelled on CExpressionEvaluator in Valve's tier1/exprevaluator.cpp, where && and ||
+    // have equal precedence and are left-associative.
     class KVConditionEvaluator
     {
         public KVConditionEvaluator(ICollection<string> definedVariables)
@@ -14,273 +13,171 @@ namespace ValveKeyValue
             this.definedVariables = definedVariables;
         }
 
+        // Bail out before pathologically nested input (thousands of '(' or '!') can overflow the stack.
+        const int MaximumNestingDepth = 128;
+
         readonly ICollection<string> definedVariables;
+
+        string expressionText = string.Empty;
+        int position;
 
         public bool Evaluate(string expressionText)
         {
-            Expression expression;
+            ArgumentNullException.ThrowIfNull(expressionText);
+
+            this.expressionText = expressionText;
+            position = 0;
+
             try
             {
-                var tokens = new List<KVConditionToken>();
-                using (var reader = new StringReader(expressionText))
+                var result = EvaluateExpression(depth: 0);
+
+                SkipWhitespace();
+                if (position < expressionText.Length)
                 {
-                    KVConditionToken? token;
-                    while ((token = ReadToken(reader)) != null)
-                    {
-                        tokens.Add(token);
-                    }
+                    throw new InvalidOperationException($"Unexpected '{expressionText[position]}' after end of expression.");
                 }
 
-                expression = CreateExpression(tokens);
+                return result;
             }
             catch (InvalidOperationException ex)
             {
                 throw new InvalidDataException($"Invalid conditional syntax \"{expressionText}\"", ex);
             }
-
-            var value = Expression.Lambda<Func<bool>>(expression).Compile().Invoke();
-            return value;
         }
 
-        bool EvaluateVariable(string variable) => definedVariables.Contains(variable);
-
-        Expression CreateExpression(IList<KVConditionToken> tokens)
+        // expression := term { ('&&' | '||') term }
+        bool EvaluateExpression(int depth)
         {
-            if (tokens.Count == 0)
+            var result = EvaluateTerm(depth);
+
+            while (true)
             {
-                throw new InvalidOperationException($"{nameof(CreateExpression)} called with no condition tokens.");
-            }
+                SkipWhitespace();
 
-            PreprocessBracketedExpressions(tokens);
-
-            KVConditionToken token;
-
-            // Process AND and OR next. Split the list of expressions into two parts, and recursively process
-            // each part before joining in the desired expression.
-            for (int i = 0; i < tokens.Count; i++)
-            {
-                token = tokens[i];
-                if (token.TokenType != KVConditionTokenType.OrJoin && token.TokenType != KVConditionTokenType.AndJoin)
+                if (TrySkipOperator('&'))
                 {
-                    continue;
+                    result &= EvaluateTerm(depth);
                 }
-
-                var left = tokens.Take(i).ToList();
-                var right = tokens.Skip(i + 1).ToList();
-
-                var leftExpression = CreateExpression(left);
-                var rightExpression = CreateExpression(right);
-
-                switch (token.TokenType)
+                else if (TrySkipOperator('|'))
                 {
-                    case KVConditionTokenType.OrJoin:
-                        return Expression.OrElse(leftExpression, rightExpression);
-
-                    case KVConditionTokenType.AndJoin:
-                        return Expression.AndAlso(leftExpression, rightExpression);
+                    result |= EvaluateTerm(depth);
                 }
-            }
-
-            if (tokens.Count == 2 && tokens[0].TokenType == KVConditionTokenType.Negation)
-            {
-                var positiveExpression = CreateExpression(tokens.Skip(1).ToList());
-                return Expression.Not(positiveExpression);
-            }
-            else if (tokens.Count == 1)
-            {
-                token = tokens.Single();
-                switch (token.TokenType)
-                {
-                    case KVConditionTokenType.Value:
-                        return EvaluateVariableExpression((string)token.Value!);
-
-                    case KVConditionTokenType.PreprocessedExpression:
-                        return (Expression)token.Value!;
-                }
-            }
-
-            throw new InvalidOperationException("Invalid conditional syntax.");
-        }
-
-        void PreprocessBracketedExpressions(IList<KVConditionToken> tokens)
-        {
-            int startIndex;
-            for (startIndex = 0; startIndex < tokens.Count; startIndex++)
-            {
-                if (tokens[startIndex].TokenType == KVConditionTokenType.BeginSubExpression)
+                else
                 {
                     break;
                 }
             }
 
-            if (startIndex == tokens.Count)
-            {
-                return;
-            }
-
-            int endIndex;
-            for (endIndex = tokens.Count - 1; endIndex > startIndex; endIndex--)
-            {
-                if (tokens[endIndex].TokenType == KVConditionTokenType.EndSubExpression)
-                {
-                    break;
-                }
-            }
-
-            if (endIndex == 0)
-            {
-                return;
-            }
-
-            var subRange = tokens.Skip(startIndex + 1).Take(endIndex - startIndex - 1).ToList();
-            var evaluatedExpression = CreateExpression(subRange);
-
-            for (int i = 0; i < endIndex - startIndex + 1; i++)
-            {
-                tokens.RemoveAt(startIndex);
-            }
-
-            tokens.Insert(startIndex, new KVConditionToken(evaluatedExpression));
+            return result;
         }
 
-        MethodCallExpression EvaluateVariableExpression(string variable)
+        // term := '!' term | '(' expression ')' | '$' identifier | digits
+        bool EvaluateTerm(int depth)
         {
-            var instance = Expression.Constant(this);
-            var method = typeof(KVConditionEvaluator)
-                .GetMethod(nameof(EvaluateVariable), BindingFlags.NonPublic | BindingFlags.Instance);
-            return Expression.Call(instance, method!, new[] { Expression.Constant(variable) });
-        }
+            if (depth > MaximumNestingDepth)
+            {
+                throw new InvalidOperationException("Expression is nested too deeply.");
+            }
 
-        static KVConditionToken? ReadToken(StringReader reader)
-        {
-            SkipWhitespace(reader);
+            SkipWhitespace();
 
-            var current = reader.Read();
+            if (position >= expressionText.Length)
+            {
+                throw new InvalidOperationException("Unexpected end of expression.");
+            }
 
+            var current = expressionText[position];
             switch (current)
             {
-                case -1:
-                    return null; // End of string
-
-                case '$':
-                    return ReadVariableToken(reader);
-
                 case '!':
-                    return KVConditionToken.Not;
-
-                case '|':
-                    {
-                        var next = reader.Peek();
-                        if (next != -1 && (char)next == '|')
-                        {
-                            reader.Read();
-                            return KVConditionToken.Or;
-                        }
-
-                        break;
-                    }
-
-                case '&':
-                    {
-                        var next = reader.Peek();
-                        if (next != -1 && (char)next == '&')
-                        {
-                            reader.Read();
-                            return KVConditionToken.And;
-                        }
-
-                        break;
-                    }
+                    position++;
+                    return !EvaluateTerm(depth + 1);
 
                 case '(':
-                    return KVConditionToken.LeftParenthesis;
+                    {
+                        position++;
+                        var result = EvaluateExpression(depth + 1);
 
-                case ')':
-                    return KVConditionToken.RightParenthesis;
+                        SkipWhitespace();
+                        if (position >= expressionText.Length || expressionText[position] != ')')
+                        {
+                            throw new InvalidOperationException("Unterminated bracketed expression.");
+                        }
+
+                        position++;
+                        return result;
+                    }
+
+                case '$':
+                    position++;
+                    return EvaluateVariable(ReadVariableName());
+
+                case >= '0' and <= '9':
+                    return ReadNumericLiteral();
             }
 
-            throw new InvalidOperationException("Bad condition syntax.");
+            throw new InvalidOperationException($"Unexpected '{current}'.");
         }
 
-        static void SkipWhitespace(StringReader reader)
+        // Case-insensitive to match Valve, whose symbol resolution uses V_stricmp.
+        bool EvaluateVariable(string variable)
         {
-            var next = reader.Peek();
-            while (next != -1 && char.IsWhiteSpace((char)next))
+            foreach (var definedVariable in definedVariables)
             {
-                reader.Read();
-                next = reader.Peek();
+                if (string.Equals(definedVariable, variable, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
             }
+
+            return false;
         }
 
-        static KVConditionToken ReadVariableToken(StringReader reader)
+        bool TrySkipOperator(char operatorCharacter)
         {
-            var builder = new StringBuilder();
-            while (IsReadableVariableCharacter(reader.Peek()))
+            if (position + 1 < expressionText.Length
+                && expressionText[position] == operatorCharacter
+                && expressionText[position + 1] == operatorCharacter)
             {
-                builder.Append((char)reader.Read());
+                position += 2;
+                return true;
             }
 
-            return new KVConditionToken(builder.ToString());
+            return false;
         }
 
-        static bool IsReadableVariableCharacter(int value)
+        bool ReadNumericLiteral()
         {
-            if (value == -1)
+            var isNonZero = false;
+            while (position < expressionText.Length && char.IsAsciiDigit(expressionText[position]))
             {
-                return false;
+                isNonZero |= expressionText[position] != '0';
+                position++;
             }
 
-            return char.IsLetterOrDigit((char)value) || (char)value == '_';
+            return isNonZero;
         }
 
-        enum KVConditionTokenType
+        string ReadVariableName()
         {
-            Value,
-            Negation,
-            OrJoin,
-            AndJoin,
-            BeginSubExpression,
-            EndSubExpression,
-            PreprocessedExpression // Used internally for bracketed expressions
+            var start = position;
+            while (position < expressionText.Length && IsVariableCharacter(expressionText[position]))
+            {
+                position++;
+            }
+
+            return expressionText[start..position];
         }
 
-        class KVConditionToken
+        static bool IsVariableCharacter(char c) => char.IsLetterOrDigit(c) || c == '_';
+
+        void SkipWhitespace()
         {
-            public KVConditionToken(string variable)
-                : this(KVConditionTokenType.Value)
+            while (position < expressionText.Length && char.IsWhiteSpace(expressionText[position]))
             {
-                Value = variable;
+                position++;
             }
-
-            public KVConditionToken(Expression expression)
-                 : this(KVConditionTokenType.PreprocessedExpression)
-            {
-                Value = expression;
-            }
-
-            KVConditionToken(KVConditionTokenType type)
-            {
-                TokenType = type;
-            }
-
-            public KVConditionTokenType TokenType { get; }
-
-            public object? Value { get; }
-
-            public static KVConditionToken Not
-                => new(KVConditionTokenType.Negation);
-
-            public static KVConditionToken Or
-                => new(KVConditionTokenType.OrJoin);
-
-            public static KVConditionToken And
-                => new(KVConditionTokenType.AndJoin);
-
-            public static KVConditionToken LeftParenthesis
-                => new(KVConditionTokenType.BeginSubExpression);
-
-            public static KVConditionToken RightParenthesis
-                => new(KVConditionTokenType.EndSubExpression);
         }
     }
 }

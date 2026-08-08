@@ -20,6 +20,18 @@ namespace ValveKeyValue.Test
         [TestCase(")")]
         [TestCase("$ABC && ($DEF || $GHI")]
         [TestCase("$ABC && $DEF)")]
+        [TestCase("1 2")]
+        [TestCase("1$ABC")]
+        [TestCase("$ABC 1")]
+        [TestCase("1 !")]
+        [TestCase("")]
+        [TestCase(" ")]
+        [TestCase("$ABC &&")]
+        [TestCase("$ABC ||")]
+        [TestCase("$ABC &")]
+        [TestCase("$ABC |")]
+        [TestCase("$ABC($DEF)")]
+        [TestCase("$ABC &&&& $DEF")]
         public void ThrowsInvalidDataException(string conditional)
         {
             var text = TestDataHelper.ReadTextResource("Text.invalid_conditional.vdf");
@@ -30,6 +42,14 @@ namespace ValveKeyValue.Test
                 () => KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream),
                 Throws.Exception.InstanceOf<InvalidDataException>()
                 .With.Message.EqualTo($"Invalid conditional syntax \"{conditional}\""));
+        }
+
+        // Pathologically nested input must fail with a parse error rather than a StackOverflowException.
+        [Test]
+        public void ThrowsForDeeplyNestedConditional()
+        {
+            ThrowsInvalidDataException(new string('(', 10000) + "$ABC" + new string(')', 10000));
+            ThrowsInvalidDataException(new string('!', 10000) + "$ABC");
         }
     }
 }

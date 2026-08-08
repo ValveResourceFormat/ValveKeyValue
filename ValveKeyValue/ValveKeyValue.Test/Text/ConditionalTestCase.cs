@@ -50,6 +50,135 @@ namespace ValveKeyValue.Test
             Assert.That(data.ContainsKey("ui type"), Is.False);
         }
 
+        [TestCase("WIN32")]
+        [TestCase("WIN64")]
+        public void ReadsValueWhenBothSidesOfConditionalAreBracketed(string condition)
+        {
+            var data = ParseResource("Text.conditional.vdf", [condition]);
+
+            Assert.That((string)data["bracketed sides"], Is.EqualTo("windows"));
+        }
+
+        [Test]
+        public void EvaluatesNumericLiterals()
+        {
+            var data = ParseResource("Text.conditional.vdf");
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That((string)data["literal true"], Is.EqualTo("yes"));
+                Assert.That(data.ContainsKey("literal false"), Is.False);
+                Assert.That((string)data["literal multi digit"], Is.EqualTo("yes"));
+                Assert.That((string)data["literal brackets"], Is.EqualTo("yes"));
+            }
+        }
+
+        [Test]
+        public void ReadsValueWhenNegatedGroupMatches()
+        {
+            var data = ParseResource("Text.conditional.vdf");
+
+            Assert.That((string)data["negated group"], Is.EqualTo("yes"));
+        }
+
+        [TestCase("GERMAN")]
+        [TestCase("FRENCH")]
+        public void DiscardsValueWhenNegatedGroupDoesNotMatch(string condition)
+        {
+            var data = ParseResource("Text.conditional.vdf", [condition]);
+
+            Assert.That(data.ContainsKey("negated group"), Is.False);
+        }
+
+        [Test]
+        public void ReadsValueFromNestedBrackets()
+        {
+            var data = ParseResource("Text.conditional.vdf", ["WIN32"]);
+
+            Assert.That((string)data["nested brackets"], Is.EqualTo("yes"));
+        }
+
+        // && and || have equal precedence and are left-associative, matching Valve's CExpressionEvaluator.
+        [Test]
+        public void AndOrHaveEqualPrecedenceAndAreLeftAssociative()
+        {
+            var data = ParseResource("Text.conditional.vdf", ["POLISH"]);
+
+            // ($GERMAN && $FRENCH) || $POLISH, not $GERMAN && ($FRENCH || $POLISH)
+            Assert.That((string)data["left associative"], Is.EqualTo("yes"));
+        }
+
+        // Distinguishes equal precedence from C style precedence: ($GERMAN || $FRENCH) && $POLISH
+        // is false with only GERMAN defined, $GERMAN || ($FRENCH && $POLISH) would be true.
+        [Test]
+        public void OrBeforeAndEvaluatesWithEqualPrecedence()
+        {
+            var data = ParseResource("Text.conditional.vdf", ["GERMAN"]);
+            Assert.That(data.ContainsKey("or before and"), Is.False);
+
+            data = ParseResource("Text.conditional.vdf", ["GERMAN", "POLISH"]);
+            Assert.That((string)data["or before and"], Is.EqualTo("yes"));
+        }
+
+        // Valve's evaluator mangles !!$A into !$A, we evaluate standard double negation instead.
+        [Test]
+        public void SupportsDoubleNegation()
+        {
+            var data = ParseResource("Text.conditional.vdf", ["WIN32"]);
+            Assert.That((string)data["double negation"], Is.EqualTo("yes"));
+
+            data = ParseResource("Text.conditional.vdf");
+            Assert.That(data.ContainsKey("double negation"), Is.False);
+        }
+
+        [Test]
+        public void BareDollarEvaluatesToFalseWithoutError()
+        {
+            var data = ParseResource("Text.conditional.vdf");
+            Assert.That(data.ContainsKey("dollar only"), Is.False);
+        }
+
+        // $0 is a variable lookup, not a numeric literal. Matches Valve, where only bare digit
+        // runs are constants.
+        [Test]
+        public void VariableMadeOfDigitsIsNotALiteral()
+        {
+            var data = ParseResource("Text.conditional.vdf", ["0"]);
+            Assert.That((string)data["digit variable"], Is.EqualTo("yes"));
+
+            data = ParseResource("Text.conditional.vdf");
+            Assert.That(data.ContainsKey("digit variable"), Is.False);
+        }
+
+        // Matches Valve, whose symbol resolution uses case-insensitive V_stricmp.
+        [Test]
+        public void VariableMatchingIsCaseInsensitive()
+        {
+            var data = ParseResource("Text.conditional.vdf", ["WIN32"]);
+
+            // Lowercase variable in the file, uppercase defined condition.
+            Assert.That((string)data["lowercase variable"], Is.EqualTo("yes"));
+
+            // Uppercase variable in the file, lowercase defined condition.
+            data = ParseResource("Text.conditional.vdf", ["win32"]);
+            Assert.That((string)data["operating system"], Is.EqualTo("windows 32-bit"));
+
+            data = ParseResource("Text.conditional.vdf");
+            Assert.That(data.ContainsKey("lowercase variable"), Is.False);
+        }
+
+        [Test]
+        public void SupportsWhitespacePaddingInConditions()
+        {
+            var data = ParseResource("Text.conditional.vdf", ["WIN32", "X360", "X360WIDE"]);
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That((string)data["padded condition"], Is.EqualTo("yes"));
+                Assert.That((string)data["tabbed condition"], Is.EqualTo("yes"));
+            }
+        }
+
         [Test]
         public void SupportsConditionalsWithUnderscores()
         {
