@@ -16,6 +16,8 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         public bool IsInObject => states.Count > 0;
 
+        public bool IsAtDocumentLevel => states.Count == 1;
+
         public bool IsInArray => states.Count > 0 && CurrentObject.IsArray;
 
         public void PushObject() => states.Push(new KVPartialState<KV3TextReaderState>());

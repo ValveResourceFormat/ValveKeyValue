@@ -42,7 +42,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
             try
             {
-                ReadObjectCore();
+                ReadRootObject();
             }
             catch (IOException ex)
             {
@@ -66,6 +66,23 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             {
                 reader.Dispose();
                 disposed = true;
+            }
+        }
+
+        void ReadRootObject()
+        {
+            var type = ReadNextNodeType();
+
+            if (type == endMarker)
+            {
+                return;
+            }
+
+            ReadValue(type);
+
+            if (ReadNextNodeType() != endMarker)
+            {
+                throw new KeyValueException("Found data after the root object, documents with multiple root objects are not supported.");
             }
         }
 

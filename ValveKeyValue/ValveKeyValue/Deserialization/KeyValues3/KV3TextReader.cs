@@ -156,6 +156,8 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         void ReadFlag(string text)
         {
+            ThrowIfAfterRootValue();
+
             if (stateMachine.Current != KV3TextReaderState.InArray && stateMachine.Current != KV3TextReaderState.InObjectAfterKey)
             {
                 throw new InvalidOperationException($"Attempted to read flag while in state {stateMachine.Current}.");
@@ -166,8 +168,20 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             stateMachine.SetFlag(flag);
         }
 
+        // The document pseudo-object is only ever in InObjectBeforeKey once the root value
+        // has been fully read, so any further data-bearing token at that point is trailing garbage.
+        void ThrowIfAfterRootValue()
+        {
+            if (stateMachine.IsAtDocumentLevel && stateMachine.Current == KV3TextReaderState.InObjectBeforeKey)
+            {
+                throw new KeyValueException($"Found data after the root value at {tokenReader.PreviousTokenPosition}, documents with multiple root values are not supported.");
+            }
+        }
+
         void ReadText(string text)
         {
+            ThrowIfAfterRootValue();
+
             switch (stateMachine.Current)
             {
                 case KV3TextReaderState.InArray:
@@ -200,6 +214,8 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         void ReadBinaryBlob(string text)
         {
+            ThrowIfAfterRootValue();
+
             var bytes = HexStringHelper.ParseHexStringAsByteArray(text);
             var value = KVObject.Blob(bytes);
             value.Flag = stateMachine.GetAndResetFlag();
@@ -228,6 +244,8 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         void BeginNewArray()
         {
+            ThrowIfAfterRootValue();
+
             if (stateMachine.Current != KV3TextReaderState.InArray && stateMachine.Current != KV3TextReaderState.InObjectAfterKey)
             {
                 throw new InvalidOperationException($"Attempted to begin new array while in state {stateMachine.Current}.");
@@ -266,6 +284,8 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         void BeginNewObject()
         {
+            ThrowIfAfterRootValue();
+
             if (stateMachine.Current != KV3TextReaderState.InArray && stateMachine.Current != KV3TextReaderState.InObjectAfterKey)
             {
                 throw new InvalidOperationException($"Attempted to begin new object while in state {stateMachine.Current}.");

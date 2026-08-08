@@ -16,6 +16,8 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
         public bool IsInObject => states.Count > 0;
 
+        public bool IsAtDocumentLevel => states.Count == 1;
+
         public bool IsAtStart => states.Count == 1 && CurrentObject.States.Count == 1 && Current == KV1TextReaderState.InObjectBeforeKey;
 
         public void PushObject() => states.Push(new KVPartialState<KV1TextReaderState>());

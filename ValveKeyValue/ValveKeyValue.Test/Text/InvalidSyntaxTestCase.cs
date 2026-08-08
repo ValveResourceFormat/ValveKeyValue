@@ -14,6 +14,7 @@ namespace ValveKeyValue.Test
         [TestCase("partial_partialvalue")]
         [TestCase("partial_noclose")]
         [TestCase("invalid_zerobracerepeated")]
+        [TestCase("multiple_root_objects")]
         public void InvalidTextSyntaxThrowsKeyValueException(string resourceName)
         {
             using var stream = TestDataHelper.OpenResource("Text." + resourceName + ".vdf");

@@ -140,6 +140,11 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             {
                 // If we're after a value when we find more text, then we must be starting a new key/value pair.
                 case KV1TextReaderState.InObjectAfterValue:
+                    if (stateMachine.IsAtDocumentLevel)
+                    {
+                        throw new KeyValueException($"Found data after the root object at {tokenReader.PreviousTokenPosition}, documents with multiple root objects are not supported.");
+                    }
+
                     FinalizeCurrentObject(@explicit: false);
                     stateMachine.PushObject();
                     SetObjectKey(text);
