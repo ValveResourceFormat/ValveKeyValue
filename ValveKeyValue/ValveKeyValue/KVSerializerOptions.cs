@@ -27,7 +27,6 @@ namespace ValveKeyValue
         /// </summary>
         public IIncludedFileLoader? FileLoader { get; set; }
 
-
         /// <summary>
         /// Gets or sets a value indicating whether the KV3 header comment should be skipped during serialization and deserialization.
         /// </summary>

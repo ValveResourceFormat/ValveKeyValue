@@ -7,7 +7,7 @@ namespace ValveKeyValue
     {
         #region IConvertible (explicit interface)
 
-        TypeCode IConvertible.GetTypeCode() => ValueType switch
+        public TypeCode GetTypeCode() => ValueType switch
         {
             KVValueType.Boolean => TypeCode.Boolean,
             KVValueType.String => TypeCode.String,

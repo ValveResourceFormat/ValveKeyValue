@@ -1,4 +1,4 @@
-﻿namespace ValveKeyValue
+namespace ValveKeyValue
 {
     /// <summary>
     /// Represents a string table for efficient binary serialization.
@@ -44,7 +44,6 @@
                 reverse[value] = i;
             }
         }
-
 
         readonly IList<string> lookup;
         readonly bool writable;
