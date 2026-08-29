@@ -50,6 +50,11 @@ namespace ValveKeyValue
         readonly Dictionary<string, int> reverse;
 
         /// <summary>
+        /// Gets the number of strings in the table.
+        /// </summary>
+        public int Count => lookup.Count;
+
+        /// <summary>
         /// Gets the string at the specified index.
         /// </summary>
         /// <param name="index">The zero-based index.</param>

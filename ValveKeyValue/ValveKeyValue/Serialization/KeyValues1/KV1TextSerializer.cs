@@ -27,7 +27,9 @@ namespace ValveKeyValue.Serialization.KeyValues1
         readonly Stack<int> arrayCount = new();
 
         public void OnObjectStart(string? name, KVFlag flag)
-            => WriteStartObject(name);
+        {
+            WriteStartObject(name);
+        }
 
         public void OnObjectEnd()
             => WriteEndObject();

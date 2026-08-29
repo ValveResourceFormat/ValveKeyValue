@@ -31,8 +31,15 @@ namespace ValveKeyValue.Serialization.KeyValues3
             var defaultEncoding = new ValveKeyValue.KeyValues3.KV3ID("text", ValveKeyValue.KeyValues3.Encoding.Text);
             var defaultFormat = new ValveKeyValue.KeyValues3.KV3ID("generic", ValveKeyValue.KeyValues3.Format.Generic);
 
-            var encoding = header?.Encoding.Name != null ? header.Encoding : defaultEncoding;
-            var format = header?.Format.Name != null ? header.Format : defaultFormat;
+            // A KeyValues3 identifier is a name plus a GUID. A header carried over from another
+            // format has only a name and a version number, which would format into a header no
+            // KeyValues3 reader can parse, so fall back to the defaults for those.
+            var encoding = header?.Encoding is { Name: not null, Id: var encodingId } && encodingId != default
+                ? header.Encoding
+                : defaultEncoding;
+            var format = header?.Format is { Name: not null, Id: var formatId } && formatId != default
+                ? header.Format
+                : defaultFormat;
 
             var s = Position;
             writer.Write($"<!-- kv3 encoding:{encoding} format:{format} -->");

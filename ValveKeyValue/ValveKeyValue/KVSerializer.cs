@@ -3,8 +3,10 @@ using System.Text;
 using ValveKeyValue.Abstraction;
 using ValveKeyValue.Deserialization;
 using ValveKeyValue.Deserialization.KeyValues1;
+using ValveKeyValue.Deserialization.KeyValues2;
 using ValveKeyValue.Deserialization.KeyValues3;
 using ValveKeyValue.Serialization.KeyValues1;
+using ValveKeyValue.Serialization.KeyValues2;
 using ValveKeyValue.Serialization.KeyValues3;
 
 namespace ValveKeyValue
@@ -38,6 +40,18 @@ namespace ValveKeyValue
         public KVDocument Deserialize(Stream stream, KVSerializerOptions? options = null)
         {
             ArgumentNullException.ThrowIfNull(stream);
+
+            if (format == KVSerializationFormat.KeyValues2Text)
+            {
+                using var kv2Reader = new KV2TextReader(new StreamReader(stream, null, true, -1, leaveOpen: true));
+                return kv2Reader.Read();
+            }
+
+            if (format == KVSerializationFormat.KeyValues2Binary)
+            {
+                using var kv2BinaryReader = new KV2BinaryReader(stream);
+                return kv2BinaryReader.Read();
+            }
 
             var builder = new KVObjectBuilder(useDictionaryForCollections: format == KVSerializationFormat.KeyValues3Text);
 
@@ -77,6 +91,13 @@ namespace ValveKeyValue
             ArgumentNullException.ThrowIfNull(stream);
             ArgumentNullException.ThrowIfNull(data);
 
+            // KV2 is standalone — a graph of elements referencing each other doesn't fit the visitor pattern
+            if (format is KVSerializationFormat.KeyValues2Binary or KVSerializationFormat.KeyValues2Text)
+            {
+                SerializeKeyValues2(stream, new KVDocument(null, name, data));
+                return;
+            }
+
             using var serializer = MakeSerializer(stream, options ?? KVSerializerOptions.DefaultOptions);
             var visitor = new KVObjectVisitor(serializer);
             visitor.Visit(name, data);
@@ -93,9 +114,28 @@ namespace ValveKeyValue
             ArgumentNullException.ThrowIfNull(stream);
             ArgumentNullException.ThrowIfNull(data);
 
+            if (format is KVSerializationFormat.KeyValues2Binary or KVSerializationFormat.KeyValues2Text)
+            {
+                SerializeKeyValues2(stream, data);
+                return;
+            }
+
             using var serializer = MakeSerializer(stream, options ?? KVSerializerOptions.DefaultOptions, data.Header);
             var visitor = new KVObjectVisitor(serializer);
             visitor.Visit(data.Name, data.Root);
+        }
+
+        void SerializeKeyValues2(Stream stream, KVDocument data)
+        {
+            if (format == KVSerializationFormat.KeyValues2Binary)
+            {
+                using var binaryWriter = new KV2BinaryWriter(stream, data.Header);
+                binaryWriter.Write(data);
+                return;
+            }
+
+            using var textWriter = new KV2TextWriter(stream, data.Header);
+            textWriter.Write(data);
         }
 
         /// <summary>
@@ -111,6 +151,24 @@ namespace ValveKeyValue
             ArgumentNullException.ThrowIfNull(stream);
             ArgumentNullException.ThrowIfNull(data);
             ArgumentNullException.ThrowIfNull(name);
+
+            // A KVObject subclass binds to this overload rather than the KVObject one, because
+            // TData matches it exactly while the other needs a conversion to the base type.
+            // Serialize it as the KeyValues object it is instead of reflecting over its properties.
+            if (data is KVObject kvObject)
+            {
+                Serialize(stream, kvObject, name, options);
+                return;
+            }
+
+            if (format is KVSerializationFormat.KeyValues2Binary or KVSerializationFormat.KeyValues2Text)
+            {
+                // A DMX element needs a class name and an id, which an arbitrary object does not
+                // carry, so there is nothing sensible to write here. Checked before converting, so
+                // that the caller gets this rather than a failure from the conversion.
+                throw new InvalidOperationException(
+                    $"{format} cannot serialize an arbitrary object. Build a {nameof(KV2Element)} tree and serialize that instead.");
+            }
 
             var kvObjectTree = ObjectCopier.FromObject(typeof(TData), data);
 
@@ -153,7 +211,7 @@ namespace ValveKeyValue
             {
                 KVSerializationFormat.KeyValues1Text => new KV1TextReader(textReader, listener, options, spans),
                 KVSerializationFormat.KeyValues3Text => new KV3TextReader(textReader, listener, options.SkipHeader, spans),
-                _ => throw new InvalidOperationException($"Source maps are only supported for text formats, not {format}."),
+                _ => throw new InvalidOperationException($"Source maps are only supported for the KeyValues1 and KeyValues3 text formats, not {format}."),
             };
         }
 
@@ -201,6 +259,15 @@ namespace ValveKeyValue
             ArgumentNullException.ThrowIfNull(data);
             ArgumentNullException.ThrowIfNull(name);
 
+            ThrowIfSourceMapsUnsupported();
+
+            // As in Serialize<TData>, a KVObject subclass binds here rather than the KVObject
+            // overload, so serialize it as the KeyValues object it is.
+            if (data is KVObject kvObject)
+            {
+                return SerializeWithSourceMapCore(kvObject, name, header: null, options);
+            }
+
             var kvObjectTree = ObjectCopier.FromObject(typeof(TData), data);
             return SerializeWithSourceMapCore(kvObjectTree, name, header: null, options);
         }
@@ -218,13 +285,26 @@ namespace ValveKeyValue
             return (sb.ToString(), spans);
         }
 
+        /// <summary>
+        /// Source maps describe token positions in text, which only the KeyValues1 and KeyValues3
+        /// serializers record. Checked before any conversion work so the caller sees this rather
+        /// than a failure from converting an object that was never going to be written.
+        /// </summary>
+        void ThrowIfSourceMapsUnsupported()
+        {
+            if (format is not (KVSerializationFormat.KeyValues1Text or KVSerializationFormat.KeyValues3Text))
+            {
+                throw new InvalidOperationException($"Source maps are only supported for the KeyValues1 and KeyValues3 text formats, not {format}.");
+            }
+        }
+
         IVisitationListener MakeSourceMapSerializer(StringBuilder sb, List<KvSourceSpan> spans, KVSerializerOptions options, KVHeader? header)
         {
             return format switch
             {
                 KVSerializationFormat.KeyValues1Text => new KV1TextSerializer(sb, spans, options),
                 KVSerializationFormat.KeyValues3Text => new KV3TextSerializer(sb, spans, header, options.SkipHeader),
-                _ => throw new InvalidOperationException($"Source maps are only supported for text formats, not {format}."),
+                _ => throw new InvalidOperationException($"Source maps are only supported for the KeyValues1 and KeyValues3 text formats, not {format}."),
             };
         }
 

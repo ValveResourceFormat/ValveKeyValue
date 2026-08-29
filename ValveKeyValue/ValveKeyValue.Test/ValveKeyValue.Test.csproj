@@ -17,6 +17,7 @@
     <EmbeddedResource Include="Test Data\**\*.txt" />
     <EmbeddedResource Include="Test Data\**\*.vdf" />
     <EmbeddedResource Include="Test Data\**\*.kv3" />
+    <EmbeddedResource Include="Test Data\**\*.dmx" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="coverlet.msbuild" Version="8.0.1">

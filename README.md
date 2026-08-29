@@ -15,15 +15,16 @@ The library is built around a single type:
 - **`KVObject`** (class) -- a value node. Can be a scalar (string, int, float, bool, etc.), a binary blob, an array, or a named collection of children. Keys (names) are stored in the parent container, not on the child -- similar to how JSON works. Implements `IReadOnlyDictionary<string, KVObject>` and `IConvertible`.
 - **`KVDocument`** (class) -- a deserialized document containing a `Root` KVObject, a root key `Name`, and an optional `Header`. Has a read-only string indexer that delegates to `Root`, and an implicit conversion to `KVObject`.
 
-All types are shared across KV1 and KV3 -- you can deserialize from one format and serialize to another. However, not all value types are supported by all formats:
+All types are shared across the formats -- you can deserialize from one format and serialize to another. However, not all value types are supported by all formats:
 
-| Feature | KV1 Text | KV1 Binary | KV3 Text |
-|---------|----------|------------|----------|
-| Collections | Yes (list-backed, allows duplicate keys) | Yes (list-backed) | Yes (dict-backed, O(1) lookup) |
-| Arrays | Emulated as objects with numeric keys | No (throws) | Yes (native) |
-| Binary blobs | No | No (throws) | Yes (native) |
-| Scalars | Yes | Yes | Yes |
-| Flags | No | No | Yes |
+| Feature | KV1 Text | KV1 Binary | KV2 (DMX) | KV3 Text |
+|---------|----------|------------|-----------|----------|
+| Collections | Yes (list-backed, allows duplicate keys) | Yes (list-backed) | Yes (elements, see [KeyValues2](#keyvalues2-dmx--datamodel)) | Yes (dict-backed, O(1) lookup) |
+| Arrays | Emulated as objects with numeric keys | No (throws) | Yes (one type per item type) | Yes (native) |
+| Binary blobs | No | No (throws) | Yes (native) | Yes (native) |
+| Scalars | Yes | Yes | Yes | Yes |
+| Flags | No | No | No | Yes |
+| DMX types (vectors, colours, matrices, ...) | No (throws) | No (throws) | Yes | No (throws) |
 
 When constructing objects programmatically, use `KVObject.Collection()` (dict-backed) for general use and KV3 output, or `KVObject.ListCollection()` (list-backed) when you need duplicate keys or KV1 compatibility. Deserialization picks the appropriate backing store automatically.
 
@@ -264,9 +265,113 @@ kv.Serialize(stream, data, "root object name");
 
 Essentially the same as text, just change `KeyValues1Text` to `KeyValues1Binary`.
 
-# KeyValues2 (Datamodel)
+# KeyValues2 (DMX / Datamodel)
 
-This library does not currently support KeyValues2 (Datamodel). If you need KV2/Datamodel support, use our fork of [Datamodel.NET](https://github.com/ValveResourceFormat/Datamodel.NET) instead.
+Used by the Source engine tools -- SFM, Hammer, the model compiler and the particle editor -- and
+stored in `.dmx` files.
+
+Unlike KV1 and KV3, a DMX document is not a tree. It is a flat set of *elements* that reference each
+other by GUID, so the same element can appear in several places and the graph can contain cycles.
+Every element has a class name, an instance name, a unique id and a set of typed attributes.
+
+- **`KV2Element`** (class, derives from `KVObject`) -- one element. Carries `ClassName`, `Name` and
+  `ElementId` alongside its attributes. An attribute whose value is another element holds the
+  `KV2Element` itself, so the same instance is shared by every reference to it.
+- **`KV2Document`** (class, derives from `KVDocument`) -- what the two KV2 readers return. Adds
+  `PrefixElement`, the attribute container that precedes the root in binary v9 and keyvalues2 v4
+  documents (CS2 vmaps use it).
+- **`KV2Element.Null`** -- the sentinel for a null element reference.
+- **`KV2Element.Stub(id)`** -- a reference to an element owned by another file. A stub carries only
+  its id, and the writers emit it as an external reference rather than inlining it.
+
+Both encodings are supported for reading and writing: binary versions 1 to 5 and 9 (versions 6 to 8
+never existed), and keyvalues2 text versions 1 to 4. Documents can be moved freely between the two.
+
+## Deserializing
+
+```csharp
+using var stream = File.OpenRead("file.dmx");
+
+// Or KVSerializationFormat.KeyValues2Binary for the binary encoding.
+var kv = KVSerializer.Create(KVSerializationFormat.KeyValues2Text);
+var data = (KV2Document)kv.Deserialize(stream);
+
+var root = (KV2Element)data.Root;
+Console.WriteLine(root.ClassName);            // "CMapRootElement"
+Console.WriteLine(root["editorbuild"]);       // an int attribute
+
+// Element attributes are elements, and shared references are the same instance.
+var world = (KV2Element)root["world"];
+Console.WriteLine(world.ElementId);
+
+// Attributes carrying DMX structs, and typed arrays.
+Vector3 origin = world["origin"].GetValue<Vector3>();
+List<KV2Element> children = world["children"].GetArray<KV2Element>();
+
+// The prefix container, when the document has one.
+Console.WriteLine(data.PrefixElement?["map_asset_references"].GetArray<string>().Count);
+```
+
+## Serializing
+
+```csharp
+var child = new KV2Element("DmeChild", "child", Guid.NewGuid());
+child.Add("value", new KVObject(99));
+
+var root = new KV2Element("DmElement", "root", Guid.NewGuid());
+root.Add("position", new KVObject(new Vector3(1.5f, 2.5f, 3.5f)));
+root.Add("numbers", KVObject.TypedArray(new List<int> { 1, 2, 3 }));
+root.Add("child", child);
+root.Add("nothing", KV2Element.Null);
+
+using var stream = File.OpenWrite("file.dmx");
+
+var kv = KVSerializer.Create(KVSerializationFormat.KeyValues2Text);
+kv.Serialize(stream, new KVDocument(header: null, name: null, root));
+```
+
+An element referenced once is written inline at its usage site, and one referenced several times is
+written as its own top-level block that the usage sites point at by id, which is what Valve's own
+serializer does.
+
+### Choosing an encoding and version
+
+The encoding name and version in the header always describe the output, so writing a document that
+was read from a `.dmx` text file as binary produces a `binary` header rather than carrying the
+`keyvalues2` one over. Only the *format* name and version (`dmx`, `vmap 35`, `model 22`, ...) carry
+over, since they describe the content rather than how it is stored.
+
+Pass a `KVHeader` on the document to choose a version or an encoding variant:
+
+| Encoding name | Effect |
+|---------------|--------|
+| `binary` | Default for binary output, version 5 unless the document came from a binary document |
+| `binary_seqids` | Assigns sequential element ids, so writing the same document twice produces identical bytes |
+| `keyvalues2` | Default for text output, version 1 unless the document came from a text document |
+| `keyvalues2_flat` | Writes every element as a top-level block, with every element attribute a reference |
+| `keyvalues2_noids` | Omits the `id` line of elements written inline |
+
+A document that needs `uint8`, `uint64` or a prefix element is automatically written as binary
+version 9 or keyvalues2 version 4, which are the first versions that can encode them.
+
+## Value types
+
+DMX has a typed attribute system, so `KVValueType` carries one entry per DMX type. Scalars are
+`Byte`, `Color`, `TimeSpan`, `Vector2`, `Vector3`, `Vector4`, `QAngle`, `Quaternion` and
+`Matrix4x4`, alongside the ones shared with KV1 and KV3; every one of them also has an array
+counterpart such as `Vector3Array` and `ElementArray`.
+
+- `KVObject.GetValue<T>()` reads a struct value: `GetValue<Vector3>()`, `GetValue<DmxColor>()`,
+  `GetValue<DmxTime>()`.
+- `KVObject.GetArray<T>()` reads a typed array as a `List<T>`.
+- `KVObject.TypedArray(list)` builds one, taking the array type from the list item type.
+
+`QAngle`, `DmxColor` and `DmxTime` are library types, the rest come from `System.Numerics`. A
+`DmxTime` holds tenths of milliseconds, matching the binary encoding; the text encoding writes it as
+seconds and the conversion is handled for you.
+
+These types only exist in DMX. The KV1 and KV3 serializers throw rather than write something that
+cannot be read back.
 
 # KeyValues3
 

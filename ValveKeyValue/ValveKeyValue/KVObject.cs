@@ -1,7 +1,9 @@
+using System.Collections;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace ValveKeyValue
@@ -29,10 +31,10 @@ namespace ValveKeyValue
 
         // Inline storage for scalar types (no boxing).
         // Interpretation depends on ValueType.
-        private readonly long _scalar;
+        internal readonly long _scalar;
 
-        // Reference storage for heap types: string, byte[], List<KVObject>, Dictionary<string, KVObject>, etc.
-        private readonly object? _ref;
+        // Reference storage for heap types: string, byte[], List<KVObject>, OrderedDictionary<string, KVObject>, etc.
+        internal readonly object? _ref;
 
         /// <summary>
         /// Gets a value indicating whether this value is null.
@@ -57,8 +59,14 @@ namespace ValveKeyValue
         {
             KVValueType.Collection => GetCollectionCount(),
             KVValueType.Array => ((List<KVObject>)_ref!).Count,
+            _ when IsTypedArray => (_ref as ICollection)?.Count ?? 0,
             _ => 0,
         };
+
+        /// <summary>
+        /// Gets a value indicating whether this value is a DMX typed array.
+        /// </summary>
+        public bool IsTypedArray => ValueType >= KVValueType.ElementArray && ValueType <= KVValueType.UInt64Array;
 
         #endregion
 
@@ -70,7 +78,7 @@ namespace ValveKeyValue
         public KVObject()
         {
             ValueType = KVValueType.Collection;
-            _ref = new Dictionary<string, KVObject>();
+            _ref = new OrderedDictionary<string, KVObject>();
         }
 
         /// <summary>
@@ -173,6 +181,84 @@ namespace ValveKeyValue
             _scalar = value.ToInt32();
         }
 
+        /// <summary>
+        /// Creates a DMX byte-valued <see cref="KVObject"/>.
+        /// </summary>
+        public static KVObject Byte(byte value)
+            => new(KVValueType.Byte, value, null, KVFlag.None);
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KVObject"/> class with a <see cref="DmxColor"/> value.
+        /// </summary>
+        public KVObject(DmxColor value)
+        {
+            ValueType = KVValueType.Color;
+            _ref = value;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KVObject"/> class with a <see cref="DmxTime"/> value.
+        /// </summary>
+        public KVObject(DmxTime value)
+        {
+            ValueType = KVValueType.TimeSpan;
+            _ref = value;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KVObject"/> class with a <see cref="Vector2"/> value.
+        /// </summary>
+        public KVObject(Vector2 value)
+        {
+            ValueType = KVValueType.Vector2;
+            _ref = value;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KVObject"/> class with a <see cref="Vector3"/> value.
+        /// </summary>
+        public KVObject(Vector3 value)
+        {
+            ValueType = KVValueType.Vector3;
+            _ref = value;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KVObject"/> class with a <see cref="Vector4"/> value.
+        /// </summary>
+        public KVObject(Vector4 value)
+        {
+            ValueType = KVValueType.Vector4;
+            _ref = value;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KVObject"/> class with a <see cref="QAngle"/> value.
+        /// </summary>
+        public KVObject(QAngle value)
+        {
+            ValueType = KVValueType.QAngle;
+            _ref = value;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KVObject"/> class with a <see cref="Quaternion"/> value.
+        /// </summary>
+        public KVObject(Quaternion value)
+        {
+            ValueType = KVValueType.Quaternion;
+            _ref = value;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KVObject"/> class with a <see cref="Matrix4x4"/> value.
+        /// </summary>
+        public KVObject(Matrix4x4 value)
+        {
+            ValueType = KVValueType.Matrix4x4;
+            _ref = value;
+        }
+
         internal KVObject(KVValueType type, long scalar, object? refValue = null, KVFlag flag = KVFlag.None)
         {
             ValueType = type;
@@ -250,7 +336,7 @@ namespace ValveKeyValue
 
             switch (_ref)
             {
-                case Dictionary<string, KVObject> dict:
+                case OrderedDictionary<string, KVObject> dict:
                     return dict.TryGetValue(name, out child);
                 case List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection:
                     return TryFindInList(list, name, out child);
@@ -269,7 +355,7 @@ namespace ValveKeyValue
 
             return _ref switch
             {
-                Dictionary<string, KVObject> dict => dict.ContainsKey(name),
+                OrderedDictionary<string, KVObject> dict => dict.ContainsKey(name),
                 List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection => TryFindInList(list, name, out _),
                 _ => false,
             };
@@ -293,7 +379,7 @@ namespace ValveKeyValue
         /// </summary>
         public IEnumerable<string> Keys => _ref switch
         {
-            Dictionary<string, KVObject> dict when ValueType == KVValueType.Collection => dict.Keys,
+            OrderedDictionary<string, KVObject> dict when ValueType == KVValueType.Collection => dict.Keys,
             List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection => list.Select(kvp => kvp.Key),
             _ => [],
         };
@@ -304,7 +390,7 @@ namespace ValveKeyValue
         /// </summary>
         public IEnumerable<KVObject> Values => _ref switch
         {
-            Dictionary<string, KVObject> dict when ValueType == KVValueType.Collection => dict.Values,
+            OrderedDictionary<string, KVObject> dict when ValueType == KVValueType.Collection => dict.Values,
             List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection => list.Select(kvp => kvp.Value),
             List<KVObject> list when ValueType == KVValueType.Array => list,
             _ => [],
@@ -360,7 +446,7 @@ namespace ValveKeyValue
 
             return _ref switch
             {
-                Dictionary<string, KVObject> dict => dict.Remove(key),
+                OrderedDictionary<string, KVObject> dict => dict.Remove(key),
                 // RemoveAll: removes all entries with this key, not just the first (list-backed collections allow duplicate keys)
                 List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection => list.RemoveAll(c => c.Key == key) > 0,
                 _ => throw new InvalidOperationException($"Cannot remove a named child from a {ValueType} value."),
@@ -388,7 +474,7 @@ namespace ValveKeyValue
         {
             switch (_ref)
             {
-                case Dictionary<string, KVObject> dict:
+                case OrderedDictionary<string, KVObject> dict:
                     dict.Clear();
                     break;
                 case List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection:
@@ -416,7 +502,7 @@ namespace ValveKeyValue
         /// Creates an empty dictionary-backed collection with the specified capacity.
         /// </summary>
         public static KVObject Collection(int capacity)
-            => new(KVValueType.Collection, new Dictionary<string, KVObject>(capacity));
+            => new(KVValueType.Collection, new OrderedDictionary<string, KVObject>(capacity));
 
         /// <summary>
         /// Creates a dictionary-backed collection from the given children.
@@ -426,7 +512,7 @@ namespace ValveKeyValue
             ArgumentNullException.ThrowIfNull(children);
 
             var capacity = children is ICollection<KeyValuePair<string, KVObject>> col ? col.Count : 0;
-            var dict = new Dictionary<string, KVObject>(capacity);
+            var dict = new OrderedDictionary<string, KVObject>(capacity);
             foreach (var (key, value) in children)
             {
                 dict[key] = value;
@@ -522,6 +608,88 @@ namespace ValveKeyValue
 
         #endregion
 
+        #region Typed array access
+
+        /// <summary>
+        /// Creates a typed DMX array from a list. The array type follows from
+        /// <typeparamref name="T"/>, for example a <c>List&lt;int&gt;</c> becomes
+        /// <see cref="KVValueType.Int32Array"/>.
+        /// </summary>
+        /// <param name="values">The values, which are used as is and not copied.</param>
+        /// <typeparam name="T">The item type of the array.</typeparam>
+        /// <exception cref="ArgumentException"><typeparamref name="T"/> is not a DMX array item type.</exception>
+        [SuppressMessage("Design", "CA1002")]
+        public static KVObject TypedArray<T>(List<T> values)
+        {
+            ArgumentNullException.ThrowIfNull(values);
+
+            return new KVObject(TypedArrayValueType(typeof(T)), values);
+        }
+
+        static KVValueType TypedArrayValueType(Type itemType)
+        {
+            if (itemType == typeof(KV2Element)) return KVValueType.ElementArray;
+            if (itemType == typeof(int)) return KVValueType.Int32Array;
+            if (itemType == typeof(float)) return KVValueType.FloatArray;
+            if (itemType == typeof(bool)) return KVValueType.BooleanArray;
+            if (itemType == typeof(string)) return KVValueType.StringArray;
+            if (itemType == typeof(byte[])) return KVValueType.BinaryBlobArray;
+            if (itemType == typeof(DmxTime)) return KVValueType.TimeSpanArray;
+            if (itemType == typeof(DmxColor)) return KVValueType.ColorArray;
+            if (itemType == typeof(Vector2)) return KVValueType.Vector2Array;
+            if (itemType == typeof(Vector3)) return KVValueType.Vector3Array;
+            if (itemType == typeof(Vector4)) return KVValueType.Vector4Array;
+            if (itemType == typeof(QAngle)) return KVValueType.QAngleArray;
+            if (itemType == typeof(Quaternion)) return KVValueType.QuaternionArray;
+            if (itemType == typeof(Matrix4x4)) return KVValueType.Matrix4x4Array;
+            if (itemType == typeof(byte)) return KVValueType.ByteArray;
+            if (itemType == typeof(ulong)) return KVValueType.UInt64Array;
+
+            throw new ArgumentException($"{itemType.Name} is not a DMX array item type.", nameof(itemType));
+        }
+
+        /// <summary>Gets the typed array data as a <see cref="List{T}"/>.</summary>
+        [SuppressMessage("Design", "CA1002")]
+        public List<T> GetArray<T>()
+        {
+            if (_ref is List<T> list)
+            {
+                return list;
+            }
+
+            throw new InvalidOperationException($"Cannot get List<{typeof(T).Name}> from a {ValueType} value.");
+        }
+
+        /// <summary>
+        /// Gets a DMX struct value, such as a <see cref="Vector3"/>, <see cref="DmxColor"/> or
+        /// <see cref="DmxTime"/>.
+        /// </summary>
+        /// <typeparam name="T">The value type to get.</typeparam>
+        /// <exception cref="InvalidOperationException">This value does not hold a <typeparamref name="T"/>.</exception>
+        public T GetValue<T>()
+            where T : struct
+        {
+            if (_ref is T value)
+            {
+                return value;
+            }
+
+            // Byte and UInt64 are stored inline in the scalar slot rather than boxed in _ref.
+            if (ValueType == KVValueType.Byte && typeof(T) == typeof(byte))
+            {
+                return (T)(object)(byte)_scalar;
+            }
+
+            if (ValueType == KVValueType.UInt64 && typeof(T) == typeof(ulong))
+            {
+                return (T)(object)unchecked((ulong)_scalar);
+            }
+
+            throw new InvalidOperationException($"Cannot get {typeof(T).Name} from a {ValueType} value.");
+        }
+
+        #endregion
+
         #region Private helpers
 
         private enum InsertionBehavior
@@ -535,7 +703,7 @@ namespace ValveKeyValue
         {
             switch (_ref)
             {
-                case Dictionary<string, KVObject> dict:
+                case OrderedDictionary<string, KVObject> dict:
                     if (behavior == InsertionBehavior.OverwriteExisting)
                     {
                         dict[key] = value;
@@ -585,14 +753,14 @@ namespace ValveKeyValue
 
         private int GetCollectionCount() => _ref switch
         {
-            Dictionary<string, KVObject> dict => dict.Count,
+            OrderedDictionary<string, KVObject> dict => dict.Count,
             List<KeyValuePair<string, KVObject>> list => list.Count,
             _ => 0,
         };
 
         private IEnumerable<KeyValuePair<string, KVObject>> EnumerateCollection() => _ref switch
         {
-            Dictionary<string, KVObject> dict => dict,
+            OrderedDictionary<string, KVObject> dict => dict,
             List<KeyValuePair<string, KVObject>> list => list,
             _ => [],
         };
@@ -627,6 +795,7 @@ namespace ValveKeyValue
             KVValueType.Null => "null",
             KVValueType.Collection => $"Collection ({Count} items)",
             KVValueType.Array => $"Array ({Count} items)",
+            _ when IsTypedArray => $"{ValueType} ({Count} items)",
             _ => $"{ToString(CultureInfo.InvariantCulture)} ({ValueType})",
         };
 

@@ -79,5 +79,102 @@ namespace ValveKeyValue
         /// This <see cref="KVObject"/> is represented by a <see cref="int"/>, but represents a pointer.
         /// </summary>
         Pointer,
+
+        // DMX scalar types
+
+        /// <summary>
+        /// This <see cref="KVObject"/> is represented by a <see cref="byte"/>.
+        /// </summary>
+        Byte,
+
+        /// <summary>
+        /// This <see cref="KVObject"/> is represented by a <see cref="DmxColor"/>.
+        /// </summary>
+        Color,
+
+        /// <summary>
+        /// This <see cref="KVObject"/> is represented by a <see cref="DmxTime"/>.
+        /// </summary>
+        TimeSpan,
+
+        /// <summary>
+        /// This <see cref="KVObject"/> is represented by a <see cref="System.Numerics.Vector2"/>.
+        /// </summary>
+        Vector2,
+
+        /// <summary>
+        /// This <see cref="KVObject"/> is represented by a <see cref="System.Numerics.Vector3"/>.
+        /// </summary>
+        Vector3,
+
+        /// <summary>
+        /// This <see cref="KVObject"/> is represented by a <see cref="System.Numerics.Vector4"/>.
+        /// </summary>
+        Vector4,
+
+        /// <summary>
+        /// This <see cref="KVObject"/> is represented by a <see cref="ValveKeyValue.QAngle"/>.
+        /// </summary>
+        QAngle,
+
+        /// <summary>
+        /// This <see cref="KVObject"/> is represented by a <see cref="System.Numerics.Quaternion"/>.
+        /// </summary>
+        Quaternion,
+
+        /// <summary>
+        /// This <see cref="KVObject"/> is represented by a <see cref="System.Numerics.Matrix4x4"/>.
+        /// </summary>
+        Matrix4x4,
+
+        // DMX array types
+
+        /// <summary>DMX element array (<see cref="System.Collections.Generic.List{T}"/> of <see cref="KV2Element"/>).</summary>
+        ElementArray,
+
+        /// <summary>DMX int array (<see cref="System.Collections.Generic.List{T}"/> of <see cref="int"/>).</summary>
+        Int32Array,
+
+        /// <summary>DMX float array (<see cref="System.Collections.Generic.List{T}"/> of <see cref="float"/>).</summary>
+        FloatArray,
+
+        /// <summary>DMX bool array (<see cref="System.Collections.Generic.List{T}"/> of <see cref="bool"/>).</summary>
+        BooleanArray,
+
+        /// <summary>DMX string array (<see cref="System.Collections.Generic.List{T}"/> of <see cref="string"/>).</summary>
+        StringArray,
+
+        /// <summary>DMX binary blob array (<see cref="System.Collections.Generic.List{T}"/> of byte arrays).</summary>
+        BinaryBlobArray,
+
+        /// <summary>DMX time array (<see cref="System.Collections.Generic.List{T}"/> of <see cref="DmxTime"/>).</summary>
+        TimeSpanArray,
+
+        /// <summary>DMX color array (<see cref="System.Collections.Generic.List{T}"/> of <see cref="DmxColor"/>).</summary>
+        ColorArray,
+
+        /// <summary>DMX Vector2 array (<see cref="System.Collections.Generic.List{T}"/> of <see cref="System.Numerics.Vector2"/>).</summary>
+        Vector2Array,
+
+        /// <summary>DMX Vector3 array (<see cref="System.Collections.Generic.List{T}"/> of <see cref="System.Numerics.Vector3"/>).</summary>
+        Vector3Array,
+
+        /// <summary>DMX Vector4 array (<see cref="System.Collections.Generic.List{T}"/> of <see cref="System.Numerics.Vector4"/>).</summary>
+        Vector4Array,
+
+        /// <summary>DMX QAngle array (<see cref="System.Collections.Generic.List{T}"/> of <see cref="ValveKeyValue.QAngle"/>).</summary>
+        QAngleArray,
+
+        /// <summary>DMX Quaternion array (<see cref="System.Collections.Generic.List{T}"/> of <see cref="System.Numerics.Quaternion"/>).</summary>
+        QuaternionArray,
+
+        /// <summary>DMX Matrix4x4 array (<see cref="System.Collections.Generic.List{T}"/> of <see cref="System.Numerics.Matrix4x4"/>).</summary>
+        Matrix4x4Array,
+
+        /// <summary>DMX byte array (<see cref="System.Collections.Generic.List{T}"/> of <see cref="byte"/>).</summary>
+        ByteArray,
+
+        /// <summary>DMX uint64 array (<see cref="System.Collections.Generic.List{T}"/> of <see cref="ulong"/>).</summary>
+        UInt64Array,
     }
 }

@@ -1,0 +1,34 @@
+<!-- dmx	encoding   keyvalues2  1   format dmx 1 -->
+// A layout in the style Valve writes, with the quirks that come with it.
+"DmElement"
+{
+	"name" "string" "valve layout"
+	"id" "elementid" "aaaaaaaa-0000-0000-0000-000000000001"
+	"apostrophe" "STRING" "it\'s a \? \"quote\""
+	"transform" "matrix" 
+	"
+		1 0 0 0
+		0 1 0 0
+		0 0 1 0
+		5 6 7 1
+	"
+	"blob" "binary" 
+	"
+		DEADBEEF
+		0102030405
+	"
+	"blobs" "binary_array"
+	[
+		"
+			AABB
+		", // trailing comment
+		"CCDD"
+	]
+	"nothing" "unknown" ""
+	"external" "element" "ffffffff-ffff-ffff-ffff-ffffffffffff"
+	"truthy" "bool" "2"
+	"mixedCase" "Vector3" "1  2	3"
+	"seconds" "time" "1.5000"
+	"handle" "uint64" "0xdf41645d6af564a"
+	"stray" "elementid" "bbbbbbbb-0000-0000-0000-000000000002"
+}

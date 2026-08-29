@@ -12,6 +12,23 @@ namespace ValveKeyValue
     // TODO: Migrate to IVisitationListener
     static class ObjectCopier
     {
+        /// <summary>
+        /// How deeply <see cref="MakeObject{TObject}(KVObject, IObjectReflector)"/> may recurse.
+        /// There is no visited set to stop a cyclic graph on this side, and a stack overflow cannot
+        /// be caught, so a depth limit turns it into a reportable error. KeyValues2 documents are
+        /// graphs and can genuinely contain cycles; the tree formats simply nest.
+        /// </summary>
+        /// <remarks>
+        /// Much lower than the limit the KeyValues2 codecs use, because each level here closes a
+        /// generic method through reflection and so costs several large stack frames rather than
+        /// one. Raising it to 128 or 256 reintroduces the stack overflow it exists to prevent, so
+        /// a document nested deeper than this can be read but not mapped onto objects.
+        /// </remarks>
+        const int MaxObjectDepth = 64;
+
+        [ThreadStatic]
+        static int objectDepth;
+
         public static TObject MakeObject<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TObject>(KVObject keyValueObject)
             => MakeObject<TObject>(keyValueObject, new DefaultObjectReflector());
 
@@ -19,12 +36,32 @@ namespace ValveKeyValue
             [DynamicallyAccessedMembers(Trimming.Properties)] Type objectType, KVObject keyValueObject, IObjectReflector reflector)
             => InvokeGeneric(nameof(MakeObject), objectType, new object[] { keyValueObject, reflector });
 
-        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2062", Justification = "If the lookup value type exists at runtime then it should have enough for us to introspect.")]
         public static TObject MakeObject<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TObject>(KVObject keyValueObject, IObjectReflector reflector)
         {
             ArgumentNullException.ThrowIfNull(keyValueObject);
             ArgumentNullException.ThrowIfNull(reflector);
 
+            objectDepth++;
+
+            try
+            {
+                if (objectDepth > MaxObjectDepth)
+                {
+                    throw new KeyValueException(
+                        $"Object nesting went deeper than {MaxObjectDepth} levels. Data nested that deeply, or containing a reference cycle, cannot be mapped onto objects.");
+                }
+
+                return MakeObjectCore<TObject>(keyValueObject, reflector);
+            }
+            finally
+            {
+                objectDepth--;
+            }
+        }
+
+        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2062", Justification = "If the lookup value type exists at runtime then it should have enough for us to introspect.")]
+        static TObject MakeObjectCore<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TObject>(KVObject keyValueObject, IObjectReflector reflector)
+        {
             if (keyValueObject.ValueType == KVValueType.Collection)
             {
                 if (IsLookupWithStringKey(typeof(TObject), out var lookupValueType))
@@ -59,6 +96,17 @@ namespace ValveKeyValue
                 }
 
                 throw new NotSupportedException($"Cannot convert Array to {typeof(TObject).Name}.");
+            }
+            else if (keyValueObject.IsTypedArray)
+            {
+                // A DMX typed array already holds a List<T> of the item type, so the items only
+                // need boxing before the usual enumerable construction takes over.
+                if (ConstructTypedEnumerable(typeof(TObject), TypedArrayValues(keyValueObject), reflector, out var enumerable))
+                {
+                    return (TObject)enumerable;
+                }
+
+                throw new NotSupportedException($"Cannot convert {keyValueObject.ValueType} to {typeof(TObject).Name}.");
             }
             else if (TryConvertValueTo<TObject>(keyValueObject, out var converted))
             {
@@ -158,6 +206,22 @@ namespace ValveKeyValue
                 var convertedValue = MakeObject(member.MemberType, child, reflector);
                 member.Value = convertedValue;
             }
+        }
+
+        /// <summary>
+        /// Boxes the items of a DMX typed array, which are stored as a <c>List&lt;T&gt;</c>.
+        /// </summary>
+        static object[] TypedArrayValues(KVObject value)
+        {
+            var list = (IList)value._ref!;
+            var values = new object[list.Count];
+
+            for (var i = 0; i < list.Count; i++)
+            {
+                values[i] = list[i]!;
+            }
+
+            return values;
         }
 
         static bool IsArray(KVObject obj, [MaybeNullWhen(false)] out object[] values)
@@ -414,6 +478,13 @@ namespace ValveKeyValue
                 valueType = underlyingType;
             }
 
+            // Items of a DMX typed array arrive already boxed as their final type, and the DMX
+            // struct types are not IConvertible so Convert.ChangeType cannot handle them.
+            if (value is not KVObject && valueType.IsInstanceOfType(value))
+            {
+                return value;
+            }
+
             if (value is KVObject kvObject)
             {
                 if (kvObject.ValueType == KVValueType.Collection)
@@ -437,6 +508,14 @@ namespace ValveKeyValue
             if (typeof(TValue) == typeof(IntPtr))
             {
                 converted = (TValue)(object)(IntPtr)value;
+                return true;
+            }
+
+            // The DMX struct types (vectors, colours, times, matrices) are boxed in _ref and are
+            // not IConvertible, so hand them back directly when the target type matches.
+            if (typeof(TValue) != typeof(string) && value._ref is TValue boxed)
+            {
+                converted = boxed;
                 return true;
             }
 
