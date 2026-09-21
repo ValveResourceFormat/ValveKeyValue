@@ -1,12 +1,25 @@
-<h1 align="center"><img src="https://raw.githubusercontent.com/ValveResourceFormat/ValveKeyValue/master/Misc/logo.png" width="64" height="64" align="center"> Valve Key Value for .NET</h1>
+<h1 align="center">
+  <img src="https://raw.githubusercontent.com/ValveResourceFormat/ValveKeyValue/master/Misc/logo.png" alt="Logo" width="128">
+  <br>Valve Key Value for .NET
+</h1>
 
 <p align="center">
-    <a href="https://github.com/ValveResourceFormat/ValveKeyValue/actions" title="Build Status"><img alt="Build Status" src="https://img.shields.io/github/actions/workflow/status/ValveResourceFormat/ValveKeyValue/ci.yml?logo=github&label=Build&logoColor=ffffff&style=for-the-badge&branch=master"></a>
-    <a href="https://www.nuget.org/packages/ValveKeyValue/" title="NuGet"><img alt="NuGet" src="https://img.shields.io/nuget/v/ValveKeyValue.svg?logo=nuget&label=NuGet&logoColor=ffffff&color=004880&style=for-the-badge"></a>
-    <a href="https://app.codecov.io/gh/ValveResourceFormat/ValveKeyValue" title="Code Coverage"><img alt="Code Coverage" src="https://img.shields.io/codecov/c/github/ValveResourceFormat/ValveKeyValue/master?logo=codecov&label=Coverage&logoColor=ffffff&color=F01F7A&style=for-the-badge"></a>
+  Read and write KeyValues, Valve's simple key-value pair format.
+  <br />
+  Used in Steam and the Source engines for configuration files, game data, and more.
+  <br />
+  <a href="https://www.nuget.org/packages/ValveKeyValue/">NuGet</a>
+  ·
+  <a href="#quick-start">Quick start</a>
+  ·
+  <a href="#keyvalues1">KeyValues1</a>
+  ·
+  <a href="#keyvalues3">KeyValues3</a>
+  ·
+  <a href="https://app.codecov.io/gh/ValveResourceFormat/ValveKeyValue">Coverage</a>
 </p>
 
-KeyValues is a simple key-value pair format used by Valve in Steam and the Source engine for configuration files, game data, and more (`.vdf`, `.res`, `.acf`, etc.). This library aims to be fully compatible with Valve's various implementations of KeyValues format parsing (believe us, it's not consistent).
+KeyValues files turn up as `.vdf`, `.res`, `.acf`, and more. This library aims to be fully compatible with Valve's various implementations of KeyValues format parsing (believe us, it's not consistent).
 
 | Format | Enum value | Read | Write |
 |--------|------------|------|-------|
