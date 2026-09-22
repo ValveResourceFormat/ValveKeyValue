@@ -74,7 +74,7 @@ namespace ValveKeyValue
         public static KVObject FromObject(
             [DynamicallyAccessedMembers(Trimming.Properties)] Type objectType,
             object managedObject)
-            => ConvertObjectToValue(objectType, managedObject, new DefaultObjectReflector(), new HashSet<object>());
+            => ConvertObjectToValue(objectType, managedObject, new DefaultObjectReflector(), new HashSet<object>(ReferenceEqualityComparer.Instance));
 
         [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2072", Justification = "If the IDictionary's value object already exists at runtime then its properties will too.")]
         static KVObject ConvertObjectToValue(
