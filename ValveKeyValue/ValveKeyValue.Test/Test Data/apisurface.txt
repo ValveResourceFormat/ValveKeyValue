@@ -101,6 +101,20 @@ public sealed class ValveKeyValue.KVIgnoreAttribute : Attribute
     public string ToString();
 }
 
+public sealed class ValveKeyValue.KVIncludeAttribute : Attribute
+{
+    public .ctor();
+    public bool Equals(object obj);
+    protected void Finalize();
+    public object get_TypeId();
+    public int GetHashCode();
+    public Type GetType();
+    public bool IsDefaultAttribute();
+    public bool Match(object obj);
+    protected object MemberwiseClone();
+    public string ToString();
+}
+
 public class ValveKeyValue.KVObject : IConvertible, System.Collections.Generic.IReadOnlyDictionary`2[[string, ValveKeyValue.KVObject]]
 {
     public .ctor();

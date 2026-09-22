@@ -131,7 +131,7 @@ namespace ValveKeyValue
             {
                 foreach (var member in reflector.GetMembers(objectType, managedObject))
                 {
-                    if (member.Value is null)
+                    if (!member.CanRead || member.Value is null)
                     {
                         continue;
                     }

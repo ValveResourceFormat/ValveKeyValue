@@ -35,7 +35,18 @@ namespace ValveKeyValue
                         continue;
                     }
 
-                    yield return new PropertyMember(property, @object);
+                    // A property is visible when one of its accessors is public, or when it is
+                    // explicitly opted in. Opting in makes any accessor usable regardless of visibility.
+                    var included = property.GetCustomAttribute<KVIncludeAttribute>() != null;
+                    var canRead = property.GetMethod is { } getter && (included || getter.IsPublic);
+                    var canWrite = property.SetMethod is { } setter && (included || setter.IsPublic);
+
+                    if (!canRead && !canWrite)
+                    {
+                        continue;
+                    }
+
+                    yield return new PropertyMember(property, @object, canRead, canWrite);
                 }
             }
         }

@@ -8,6 +8,8 @@ namespace ValveKeyValue
 
         string Name { get; }
 
+        bool CanRead { get; }
+
         bool CanWrite { get; }
 
         [DynamicallyAccessedMembers(Trimming.Properties)]

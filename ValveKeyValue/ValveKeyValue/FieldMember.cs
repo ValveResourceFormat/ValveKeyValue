@@ -21,6 +21,8 @@ namespace ValveKeyValue
 
         public string Name => fieldInfo.Name;
 
+        public bool CanRead => true;
+
         public bool CanWrite => !fieldInfo.IsInitOnly;
 
         [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2073", Justification = "FieldType")]

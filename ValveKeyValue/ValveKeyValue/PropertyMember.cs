@@ -5,13 +5,15 @@ namespace ValveKeyValue
 {
     sealed class PropertyMember : IObjectMember
     {
-        public PropertyMember(PropertyInfo propertyInfo, object @object)
+        public PropertyMember(PropertyInfo propertyInfo, object @object, bool canRead, bool canWrite)
         {
             ArgumentNullException.ThrowIfNull(propertyInfo);
             ArgumentNullException.ThrowIfNull(@object);
 
             this.propertyInfo = propertyInfo;
             this.@object = @object;
+            CanRead = canRead;
+            CanWrite = canWrite;
         }
 
         readonly PropertyInfo propertyInfo;
@@ -22,7 +24,9 @@ namespace ValveKeyValue
         string IObjectMember.Name
             => PropertyAttribute?.PropertyName ?? propertyInfo.Name;
 
-        bool IObjectMember.CanWrite => propertyInfo.CanWrite;
+        public bool CanRead { get; }
+
+        public bool CanWrite { get; }
 
         [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2073", Justification = "PropertyType")]
         [DynamicallyAccessedMembers(Trimming.Properties)]

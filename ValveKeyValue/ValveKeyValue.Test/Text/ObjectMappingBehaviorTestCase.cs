@@ -48,7 +48,7 @@ namespace ValveKeyValue.Test
         }
 
         [Test]
-        public void NonPublicPropertiesOfDeclaredTypeAreMapped()
+        public void NonPublicPropertiesAreNotMapped()
         {
             var value = new WithNonPublic("private", "protected", "internal", "privateset");
 
@@ -57,9 +57,62 @@ namespace ValveKeyValue.Test
 
             using (Assert.EnterMultipleScope())
             {
-                Assert.That(tree.Keys, Is.EqualTo(["PrivateValue", "ProtectedValue", "InternalValue", "PrivateSetValue"]));
-                Assert.That(back.Snapshot(), Is.EqualTo(value.Snapshot()));
+                Assert.That(tree.Keys, Is.EqualTo(["PrivateSetValue"]), "only the property with a public getter is serialized");
+                Assert.That(back.Snapshot(), Is.EqualTo(default((string?, string?, string?, string?))), "a private setter is not used without [KVInclude]");
             }
+        }
+
+        [Test]
+        public void IncludedPrivateSetterIsDeserialized()
+        {
+            var text = "\"root\"\n{\n\t\"Value\"\t\"v\"\n}";
+
+            var back = KV1.Deserialize<WithIncludedPrivateSetter>(text);
+
+            Assert.That(back.Value, Is.EqualTo("v"));
+        }
+
+        [Test]
+        public void IncludedPrivatePropertyIsMappedInBothDirections()
+        {
+            var value = new WithIncludedPrivateProperty();
+            value.SetSecret("s");
+
+            var tree = SerializeToTree(value);
+            var back = KV1.Deserialize<WithIncludedPrivateProperty>(SerializeToText(value));
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(tree.Keys, Is.EqualTo(["Secret"]));
+                Assert.That(back.GetSecret(), Is.EqualTo("s"));
+            }
+        }
+
+        [Test]
+        public void PrivatePropertyWithoutIncludeIsInvisible()
+        {
+            var value = new WithPrivateProperty { Visible = "v" };
+            value.SetSecret("s");
+
+            var tree = SerializeToTree(value);
+            var back = KV1.Deserialize<WithPrivateProperty>("\"root\"\n{\n\t\"Visible\"\t\"v\"\n\t\"Secret\"\t\"s\"\n}");
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(tree.Keys, Is.EqualTo(["Visible"]));
+                Assert.That(back.Visible, Is.EqualTo("v"));
+                Assert.That(back.GetSecret(), Is.Null);
+            }
+        }
+
+        [Test]
+        public void PrivateGetterIsNotSerializedWithoutInclude()
+        {
+            var value = new WithPrivateGetters { Hidden = "h", Included = "i" };
+
+            var tree = SerializeToTree(value);
+
+            Assert.That(tree.Keys, Is.EqualTo(["Included"]));
         }
 
         [Test]
@@ -284,6 +337,7 @@ namespace ValveKeyValue.Test
         {
             public string? BaseValue { get; set; }
 
+            [KVInclude]
             protected internal string? ProtectedValue { get; set; }
 
             string? BasePrivate { get; set; }
@@ -321,6 +375,41 @@ namespace ValveKeyValue.Test
             public string? PrivateSetValue { get; private set; }
 
             public (string?, string?, string?, string?) Snapshot() => (PrivateValue, ProtectedValue, InternalValue, PrivateSetValue);
+        }
+
+        class WithIncludedPrivateSetter
+        {
+            [KVInclude]
+            public string? Value { get; private set; }
+        }
+
+        class WithIncludedPrivateProperty
+        {
+            [KVInclude]
+            string? Secret { get; set; }
+
+            public void SetSecret(string value) => Secret = value;
+
+            public string? GetSecret() => Secret;
+        }
+
+        class WithPrivateProperty
+        {
+            public string? Visible { get; set; }
+
+            string? Secret { get; set; }
+
+            public void SetSecret(string value) => Secret = value;
+
+            public string? GetSecret() => Secret;
+        }
+
+        class WithPrivateGetters
+        {
+            public string? Hidden { private get; set; }
+
+            [KVInclude]
+            public string? Included { private get; set; }
         }
 
         class Animal
