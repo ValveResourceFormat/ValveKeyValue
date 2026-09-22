@@ -5,10 +5,9 @@ namespace ValveKeyValue
 {
     sealed class DefaultObjectReflector : IObjectReflector
     {
-        IEnumerable<IObjectMember> IObjectReflector.GetMembers([DynamicallyAccessedMembers(Trimming.Properties)] Type objectType, object @object)
+        IEnumerable<IObjectMember> IObjectReflector.GetMembers([DynamicallyAccessedMembers(Trimming.Properties)] Type objectType)
         {
             ArgumentNullException.ThrowIfNull(objectType);
-            ArgumentNullException.ThrowIfNull(@object);
 
             if (IsValueTupleType(objectType))
             {
@@ -16,7 +15,7 @@ namespace ValveKeyValue
 
                 foreach (var field in fields)
                 {
-                    yield return new FieldMember(field, @object);
+                    yield return new FieldMember(field);
                 }
             }
             else
@@ -46,7 +45,7 @@ namespace ValveKeyValue
                         continue;
                     }
 
-                    yield return new PropertyMember(property, @object, canRead, canWrite);
+                    yield return new PropertyMember(property, canRead, canWrite);
                 }
             }
         }

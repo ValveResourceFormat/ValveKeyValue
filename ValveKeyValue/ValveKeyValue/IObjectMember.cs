@@ -6,15 +6,27 @@ namespace ValveKeyValue
     {
         bool IsExplicitName { get; }
 
+        /// <summary>
+        /// Gets the name of the member as it appears in KeyValues data.
+        /// </summary>
         string Name { get; }
+
+        /// <summary>
+        /// Gets the name of the member as it is declared on the type.
+        /// </summary>
+        string DeclaredName { get; }
 
         bool CanRead { get; }
 
         bool CanWrite { get; }
 
+        bool IsRequired { get; }
+
         [DynamicallyAccessedMembers(Trimming.Properties)]
         Type MemberType { get; }
 
-        object? Value { get; set; }
+        object? GetValue(object @object);
+
+        void SetValue(object @object, object? value);
     }
 }

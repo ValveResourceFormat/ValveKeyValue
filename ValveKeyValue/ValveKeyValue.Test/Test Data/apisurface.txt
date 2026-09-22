@@ -32,6 +32,20 @@ public class ValveKeyValue.KeyValueException : Exception
     public string ToString();
 }
 
+public sealed class ValveKeyValue.KVConstructorAttribute : Attribute
+{
+    public .ctor();
+    public bool Equals(object obj);
+    protected void Finalize();
+    public object get_TypeId();
+    public int GetHashCode();
+    public Type GetType();
+    public bool IsDefaultAttribute();
+    public bool Match(object obj);
+    protected object MemberwiseClone();
+    public string ToString();
+}
+
 public class ValveKeyValue.KVDocument
 {
     public .ctor(ValveKeyValue.KVHeader header, string name, ValveKeyValue.KVObject root);

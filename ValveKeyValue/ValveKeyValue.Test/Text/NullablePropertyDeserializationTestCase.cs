@@ -78,18 +78,14 @@ namespace ValveKeyValue.Test
         #region Deserialization - required properties missing from data
 
         [Test]
-        public void RequiredStringPropertyIsDefaultWhenMissingFromData()
+        public void RequiredStringPropertyThrowsWhenMissingFromData()
         {
-            // VDF only has Name/Description/Age/Numbers, but RequiredObject expects RequiredName
+            // VDF only has Name, but RequiredObject expects RequiredName
             var vdf = "\"object\"\n{\n\t\"Name\"\t\"hello\"\n}";
-            var obj = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<RequiredObject>(vdf);
 
-            using (Assert.EnterMultipleScope())
-            {
-                // required is bypassed by GetUninitializedObject - property stays at default
-                Assert.That(obj.RequiredName, Is.Null);
-                Assert.That(obj.Name, Is.EqualTo("hello"));
-            }
+            Assert.That(
+                () => KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<RequiredObject>(vdf),
+                Throws.InstanceOf<KeyValueException>().With.Message.EqualTo("Required property 'RequiredName' on type 'RequiredObject' was not found in the KeyValues data."));
         }
 
         #endregion
@@ -107,8 +103,8 @@ namespace ValveKeyValue.Test
             {
                 Assert.That(obj.Name, Is.EqualTo("hello"));
 
-                // GetUninitializedObject zeroes all memory, so non-nullable string is null
-                // This violates the non-nullable contract silently
+                // The property initializer assigns null and nothing in the data replaces it,
+                // so the non-nullable string is null. This violates the non-nullable contract silently.
                 Assert.That(obj.Title, Is.Null);
             }
         }

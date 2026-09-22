@@ -304,7 +304,7 @@ namespace ValveKeyValue.Test
         }
 
         [Test]
-        public void GetOnlyPropertyIsSerializedButSkippedOnDeserialize()
+        public void GetOnlyPropertyIsSerializedAndBoundThroughConstructor()
         {
             var value = new WithGetOnly("computed") { Writable = "w" };
             var text = SerializeToText(value);
@@ -316,20 +316,49 @@ namespace ValveKeyValue.Test
             {
                 Assert.That((string)tree["ReadOnly"], Is.EqualTo("computed"));
                 Assert.That(back.Writable, Is.EqualTo("w"));
-                Assert.That(back.ReadOnly, Is.Null, "object is created uninitialized and the get-only member is left alone");
+                Assert.That(back.ReadOnly, Is.EqualTo("computed"), "the get-only member is bound through the constructor parameter of the same name");
             }
         }
 
         [Test]
-        public void ObjectIsCreatedWithoutRunningConstructorOrInitializers()
+        public void ObjectIsCreatedByRunningConstructorAndInitializers()
         {
             var back = KV1.Deserialize<WithInitializers>("\"root\"\n{\n\t\"Name\"\t\"n\"\n}");
 
             using (Assert.EnterMultipleScope())
             {
                 Assert.That(back.Name, Is.EqualTo("n"));
-                Assert.That(back.Initialized, Is.Null);
-                Assert.That(back.ConstructorRan, Is.False);
+                Assert.That(back.Initialized, Is.EqualTo("init"));
+                Assert.That(back.ConstructorRan, Is.True);
+            }
+        }
+
+        [Test]
+        public void PropertyInitializerIsOverwrittenWhenKeyIsPresent()
+        {
+            var back = KV1.Deserialize<WithInitializers>("\"root\"\n{\n\t\"Initialized\"\t\"from data\"\n}");
+
+            Assert.That(back.Initialized, Is.EqualTo("from data"));
+        }
+
+        [Test]
+        public void SetterLogicRunsWhenDeserializing()
+        {
+            var back = KV1.Deserialize<WithClampingSetter>("\"root\"\n{\n\t\"Percent\"\t\"250\"\n}");
+
+            Assert.That(back.Percent, Is.EqualTo(100));
+        }
+
+        [Test]
+        public void PropertyInitializersApplyWithParameterizedConstructor()
+        {
+            var back = KV1.Deserialize<WithInitializersAndParameters>("\"root\"\n{\n\t\"Name\"\t\"n\"\n\t\"Overwritten\"\t\"from data\"\n}");
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(back.Name, Is.EqualTo("n"));
+                Assert.That(back.Kept, Is.EqualTo("kept"));
+                Assert.That(back.Overwritten, Is.EqualTo("from data"));
             }
         }
 
@@ -497,6 +526,31 @@ namespace ValveKeyValue.Test
             public string? Initialized { get; set; } = "init";
 
             public bool ConstructorRan { get; set; }
+        }
+
+        class WithClampingSetter
+        {
+            int percent;
+
+            public int Percent
+            {
+                get => percent;
+                set => percent = Math.Clamp(value, 0, 100);
+            }
+        }
+
+        class WithInitializersAndParameters
+        {
+            public WithInitializersAndParameters(string name)
+            {
+                Name = name;
+            }
+
+            public string Name { get; }
+
+            public string Kept { get; set; } = "kept";
+
+            public string Overwritten { get; set; } = "initial";
         }
     }
 }

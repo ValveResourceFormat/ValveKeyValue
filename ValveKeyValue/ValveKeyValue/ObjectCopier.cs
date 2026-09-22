@@ -50,8 +50,7 @@ namespace ValveKeyValue
 
                 // The object must remain boxed until it is fully initiallized, as this is the only way
                 // that we can build a struct due to the nature of struct copying.
-                var typedObject = RuntimeHelpers.GetUninitializedObject(typeof(TObject));
-                CopyObject(keyValueObject, typeof(TObject), typedObject, reflector);
+                var typedObject = ConstructObject(typeof(TObject), keyValueObject, reflector);
                 return (TObject)typedObject;
             }
             else if (keyValueObject.ValueType == KVValueType.Array)
@@ -129,14 +128,20 @@ namespace ValveKeyValue
             }
             else
             {
-                foreach (var member in reflector.GetMembers(objectType, managedObject))
+                foreach (var member in reflector.GetMembers(objectType))
                 {
-                    if (!member.CanRead || member.Value is null)
+                    if (!member.CanRead)
                     {
                         continue;
                     }
 
-                    var childValue = ConvertObjectToValue(member.Value!.GetType(), member.Value, reflector, visitedObjects);
+                    var value = member.GetValue(managedObject);
+                    if (value is null)
+                    {
+                        continue;
+                    }
+
+                    var childValue = ConvertObjectToValue(value.GetType(), value, reflector, visitedObjects);
                     childItems.Add(new KeyValuePair<string, KVObject>(member.Name, childValue));
                 }
             }
@@ -144,25 +149,159 @@ namespace ValveKeyValue
             return new KVObject(KVValueType.Collection, childItems);
         }
 
-        static void CopyObject(KVObject kv, [DynamicallyAccessedMembers(Trimming.Properties)] Type objectType, object obj, IObjectReflector reflector)
+        // Converts every child that matches a constructor parameter or a writable member, then constructs
+        // the object and assigns the members that were not consumed by the constructor.
+        static object ConstructObject(
+            [DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] Type objectType,
+            KVObject kv,
+            IObjectReflector reflector)
         {
-            ArgumentNullException.ThrowIfNull(kv);
-            ArgumentNullException.ThrowIfNull(obj);
-            ArgumentNullException.ThrowIfNull(reflector);
+            var members = reflector.GetMembers(objectType).ToArray();
+            var membersByName = members.ToDictionary(m => m.Name, m => m, StringComparer.OrdinalIgnoreCase);
 
-            var members = reflector.GetMembers(objectType, obj).ToDictionary(m => m.Name, m => m, StringComparer.OrdinalIgnoreCase);
+            var constructor = SelectConstructor(objectType);
+            var parameters = constructor?.GetParameters() ?? [];
+            var parameterMembers = new IObjectMember?[parameters.Length];
+            var parametersByName = new Dictionary<string, int>(parameters.Length, StringComparer.OrdinalIgnoreCase);
 
-            foreach (var (key, child) in kv)
+            for (var i = 0; i < parameters.Length; i++)
             {
-                if (!members.TryGetValue(key, out var member) || !member.CanWrite)
+                var parameterName = parameters[i].Name;
+                if (parameterName is null)
                 {
                     continue;
                 }
 
-                var convertedValue = MakeObject(member.MemberType, child, reflector);
-                member.Value = convertedValue;
+                // A parameter that corresponds to a member (by declared name) is matched
+                // using the member's KeyValues name, so that renamed properties bind correctly.
+                var member = members.FirstOrDefault(m => string.Equals(m.DeclaredName, parameterName, StringComparison.OrdinalIgnoreCase));
+                parameterMembers[i] = member;
+                parametersByName[member?.Name ?? parameterName] = i;
+            }
+
+            // A parameter that receives no value keeps its declared default, or null, which the
+            // constructor invocation treats as the default value of the parameter type.
+            var parameterValues = new object?[parameters.Length];
+            var parameterAssigned = new bool[parameters.Length];
+            var memberValues = new Dictionary<IObjectMember, object?>(ReferenceEqualityComparer.Instance);
+
+            for (var i = 0; i < parameters.Length; i++)
+            {
+                if (parameters[i].HasDefaultValue)
+                {
+                    parameterValues[i] = parameters[i].DefaultValue;
+                }
+            }
+
+            foreach (var (key, child) in kv)
+            {
+                if (parametersByName.TryGetValue(key, out var index))
+                {
+                    parameterValues[index] = MakeObject(GetParameterType(parameters[index]), child, reflector);
+                    parameterAssigned[index] = true;
+                }
+                else if (membersByName.TryGetValue(key, out var member) && member.CanWrite)
+                {
+                    memberValues[member] = MakeObject(member.MemberType, child, reflector);
+                }
+            }
+
+            var obj = constructor is null
+                ? RuntimeHelpers.GetUninitializedObject(objectType)
+                : InvokeConstructor(constructor, parameterValues);
+
+            foreach (var (member, value) in memberValues)
+            {
+                member.SetValue(obj, value);
+            }
+
+            if (constructor?.GetCustomAttribute<SetsRequiredMembersAttribute>() is null)
+            {
+                foreach (var member in members)
+                {
+                    if (!member.IsRequired || memberValues.ContainsKey(member))
+                    {
+                        continue;
+                    }
+
+                    var parameterIndex = Array.IndexOf(parameterMembers, member);
+                    if (parameterIndex >= 0 && parameterAssigned[parameterIndex])
+                    {
+                        continue;
+                    }
+
+                    throw new KeyValueException($"Required property '{member.DeclaredName}' on type '{objectType.Name}' was not found in the KeyValues data.");
+                }
+            }
+
+            return obj;
+        }
+
+        // Picks the constructor in this order: the one marked with [KVConstructor], a public parameterless
+        // constructor, or the single public constructor. Returns null for a struct that declares no public
+        // constructor, in which case the default value is used.
+        static ConstructorInfo? SelectConstructor([DynamicallyAccessedMembers(Trimming.Constructors)] Type objectType)
+        {
+            var constructors = objectType.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+            ConstructorInfo? marked = null;
+            foreach (var constructor in constructors)
+            {
+                if (constructor.GetCustomAttribute<KVConstructorAttribute>() is null)
+                {
+                    continue;
+                }
+
+                if (marked != null)
+                {
+                    throw new KeyValueException($"Type '{objectType.Name}' has more than one constructor marked with [KVConstructor].");
+                }
+
+                marked = constructor;
+            }
+
+            if (marked != null)
+            {
+                return marked;
+            }
+
+            var publicConstructors = constructors.Where(c => c.IsPublic).ToArray();
+
+            var parameterless = publicConstructors.FirstOrDefault(c => c.GetParameters().Length == 0);
+            if (parameterless != null)
+            {
+                return parameterless;
+            }
+
+            if (publicConstructors.Length == 0 && objectType.IsValueType)
+            {
+                return null;
+            }
+
+            if (publicConstructors.Length == 1)
+            {
+                return publicConstructors[0];
+            }
+
+            throw new KeyValueException($"Type '{objectType.Name}' has no usable constructor; add a public parameterless constructor, a single public constructor, or mark one with [KVConstructor].");
+        }
+
+        static object InvokeConstructor(ConstructorInfo constructor, object?[] parameters)
+        {
+            try
+            {
+                return constructor.Invoke(parameters);
+            }
+            catch (TargetInvocationException ex) when (ex.InnerException != null)
+            {
+                ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
+                throw; // Unreachable
             }
         }
+
+        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2073", Justification = "ParameterType")]
+        [return: DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)]
+        static Type GetParameterType(ParameterInfo parameter) => parameter.ParameterType;
 
         static bool IsArray(KVObject obj, [MaybeNullWhen(false)] out object[] values)
         {
