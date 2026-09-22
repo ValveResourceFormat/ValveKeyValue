@@ -44,13 +44,13 @@ namespace ValveKeyValue.Test
             Assert.That(stream.Position, Is.EqualTo(75)); // ensure we read exactly 39 bytes
         }
 
-        class FirstObject
+        internal class FirstObject
         {
             [KVProperty("firstkey")]
             public required string StringValue { get; set; }
         }
 
-        class SecondObject
+        internal class SecondObject
         {
             [KVProperty("secondkey")]
             public required string StringValue { get; set; }

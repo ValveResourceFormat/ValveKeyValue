@@ -142,7 +142,7 @@ namespace ValveKeyValue.Test
             Assert.That(spans.Any(s => s.TokenType == KVTokenType.ObjectEnd && text[s.Start] == '}'), Is.True);
         }
 
-        class Person
+        internal class Person
         {
             public required string FirstName { get; set; }
             public int Age { get; set; }

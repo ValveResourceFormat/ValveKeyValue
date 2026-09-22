@@ -22,7 +22,7 @@ namespace ValveKeyValue.Test
             }
         }
 
-        class VKVConfig
+        internal class VKVConfig
         {
             public required List<string> GameSearchPaths { get; set; }
             public required string BackgroundColor { get; set; }

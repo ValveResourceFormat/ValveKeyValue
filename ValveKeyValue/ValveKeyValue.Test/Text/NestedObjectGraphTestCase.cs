@@ -47,7 +47,7 @@ namespace ValveKeyValue.Test
             data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<ObjectGraph>(stream);
         }
 
-        class ObjectGraph
+        internal class ObjectGraph
         {
             public int OGInt { get; set; }
 

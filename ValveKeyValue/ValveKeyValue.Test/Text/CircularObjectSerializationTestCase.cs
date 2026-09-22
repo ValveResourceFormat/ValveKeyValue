@@ -56,7 +56,7 @@ namespace ValveKeyValue.Test
             Assert.That(text, Is.EqualTo(expected));
         }
 
-        class DataObject
+        internal class DataObject
         {
             public required string Name { get; set; }
 

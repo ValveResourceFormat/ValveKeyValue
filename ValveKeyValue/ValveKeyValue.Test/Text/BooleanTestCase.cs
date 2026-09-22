@@ -67,7 +67,7 @@ namespace ValveKeyValue.Test
             Assert.That(text, Is.EqualTo(expected));
         }
 
-        class SerializedType
+        internal class SerializedType
         {
 #pragma warning disable IDE1006 // Naming Styles
             public bool test1_false { get; set; }

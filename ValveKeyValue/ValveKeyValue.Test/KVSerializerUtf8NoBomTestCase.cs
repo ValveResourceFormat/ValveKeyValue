@@ -23,7 +23,7 @@ namespace ValveKeyValue.Test
             Assert.That(output[0], Is.EqualTo((byte)'"'));
         }
 
-        class DataObject
+        internal class DataObject
         {
             public required string Name { get; set; }
         }

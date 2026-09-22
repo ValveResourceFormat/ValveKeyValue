@@ -234,7 +234,7 @@ namespace ValveKeyValue.Test
 
         #region Test classes
 
-        class NullableObject
+        internal class NullableObject
         {
             public string? Name { get; set; }
             public string? Description { get; set; }
@@ -245,13 +245,13 @@ namespace ValveKeyValue.Test
             public List<string>? MissingList { get; set; }
         }
 
-        class RequiredObject
+        internal class RequiredObject
         {
             public required string RequiredName { get; set; }
             public string? Name { get; set; }
         }
 
-        class NonNullableObject
+        internal class NonNullableObject
         {
             public string Name { get; set; } = null!;
             public string Title { get; set; } = null!;

@@ -2,7 +2,7 @@ namespace ValveKeyValue.Test
 {
     class BinaryObjectSerializationTypedTestCase
     {
-        class TestObject
+        internal class TestObject
         {
 #pragma warning disable IDE1006 // Naming Styles
             public string key { get; set; } = "value";

@@ -284,18 +284,22 @@ public class ValveKeyValue.KVSerializer
     public static ValveKeyValue.KVSerializer Create(ValveKeyValue.KVSerializationFormat format);
     public ValveKeyValue.KVDocument Deserialize(System.IO.Stream stream, ValveKeyValue.KVSerializerOptions options);
     public ValveKeyValue.TObject Deserialize<ValveKeyValue.TObject>(System.IO.Stream stream, ValveKeyValue.KVSerializerOptions options);
+    public ValveKeyValue.TObject Deserialize<ValveKeyValue.TObject>(System.IO.Stream stream, ValveKeyValue.Metadata.KVTypeInfo`1[[ValveKeyValue.TObject]] typeInfo, ValveKeyValue.KVSerializerOptions options);
     public ValueTuple`2[[ValveKeyValue.KVDocument, System.Collections.Generic.IReadOnlyList`1[[ValveKeyValue.KvSourceSpan]]]] DeserializeWithSourceMap(string text, ValveKeyValue.KVSerializerOptions options);
     public bool Equals(object obj);
     protected void Finalize();
     public int GetHashCode();
     public Type GetType();
+    public static ValveKeyValue.Metadata.KVTypeInfo`1[[ValveKeyValue.T]] GetTypeInfo<ValveKeyValue.T>();
     protected object MemberwiseClone();
     public void Serialize(System.IO.Stream stream, ValveKeyValue.KVDocument data, ValveKeyValue.KVSerializerOptions options);
     public void Serialize(System.IO.Stream stream, ValveKeyValue.KVObject data, string name, ValveKeyValue.KVSerializerOptions options);
     public void Serialize<ValveKeyValue.TData>(System.IO.Stream stream, ValveKeyValue.TData data, string name, ValveKeyValue.KVSerializerOptions options);
+    public void Serialize<ValveKeyValue.TData>(System.IO.Stream stream, ValveKeyValue.TData data, string name, ValveKeyValue.Metadata.KVTypeInfo`1[[ValveKeyValue.TData]] typeInfo, ValveKeyValue.KVSerializerOptions options);
     public ValueTuple`2[[string, System.Collections.Generic.IReadOnlyList`1[[ValveKeyValue.KvSourceSpan]]]] SerializeWithSourceMap(ValveKeyValue.KVDocument data, ValveKeyValue.KVSerializerOptions options);
     public ValueTuple`2[[string, System.Collections.Generic.IReadOnlyList`1[[ValveKeyValue.KvSourceSpan]]]] SerializeWithSourceMap(ValveKeyValue.KVObject data, string name, ValveKeyValue.KVSerializerOptions options);
     public ValueTuple`2[[string, System.Collections.Generic.IReadOnlyList`1[[ValveKeyValue.KvSourceSpan]]]] SerializeWithSourceMap<ValveKeyValue.TData>(ValveKeyValue.TData data, string name, ValveKeyValue.KVSerializerOptions options);
+    public ValueTuple`2[[string, System.Collections.Generic.IReadOnlyList`1[[ValveKeyValue.KvSourceSpan]]]] SerializeWithSourceMap<ValveKeyValue.TData>(ValveKeyValue.TData data, string name, ValveKeyValue.Metadata.KVTypeInfo`1[[ValveKeyValue.TData]] typeInfo, ValveKeyValue.KVSerializerOptions options);
     public string ToString();
 }
 
@@ -471,6 +475,115 @@ public sealed struct ValveKeyValue.KeyValues3.KV3ID : IEquatable`1[[ValveKeyValu
     public static bool op_Inequality(ValveKeyValue.KeyValues3.KV3ID left, ValveKeyValue.KeyValues3.KV3ID right);
     public void set_Id(Guid value);
     public void set_Name(string value);
+    public string ToString();
+}
+
+public abstract class ValveKeyValue.Metadata.KVMemberInfo`1
+{
+    public bool Equals(object obj);
+    protected void Finalize();
+    public bool get_CanRead();
+    public bool get_CanWrite();
+    public string get_DeclaredName();
+    public bool get_IsRequired();
+    public string get_Name();
+    public int GetHashCode();
+    public Type GetType();
+    protected object MemberwiseClone();
+    public string ToString();
+}
+
+public static class ValveKeyValue.Metadata.KVMetadata
+{
+    public static ValveKeyValue.Metadata.KVTypeInfo`1[[ValveKeyValue.Metadata.TElement[]]] Array<ValveKeyValue.Metadata.TElement>(ValveKeyValue.Metadata.KVTypeInfo`1[[ValveKeyValue.Metadata.TElement]] element);
+    public static ValveKeyValue.Metadata.KVTypeInfo`1[[ValveKeyValue.Metadata.TCollection]] Collection<ValveKeyValue.Metadata.TCollection, ValveKeyValue.Metadata.TElement>(ValveKeyValue.Metadata.KVTypeInfo`1[[ValveKeyValue.Metadata.TElement]] element);
+    public static ValveKeyValue.Metadata.KVTypeInfo`1[[ValveKeyValue.Metadata.TDictionary]] Dictionary<ValveKeyValue.Metadata.TDictionary, ValveKeyValue.Metadata.TKey, ValveKeyValue.Metadata.TValue>(ValveKeyValue.Metadata.KVTypeInfo`1[[ValveKeyValue.Metadata.TKey]] key, ValveKeyValue.Metadata.KVTypeInfo`1[[ValveKeyValue.Metadata.TValue]] value);
+    public static ValveKeyValue.Metadata.KVTypeInfo`1[[ValveKeyValue.Metadata.TEnum]] Enum<ValveKeyValue.Metadata.TEnum, ValveKeyValue.Metadata.TUnderlying>(ValveKeyValue.Metadata.KVTypeInfo`1[[ValveKeyValue.Metadata.TUnderlying]] underlying);
+    public bool Equals(object obj);
+    protected void Finalize();
+    public static ValveKeyValue.Metadata.KVTypeInfo`1[[bool]] get_Boolean();
+    public static ValveKeyValue.Metadata.KVTypeInfo`1[[byte]] get_Byte();
+    public static ValveKeyValue.Metadata.KVTypeInfo`1[[byte[]]] get_ByteArray();
+    public static ValveKeyValue.Metadata.KVTypeInfo`1[[char]] get_Char();
+    public static ValveKeyValue.Metadata.KVTypeInfo`1[[decimal]] get_Decimal();
+    public static ValveKeyValue.Metadata.KVTypeInfo`1[[double]] get_Double();
+    public static ValveKeyValue.Metadata.KVTypeInfo`1[[short]] get_Int16();
+    public static ValveKeyValue.Metadata.KVTypeInfo`1[[int]] get_Int32();
+    public static ValveKeyValue.Metadata.KVTypeInfo`1[[long]] get_Int64();
+    public static ValveKeyValue.Metadata.KVTypeInfo`1[[IntPtr]] get_IntPtr();
+    public static ValveKeyValue.Metadata.KVTypeInfo`1[[sbyte]] get_SByte();
+    public static ValveKeyValue.Metadata.KVTypeInfo`1[[float]] get_Single();
+    public static ValveKeyValue.Metadata.KVTypeInfo`1[[string]] get_String();
+    public static ValveKeyValue.Metadata.KVTypeInfo`1[[ushort]] get_UInt16();
+    public static ValveKeyValue.Metadata.KVTypeInfo`1[[uint]] get_UInt32();
+    public static ValveKeyValue.Metadata.KVTypeInfo`1[[ulong]] get_UInt64();
+    public int GetHashCode();
+    public Type GetType();
+    public static ValveKeyValue.Metadata.KVTypeInfo`1[[System.Linq.ILookup`2[[string, ValveKeyValue.Metadata.TValue]]]] Lookup<ValveKeyValue.Metadata.TValue>(ValveKeyValue.Metadata.KVTypeInfo`1[[ValveKeyValue.Metadata.TValue]] value);
+    public static ValveKeyValue.Metadata.KVMemberInfo`1[[ValveKeyValue.Metadata.T]] Member<ValveKeyValue.Metadata.T, ValveKeyValue.Metadata.TValue>(string name, string declaredName, ValveKeyValue.Metadata.KVTypeInfo`1[[ValveKeyValue.Metadata.TValue]] type, Func`2[[ValveKeyValue.Metadata.T, ValveKeyValue.Metadata.TValue]] getter, ValveKeyValue.Metadata.KVSetter`2[[ValveKeyValue.Metadata.T, ValveKeyValue.Metadata.TValue]] setter, bool isRequired);
+    protected object MemberwiseClone();
+    public static ValveKeyValue.Metadata.KVTypeInfo`1[[Nullable`1[[ValveKeyValue.Metadata.T]]]] Nullable<ValveKeyValue.Metadata.T>(ValveKeyValue.Metadata.KVTypeInfo`1[[ValveKeyValue.Metadata.T]] underlying);
+    public static ValveKeyValue.Metadata.KVTypeInfo`1[[ValveKeyValue.Metadata.T]] Object<ValveKeyValue.Metadata.T>(Func`2[[object[], ValveKeyValue.Metadata.T]] create, Func`1[[ValveKeyValue.Metadata.KVParameterInfo[]]] parameters, Func`1[[ValveKeyValue.Metadata.KVMemberInfo`1[[ValveKeyValue.Metadata.T]][]]] members, bool constructorSetsRequiredMembers);
+    public static ValveKeyValue.Metadata.KVParameterInfo Parameter<ValveKeyValue.Metadata.T>(string name, ValveKeyValue.Metadata.KVTypeInfo`1[[ValveKeyValue.Metadata.T]] type, ValveKeyValue.Metadata.T defaultValue);
+    public string ToString();
+}
+
+public sealed class ValveKeyValue.Metadata.KVParameterInfo
+{
+    public bool Equals(object obj);
+    protected void Finalize();
+    public string get_Name();
+    public ValveKeyValue.Metadata.KVTypeInfo get_Type();
+    public int GetHashCode();
+    public Type GetType();
+    protected object MemberwiseClone();
+    public string ToString();
+}
+
+public sealed class ValveKeyValue.Metadata.KVSetter`2 : MulticastDelegate
+{
+    public .ctor(object object, IntPtr method);
+    public IAsyncResult BeginInvoke(ref ValveKeyValue.Metadata.T& target, ValveKeyValue.Metadata.TValue value, AsyncCallback callback, object object);
+    public object Clone();
+    protected Delegate CombineImpl(Delegate follow);
+    public object DynamicInvoke(object[] args);
+    protected object DynamicInvokeImpl(object[] args);
+    public void EndInvoke(ref ValveKeyValue.Metadata.T& target, IAsyncResult result);
+    public bool Equals(object obj);
+    protected void Finalize();
+    public bool get_HasSingleTarget();
+    public System.Reflection.MethodInfo get_Method();
+    public object get_Target();
+    public int GetHashCode();
+    public Delegate[] GetInvocationList();
+    protected System.Reflection.MethodInfo GetMethodImpl();
+    public void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context);
+    public Type GetType();
+    public void Invoke(ref ValveKeyValue.Metadata.T& target, ValveKeyValue.Metadata.TValue value);
+    protected object MemberwiseClone();
+    protected Delegate RemoveImpl(Delegate value);
+    public string ToString();
+}
+
+public abstract class ValveKeyValue.Metadata.KVTypeInfo
+{
+    public bool Equals(object obj);
+    protected void Finalize();
+    public Type get_Type();
+    public int GetHashCode();
+    public Type GetType();
+    protected object MemberwiseClone();
+    public string ToString();
+}
+
+public abstract class ValveKeyValue.Metadata.KVTypeInfo`1 : ValveKeyValue.Metadata.KVTypeInfo
+{
+    public bool Equals(object obj);
+    protected void Finalize();
+    public Type get_Type();
+    public int GetHashCode();
+    public Type GetType();
+    protected object MemberwiseClone();
     public string ToString();
 }
 

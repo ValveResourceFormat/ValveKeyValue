@@ -4,6 +4,7 @@ using ValveKeyValue.Abstraction;
 using ValveKeyValue.Deserialization;
 using ValveKeyValue.Deserialization.KeyValues1;
 using ValveKeyValue.Deserialization.KeyValues3;
+using ValveKeyValue.Metadata;
 using ValveKeyValue.Serialization.KeyValues1;
 using ValveKeyValue.Serialization.KeyValues3;
 
@@ -28,6 +29,21 @@ namespace ValveKeyValue
         /// <returns>A new <see cref="KVSerializer"/> that (de)serializes with the given format.</returns>
         public static KVSerializer Create(KVSerializationFormat format)
             => new(format);
+
+        /// <summary>
+        /// Returns the type information that maps <typeparamref name="T"/> to and from KeyValues data.
+        /// Calls with a concrete type argument are replaced by generated type information that does not use reflection.
+        /// </summary>
+        /// <remarks>
+        /// Pass the returned instance to the overloads that accept a <see cref="KVTypeInfo{T}"/>, for example from a
+        /// generic method whose type argument is not known at the call site.
+        /// </remarks>
+        /// <typeparam name="T">The type to describe.</typeparam>
+        /// <returns>The type information for <typeparamref name="T"/>.</returns>
+        [RequiresUnreferencedCode(KVReflectionTypeInfo.RequiresMessage)]
+        [RequiresDynamicCode(KVReflectionTypeInfo.RequiresMessage)]
+        public static KVTypeInfo<T> GetTypeInfo<T>()
+            => KVReflectionTypeInfo.Get<T>();
 
         /// <summary>
         /// Deserializes a KeyValue object from a stream.
@@ -56,13 +72,26 @@ namespace ValveKeyValue
         /// <param name="options">Options to use that can influence the deserialization process.</param>
         /// <returns>A <typeparamref name="TObject" /> instance representing the KeyValues structure in the stream.</returns>
         /// <typeparam name="TObject">The type of object to deserialize.</typeparam>
-        public TObject Deserialize<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TObject>(Stream stream, KVSerializerOptions? options = null)
+        [RequiresUnreferencedCode(KVReflectionTypeInfo.RequiresMessage)]
+        [RequiresDynamicCode(KVReflectionTypeInfo.RequiresMessage)]
+        public TObject Deserialize<TObject>(Stream stream, KVSerializerOptions? options = null)
+            => Deserialize(stream, KVReflectionTypeInfo.Get<TObject>(), options);
+
+        /// <summary>
+        /// Deserializes an object from a KeyValues representation in a stream, using the given type information.
+        /// </summary>
+        /// <param name="stream">The stream to deserialize from.</param>
+        /// <param name="typeInfo">The type information that describes how to create <typeparamref name="TObject"/>.</param>
+        /// <param name="options">Options to use that can influence the deserialization process.</param>
+        /// <returns>A <typeparamref name="TObject" /> instance representing the KeyValues structure in the stream.</returns>
+        /// <typeparam name="TObject">The type of object to deserialize.</typeparam>
+        public TObject Deserialize<TObject>(Stream stream, KVTypeInfo<TObject> typeInfo, KVSerializerOptions? options = null)
         {
             ArgumentNullException.ThrowIfNull(stream);
+            ArgumentNullException.ThrowIfNull(typeInfo);
 
-            var @object = Deserialize(stream, options ?? KVSerializerOptions.DefaultOptions);
-            var typedObject = ObjectCopier.MakeObject<TObject>(@object.Root);
-            return typedObject;
+            var document = Deserialize(stream, options ?? KVSerializerOptions.DefaultOptions);
+            return typeInfo.Read(document.Root);
         }
 
         /// <summary>
@@ -106,13 +135,28 @@ namespace ValveKeyValue
         /// <param name="name">The top-level object name.</param>
         /// <param name="options">Options to use that can influence the serialization process.</param>
         /// <typeparam name="TData">The type of object to serialize.</typeparam>
-        public void Serialize<[DynamicallyAccessedMembers(Trimming.Properties)] TData>(Stream stream, TData data, string name, KVSerializerOptions? options = null)
+        [RequiresUnreferencedCode(KVReflectionTypeInfo.RequiresMessage)]
+        [RequiresDynamicCode(KVReflectionTypeInfo.RequiresMessage)]
+        public void Serialize<TData>(Stream stream, TData data, string name, KVSerializerOptions? options = null)
+            => Serialize(stream, data, name, KVReflectionTypeInfo.Get<TData>(), options);
+
+        /// <summary>
+        /// Serializes an object into a stream, using the given type information.
+        /// </summary>
+        /// <param name="stream">The stream to serialize into.</param>
+        /// <param name="data">The data to serialize.</param>
+        /// <param name="name">The top-level object name.</param>
+        /// <param name="typeInfo">The type information that describes how to write <typeparamref name="TData"/>.</param>
+        /// <param name="options">Options to use that can influence the serialization process.</param>
+        /// <typeparam name="TData">The type of object to serialize.</typeparam>
+        public void Serialize<TData>(Stream stream, TData data, string name, KVTypeInfo<TData> typeInfo, KVSerializerOptions? options = null)
         {
             ArgumentNullException.ThrowIfNull(stream);
             ArgumentNullException.ThrowIfNull(data);
             ArgumentNullException.ThrowIfNull(name);
+            ArgumentNullException.ThrowIfNull(typeInfo);
 
-            var kvObjectTree = ObjectCopier.FromObject(typeof(TData), data);
+            var kvObjectTree = typeInfo.Write(data, new KVWriteContext());
 
             using var serializer = MakeSerializer(stream, options ?? KVSerializerOptions.DefaultOptions);
             var visitor = new KVObjectVisitor(serializer);
@@ -196,12 +240,29 @@ namespace ValveKeyValue
         /// <param name="options">Options to use that can influence the serialization process.</param>
         /// <typeparam name="TData">The type of object to serialize.</typeparam>
         /// <returns>The serialized text and a list of <see cref="KvSourceSpan"/> records covering each token.</returns>
-        public (string Text, IReadOnlyList<KvSourceSpan> Spans) SerializeWithSourceMap<[DynamicallyAccessedMembers(Trimming.Properties)] TData>(TData data, string name, KVSerializerOptions? options = null)
+        [RequiresUnreferencedCode(KVReflectionTypeInfo.RequiresMessage)]
+        [RequiresDynamicCode(KVReflectionTypeInfo.RequiresMessage)]
+        public (string Text, IReadOnlyList<KvSourceSpan> Spans) SerializeWithSourceMap<TData>(TData data, string name, KVSerializerOptions? options = null)
+            => SerializeWithSourceMap(data, name, KVReflectionTypeInfo.Get<TData>(), options);
+
+        /// <summary>
+        /// Serializes a typed object to KeyValues text using the given type information, and produces a per-token
+        /// source map alongside it. Intended for syntax highlighters that want exact token boundaries instead of
+        /// regex approximations. Only text formats are supported.
+        /// </summary>
+        /// <param name="data">The object to serialize.</param>
+        /// <param name="name">The top-level object name.</param>
+        /// <param name="typeInfo">The type information that describes how to write <typeparamref name="TData"/>.</param>
+        /// <param name="options">Options to use that can influence the serialization process.</param>
+        /// <typeparam name="TData">The type of object to serialize.</typeparam>
+        /// <returns>The serialized text and a list of <see cref="KvSourceSpan"/> records covering each token.</returns>
+        public (string Text, IReadOnlyList<KvSourceSpan> Spans) SerializeWithSourceMap<TData>(TData data, string name, KVTypeInfo<TData> typeInfo, KVSerializerOptions? options = null)
         {
             ArgumentNullException.ThrowIfNull(data);
             ArgumentNullException.ThrowIfNull(name);
+            ArgumentNullException.ThrowIfNull(typeInfo);
 
-            var kvObjectTree = ObjectCopier.FromObject(typeof(TData), data);
+            var kvObjectTree = typeInfo.Write(data, new KVWriteContext());
             return SerializeWithSourceMapCore(kvObjectTree, name, header: null, options);
         }
 

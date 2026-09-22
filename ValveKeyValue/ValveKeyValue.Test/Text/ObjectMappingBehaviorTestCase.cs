@@ -7,15 +7,8 @@ namespace ValveKeyValue.Test
     {
         static readonly KVSerializer KV1 = KVSerializer.Create(KVSerializationFormat.KeyValues1Text);
 
-        static string SerializeToText<T>(T value)
-        {
-            using var ms = new MemoryStream();
-            KV1.Serialize(ms, value, "root");
-            return Encoding.UTF8.GetString(ms.ToArray());
-        }
-
         static KVObject SerializeToTree<T>(T value)
-            => KV1.Deserialize(SerializeToText(value)).Root;
+            => KV1.Deserialize(KV1.Serialize(value)).Root;
 
         [Test]
         public void InheritedPropertiesSerializeDeclaredTypeFirstThenBase()
@@ -53,7 +46,7 @@ namespace ValveKeyValue.Test
             var value = new WithNonPublic("private", "protected", "internal", "privateset");
 
             var tree = SerializeToTree(value);
-            var back = KV1.Deserialize<WithNonPublic>(SerializeToText(value));
+            var back = KV1.Deserialize<WithNonPublic>(KV1.Serialize(value));
 
             using (Assert.EnterMultipleScope())
             {
@@ -79,7 +72,7 @@ namespace ValveKeyValue.Test
             value.SetSecret("s");
 
             var tree = SerializeToTree(value);
-            var back = KV1.Deserialize<WithIncludedPrivateProperty>(SerializeToText(value));
+            var back = KV1.Deserialize<WithIncludedPrivateProperty>(KV1.Serialize(value));
 
             using (Assert.EnterMultipleScope())
             {
@@ -182,7 +175,7 @@ namespace ValveKeyValue.Test
             var value = new Person("Alice", 30);
 
             var tree = SerializeToTree(value);
-            var back = KV1.Deserialize<Person>(SerializeToText(value));
+            var back = KV1.Deserialize<Person>(KV1.Serialize(value));
 
             using (Assert.EnterMultipleScope())
             {
@@ -204,7 +197,7 @@ namespace ValveKeyValue.Test
                 ],
             };
 
-            var back = KV1.Deserialize<Node>(SerializeToText(value));
+            var back = KV1.Deserialize<Node>(KV1.Serialize(value));
 
             using (Assert.EnterMultipleScope())
             {
@@ -220,7 +213,7 @@ namespace ValveKeyValue.Test
         {
             var value = new Point { X = 3, Y = -4 };
 
-            var back = KV1.Deserialize<Point>(SerializeToText(value));
+            var back = KV1.Deserialize<Point>(KV1.Serialize(value));
 
             Assert.That(back, Is.EqualTo(value));
         }
@@ -231,7 +224,7 @@ namespace ValveKeyValue.Test
             var value = new WithNullableEnum { Present = Color.Green };
 
             var tree = SerializeToTree(value);
-            var back = KV1.Deserialize<WithNullableEnum>(SerializeToText(value));
+            var back = KV1.Deserialize<WithNullableEnum>(KV1.Serialize(value));
 
             using (Assert.EnterMultipleScope())
             {
@@ -307,7 +300,7 @@ namespace ValveKeyValue.Test
         public void GetOnlyPropertyIsSerializedAndBoundThroughConstructor()
         {
             var value = new WithGetOnly("computed") { Writable = "w" };
-            var text = SerializeToText(value);
+            var text = KV1.Serialize(value);
 
             var tree = KV1.Deserialize(text).Root;
             var back = KV1.Deserialize<WithGetOnly>(text);
@@ -362,7 +355,7 @@ namespace ValveKeyValue.Test
             }
         }
 
-        class Base
+        internal class Base
         {
             public string? BaseValue { get; set; }
 
@@ -376,12 +369,12 @@ namespace ValveKeyValue.Test
             public string? GetBasePrivate() => BasePrivate;
         }
 
-        class Derived : Base
+        internal class Derived : Base
         {
             public string? DerivedValue { get; set; }
         }
 
-        class WithNonPublic
+        internal class WithNonPublic
         {
             public WithNonPublic()
             {
@@ -406,13 +399,13 @@ namespace ValveKeyValue.Test
             public (string?, string?, string?, string?) Snapshot() => (PrivateValue, ProtectedValue, InternalValue, PrivateSetValue);
         }
 
-        class WithIncludedPrivateSetter
+        internal class WithIncludedPrivateSetter
         {
             [KVInclude]
             public string? Value { get; private set; }
         }
 
-        class WithIncludedPrivateProperty
+        internal class WithIncludedPrivateProperty
         {
             [KVInclude]
             string? Secret { get; set; }
@@ -422,7 +415,7 @@ namespace ValveKeyValue.Test
             public string? GetSecret() => Secret;
         }
 
-        class WithPrivateProperty
+        internal class WithPrivateProperty
         {
             public string? Visible { get; set; }
 
@@ -433,7 +426,7 @@ namespace ValveKeyValue.Test
             public string? GetSecret() => Secret;
         }
 
-        class WithPrivateGetters
+        internal class WithPrivateGetters
         {
             public string? Hidden { private get; set; }
 
@@ -441,68 +434,68 @@ namespace ValveKeyValue.Test
             public string? Included { private get; set; }
         }
 
-        class Animal
+        internal class Animal
         {
             public string? Name { get; set; }
         }
 
-        class Dog : Animal
+        internal class Dog : Animal
         {
             public string? Breed { get; set; }
         }
 
-        class Zoo
+        internal class Zoo
         {
             public Animal? Pet { get; set; }
         }
 
-        class WithReadOnlyDictionary
+        internal class WithReadOnlyDictionary
         {
             public IReadOnlyDictionary<string, int>? Values { get; set; }
         }
 
-        class WithEnumerables
+        internal class WithEnumerables
         {
             public HashSet<string>? Set { get; set; }
 
             public IEnumerable<int>? Lazy { get; set; }
         }
 
-        class Node
+        internal class Node
         {
             public string? Name { get; set; }
 
             public List<Node>? Children { get; set; }
         }
 
-        struct Point
+        internal struct Point
         {
             public int X { get; set; }
 
             public int Y { get; set; }
         }
 
-        enum Color
+        internal enum Color
         {
             Red = 1,
             Green = 2,
         }
 
-        class WithNullableEnum
+        internal class WithNullableEnum
         {
             public Color? Present { get; set; }
 
             public Color? Missing { get; set; }
         }
 
-        record Person(string Name, int Age);
+        internal record Person(string Name, int Age);
 
-        class WithRecords
+        internal class WithRecords
         {
             public List<Person>? Items { get; set; }
         }
 
-        class WithGetOnly
+        internal class WithGetOnly
         {
             public WithGetOnly(string readOnly)
             {
@@ -514,7 +507,7 @@ namespace ValveKeyValue.Test
             public string? Writable { get; set; }
         }
 
-        class WithInitializers
+        internal class WithInitializers
         {
             public WithInitializers()
             {
@@ -528,7 +521,7 @@ namespace ValveKeyValue.Test
             public bool ConstructorRan { get; set; }
         }
 
-        class WithClampingSetter
+        internal class WithClampingSetter
         {
             int percent;
 
@@ -539,7 +532,7 @@ namespace ValveKeyValue.Test
             }
         }
 
-        class WithInitializersAndParameters
+        internal class WithInitializersAndParameters
         {
             public WithInitializersAndParameters(string name)
             {

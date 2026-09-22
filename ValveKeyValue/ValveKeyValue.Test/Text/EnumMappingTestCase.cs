@@ -11,15 +11,8 @@ namespace ValveKeyValue.Test
 
         static readonly KVSerializer KV1 = KVSerializer.Create(KVSerializationFormat.KeyValues1Text);
 
-        static string Serialize<T>(KVSerializationFormat format, T value)
-        {
-            using var ms = new MemoryStream();
-            KVSerializer.Create(format).Serialize(ms, value, "root");
-            return Encoding.UTF8.GetString(ms.ToArray());
-        }
-
         static T RoundTrip<T>(KVSerializationFormat format, T value)
-            => KVSerializer.Create(format).Deserialize<T>(Serialize(format, value));
+            => KVSerializer.Create(format).Deserialize<T>(KVSerializer.Create(format).Serialize(value));
 
         [TestCaseSource(nameof(Formats))]
         public void ListRoundTrips(KVSerializationFormat format)
@@ -110,7 +103,7 @@ namespace ValveKeyValue.Test
                 [(Color)99] = (Permissions)64,
             };
 
-            var back = KVSerializer.Create(format).Deserialize<IReadOnlyDictionary<Color, Permissions>>(Serialize(format, value));
+            var back = KVSerializer.Create(format).Deserialize<IReadOnlyDictionary<Color, Permissions>>(KVSerializer.Create(format).Serialize(value));
 
             Assert.That(back, Is.EqualTo(value));
         }
@@ -164,7 +157,7 @@ namespace ValveKeyValue.Test
         [Test]
         public void ListSerializesAsUnderlyingNumbers()
         {
-            var text = Serialize(KVSerializationFormat.KeyValues1Text, new List<Color> { Color.Red, Color.Blue, (Color)99 });
+            var text = KV1.Serialize(new List<Color> { Color.Red, Color.Blue, (Color)99 });
 
             Assert.That(text, Is.EqualTo("\"root\"\n{\n\t\"0\"\t\"1\"\n\t\"1\"\t\"3\"\n\t\"2\"\t\"99\"\n}\n"));
         }
@@ -179,7 +172,7 @@ namespace ValveKeyValue.Test
                 [(Permissions)64] = (Color)99,
             };
 
-            var text = Serialize(KVSerializationFormat.KeyValues1Text, value);
+            var text = KV1.Serialize(value);
 
             Assert.That(text, Is.EqualTo("\"root\"\n{\n\t\"Read\"\t\"1\"\n\t\"Read, Write\"\t\"3\"\n\t\"64\"\t\"99\"\n}\n"));
         }
@@ -289,7 +282,11 @@ namespace ValveKeyValue.Test
         [Test]
         public void InvalidEnumNameThrows()
         {
-            Assert.That(() => KV1.Deserialize<List<Color>>("\"root\"\n{\n\t\"0\"\t\"Purple\"\n}"), Throws.ArgumentException);
+            Assert.That(
+                () => KV1.Deserialize<List<Color>>("\"root\"\n{\n\t\"0\"\t\"Purple\"\n}"),
+                Throws.InstanceOf<NotSupportedException>()
+                    .With.Message.EqualTo($"Conversion to {typeof(Color)} failed. (type = String)")
+                    .And.InnerException.InstanceOf<ArgumentException>());
         }
 
         [TestCaseSource(nameof(Formats))]

@@ -28,7 +28,7 @@ namespace ValveKeyValue.Test
                 .With.Message.EqualTo("Converting to DateTime is not supported. (type = String)"));
         }
 
-        class SerializedType
+        internal class SerializedType
         {
             public DateTime Value { get; set; }
         }

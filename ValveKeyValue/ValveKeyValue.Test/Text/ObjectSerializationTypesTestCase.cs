@@ -54,7 +54,7 @@ namespace ValveKeyValue.Test
             }
         }
 
-        class DataObject
+        internal class DataObject
         {
             public required string VString { get; set; }
             public int VInt { get; set; }
@@ -69,7 +69,7 @@ namespace ValveKeyValue.Test
             public ULongEnum VULongEnum { get; set; }
         }
 
-        enum SomeEnum
+        internal enum SomeEnum
         {
             One = 1,
             Two = 2,
@@ -77,30 +77,30 @@ namespace ValveKeyValue.Test
         }
 
         [Flags]
-        enum SomeFlags
+        internal enum SomeFlags
         {
             Foo = 1 << 1,
             Bar = 1 << 3,
         }
 
-        enum ByteEnum : byte
+        internal enum ByteEnum : byte
         {
             Zero = 0,
             Max = 255,
         }
 
-        enum ShortEnum : short
+        internal enum ShortEnum : short
         {
             Negative = -1,
             Positive = 100,
         }
 
-        enum LongEnum : long
+        internal enum LongEnum : long
         {
             Big = 0x0102030405060708,
         }
 
-        enum ULongEnum : ulong
+        internal enum ULongEnum : ulong
         {
             Big = 0x8877665544332211,
         }
@@ -195,7 +195,7 @@ namespace ValveKeyValue.Test
             }
         }
 
-        class CharDecimalObject
+        internal class CharDecimalObject
         {
             public char VChar { get; set; }
             public decimal VDecimal { get; set; }
@@ -217,7 +217,7 @@ namespace ValveKeyValue.Test
             Assert.That(text, Does.Contain("AB CD EF"));
         }
 
-        class AllScalarsObject
+        internal class AllScalarsObject
         {
             public bool VBool { get; set; }
             public byte VByte { get; set; }
@@ -235,7 +235,7 @@ namespace ValveKeyValue.Test
             public decimal VDecimal { get; set; }
         }
 
-        class ByteArrayObject
+        internal class ByteArrayObject
         {
             public required byte[] VBlob { get; set; }
         }

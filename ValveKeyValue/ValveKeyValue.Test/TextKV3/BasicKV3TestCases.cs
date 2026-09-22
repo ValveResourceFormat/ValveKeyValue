@@ -328,22 +328,22 @@ namespace ValveKeyValue.Test.TextKV3
         }
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes - used by deserializer
-        class TypedArrayData
+        internal class TypedArrayData
         {
             public required List<int> Numbers { get; set; }
         }
 
-        class TypedStringArrayData
+        internal class TypedStringArrayData
         {
             public required string[] Names { get; set; }
         }
 
-        class TypedIntArrayData
+        internal class TypedIntArrayData
         {
             public required int[] Values { get; set; }
         }
 
-        class TypedBlobData
+        internal class TypedBlobData
         {
             public required byte[] Array { get; set; }
         }

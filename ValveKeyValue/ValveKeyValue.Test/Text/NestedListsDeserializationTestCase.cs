@@ -33,7 +33,7 @@ namespace ValveKeyValue.Test
             }
         }
 
-        class DataObject
+        internal class DataObject
         {
             public required List<List<string>> Values { get; set; }
         }

@@ -52,7 +52,7 @@ namespace ValveKeyValue.Test
                 Throws.InstanceOf<KeyValueException>().With.Message.EqualTo("Required property 'ZipCode' on type 'PersonWithExtraRequiredInit' was not found in the KeyValues data."));
         }
 
-        class PersonWithRequiredInit
+        internal class PersonWithRequiredInit
         {
             public required string FirstName { get; init; }
 
@@ -61,7 +61,7 @@ namespace ValveKeyValue.Test
             public required int Age { get; init; }
         }
 
-        class PersonWithGetOnly
+        internal class PersonWithGetOnly
         {
             public string FirstName { get; } = string.Empty;
 
@@ -70,7 +70,7 @@ namespace ValveKeyValue.Test
             public int Age { get; }
         }
 
-        class PersonWithExtraRequiredInit
+        internal class PersonWithExtraRequiredInit
         {
             public required string FirstName { get; init; }
 

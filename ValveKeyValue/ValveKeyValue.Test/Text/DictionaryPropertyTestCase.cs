@@ -48,7 +48,7 @@ namespace ValveKeyValue.Test
             data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<ContainerClass>(stream);
         }
 
-        class ContainerClass
+        internal class ContainerClass
         {
             public required Dictionary<int, string> Numbers { get; set; }
         }

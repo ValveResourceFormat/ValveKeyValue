@@ -111,7 +111,7 @@ namespace ValveKeyValue.Test
             }
         }
 
-        class DataObject
+        internal class DataObject
         {
             [KVProperty("test")]
             public required Dictionary<string, float[]> Test { get; set; }

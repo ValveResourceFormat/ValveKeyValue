@@ -35,7 +35,7 @@ namespace ValveKeyValue.Test
             person = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<Person>(stream);
         }
 
-        class Person
+        internal class Person
         {
             public required string FirstName { get; set; }
 
