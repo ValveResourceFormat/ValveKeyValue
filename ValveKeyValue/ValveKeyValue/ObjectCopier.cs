@@ -430,10 +430,36 @@ namespace ValveKeyValue
                     return kvObject.AsBlob();
                 }
 
+                if (valueType.IsEnum)
+                {
+                    return ConvertToEnum(kvObject, valueType);
+                }
+
                 return Convert.ChangeType(kvObject.ToType(valueType, null), valueType, CultureInfo.InvariantCulture);
             }
 
+            if (valueType.IsEnum)
+            {
+                return ConvertToEnum(value, valueType);
+            }
+
             return Convert.ChangeType(value, valueType, CultureInfo.InvariantCulture);
+        }
+
+        // Converts a scalar value to an enum. Strings (including dictionary keys) are parsed as
+        // either a number or case-insensitive member names, comma-separated for flags. Other
+        // values are converted through the enum's underlying type.
+        static object ConvertToEnum(object value, Type enumType)
+        {
+            if (value is KVObject { ValueType: not KVValueType.String } kvObject)
+            {
+                var underlyingType = Enum.GetUnderlyingType(enumType);
+                var underlyingValue = kvObject.ToType(underlyingType, CultureInfo.InvariantCulture);
+                return Enum.ToObject(enumType, underlyingValue);
+            }
+
+            var text = Convert.ToString(value, CultureInfo.InvariantCulture)!;
+            return Enum.Parse(enumType, text, ignoreCase: true);
         }
 
         static bool TryConvertValueTo<TValue>(KVObject value, [MaybeNullWhen(false)] out TValue converted)
@@ -454,9 +480,7 @@ namespace ValveKeyValue
 
             if (targetType.IsEnum)
             {
-                var underlyingType = Enum.GetUnderlyingType(targetType);
-                var underlyingValue = value.ToType(underlyingType, CultureInfo.InvariantCulture);
-                converted = (TValue)Enum.ToObject(targetType, underlyingValue);
+                converted = (TValue)ConvertToEnum(value, targetType);
                 return true;
             }
 
