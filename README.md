@@ -327,6 +327,45 @@ using var output = File.OpenWrite("file.vdf");
 kv.Serialize(output, data, "root object name");
 ```
 
+Mapping rules:
+
+* Only public properties are mapped. A property with a public getter is serialized, and a property with a public setter (or `init`) is deserialized. Mark a property with `[KVInclude]` to map it even when the property or one of its accessors is not public. Properties without a setter are serialized but skipped when deserializing, unless a constructor parameter has the same name.
+* Objects are created through a constructor: the one marked with `[KVConstructor]` (which may be non-public), otherwise a public parameterless constructor, otherwise the only public constructor. Constructor parameters are bound to keys by name, case-insensitively, and a missing key uses the declared default value of the parameter. Structs without a public constructor start from their default value. A type without a usable constructor can still be serialized, but deserializing it throws.
+* `required` properties must be present in the data, otherwise a `KeyValueException` is thrown, unless the constructor is marked with `[SetsRequiredMembers]`.
+* Values are converted the same way as the explicit conversions of `KVObject`, such as `(int)value`: a floating-point value read into an integer is truncated. A `bool` is read from a number, where non-zero is `true`, or from `true` or `false` in any casing. Enums are also read from their member names. Dictionary keys are read from their text with the same rules. Reading an object or array into a scalar, or a value that does not convert, throws `NotSupportedException`.
+* A KeyValues3 `null` is read as `null` into reference types and nullable value types, and throws `NotSupportedException` for any other value type.
+
+### Native AOT and source generation
+
+The package includes a source generator. Calls to `Deserialize<T>`, `Serialize<T>`, `SerializeWithSourceMap<T>` and `KVSerializer.GetTypeInfo<T>()` whose type argument is a concrete type are intercepted at compile time and use generated type information instead of reflection, so they are trim and Native AOT compatible and do not report IL2026 or IL3050 warnings. This works automatically with a `PackageReference`, on C# 12 or later. If you reference the library as a project instead, add the generator and enable its namespace yourself:
+
+```xml
+<PropertyGroup>
+  <InterceptorsNamespaces>$(InterceptorsNamespaces);ValveKeyValue.Generated</InterceptorsNamespaces>
+</PropertyGroup>
+<ItemGroup>
+  <ProjectReference Include="..\ValveKeyValue.SourceGenerator\ValveKeyValue.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+</ItemGroup>
+```
+
+Calls that cannot be intercepted keep working through reflection, and trimming or AOT compilation warns about them. That is the case when the type argument is a type parameter of a generic method, when the method is used as a delegate or method group, in F# and Visual Basic, and when a type is not supported by the generator. The generator explains each case with an informational diagnostic:
+
+* `VKV0001` - The type argument contains a type parameter.
+* `VKV0002` - A type is not accessible from generated code, such as a `private` nested class or an anonymous type. Make it `internal`.
+* `VKV0003` - A type is not supported, such as `object`, non-generic collections, and interfaces or abstract classes that are not collections.
+* `VKV0006` - The language version is older than C# 12.
+* `VKV0007` - The `ValveKeyValue.Generated` namespace is missing from `InterceptorsNamespaces`.
+
+Generic code can stay trim and AOT compatible by taking a `KVTypeInfo<T>` and passing it to the overloads that accept one. Obtain it with `KVSerializer.GetTypeInfo<T>()` where the type is known:
+
+```csharp
+static T Load<T>(KVSerializer kv, Stream stream, KVTypeInfo<T> typeInfo) => kv.Deserialize(stream, typeInfo);
+
+var settings = Load(kv, stream, KVSerializer.GetTypeInfo<Settings>());
+```
+
+Generated type information serializes values using their declared type, while reflection uses the runtime type of each value, so a property declared as a base class only writes the members of that base class when the call is intercepted. `dotnet format` and some IDE code fixes do not run diagnostic suppressors and may still offer to fix IL2026 on intercepted calls.
+
 ## KeyValues1
 
 Used by Steam and the Source engine. Text files look like this:
