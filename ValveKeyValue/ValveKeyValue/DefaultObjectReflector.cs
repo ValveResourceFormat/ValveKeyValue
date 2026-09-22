@@ -30,6 +30,11 @@ namespace ValveKeyValue
                         continue;
                     }
 
+                    if (IsRecordEqualityContract(property))
+                    {
+                        continue;
+                    }
+
                     yield return new PropertyMember(property, @object);
                 }
             }
@@ -37,5 +42,11 @@ namespace ValveKeyValue
 
         static bool IsValueTupleType(Type type)
             => type.IsGenericType && type.FullName!.StartsWith("System.ValueTuple`", StringComparison.Ordinal);
+
+        // Records synthesize a protected "Type EqualityContract" property which must not be treated as data.
+        static bool IsRecordEqualityContract(PropertyInfo property)
+            => property.Name == "EqualityContract"
+            && property.PropertyType == typeof(Type)
+            && property.GetMethod?.GetCustomAttribute<System.Runtime.CompilerServices.CompilerGeneratedAttribute>() != null;
     }
 }
