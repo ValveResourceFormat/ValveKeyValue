@@ -17,14 +17,17 @@ namespace ValveKeyValue.Test
         }
 
         [Test]
-        public void GetOnlyPropertyThrows()
+        public void GetOnlyPropertiesAreSkipped()
         {
             using var stream = TestDataHelper.OpenResource("Text.required_init_person.vdf");
-            var serializer = KVSerializer.Create(KVSerializationFormat.KeyValues1Text);
+            var person = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize<PersonWithGetOnly>(stream);
 
-            Assert.That(
-                () => serializer.Deserialize<PersonWithGetOnly>(stream),
-                Throws.ArgumentException.With.Message.EqualTo("Property set method not found."));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(person.FirstName, Is.Null);
+                Assert.That(person.LastName, Is.Null);
+                Assert.That(person.Age, Is.Zero);
+            }
         }
 
         [Test]

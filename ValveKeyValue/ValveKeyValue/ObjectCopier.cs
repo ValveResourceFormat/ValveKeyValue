@@ -154,7 +154,7 @@ namespace ValveKeyValue
 
             foreach (var (key, child) in kv)
             {
-                if (!members.TryGetValue(key, out var member))
+                if (!members.TryGetValue(key, out var member) || !member.CanWrite)
                 {
                     continue;
                 }
