@@ -1,5 +1,8 @@
 <Solution>
+  <Project Path="ValveKeyValue/ValveKeyValue.AotSmoke/ValveKeyValue.AotSmoke.csproj" />
   <Project Path="ValveKeyValue/ValveKeyValue.Console/ValveKeyValue.Console.csproj" />
+  <Project Path="ValveKeyValue/ValveKeyValue.SourceGenerator.Test/ValveKeyValue.SourceGenerator.Test.csproj" />
+  <Project Path="ValveKeyValue/ValveKeyValue.SourceGenerator/ValveKeyValue.SourceGenerator.csproj" />
   <Project Path="ValveKeyValue/ValveKeyValue.Test/ValveKeyValue.Test.csproj" />
   <Project Path="ValveKeyValue/ValveKeyValue/ValveKeyValue.csproj" />
 </Solution>

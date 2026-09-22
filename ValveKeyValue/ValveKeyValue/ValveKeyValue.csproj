@@ -11,9 +11,24 @@
     <AssemblyOriginatorKeyFile>ValveKeyValue.snk</AssemblyOriginatorKeyFile>
     <IsAotCompatible>true</IsAotCompatible>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);AddSourceGeneratorToPackage</TargetsForTfmSpecificContentInPackage>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
     <None Include="..\..\Misc\logo.png" Pack="true" PackagePath="\"/>
+    <None Include="buildTransitive\ValveKeyValue.props" Pack="true" PackagePath="buildTransitive\" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- The library has no call sites to intercept; the generator is only built here so that it can be packed. -->
+    <ProjectReference Include="..\ValveKeyValue.SourceGenerator\ValveKeyValue.SourceGenerator.csproj" ReferenceOutputAssembly="false" PrivateAssets="all" PackAsAnalyzer="true" />
+  </ItemGroup>
+  <!-- Packs the generator, which also contains the diagnostic suppressor, as a C# analyzer. -->
+  <Target Name="AddSourceGeneratorToPackage">
+    <MSBuild Projects="@(ProjectReference->WithMetadataValue('PackAsAnalyzer', 'true'))" Targets="GetTargetPath" RemoveProperties="TargetFramework;RuntimeIdentifier">
+      <Output TaskParameter="TargetOutputs" ItemName="_SourceGeneratorAssembly" />
+    </MSBuild>
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="@(_SourceGeneratorAssembly)" PackagePath="analyzers/dotnet/cs" />
+    </ItemGroup>
+  </Target>
 </Project>

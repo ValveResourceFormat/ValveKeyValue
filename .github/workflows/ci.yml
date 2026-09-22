@@ -31,6 +31,12 @@ jobs:
     - name: Test
       run: dotnet test -c Release /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:CoverletOutput='./lcov.info' /p:Include="[ValveKeyValue*]*"
 
+    - name: Native AOT smoke test
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        dotnet publish ValveKeyValue/ValveKeyValue.AotSmoke/ValveKeyValue.AotSmoke.csproj -c Release -r linux-x64 -o aot-smoke
+        ./aot-smoke/ValveKeyValue.AotSmoke
+
     - name: Create nupkg
       run: dotnet pack --configuration Release ValveKeyValue/ValveKeyValue/ValveKeyValue.csproj
 

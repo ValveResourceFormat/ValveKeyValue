@@ -1,29 +1,27 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <RollForward>LatestMajor</RollForward>
     <IsTestProject>true</IsTestProject>
-    <Product>Valve KeyValue Library - Unit Tests</Product>
-    <Description>Unit Tests for library to parse and write Valve KeyValue formats</Description>
+    <Product>Valve KeyValue Library - Source Generator Tests</Product>
+    <Description>Unit tests for the ValveKeyValue source generator</Description>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>../ValveKeyValue/ValveKeyValue.snk</AssemblyOriginatorKeyFile>
-    <InterceptorsNamespaces>$(InterceptorsNamespaces);ValveKeyValue.Generated</InterceptorsNamespaces>
+    <!-- The analyzer in SuppressorTestCase stands in for the trim analyzer and is only run by the tests, never loaded by the compiler. -->
+    <NoWarn>$(NoWarn);RS1036;RS1041;RS2008</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="Test Data\**\*.txt" />
-    <None Remove="Test Data\**\*.vdf" />
-    <None Remove="Test Data\**\*.kv3" />
+    <Compile Remove="Snapshots\**" />
+    <None Remove="Snapshots\**" />
+    <EmbeddedResource Include="Snapshots\*.g.cs" Exclude="Snapshots\*.received.g.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Test Data\**\*.txt" />
-    <EmbeddedResource Include="Test Data\**\*.vdf" />
-    <EmbeddedResource Include="Test Data\**\*.kv3" />
-  </ItemGroup>
-  <ItemGroup>
+    <PackageReference Include="Basic.Reference.Assemblies.Net100" Version="1.8.12" />
     <PackageReference Include="coverlet.msbuild" Version="8.0.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
     <PackageReference Include="NUnit" Version="4.5.1" />
     <PackageReference Include="NUnit.Analyzers" Version="4.12.0">
@@ -34,7 +32,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ValveKeyValue\ValveKeyValue.csproj" />
-    <ProjectReference Include="..\ValveKeyValue.SourceGenerator\ValveKeyValue.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\ValveKeyValue.SourceGenerator\ValveKeyValue.SourceGenerator.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Using Include="NUnit.Framework" />

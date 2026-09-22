@@ -1,0 +1,6 @@
+<Project>
+  <!-- Allows the source generator shipped in this package to intercept KVSerializer calls. -->
+  <PropertyGroup>
+    <InterceptorsNamespaces>$(InterceptorsNamespaces);ValveKeyValue.Generated</InterceptorsNamespaces>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ValveKeyValue.Test": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "..\\ValveKeyValue.Test\\ValveKeyValue.Test.csproj"
+    }
+  }
+}
