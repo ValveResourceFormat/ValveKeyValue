@@ -509,6 +509,8 @@ namespace ValveKeyValue
             return Type.GetTypeCode(type) switch
             {
                 TypeCode.Boolean => new KVObject((bool)value),
+                TypeCode.Char => new KVObject(((char)value).ToString()),
+                TypeCode.Decimal => new KVObject((double)(decimal)value),
                 TypeCode.Byte => new KVObject((int)(byte)value),
                 TypeCode.SByte => new KVObject((int)(sbyte)value),
                 TypeCode.Int16 => new KVObject((int)(short)value),

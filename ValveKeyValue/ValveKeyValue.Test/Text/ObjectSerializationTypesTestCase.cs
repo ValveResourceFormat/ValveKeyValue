@@ -122,6 +122,9 @@ namespace ValveKeyValue.Test
                 VFloat = -1234.5678f,
                 VDouble = 3.14159265358979,
                 VString = "hello world",
+                VChar = 'x',
+                // KV1 text type-guesses numbers as float32 on read, so keep this exactly representable
+                VDecimal = 1234.5m,
             };
 
             using var ms = new MemoryStream();
@@ -144,7 +147,58 @@ namespace ValveKeyValue.Test
                 Assert.That(d.VFloat, Is.EqualTo(-1234.5678f));
                 Assert.That(d.VDouble, Is.EqualTo(3.14159265358979).Within(0.0000001));
                 Assert.That(d.VString, Is.EqualTo("hello world"));
+                Assert.That(d.VChar, Is.EqualTo('x'));
+                Assert.That(d.VDecimal, Is.EqualTo(1234.5m));
             }
+        }
+
+        [Test]
+        public void CharAndDecimalSerializeAsScalars()
+        {
+            var dataObject = new CharDecimalObject
+            {
+                VChar = 'q',
+                VDecimal = -0.5m,
+            };
+
+            using var ms = new MemoryStream();
+            KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Serialize(ms, dataObject, "test data");
+
+            ms.Seek(0, SeekOrigin.Begin);
+            using var reader = new StreamReader(ms);
+            var text = reader.ReadToEnd();
+
+            var expected = "\"test data\"\n{\n\t\"VChar\"\t\"q\"\n\t\"VDecimal\"\t\"-0.5\"\n}\n";
+            Assert.That(text, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void CharAndDecimalRoundTripThroughKV3Text()
+        {
+            var dataObject = new CharDecimalObject
+            {
+                VChar = 'Ω',
+                VDecimal = 98765.4321m,
+            };
+
+            using var ms = new MemoryStream();
+            var serializer = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
+            serializer.Serialize(ms, dataObject, "root");
+
+            ms.Seek(0, SeekOrigin.Begin);
+            var d = serializer.Deserialize<CharDecimalObject>(ms);
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(d.VChar, Is.EqualTo('Ω'));
+                Assert.That(d.VDecimal, Is.EqualTo(98765.4321m));
+            }
+        }
+
+        class CharDecimalObject
+        {
+            public char VChar { get; set; }
+            public decimal VDecimal { get; set; }
         }
 
         [Test]
@@ -177,6 +231,8 @@ namespace ValveKeyValue.Test
             public float VFloat { get; set; }
             public double VDouble { get; set; }
             public required string VString { get; set; }
+            public char VChar { get; set; }
+            public decimal VDecimal { get; set; }
         }
 
         class ByteArrayObject
