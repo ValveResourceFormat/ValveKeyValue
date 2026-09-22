@@ -43,6 +43,10 @@ namespace ValveKeyValue
                 {
                     throw new InvalidOperationException($"Cannot deserialize a non-array value to type \"{typeof(TObject).Namespace}.{typeof(TObject).Name}\".");
                 }
+                else if (typeof(IEnumerable).IsAssignableFrom(typeof(TObject)))
+                {
+                    throw new NotSupportedException($"Cannot deserialize to enumerable type {typeof(TObject).Name}.");
+                }
 
                 // The object must remain boxed until it is fully initiallized, as this is the only way
                 // that we can build a struct due to the nature of struct copying.
