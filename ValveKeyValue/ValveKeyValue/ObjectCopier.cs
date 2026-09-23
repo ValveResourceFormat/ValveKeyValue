@@ -87,6 +87,15 @@ namespace ValveKeyValue
             IObjectReflector reflector,
             HashSet<object> visitedObjects)
         {
+            switch (managedObject)
+            {
+                case KVObject kvObject:
+                    return kvObject;
+
+                case KVDocument document:
+                    return document.Root;
+            }
+
             if (!objectType.IsValueType && objectType != typeof(string) && !visitedObjects.Add(managedObject))
             {
                 throw new KeyValueException("Serialization failed - circular object reference detected.");
@@ -454,12 +463,28 @@ namespace ValveKeyValue
             if (value is KVObject { ValueType: not KVValueType.String } kvObject)
             {
                 var underlyingType = Enum.GetUnderlyingType(enumType);
-                var underlyingValue = kvObject.ToType(underlyingType, CultureInfo.InvariantCulture);
+                object underlyingValue;
+
+                try
+                {
+                    underlyingValue = kvObject.ToType(underlyingType, CultureInfo.InvariantCulture);
+                }
+                catch (Exception e)
+                {
+                    throw new NotSupportedException($"Conversion to {enumType} failed. (type = {kvObject.ValueType})", e);
+                }
+
                 return Enum.ToObject(enumType, underlyingValue);
             }
 
             var text = Convert.ToString(value, CultureInfo.InvariantCulture)!;
-            return Enum.Parse(enumType, text, ignoreCase: true);
+
+            if (!Enum.TryParse(enumType, text, ignoreCase: true, out var result))
+            {
+                throw new NotSupportedException($"Conversion to {enumType} failed, \"{text}\" is not a valid value.");
+            }
+
+            return result;
         }
 
         static bool TryConvertValueTo<TValue>(KVObject value, [MaybeNullWhen(false)] out TValue converted)

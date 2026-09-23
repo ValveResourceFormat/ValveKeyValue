@@ -274,7 +274,7 @@ Every `Deserialize` and `Serialize` overload takes an optional `KVSerializerOpti
 
 * `Conditions` - List of conditions used to match KV1 conditionals such as `[$WIN32]`. By default `WIN32` is always present, plus one of `WINDOWS`, `LINUX` + `POSIX`, or `OSX` + `POSIX` depending on the OS the code is running on. See [Conditionals](#conditionals).
 * `HasEscapeSequences` - Whether the KV1 parser and serializer should translate escape sequences such as `\n` and `\t`. Valve's parser only does this when asked to, so it is off by default.
-* `EnableValveNullByteBugBehavior` - Whether invalid KV1 escape sequences should truncate strings rather than throwing an `InvalidDataException`, matching a bug in Valve's parser.
+* `EnableValveNullByteBugBehavior` - Whether invalid KV1 escape sequences should truncate strings rather than throwing a `KeyValueException`, matching a bug in Valve's parser.
 * `FileLoader` - Provider for files referenced by KV1 `#include` and `#base` directives. See [Includes](#includes).
 * `StringTable` - String table used by the KV1 binary format. See [Binary](#binary).
 * `SkipHeader` - Whether to omit the KV3 header comment when serializing and to not expect one when deserializing.

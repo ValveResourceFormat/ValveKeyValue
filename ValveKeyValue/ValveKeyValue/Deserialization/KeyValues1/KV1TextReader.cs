@@ -88,15 +88,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                         break;
 
                     case KVTokenType.EndOfFile:
-                        try
-                        {
-                            FinalizeDocument();
-                        }
-                        catch (InvalidOperationException ex)
-                        {
-                            throw tokenReader.MakeSyntaxException($"Found end of file when another token type was expected at {tokenReader.TokenStartPosition}.", ex);
-                        }
-
+                        FinalizeDocument();
                         break;
 
                     case KVTokenType.Comment:
@@ -166,7 +158,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                     break;
 
                 default:
-                    throw new InvalidOperationException($"Unhandled text reader state: {stateMachine.Current} at {tokenReader.TokenStartPosition}.");
+                    throw tokenReader.MakeSyntaxException($"Unhandled text reader state: {stateMachine.Current} at {tokenReader.TokenStartPosition}.");
             }
         }
 
@@ -180,7 +172,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         {
             if (stateMachine.Current != KV1TextReaderState.InObjectBetweenKeyAndValue)
             {
-                throw new InvalidOperationException($"Attempted to begin new object while in state {stateMachine.Current} at {tokenReader.TokenStartPosition}.");
+                throw tokenReader.MakeSyntaxException($"Attempted to begin new object while in state {stateMachine.Current} at {tokenReader.TokenStartPosition}.");
             }
 
             listener.OnObjectStart(stateMachine.CurrentName, KVFlag.None);
@@ -193,7 +185,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         {
             if (stateMachine.Current != KV1TextReaderState.InObjectBeforeKey && stateMachine.Current != KV1TextReaderState.InObjectAfterValue)
             {
-                throw new InvalidOperationException($"Attempted to finalize object while in state {stateMachine.Current} at {tokenReader.TokenStartPosition}.");
+                throw tokenReader.MakeSyntaxException($"Attempted to finalize object while in state {stateMachine.Current} at {tokenReader.TokenStartPosition}.");
             }
 
             stateMachine.PopObject(out var discard);
@@ -215,12 +207,13 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
         void FinalizeDocument()
         {
-            FinalizeCurrentObject(@explicit: true);
-
-            if (stateMachine.IsInObject)
+            if (!stateMachine.IsAtDocumentLevel
+                || (stateMachine.Current != KV1TextReaderState.InObjectBeforeKey && stateMachine.Current != KV1TextReaderState.InObjectAfterValue))
             {
-                throw new InvalidOperationException("Inconsistent state - at end of file whilst inside an object.");
+                throw tokenReader.MakeSyntaxException($"Found end of file when another token type was expected at {tokenReader.TokenStartPosition}.");
             }
+
+            FinalizeCurrentObject(@explicit: true);
 
             foreach (var includedForMerge in stateMachine.ItemsForMerging)
             {

@@ -30,7 +30,7 @@ namespace ValveKeyValue
                         continue;
                     }
 
-                    if (IsRecordEqualityContract(property))
+                    if (property.GetIndexParameters().Length > 0 || IsRecordEqualityContract(property))
                     {
                         continue;
                     }

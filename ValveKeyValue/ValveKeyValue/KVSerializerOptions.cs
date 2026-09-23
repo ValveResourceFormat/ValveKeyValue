@@ -18,7 +18,7 @@ namespace ValveKeyValue
         public bool HasEscapeSequences { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether invalid escape sequences should truncate strings rather than throwing a <see cref="InvalidDataException"/>.
+        /// Gets or sets a value indicating whether invalid escape sequences should truncate strings rather than throwing a <see cref="KeyValueException"/>.
         /// </summary>
         public bool EnableValveNullByteBugBehavior { get; set; }
 

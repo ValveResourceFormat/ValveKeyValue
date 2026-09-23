@@ -289,7 +289,7 @@ namespace ValveKeyValue.Test
         [Test]
         public void InvalidEnumNameThrows()
         {
-            Assert.That(() => KV1.Deserialize<List<Color>>("\"root\"\n{\n\t\"0\"\t\"Purple\"\n}"), Throws.ArgumentException);
+            Assert.That(() => KV1.Deserialize<List<Color>>("\"root\"\n{\n\t\"0\"\t\"Purple\"\n}"), Throws.TypeOf<NotSupportedException>());
         }
 
         [TestCaseSource(nameof(Formats))]

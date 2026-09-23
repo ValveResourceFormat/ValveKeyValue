@@ -77,6 +77,32 @@ namespace ValveKeyValue.Test
         }
 
         [Test]
+        public void IndexersAreSkipped()
+        {
+            var value = new WithIndexer { Name = "a" };
+
+            var tree = SerializeToTree(value);
+            var back = KV1.Deserialize<WithIndexer>(SerializeToText(value));
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(tree.Keys, Is.EqualTo(["Name"]));
+                Assert.That(back.Name, Is.EqualTo("a"));
+            }
+        }
+
+        [Test]
+        public void KVObjectPropertySerializesAsIs()
+        {
+            var child = KVObject.ListCollection();
+            child.Add("key", "value");
+
+            var tree = SerializeToTree(new WithKVObject { Child = child });
+
+            Assert.That((string)tree["Child"]["key"], Is.EqualTo("value"));
+        }
+
+        [Test]
         public void ReadOnlyDictionaryPropertySerializesAsObject()
         {
             var value = new WithReadOnlyDictionary
@@ -296,6 +322,22 @@ namespace ValveKeyValue.Test
         class Derived : Base
         {
             public string? DerivedValue { get; set; }
+        }
+
+        class WithIndexer
+        {
+            public string? Name { get; set; }
+
+            public string this[string key]
+            {
+                get => key;
+                set { }
+            }
+        }
+
+        class WithKVObject
+        {
+            public KVObject? Child { get; set; }
         }
 
         class WithNonPublic

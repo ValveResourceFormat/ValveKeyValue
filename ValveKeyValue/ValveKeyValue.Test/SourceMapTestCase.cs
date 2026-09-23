@@ -142,6 +142,17 @@ namespace ValveKeyValue.Test
             Assert.That(spans.Any(s => s.TokenType == KVTokenType.ObjectEnd && text[s.Start] == '}'), Is.True);
         }
 
+        [Test]
+        public void DocumentWithNameSerializesItsRoot()
+        {
+            var kv = KVSerializer.Create(KVSerializationFormat.KeyValues1Text);
+            var (document, _) = kv.DeserializeWithSourceMap("\"original\"\n{\n\t\"a\"\t\"1\"\n}\n");
+
+            var (text, _) = kv.SerializeWithSourceMap(document, "renamed");
+
+            Assert.That(text, Is.EqualTo("\"renamed\"\n{\n\t\"a\"\t\"1\"\n}\n"));
+        }
+
         class Person
         {
             public required string FirstName { get; set; }

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 
@@ -5,22 +6,28 @@ namespace ValveKeyValue
 {
     internal static class HexStringHelper
     {
-        public static byte[] ParseHexStringAsByteArray(string hexadecimalRepresentation)
+        public static bool TryParseHexStringAsByteArray(string hexadecimalRepresentation, [NotNullWhen(true)] out byte[]? data)
         {
             ArgumentNullException.ThrowIfNull(hexadecimalRepresentation);
 
+            data = null;
+
             if (hexadecimalRepresentation.Length % 2 != 0)
             {
-                throw new InvalidDataException($"Hex string has odd length ({hexadecimalRepresentation.Length}), expected even number of hex characters.");
+                return false;
             }
 
-            var data = new byte[hexadecimalRepresentation.Length / 2];
-            for (var i = 0; i < data.Length; i++)
+            var result = new byte[hexadecimalRepresentation.Length / 2];
+            for (var i = 0; i < result.Length; i++)
             {
-                data[i] = byte.Parse(hexadecimalRepresentation.AsSpan(i * 2, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+                if (!byte.TryParse(hexadecimalRepresentation.AsSpan(i * 2, 2), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out result[i]))
+                {
+                    return false;
+                }
             }
 
-            return data;
+            data = result;
+            return true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
