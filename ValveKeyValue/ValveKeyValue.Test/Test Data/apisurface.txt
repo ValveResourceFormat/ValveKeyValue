@@ -72,6 +72,17 @@ public sealed enum ValveKeyValue.KVFlag
     public string ToString(string format, IFormatProvider provider);
 }
 
+public static class ValveKeyValue.KVFlagExtensions
+{
+    public bool Equals(object obj);
+    protected void Finalize();
+    public int GetHashCode();
+    public Type GetType();
+    protected object MemberwiseClone();
+    public static string SerializeFlagName(ValveKeyValue.KVFlag flag);
+    public string ToString();
+}
+
 public class ValveKeyValue.KVHeader
 {
     public .ctor();

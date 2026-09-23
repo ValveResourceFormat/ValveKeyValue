@@ -511,7 +511,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
                 return;
             }
 
-            var name = SerializeFlagName(kvFlag);
+            var name = kvFlag.SerializeFlagName();
 
             if (name != null)
             {
@@ -525,20 +525,6 @@ namespace ValveKeyValue.Serialization.KeyValues3
         void WriteLine()
         {
             writer.WriteLine();
-        }
-
-        static string? SerializeFlagName(KVFlag flag)
-        {
-            return flag switch
-            {
-                KVFlag.Resource => "resource",
-                KVFlag.ResourceName => "resource_name",
-                KVFlag.Panorama => "panorama",
-                KVFlag.SoundEvent => "soundevent",
-                KVFlag.SubClass => "subclass",
-                KVFlag.EntityName => "entity_name",
-                _ => null,
-            };
         }
     }
 }
