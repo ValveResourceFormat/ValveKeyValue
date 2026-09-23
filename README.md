@@ -19,6 +19,8 @@
   <a href="https://app.codecov.io/gh/ValveResourceFormat/ValveKeyValue">Coverage</a>
 </p>
 
+## About
+
 KeyValues files turn up as `.vdf`, `.res`, `.acf`, and more. This library aims to be fully compatible with Valve's various implementations of KeyValues format parsing (believe us, it's not consistent).
 
 | Format | Enum value | Read | Write |
