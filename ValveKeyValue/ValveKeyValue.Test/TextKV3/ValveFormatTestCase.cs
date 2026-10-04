@@ -247,6 +247,8 @@ namespace ValveKeyValue.Test.TextKV3
             root.Add("has\\backslash", "i");
             root.Add("has\nnewline", "j");
             root.Add("has\ttab", "k");
+            root.Add("has'apostrophe", "l");
+            root.Add(".dotFirst", "m");
             var doc = new KVDocument(null, null, root);
 
             var result = SerializeToString(kv, doc);
@@ -263,7 +265,23 @@ namespace ValveKeyValue.Test.TextKV3
                 Assert.That(result, Does.Contain("\t\"has\\\\backslash\" = \"i\""));
                 Assert.That(result, Does.Contain("\t\"has\\nnewline\" = \"j\""));
                 Assert.That(result, Does.Contain("\t\"has\\ttab\" = \"k\""));
+                Assert.That(result, Does.Contain("\t\"has'apostrophe\" = \"l\""));
+                Assert.That(result, Does.Contain("\t.dotFirst = \"m\""));
             }
+        }
+
+        [Test]
+        public void SerializesFlaggedRootObject()
+        {
+            var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
+
+            var root = KVObject.Collection();
+            root.Add("a", 1);
+            root.Flag = KVFlag.SubClass;
+            var doc = new KVDocument(null, null, root);
+
+            var result = SerializeToString(kv, doc);
+            Assert.That(result, Does.EndWith("-->\nsubclass:\n{\n\ta = 1\n}\n"));
         }
 
         [Test]
