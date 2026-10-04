@@ -77,6 +77,24 @@ namespace ValveKeyValue.Test
         }
 
         [Test]
+        public void Kv3ParserSpansForFlagsAndUnquotedValues()
+        {
+            const string text = TestDataHelper.KV3Header + "{\n\ta = resource : \"x\"\n\tb = -5   \n\tc = panorama|\"y\"\n}\n";
+
+            var (doc, spans) = KVSerializer.Create(KVSerializationFormat.KeyValues3Text)
+                .DeserializeWithSourceMap(text);
+
+            Assert.That(doc["a"].Flag, Is.EqualTo(KVFlag.Resource));
+
+            AssertSpansAreWellFormed(text, spans);
+            AssertSpanExists(text, spans, KVTokenType.Key, "a");
+            AssertSpanExists(text, spans, KVTokenType.Flag, "resource :");
+            AssertSpanExists(text, spans, KVTokenType.String, "\"x\"");
+            AssertSpanExists(text, spans, KVTokenType.Identifier, "-5");
+            AssertSpanExists(text, spans, KVTokenType.Flag, "panorama|");
+        }
+
+        [Test]
         public void Kv1SerializerSpansLineUpWithEmittedText()
         {
             var root = KVObject.ListCollection();

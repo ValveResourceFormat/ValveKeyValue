@@ -236,6 +236,30 @@ namespace ValveKeyValue.Test.TextKV3
             }
         }
 
+        [TestCase("a\n\"\"\"b\n\"\"\"")]
+        [TestCase("a\nb\\")]
+        [TestCase("a\nb\r")]
+        [TestCase("\\\"\"\"\n")]
+        [TestCase("\n")]
+        [TestCase("42")]
+        [TestCase("true")]
+        [TestCase("null")]
+        [TestCase("-1.5")]
+        public void StringRoundTrips(string value)
+        {
+            var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
+            var root = KVObject.Collection();
+            root.Add("a", value);
+
+            var data = RoundTrip(kv, new KVDocument(null, null, root)).Root;
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(data["a"].ValueType, Is.EqualTo(KVValueType.String));
+                Assert.That((string)data["a"], Is.EqualTo(value));
+            }
+        }
+
         static KVDocument RoundTrip(KVSerializer kv, KVDocument data)
         {
             using var ms = new MemoryStream();

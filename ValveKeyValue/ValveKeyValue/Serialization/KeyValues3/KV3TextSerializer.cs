@@ -389,7 +389,8 @@ namespace ValveKeyValue.Serialization.KeyValues3
 
         void WriteText(string text)
         {
-            if (text.Contains('\n', StringComparison.Ordinal))
+            // A trailing backslash or carriage return would merge with the newline before the closing """
+            if (text.Contains('\n', StringComparison.Ordinal) && !text.EndsWith('\\') && !text.EndsWith('\r'))
             {
                 text = text.Replace("\r\n", "\n", StringComparison.Ordinal);
                 text = text.Replace("\"\"\"", "\\\"\"\"", StringComparison.Ordinal);
@@ -412,6 +413,10 @@ namespace ValveKeyValue.Serialization.KeyValues3
                 {
                     switch (@char)
                     {
+                        case '\n':
+                            writer.Write("\\n");
+                            break;
+
                         case '\t':
                             writer.Write("\\t");
                             break;

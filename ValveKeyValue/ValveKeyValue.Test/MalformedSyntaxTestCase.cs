@@ -25,6 +25,9 @@ namespace ValveKeyValue.Test
         [TestCase("   ", TestName = "Kv3WhitespaceOnlyDocumentThrows")]
         [TestCase("{ a = abc\\\"def }", TestName = "Kv3UnquotedTokenWithQuoteThrows")]
         [TestCase("{ a = R\"(raw)\" }", TestName = "Kv3RawStringLiteralThrows")]
+        [TestCase("{ a = \"\"\" \nx\n\"\"\"\n}", TestName = "Kv3MultilineWithTextAfterOpenThrows")]
+        [TestCase("{ a = \"\"\"\nx\\\n\"\"\"\n}", TestName = "Kv3MultilineCloseAfterBackslashThrows")]
+        [TestCase("{ a = \"\"\"\nx\n\t\"\"\"\n}", TestName = "Kv3MultilineIndentedCloseThrows")]
         public void MalformedKV3ThrowsKeyValueException(string body)
         {
             Assert.That(() => TestDataHelper.ParseKV3Text(body), Throws.TypeOf<KeyValueException>());

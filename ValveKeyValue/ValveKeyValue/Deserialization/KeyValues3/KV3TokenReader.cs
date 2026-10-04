@@ -86,9 +86,8 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         KVToken ReadStringOrIdentifier()
         {
             // The token type follows what the source actually looks like, not the contents:
-            // a quoted token is always String (so "42" stays a String for the source map),
-            // an unquoted identifier-shaped token is Identifier, and an unquoted token with
-            // a trailing : or | is a Flag.
+            // a quoted token is always String (so "42" stays a string), any other token is
+            // Identifier, and an identifier-shaped token followed by : or | is a Flag.
             var first = Peek();
             var isQuoted = first == '"' || first == '\'';
 
@@ -104,9 +103,9 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 throw new KeyValueException($"The syntax is incorrect, unexpected character '{(char)first}' at {TokenStartPosition}.");
             }
 
-            var type = IsIdentifier(token) ? KVTokenType.Identifier : KVTokenType.String;
+            var type = KVTokenType.Identifier;
 
-            if (type == KVTokenType.Identifier)
+            if (IsIdentifier(token))
             {
                 // Whitespace is allowed between a flag and its separator
                 MarkTokenEnd();
@@ -361,120 +360,86 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         {
             ReadChar(quotationMark);
 
-            var isMultiline = false;
-
             if (quotationMark == '"' && Peek() == '"')
             {
                 Next();
 
                 // If the next character is not another quote, it's an empty string
-                if (Peek() == '"')
-                {
-                    isMultiline = true;
-
-                    Next();
-
-                    if (Peek() == '\r')
-                    {
-                        Next();
-                    }
-
-                    ReadChar('\n');
-                }
-                else
+                if (Peek() != '"')
                 {
                     return string.Empty;
                 }
+
+                Next();
+
+                if (Peek() == '\r')
+                {
+                    Next();
+                }
+
+                ReadChar('\n');
+                return ReadMultilineStringContents();
             }
 
             var escaped = false;
+            var hasEscapes = false;
 
-            if (isMultiline)
+            while (true)
             {
-                while (true)
+                var next = Next();
+
+                if (next == '\\')
                 {
-                    var next = Next();
-
-                    if (next == '\\')
-                    {
-                        escaped = !escaped;
-                        sb.Append(next);
-                        continue;
-                    }
-
-                    if (next == '"' && !escaped)
-                    {
-                        // Check if this is the start of """
-                        if (Peek() == '"')
-                        {
-                            Next();
-
-                            if (Peek() == '"')
-                            {
-                                Next();
-                                break;
-                            }
-
-                            // Only two quotes, append both
-                            sb.Append(next);
-                            sb.Append('"');
-                            continue;
-                        }
-                    }
-
-                    escaped = false;
+                    escaped = !escaped;
+                    hasEscapes = true;
                     sb.Append(next);
+                    continue;
                 }
 
-                // Strip trailing newline (\n or \r\n)
-                if (sb.Length > 0 && sb[^1] == '\n')
+                if (next == quotationMark && !escaped)
                 {
-                    sb.Length--;
-
-                    if (sb.Length > 0 && sb[^1] == '\r')
-                    {
-                        sb.Length--;
-                    }
+                    break;
                 }
 
+                escaped = false;
+                sb.Append(next);
+            }
+
+            if (!hasEscapes)
+            {
                 var result = sb.ToString();
                 sb.Clear();
                 return result;
             }
-            else
+
+            return UnescapeString();
+        }
+
+        // Reads the contents after the opening """ and its newline. The string only ends at """
+        // at the start of a line, and only when the newline is not preceded by a backslash.
+        string ReadMultilineStringContents()
+        {
+            // Stands in for the newline after the opening """
+            sb.Append('\n');
+
+            while (true)
             {
-                var hasEscapes = false;
+                var next = Next();
+                sb.Append(next);
 
-                while (true)
+                if (next == '"' && sb.Length >= 4 && sb[^2] == '"' && sb[^3] == '"' && sb[^4] == '\n' && (sb.Length == 4 || sb[^5] != '\\'))
                 {
-                    var next = Next();
-
-                    if (next == '\\')
-                    {
-                        escaped = !escaped;
-                        hasEscapes = true;
-                        sb.Append(next);
-                        continue;
-                    }
-
-                    if (next == quotationMark && !escaped)
-                    {
-                        break;
-                    }
-
-                    escaped = false;
-                    sb.Append(next);
+                    break;
                 }
-
-                if (!hasEscapes)
-                {
-                    var result = sb.ToString();
-                    sb.Clear();
-                    return result;
-                }
-
-                return UnescapeString();
             }
+
+            // Drop the closing """ and the newlines next to both quote markers
+            sb.Length -= 3;
+            sb.Replace("\r\n", "\n");
+
+            var result = sb.ToString(1, Math.Max(0, sb.Length - 2)).Replace("\\\"\"\"", "\"\"\"", StringComparison.Ordinal);
+            sb.Clear();
+            return result;
         }
 
         string UnescapeString()

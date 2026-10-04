@@ -89,7 +89,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
                     case KVTokenType.Identifier:
                     case KVTokenType.String:
-                        ReadText(token.Value!);
+                        ReadText(token.Value!, isQuoted: token.TokenType == KVTokenType.String);
                         break;
 
                     case KVTokenType.BinaryBlob:
@@ -180,7 +180,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             }
         }
 
-        void ReadText(string text)
+        void ReadText(string text, bool isQuoted)
         {
             ThrowIfAfterRootValue();
 
@@ -188,7 +188,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             {
                 case KV3TextReaderState.InArray:
                     {
-                        var value = ParseValue(text);
+                        var value = isQuoted ? new KVObject(text) : ParseValue(text);
                         value.Flag = stateMachine.GetAndResetFlag();
                         listener.OnArrayValue(value);
                         break;
@@ -201,7 +201,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 case KV3TextReaderState.InObjectAfterKey:
                     {
                         var name = stateMachine.CurrentName!;
-                        var value = ParseValue(text);
+                        var value = isQuoted ? new KVObject(text) : ParseValue(text);
                         value.Flag = stateMachine.GetAndResetFlag();
                         listener.OnKeyValuePair(name, value);
 

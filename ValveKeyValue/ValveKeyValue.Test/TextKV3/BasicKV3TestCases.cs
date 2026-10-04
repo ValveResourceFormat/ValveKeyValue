@@ -13,7 +13,9 @@ namespace ValveKeyValue.Test.TextKV3
             0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
             0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xFF
         ];
+        private static readonly string[] ExpectedQuotedLiterals = ["42", "true", "null", "1.5", "nan"];
         private static readonly int[] ExpectedCommentedArray = [1, 2];
+        private static readonly string[] ExpectedMultilineArray = ["x", "y"];
         private static readonly KVValueType[] ExpectedMixedArrayTypes =
         [
             KVValueType.UInt64, KVValueType.String, KVValueType.Array, KVValueType.Collection, KVValueType.BinaryBlob,
@@ -81,7 +83,7 @@ namespace ValveKeyValue.Test.TextKV3
             using (Assert.EnterMultipleScope())
             {
                 Assert.That((string)data["multiLineStringValue"], Is.EqualTo("First line of a multi-line string literal.\nSecond line of a multi-line string literal."));
-                Assert.That((string)data["multiLineWithQuotesInside"], Is.EqualTo("hmm this \\\"\"\"is awkward\n\\\"\"\" yes"));
+                Assert.That((string)data["multiLineWithQuotesInside"], Is.EqualTo("hmm this \"\"\"is awkward\n\"\"\" yes"));
                 Assert.That((string)data["singleQuotesButWithNewLineAnyway"], Is.EqualTo("hello\nvalve"));
             }
         }
@@ -92,7 +94,7 @@ namespace ValveKeyValue.Test.TextKV3
             using var stream = TestDataHelper.OpenResource("TextKV3.multiline_crlf.kv3");
             var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
 
-            Assert.That((string)data["multiLineStringValue"], Is.EqualTo("First line of a multi-line string literal.\r\nSecond line of a multi-line string literal."));
+            Assert.That((string)data["multiLineStringValue"], Is.EqualTo("First line of a multi-line string literal.\nSecond line of a multi-line string literal."));
         }
 
         [Test]
@@ -358,6 +360,15 @@ namespace ValveKeyValue.Test.TextKV3
                 Throws.Exception);
         }
 
+        [Test]
+        public void QuotedLiteralsAreStrings()
+        {
+            var data = TestDataHelper.ParseKV3Text("{ a = \"42\" b = \"true\" c = \"null\" d = '1.5' e = \"nan\" }");
+
+            Assert.That(data.Root.Values.Select(x => x.ValueType), Is.All.EqualTo(KVValueType.String));
+            Assert.That(data.Root.Values.Select(x => (string)x), Is.EqualTo(ExpectedQuotedLiterals));
+        }
+
         [TestCase("resource:\"x\"")]
         [TestCase("resource|\"x\"")]
         [TestCase("resource : \"x\"")]
@@ -433,6 +444,38 @@ namespace ValveKeyValue.Test.TextKV3
                 Assert.That((int)data["a"], Is.EqualTo(1));
                 Assert.That(data["b"].Values.Select(x => (int)x), Is.EqualTo(ExpectedCommentedArray));
                 Assert.That((int)data["c"], Is.EqualTo(3));
+            }
+        }
+
+        [TestCase("\"\"\"\nabc\"\"\" b = 1\n\"\"\"", "abc\"\"\" b = 1")]
+        [TestCase("\"\"\"\nline\\\n\"\"\"\nstill\n\"\"\"", "line\\\n\"\"\"\nstill")]
+        [TestCase("\"\"\"\n\\\"\"\"x\n\"\"\"", "\"\"\"x")]
+        [TestCase("\"\"\"\nx \\\"\"\" y\n\"\"\"", "x \"\"\" y")]
+        [TestCase("\"\"\"\r\nline1\r\nline2\r\n\"\"\"", "line1\nline2")]
+        [TestCase("\"\"\"\nx\r\ny\r\n\"\"\"", "x\ny")]
+        [TestCase("\"\"\"\n\"\"\"", "")]
+        [TestCase("\"\"\"\r\n\"\"\"", "")]
+        [TestCase("\"\"\"\n\n\"\"\"", "")]
+        [TestCase("\"\"\"\n\n\nx\n\n\"\"\"", "\n\nx\n")]
+        [TestCase("\"\"\"\n\tline\n\t\"\"\"\n\tb = 1\n\"\"\"", "\tline\n\t\"\"\"\n\tb = 1")]
+        [TestCase("\"\"\"\n\"\"\n\"x\"\n\"\"\"", "\"\"\n\"x\"")]
+        [TestCase("\"\"\"\nx\\ny\\t\n\"\"\"", "x\\ny\\t")]
+        public void DeserializesMultilineStringSyntax(string text, string expected)
+        {
+            var data = TestDataHelper.ParseKV3Text($"{{\n\ta = {text}\n}}");
+
+            Assert.That((string)data["a"], Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void DeserializesMultilineStringsInArrayAndKey()
+        {
+            var data = TestDataHelper.ParseKV3Text("{\n\ta = [ \"\"\"\nx\n\"\"\", \"\"\"\ny\n\"\"\"]\n\"\"\"\nkey\nname\n\"\"\" = 1\n}");
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(data["a"].Values.Select(x => (string)x), Is.EqualTo(ExpectedMultilineArray));
+                Assert.That((int)data["key\nname"], Is.EqualTo(1));
             }
         }
 

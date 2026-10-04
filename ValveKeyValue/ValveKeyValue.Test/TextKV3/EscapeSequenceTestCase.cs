@@ -2,6 +2,8 @@ namespace ValveKeyValue.Test.TextKV3
 {
     class EscapeSequenceTestCase
     {
+        private static readonly string[] ExpectedQuotedKeys = ["a\tb", "c\nd", "e\\f", "g\"h", "i", "u00e9"];
+
         [Test]
         public void RareEscapeSequences_CarriageReturn()
         {
@@ -144,6 +146,29 @@ namespace ValveKeyValue.Test.TextKV3
             var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
 
             Assert.That((string)data["text_then_escaped_quote"], Is.EqualTo("hello\""));
+        }
+
+        [TestCase("\"\\x\\r\\0\\u0041\\a\"", "xr0u0041a")]
+        [TestCase("\"line1\nline2\"", "line1\nline2")]
+        [TestCase("\"line1\\\nline2\"", "line1\nline2")]
+        [TestCase("'it\\'s \"q\"'", "it's \"q\"")]
+        [TestCase("'a\\tb'", "a\tb")]
+        [TestCase("\"\"", "")]
+        [TestCase("''", "")]
+        [TestCase("\"#[01] //x /*y*/ {}[]=,:|;\"", "#[01] //x /*y*/ {}[]=,:|;")]
+        public void StringValueEscapes(string text, string expected)
+        {
+            var data = TestDataHelper.ParseKV3Text($"{{ a = {text} }}");
+
+            Assert.That((string)data["a"], Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void QuotedKeyEscapes()
+        {
+            var data = TestDataHelper.ParseKV3Text("{ \"a\\tb\" = 1 \"c\\nd\" = 2 \"e\\\\f\" = 3 \"g\\\"h\" = 4 'i' = 5 \"\\u00e9\" = 6 }");
+
+            Assert.That(data.Root.Keys, Is.EqualTo(ExpectedQuotedKeys));
         }
     }
 }
