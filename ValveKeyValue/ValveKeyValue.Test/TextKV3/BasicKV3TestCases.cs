@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Linq;
 using System.Text;
 
 namespace ValveKeyValue.Test.TextKV3
@@ -11,6 +12,12 @@ namespace ValveKeyValue.Test.TextKV3
         [
             0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
             0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xFF
+        ];
+        private static readonly int[] ExpectedCommentedArray = [1, 2];
+        private static readonly KVValueType[] ExpectedMixedArrayTypes =
+        [
+            KVValueType.UInt64, KVValueType.String, KVValueType.Array, KVValueType.Collection, KVValueType.BinaryBlob,
+            KVValueType.Null, KVValueType.Boolean, KVValueType.FloatingPoint64, KVValueType.Int64,
         ];
 
         [Test]
@@ -349,6 +356,123 @@ namespace ValveKeyValue.Test.TextKV3
             Assert.That(
                 () => KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream),
                 Throws.Exception);
+        }
+
+        [TestCase("resource:\"x\"")]
+        [TestCase("resource|\"x\"")]
+        [TestCase("resource : \"x\"")]
+        [TestCase("resource\t|\t\"x\"")]
+        [TestCase("resource\n|\n\"x\"")]
+        [TestCase("resource:\n\"x\"")]
+        [TestCase("resource: /* c */ \"x\"")]
+        [TestCase("RESOURCE:\"x\"")]
+        [TestCase("Resource | \"x\"")]
+        [TestCase("resource:\"\"\"\nx\n\"\"\"")]
+        public void DeserializesFlagSyntax(string text)
+        {
+            var data = TestDataHelper.ParseKV3Text($"{{ a = {text} }}");
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(data["a"].Flag, Is.EqualTo(KVFlag.Resource));
+                Assert.That((string)data["a"], Is.EqualTo("x"));
+            }
+        }
+
+        [Test]
+        public void DeserializesNestedFlags()
+        {
+            var data = TestDataHelper.ParseKV3Text("{ a = subclass: { b = [ panorama : \"p\", entity_name:\"e\", \"plain\" ] } c = [ subclass:{ d = 2 }, { e = 3 } ] }");
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(data["a"].Flag, Is.EqualTo(KVFlag.SubClass));
+                Assert.That(data["a"]["b"][0].Flag, Is.EqualTo(KVFlag.Panorama));
+                Assert.That(data["a"]["b"][1].Flag, Is.EqualTo(KVFlag.EntityName));
+                Assert.That(data["a"]["b"][2].Flag, Is.EqualTo(KVFlag.None));
+                Assert.That(data["c"][0].Flag, Is.EqualTo(KVFlag.SubClass));
+                Assert.That(data["c"][1].Flag, Is.EqualTo(KVFlag.None));
+            }
+        }
+
+        [TestCase("#[ 01 02 ]", new byte[] { 1, 2 })]
+        [TestCase("# [ 01 02 ]", new byte[] { 1, 2 })]
+        [TestCase("#[ 01 /* x */ 02 ]", new byte[] { 1, 2 })]
+        [TestCase("# /* c */ [ 01 // x\n 02 /* y */ 03 ]", new byte[] { 1, 2, 3 })]
+        [TestCase("#[ aB Cd ef ]", new byte[] { 0xAB, 0xCD, 0xEF })]
+        [TestCase("#[]", new byte[0])]
+        [TestCase("#[ ]", new byte[0])]
+        [TestCase("#[\n]", new byte[0])]
+        public void DeserializesBinaryBlobSyntax(string text, byte[] expected)
+        {
+            var data = TestDataHelper.ParseKV3Text($"{{ a = {text} }}");
+
+            Assert.That(data["a"].AsBlob(), Is.EqualTo(expected));
+        }
+
+        [TestCase("\n")]
+        [TestCase("\r\n")]
+        public void LineCommentContinuesAfterBackslash(string newline)
+        {
+            var data = TestDataHelper.ParseKV3Text($"{{{newline}\t// comment \\{newline}\tb = 2{newline}\tc = 3{newline}}}");
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(data.Root.ContainsKey("b"), Is.False);
+                Assert.That((int)data["c"], Is.EqualTo(3));
+            }
+        }
+
+        [Test]
+        public void DeserializesCommentsBetweenTokens()
+        {
+            var data = TestDataHelper.ParseKV3Text("{ /*a*/ a /*b*/ = /*c*/ 1 /*d*/ b = [ /*e*/ 1 /*f*/ , /*g*/ 2 /*h*/ ] /*i*/ c // x\n = 3 }");
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That((int)data["a"], Is.EqualTo(1));
+                Assert.That(data["b"].Values.Select(x => (int)x), Is.EqualTo(ExpectedCommentedArray));
+                Assert.That((int)data["c"], Is.EqualTo(3));
+            }
+        }
+
+        [Test]
+        public void DeserializesVerticalTabAndFormFeedAsWhitespace()
+        {
+            var data = TestDataHelper.ParseKV3Text("{\va = 1\f}");
+
+            Assert.That((int)data["a"], Is.EqualTo(1));
+        }
+
+        [Test]
+        public void DeserializesContainersWithoutWhitespace()
+        {
+            var data = TestDataHelper.ParseKV3Text("{a=1 b=[1,2,] c={d=\"x\"} e=[[]] f={g={}} h=[{}] i=[1,\"a\",[2],{j=3},#[01],null,true,1.5,-2]}");
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That((int)data["a"], Is.EqualTo(1));
+                Assert.That(data["b"].Count, Is.EqualTo(2));
+                Assert.That((string)data["c"]["d"], Is.EqualTo("x"));
+                Assert.That(data["e"][0].Count, Is.EqualTo(0));
+                Assert.That(data["f"]["g"].Count, Is.EqualTo(0));
+                Assert.That(data["h"][0].ValueType, Is.EqualTo(KVValueType.Collection));
+                Assert.That(data["i"].Values.Select(x => x.ValueType), Is.EqualTo(ExpectedMixedArrayTypes));
+            }
+        }
+
+        [Test]
+        public void DeserializesDeeplyNestedArrays()
+        {
+            var data = TestDataHelper.ParseKV3Text("{ a = " + new string('[', 50) + "1" + new string(']', 50) + " }");
+
+            var value = data["a"];
+            for (var i = 0; i < 50; i++)
+            {
+                value = value[0];
+            }
+
+            Assert.That((int)value, Is.EqualTo(1));
         }
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes - used by deserializer

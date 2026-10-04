@@ -18,6 +18,12 @@ namespace ValveKeyValue.Test.TextKV3
         [TestCase("<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version~7412167c-06e9-4698-aff2-e63eb59037e7} -->\n{}")]
         [TestCase("<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} extra-data -->\n{}")]
         [TestCase("<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} ->-\n{}")]
+        [TestCase("<!--kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->\n{}")]
+        [TestCase("< !-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->\n{}")]
+        [TestCase("<!-- kv3encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->\n{}")]
+        [TestCase("<!-- kv3 encoding:text:version e21c7f3c-8a33-41c5-9977-a76d3a32aa0d format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->\n{}")]
+        [TestCase("<!-- kv3 encoding:text:version{{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d}} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->\n{}")]
+        [TestCase("<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} - ->\n{}")]
         public void InvalidHeadersThrow(string value)
         {
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(value));
@@ -60,15 +66,21 @@ namespace ValveKeyValue.Test.TextKV3
 
         [TestCase("<!-- KV3 ENCODING:TEXT:VERSION{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} FORMAT:GENERIC:VERSION{7412167c-06e9-4698-aff2-e63eb59037e7} -->\n{}")]
         [TestCase("<!--    kv3     encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d}      format:GENERIC:version{7412167c-06e9-4698-aff2-e63eb59037e7}     -->\n{}")]
-        [TestCase("<!--kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:GENERIC:version{7412167c-06e9-4698-aff2-e63eb59037e7}-->\n{}")]
         [TestCase("<!--\tkv3\tencoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d}\tformat:GENERIC:version{7412167c-06e9-4698-aff2-e63eb59037e7}\t-->\n{}")]
         [TestCase("<!--\nkv3\nencoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d}\nformat:GENERIC:version{7412167c-06e9-4698-aff2-e63eb59037e7}\n-->\n{}")]
+        [TestCase("<!-- kv3 encoding : text : version { e21c7f3c-8a33-41c5-9977-a76d3a32aa0d } format : generic : version { 7412167c-06e9-4698-aff2-e63eb59037e7 } -->\n{}")]
+        [TestCase("<!--\nkv3\nencoding\n:\ntext\n:\nversion\n{\ne21c7f3c-8a33-41c5-9977-a76d3a32aa0d\n}\nformat:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7}\n-->\n{}")]
+        [TestCase("<!-- kv3 /* c */ encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} // c\nformat:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->\n{}")]
+        [TestCase("<!-- kv3 encoding:text:version{E21C7F3C-8A33-41C5-9977-A76D3A32AA0D} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7}-->{}")]
+        [TestCase("  \n\t<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->\n{}")]
+        [TestCase("// c\n<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->\n{}")]
+        [TestCase("<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->\r\n{}")]
         public void ValidHeadersAreParsed(string value)
         {
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(value));
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
 
-            Assert.That(() => true);
+            Assert.That(kv.Deserialize(stream).Root.ValueType, Is.EqualTo(KVValueType.Collection));
         }
     }
 }

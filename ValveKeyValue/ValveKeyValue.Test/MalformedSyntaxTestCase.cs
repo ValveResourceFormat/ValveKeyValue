@@ -4,8 +4,6 @@ namespace ValveKeyValue.Test
 {
     class MalformedSyntaxTestCase
     {
-        const string Kv3Header = "<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->\n";
-
         [TestCase("", TestName = "Kv3EmptyDocumentThrows")]
         [TestCase("}", TestName = "Kv3LeadingObjectEndThrows")]
         [TestCase("]", TestName = "Kv3LeadingArrayEndThrows")]
@@ -17,13 +15,19 @@ namespace ValveKeyValue.Test
         [TestCase("{ a = [1, 2 }", TestName = "Kv3MismatchedBracketThrows")]
         [TestCase("{ a = 1", TestName = "Kv3UnterminatedObjectThrows")]
         [TestCase("{ a = [1, 2", TestName = "Kv3UnterminatedArrayThrows")]
+        [TestCase("{ a = 1; b = 2 }", TestName = "Kv3StraySemicolonThrows")]
+        [TestCase("{ a = | }", TestName = "Kv3StrayPipeThrows")]
+        [TestCase("{ a = 1 : }", TestName = "Kv3StrayColonThrows")]
+        [TestCase("{ a = [ 1, : ] }", TestName = "Kv3StrayColonInArrayThrows")]
+        [TestCase("{ a = \u0001 }", TestName = "Kv3ControlCharacterThrows")]
+        [TestCase("{ a = /foo }", TestName = "Kv3SlashValueThrows")]
+        [TestCase("{ a = int32:5 }", TestName = "Kv3UnknownFlagThrows")]
+        [TestCase("   ", TestName = "Kv3WhitespaceOnlyDocumentThrows")]
+        [TestCase("{ a = abc\\\"def }", TestName = "Kv3UnquotedTokenWithQuoteThrows")]
+        [TestCase("{ a = R\"(raw)\" }", TestName = "Kv3RawStringLiteralThrows")]
         public void MalformedKV3ThrowsKeyValueException(string body)
         {
-            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(Kv3Header + body));
-
-            Assert.That(
-                () => KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream),
-                Throws.TypeOf<KeyValueException>());
+            Assert.That(() => TestDataHelper.ParseKV3Text(body), Throws.TypeOf<KeyValueException>());
         }
 
         [TestCase("\"a\" { \"b\" }", TestName = "Kv1MissingValueThrows")]

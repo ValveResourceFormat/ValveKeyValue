@@ -141,5 +141,40 @@ namespace ValveKeyValue.Test.TextKV3
 
             Assert.That(data.ValueType, Is.EqualTo(KVValueType.Array));
         }
+
+        [Test]
+        public void DeserializesRootFlaggedStringWithWhitespace()
+        {
+            var data = TestDataHelper.ParseKV3Text("resource_name : \"root\"").Root;
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(data.Flag, Is.EqualTo(KVFlag.ResourceName));
+                Assert.That((string)data, Is.EqualTo("root"));
+            }
+        }
+
+        [Test]
+        public void DeserializesRootArrayOfMixedValues()
+        {
+            var data = TestDataHelper.ParseKV3Text("[ { a = 1 }, 2 ]").Root;
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(data.Count, Is.EqualTo(2));
+                Assert.That((int)data[0]["a"], Is.EqualTo(1));
+                Assert.That((int)data[1], Is.EqualTo(2));
+            }
+        }
+
+        [TestCase("// hi\n/* x */\n{ a = 1 }")]
+        [TestCase("{ a = 1 }\n// end")]
+        [TestCase("{ a = 1 } // end")]
+        public void DeserializesRootWithSurroundingComments(string body)
+        {
+            var data = TestDataHelper.ParseKV3Text(body);
+
+            Assert.That((int)data["a"], Is.EqualTo(1));
+        }
     }
 }

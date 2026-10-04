@@ -85,8 +85,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         KVToken ReadStringOrIdentifier()
         {
-            SwallowWhitespace();
-
             // The token type follows what the source actually looks like, not the contents:
             // a quoted token is always String (so "42" stays a String for the source map),
             // an unquoted identifier-shaped token is Identifier, and an unquoted token with
@@ -101,15 +99,25 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 return new KVToken(KVTokenType.String, token);
             }
 
+            if (token.Length == 0)
+            {
+                throw new KeyValueException($"The syntax is incorrect, unexpected character '{(char)first}' at {TokenStartPosition}.");
+            }
+
             var type = IsIdentifier(token) ? KVTokenType.Identifier : KVTokenType.String;
 
             if (type == KVTokenType.Identifier)
             {
+                // Whitespace is allowed between a flag and its separator
+                MarkTokenEnd();
+                SwallowWhitespace();
+
                 var next = Peek();
 
                 if (next == ':' || next == '|')
                 {
                     Next();
+                    MarkTokenEnd();
                     type = KVTokenType.Flag;
                 }
             }
@@ -120,16 +128,14 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         KVToken ReadBinaryBlob()
         {
             ReadChar(BinaryBlobMarker);
-            ReadChar(ArrayStart); // TODO: Strictly speaking Valve allows bare # without [ to be read as literal value (but what would that be?)
+            SwallowWhitespaceAndComments();
+            ReadChar(ArrayStart);
 
             while (true)
             {
-                var next = Next();
+                SwallowWhitespaceAndComments();
 
-                if (char.IsWhiteSpace(next))
-                {
-                    continue;
-                }
+                var next = Next();
 
                 if (next == ArrayEnd)
                 {
@@ -144,78 +150,30 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             return new KVToken(KVTokenType.BinaryBlob, result);
         }
 
+        // Whitespace and comments are allowed between any of the header tokens
         public KVHeader ReadHeader()
         {
-            var str = ReadToken();
-
-            if (str != "<!--")
-            {
-                throw new KeyValueException($"The header is incorrect, expected '<!--' but got '{str}' at {TokenStartPosition}.");
-            }
-
-            SwallowWhitespace();
-            str = ReadToken();
-
-            if (!str.Equals("kv3", StringComparison.OrdinalIgnoreCase))
-            {
-                throw new KeyValueException($"The header is incorrect, expected 'kv3' but got '{str}' at {TokenStartPosition}.");
-            }
-
-            SwallowWhitespace();
-            str = ReadToken();
-
-            if (!str.Equals("encoding", StringComparison.OrdinalIgnoreCase))
-            {
-                throw new KeyValueException($"The header is incorrect, expected 'encoding' but got '{str}' at {TokenStartPosition}.");
-            }
-
-            ReadChar(':');
-            var encodingType = ReadToken();
-            ReadChar(':');
-
-            str = ReadToken();
-
-            if (!str.Equals("version", StringComparison.OrdinalIgnoreCase))
-            {
-                throw new KeyValueException($"The header is incorrect, expected 'version' but got '{str}' at {TokenStartPosition}.");
-            }
-
-            ReadChar('{');
+            ExpectHeaderToken("<!--");
+            ExpectHeaderToken("kv3");
+            ExpectHeaderToken("encoding");
+            ExpectHeaderChar(':');
+            var encodingType = ReadHeaderToken();
+            ExpectHeaderChar(':');
+            ExpectHeaderToken("version");
+            ExpectHeaderChar('{');
             var encoding = ReadVersionGuid();
-            ReadChar('}');
+            ExpectHeaderChar('}');
 
-            SwallowWhitespace();
-
-            str = ReadToken();
-
-            if (!str.Equals("format", StringComparison.OrdinalIgnoreCase))
-            {
-                throw new KeyValueException($"The header is incorrect, expected 'format' but got '{str}' at {TokenStartPosition}.");
-            }
-
-            ReadChar(':');
-            var formatType = ReadToken();
-            ReadChar(':');
-
-            str = ReadToken();
-
-            if (!str.Equals("version", StringComparison.OrdinalIgnoreCase))
-            {
-                throw new KeyValueException($"The header is incorrect, expected 'version' but got '{str}' at {TokenStartPosition}.");
-            }
-
-            ReadChar('{');
+            ExpectHeaderToken("format");
+            ExpectHeaderChar(':');
+            var formatType = ReadHeaderToken();
+            ExpectHeaderChar(':');
+            ExpectHeaderToken("version");
+            ExpectHeaderChar('{');
             var format = ReadVersionGuid();
-            ReadChar('}');
+            ExpectHeaderChar('}');
 
-            SwallowWhitespace();
-
-            str = ReadToken();
-
-            if (str != "-->")
-            {
-                throw new KeyValueException($"The header is incorrect, expected '-->' but got '{str}' at {TokenStartPosition}.");
-            }
+            ExpectHeaderToken("-->");
 
             if (encodingType.Equals("text", StringComparison.OrdinalIgnoreCase) && encoding != Encoding.Text)
             {
@@ -234,9 +192,31 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             };
         }
 
+        string ReadHeaderToken()
+        {
+            SwallowWhitespaceAndComments();
+            return ReadToken();
+        }
+
+        void ExpectHeaderToken(string expected)
+        {
+            var str = ReadHeaderToken();
+
+            if (!str.Equals(expected, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new KeyValueException($"The header is incorrect, expected '{expected}' but got '{str}' at {TokenStartPosition}.");
+            }
+        }
+
+        void ExpectHeaderChar(char expected)
+        {
+            SwallowWhitespaceAndComments();
+            ReadChar(expected);
+        }
+
         Guid ReadVersionGuid()
         {
-            var str = ReadToken();
+            var str = ReadHeaderToken();
 
             if (!Guid.TryParse(str, out var guid))
             {
@@ -247,6 +227,27 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         }
 
         KVToken ReadComment()
+        {
+            SkipComment();
+            return new KVToken(KVTokenType.Comment);
+        }
+
+        void SwallowWhitespaceAndComments()
+        {
+            while (true)
+            {
+                SwallowWhitespace();
+
+                if (Peek() != CommentBegin)
+                {
+                    break;
+                }
+
+                SkipComment();
+            }
+        }
+
+        void SkipComment()
         {
             ReadChar(CommentBegin);
 
@@ -272,24 +273,32 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             }
             else if (next == CommentBegin)
             {
+                // A backslash at the end of the line continues the comment onto the next line
+                var previous = '\0';
+                var beforePrevious = '\0';
+
                 while (true)
                 {
                     var peek = Peek();
 
-                    if (IsEndOfFile(peek) || peek == '\n')
+                    if (IsEndOfFile(peek))
                     {
                         break;
                     }
 
-                    Next();
+                    if (peek == '\n' && previous != '\\' && (previous != '\r' || beforePrevious != '\\'))
+                    {
+                        break;
+                    }
+
+                    beforePrevious = previous;
+                    previous = Next();
                 }
             }
             else
             {
                 throw new KeyValueException($"The syntax is incorrect, expected comment but got '/{next}' at {TokenStartPosition}.");
             }
-
-            return new KVToken(KVTokenType.Comment);
         }
 
         static bool IsIdentifier(string text)

@@ -16,6 +16,7 @@ namespace ValveKeyValue.Deserialization
         int lineOffset;
         int columnOffset;
         int charOffset;
+        int tokenEnd = -1;
 
         public int Line => lineOffset + 1;
         public int Column => columnOffset + 1;
@@ -43,6 +44,13 @@ namespace ValveKeyValue.Deserialization
             TokenStartColumn = Column;
         }
 
+        // Records the current position as the end of the token being read, for tokens that
+        // consume trailing characters (such as whitespace) that are not part of the token.
+        protected void MarkTokenEnd()
+        {
+            tokenEnd = charOffset;
+        }
+
         public KVToken ReadNextToken()
         {
             ObjectDisposedException.ThrowIf(disposed, this);
@@ -51,8 +59,9 @@ namespace ValveKeyValue.Deserialization
             MarkTokenStart();
 
             LastTokenStart = charOffset;
+            tokenEnd = -1;
             var token = ReadNextTokenInner();
-            LastTokenEnd = charOffset;
+            LastTokenEnd = tokenEnd == -1 ? charOffset : tokenEnd;
             return token;
         }
 
