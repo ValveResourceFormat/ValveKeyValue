@@ -16,6 +16,7 @@ namespace ValveKeyValue.Test.TextKV3
         private static readonly string[] ExpectedQuotedLiterals = ["42", "true", "null", "1.5", "nan"];
         private static readonly int[] ExpectedCommentedArray = [1, 2];
         private static readonly string[] ExpectedMultilineArray = ["x", "y"];
+        private static readonly string[] ExpectedUnusualKeys = ["true", "null", "false", "a.b", ".y", "_x", "x_", "", "1abc", "a:b"];
         private static readonly KVValueType[] ExpectedMixedArrayTypes =
         [
             KVValueType.UInt64, KVValueType.String, KVValueType.Array, KVValueType.Collection, KVValueType.BinaryBlob,
@@ -389,6 +390,7 @@ namespace ValveKeyValue.Test.TextKV3
         [TestCase("007", 7L)]
         [TestCase("-0", 0L)]
         [TestCase("+5", 5L)]
+        [TestCase("+", 0L)]
         [TestCase("-9223372036854775808", long.MinValue)]
         public void DeserializesIntegerForms(string text, long expected)
         {
@@ -529,6 +531,14 @@ namespace ValveKeyValue.Test.TextKV3
                 Assert.That(data["a"].Values.Select(x => (string)x), Is.EqualTo(ExpectedMultilineArray));
                 Assert.That((int)data["key\nname"], Is.EqualTo(1));
             }
+        }
+
+        [Test]
+        public void DeserializesUnusualKeys()
+        {
+            var data = TestDataHelper.ParseKV3Text("{ true = 1 null = 2 false = 3 a.b = 4 .y = 5 _x = 6 x_ = 7 \"\" = 8 \"1abc\" = 9 \"a:b\" = 10 }");
+
+            Assert.That(data.Root.Keys, Is.EqualTo(ExpectedUnusualKeys));
         }
 
         [Test]

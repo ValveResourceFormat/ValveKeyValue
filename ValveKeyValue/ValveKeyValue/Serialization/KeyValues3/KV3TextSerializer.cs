@@ -2,6 +2,7 @@ using System.Buffers;
 using System.Globalization;
 using System.Text;
 using ValveKeyValue.Abstraction;
+using ValveKeyValue.Deserialization.KeyValues3;
 
 namespace ValveKeyValue.Serialization.KeyValues3
 {
@@ -453,7 +454,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
 
             var s = Position;
 
-            if (key.Length > 0 && !char.IsAsciiDigit(key[0]) && !NeedsQuoting(key))
+            if (KV3TokenReader.IsIdentifier(key))
             {
                 writer.Write(key);
             }
@@ -467,19 +468,6 @@ namespace ValveKeyValue.Serialization.KeyValues3
             writer.Write(' ');
             Record(KVTokenType.Assignment, '=');
             writer.Write(' ');
-        }
-
-        static bool NeedsQuoting(string key)
-        {
-            foreach (var c in key)
-            {
-                if (c != '.' && c != '_' && !char.IsAsciiLetterOrDigit(c))
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         void WriteFlag(KVFlag kvFlag)

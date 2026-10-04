@@ -15,7 +15,7 @@
 	doubleMaxValue = 62147483647.1337
 	doubleNegativeMaxValue = -62147483647.1337
 	doubleExponent = 1.23456E+2
-	intWithStringSuffix = 123foobar
+	intWithStringSuffix = "123foobar"
 	singleQuotes = 'string'
 	singleQuotesWithQuotesInside = 'string is "pretty" cool'
 	key_with._various.separators = "test"
@@ -26,9 +26,9 @@ line
 key
 """ = "multi line key parsed"
 	empty.string = ""
-	1 = "one"
+	"1" = "one"
 	a = "alpha"
-	22 = "two"
+	"22" = "two"
 	a3 = "three"
 	bb = "bravo"
 	"" = "empty key"

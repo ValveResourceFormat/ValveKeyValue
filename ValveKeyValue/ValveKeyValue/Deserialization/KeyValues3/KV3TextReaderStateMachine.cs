@@ -7,7 +7,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             states = new Stack<KVPartialState<KV3TextReaderState>>();
 
             PushObject();
-            Push(KV3TextReaderState.InObjectAfterKey);
+            Set(KV3TextReaderState.InObjectBeforeValue);
         }
 
         readonly Stack<KVPartialState<KV3TextReaderState>> states;
@@ -22,7 +22,13 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         public void PushObject() => states.Push(new KVPartialState<KV3TextReaderState>());
 
-        public void Push(KV3TextReaderState state) => CurrentObject.States.Push(state);
+        // Only the current state of each object is ever needed, so it replaces the previous one
+        public void Set(KV3TextReaderState state)
+        {
+            var states = CurrentObject.States;
+            states.TryPop(out _);
+            states.Push(state);
+        }
 
         public void PopObject()
         {

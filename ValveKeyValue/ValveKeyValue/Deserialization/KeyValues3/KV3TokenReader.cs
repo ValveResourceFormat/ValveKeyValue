@@ -17,7 +17,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         const char Comma = ',';
 
         // Dota 2 binary from 2017 used "+" as a terminate (for flagged values), but then they changed it to "|"
-        static readonly SearchValues<char> TokenTerminators = SearchValues.Create("{}[]=, \t\n\r'\":|;");
+        static readonly SearchValues<char> TokenTerminators = SearchValues.Create("{}[]=,'\":|;");
 
         readonly StringBuilder sb = new();
 
@@ -127,21 +127,38 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         KVToken ReadBinaryBlob()
         {
             ReadChar(BinaryBlobMarker);
+
+            // The marker is a token of its own, so it cannot be followed directly by more token characters
+            if (IsUnquotedTokenChar(Peek()))
+            {
+                throw new KeyValueException($"The syntax is incorrect, expected '[' after '#' at {TokenStartPosition}.");
+            }
+
             SwallowWhitespaceAndComments();
             ReadChar(ArrayStart);
 
+            // Each byte is a separate token of exactly two hexadecimal digits
             while (true)
             {
                 SwallowWhitespaceAndComments();
 
-                var next = Next();
-
-                if (next == ArrayEnd)
+                if (Peek() == ArrayEnd)
                 {
+                    Next();
                     break;
                 }
 
-                sb.Append(next);
+                var start = sb.Length;
+
+                while (IsUnquotedTokenChar(Peek()))
+                {
+                    sb.Append(Next());
+                }
+
+                if (sb.Length - start != 2)
+                {
+                    throw new KeyValueException($"Invalid binary blob at {TokenStartPosition}, expected bytes as pairs of hexadecimal digits separated by whitespace.");
+                }
             }
 
             var result = sb.ToString();
@@ -156,7 +173,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             ExpectHeaderToken("kv3");
             ExpectHeaderToken("encoding");
             ExpectHeaderChar(':');
-            var encodingType = ReadHeaderToken();
+            var encodingType = ReadHeaderName();
             ExpectHeaderChar(':');
             ExpectHeaderToken("version");
             ExpectHeaderChar('{');
@@ -165,7 +182,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
             ExpectHeaderToken("format");
             ExpectHeaderChar(':');
-            var formatType = ReadHeaderToken();
+            var formatType = ReadHeaderName();
             ExpectHeaderChar(':');
             ExpectHeaderToken("version");
             ExpectHeaderChar('{');
@@ -174,7 +191,12 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
             ExpectHeaderToken("-->");
 
-            if (encodingType.Equals("text", StringComparison.OrdinalIgnoreCase) && encoding != Encoding.Text)
+            if (!encodingType.Equals("text", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new KeyValueException($"Unrecognized encoding, expected 'text' but got '{encodingType}'.");
+            }
+
+            if (encoding != Encoding.Text)
             {
                 throw new KeyValueException($"Unrecognized encoding version, expected '{Encoding.Text}' but got '{encoding}'.");
             }
@@ -191,10 +213,24 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             };
         }
 
+        // Header tokens are never quoted
         string ReadHeaderToken()
         {
             SwallowWhitespaceAndComments();
-            return ReadToken();
+            MarkTokenStart();
+            return ReadUnquotedToken();
+        }
+
+        string ReadHeaderName()
+        {
+            var str = ReadHeaderToken();
+
+            if (!IsIdentifier(str))
+            {
+                throw new KeyValueException($"The header is incorrect, expected a name but got '{str}' at {TokenStartPosition}.");
+            }
+
+            return str;
         }
 
         void ExpectHeaderToken(string expected)
@@ -300,33 +336,27 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             }
         }
 
-        static bool IsIdentifier(string text)
+        // Unquoted keys, flags and header names must be identifiers, which cannot start with a digit.
+        public static bool IsIdentifier(string text)
         {
-            for (var i = 0; i < text.Length; i++)
+            if (text.Length == 0 || char.IsAsciiDigit(text[0]))
             {
-                var c = text[i];
-
-                if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
-                {
-                    continue;
-                }
-
-                if (c >= '0' && c <= '9')
-                {
-                    continue;
-                }
-
-                // TODO: Disallow : because it's a token terminator?
-                if (c == '_' || c == ':' || c == '.')
-                {
-                    continue;
-                }
-
                 return false;
+            }
+
+            foreach (var c in text)
+            {
+                if (!char.IsAsciiLetterOrDigit(c) && c != '_' && c != '.')
+                {
+                    return false;
+                }
             }
 
             return true;
         }
+
+        // Non-ASCII characters are not part of unquoted tokens
+        static bool IsUnquotedTokenChar(int c) => c > ' ' && c < 0x80 && !TokenTerminators.Contains((char)c);
 
         string ReadToken()
         {
@@ -339,15 +369,13 @@ namespace ValveKeyValue.Deserialization.KeyValues3
                 return ReadQuotedStringRaw((char)next);
             }
 
-            while (true)
+            return ReadUnquotedToken();
+        }
+
+        string ReadUnquotedToken()
+        {
+            while (IsUnquotedTokenChar(Peek()))
             {
-                next = Peek();
-
-                if (next <= ' ' || TokenTerminators.Contains((char)next))
-                {
-                    break;
-                }
-
                 sb.Append(Next());
             }
 
