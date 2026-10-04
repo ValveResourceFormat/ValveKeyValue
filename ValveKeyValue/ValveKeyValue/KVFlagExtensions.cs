@@ -20,6 +20,7 @@ namespace ValveKeyValue
                 KVFlag.SoundEvent => "soundevent",
                 KVFlag.SubClass => "subclass",
                 KVFlag.EntityName => "entity_name",
+                KVFlag.Localize => "localize",
                 _ => null,
             };
         }

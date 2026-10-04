@@ -57,6 +57,7 @@ public sealed enum ValveKeyValue.KVFlag
     SoundEvent = 4;
     SubClass = 5;
     EntityName = 6;
+    Localize = 7;
 
     public int CompareTo(object target);
     public bool Equals(object obj);

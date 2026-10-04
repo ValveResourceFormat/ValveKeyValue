@@ -25,5 +25,8 @@ namespace ValveKeyValue
 
         /// <summary>Entity name reference.</summary>
         EntityName = 6,
+
+        /// <summary>Localization token reference.</summary>
+        Localize = 7,
     }
 }

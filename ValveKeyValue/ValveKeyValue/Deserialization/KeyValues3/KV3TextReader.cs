@@ -396,6 +396,7 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             if (flag.Equals("soundevent", StringComparison.OrdinalIgnoreCase)) return KVFlag.SoundEvent;
             if (flag.Equals("subclass", StringComparison.OrdinalIgnoreCase)) return KVFlag.SubClass;
             if (flag.Equals("entity_name", StringComparison.OrdinalIgnoreCase)) return KVFlag.EntityName;
+            if (flag.Equals("localize", StringComparison.OrdinalIgnoreCase)) return KVFlag.Localize;
             return null;
         }
     }

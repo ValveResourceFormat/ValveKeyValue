@@ -109,6 +109,22 @@ namespace ValveKeyValue.Test.TextKV3
         }
 
         [Test]
+        public void SerializesLocalizeFlag()
+        {
+            using var stream = TestDataHelper.OpenResource("TextKV3.localize.kv3");
+            var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
+            var data = kv.Deserialize(stream);
+
+            var data2 = RoundTrip(kv, data).Root;
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(data2["title"].Flag, Is.EqualTo(KVFlag.Localize));
+                Assert.That((string)data2["title"], Is.EqualTo("#SFUI_Title"));
+            }
+        }
+
+        [Test]
         public void SerializesRootValues()
         {
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);

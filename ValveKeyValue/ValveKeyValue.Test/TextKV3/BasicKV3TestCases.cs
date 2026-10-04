@@ -174,6 +174,19 @@ namespace ValveKeyValue.Test.TextKV3
         }
 
         [Test]
+        public void DeserializesLocalizeFlag()
+        {
+            using var stream = TestDataHelper.OpenResource("TextKV3.localize.kv3");
+            var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream);
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(data["title"].Flag, Is.EqualTo(KVFlag.Localize));
+                Assert.That((string)data["title"], Is.EqualTo("#SFUI_Title"));
+            }
+        }
+
+        [Test]
         public void DeserializesEscapeSequences()
         {
             using var stream = TestDataHelper.OpenResource("TextKV3.escape_sequences.kv3");

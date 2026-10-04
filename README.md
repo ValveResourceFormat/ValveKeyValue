@@ -473,7 +473,7 @@ if (data.Header is { } header)
 
 ### Flags
 
-KV3 values can carry a flag prefix: `resource:`, `resource_name:`, `panorama:`, `soundevent:`, `subclass:` or `entity_name:`. These map to the `KVFlag` enum and are exposed through `KVObject.Flag`. A flag can be attached to a scalar, an array or a collection.
+KV3 values can carry a flag prefix: `resource:`, `resource_name:`, `panorama:`, `soundevent:`, `subclass:`, `entity_name:`, or `localize:`. These map to the `KVFlag` enum and are exposed through `KVObject.Flag`. A flag can be attached to a scalar, an array or a collection.
 
 ```csharp
 var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
