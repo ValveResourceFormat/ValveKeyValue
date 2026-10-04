@@ -155,6 +155,14 @@ namespace ValveKeyValue.Test.TextKV3
         }
 
         [Test]
+        public void DeserializesRootUppercaseLiteral()
+        {
+            var data = TestDataHelper.ParseKV3Text("TRUE").Root;
+
+            Assert.That((bool)data, Is.True);
+        }
+
+        [Test]
         public void DeserializesRootArrayOfMixedValues()
         {
             var data = TestDataHelper.ParseKV3Text("[ { a = 1 }, 2 ]").Root;

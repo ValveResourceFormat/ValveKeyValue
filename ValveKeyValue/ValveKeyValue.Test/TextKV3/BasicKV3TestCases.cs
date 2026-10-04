@@ -369,6 +369,58 @@ namespace ValveKeyValue.Test.TextKV3
             Assert.That(data.Root.Values.Select(x => (string)x), Is.EqualTo(ExpectedQuotedLiterals));
         }
 
+        [Test]
+        public void LiteralsAreCaseInsensitive()
+        {
+            var data = TestDataHelper.ParseKV3Text("{ a = True b = FALSE c = Null d = NaN e = INF f = +inf g = -INF }");
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That((bool)data["a"], Is.True);
+                Assert.That((bool)data["b"], Is.False);
+                Assert.That(data["c"].ValueType, Is.EqualTo(KVValueType.Null));
+                Assert.That((double)data["d"], Is.NaN);
+                Assert.That((double)data["e"], Is.EqualTo(double.PositiveInfinity));
+                Assert.That((double)data["f"], Is.EqualTo(double.PositiveInfinity));
+                Assert.That((double)data["g"], Is.EqualTo(double.NegativeInfinity));
+            }
+        }
+
+        [TestCase("007", 7L)]
+        [TestCase("-0", 0L)]
+        [TestCase("+5", 5L)]
+        [TestCase("-9223372036854775808", long.MinValue)]
+        public void DeserializesIntegerForms(string text, long expected)
+        {
+            var data = TestDataHelper.ParseKV3Text($"{{ a = {text} }}");
+
+            Assert.That((long)data["a"], Is.EqualTo(expected));
+        }
+
+        [TestCase(".5", 0.5)]
+        [TestCase("-.5", -0.5)]
+        [TestCase("5.", 5.0)]
+        [TestCase("+1.5", 1.5)]
+        [TestCase("1e5", 100000.0)]
+        [TestCase("1E5", 100000.0)]
+        [TestCase("1e+5", 100000.0)]
+        [TestCase("-1.5e-5", -0.000015)]
+        [TestCase("1E-2", 0.01)]
+        [TestCase("1.5e400", double.PositiveInfinity)]
+        [TestCase("1e-400", 0.0)]
+        [TestCase("-0.0", -0.0)]
+        public void DeserializesFloatForms(string text, double expected)
+        {
+            var data = TestDataHelper.ParseKV3Text($"{{ a = {text} }}");
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(data["a"].ValueType, Is.EqualTo(KVValueType.FloatingPoint64));
+                Assert.That((double)data["a"], Is.EqualTo(expected));
+                Assert.That(double.IsNegative((double)data["a"]), Is.EqualTo(double.IsNegative(expected)));
+            }
+        }
+
         [TestCase("resource:\"x\"")]
         [TestCase("resource|\"x\"")]
         [TestCase("resource : \"x\"")]

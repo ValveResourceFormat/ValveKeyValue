@@ -335,15 +335,15 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         static KVObject ParseValue(string text)
         {
-            if (text.Equals("false", StringComparison.Ordinal))
+            if (text.Equals("false", StringComparison.OrdinalIgnoreCase))
             {
                 return new KVObject(false);
             }
-            else if (text.Equals("true", StringComparison.Ordinal))
+            else if (text.Equals("true", StringComparison.OrdinalIgnoreCase))
             {
                 return new KVObject(true);
             }
-            else if (text.Equals("null", StringComparison.Ordinal))
+            else if (text.Equals("null", StringComparison.OrdinalIgnoreCase))
             {
                 return KVObject.Null();
             }
@@ -359,10 +359,8 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             {
                 return new KVObject(double.NegativeInfinity);
             }
-            else if (text.Length > 0 && ((text[0] >= '0' && text[0] <= '9') || text[0] == '-' || text[0] == '+'))
+            else if (text.Length > 0 && (char.IsAsciiDigit(text[0]) || text[0] == '-' || text[0] == '+' || text[0] == '.'))
             {
-                // TODO: Due to Valve's string to int/double conversion functions, it is possible to have 0x hex values (as well as prefixed with minus like -0x)
-
                 const NumberStyles IntegerNumberStyles = NumberStyles.AllowLeadingSign;
 
                 if (text[0] == '-' && long.TryParse(text, IntegerNumberStyles, CultureInfo.InvariantCulture, out var intValue))
