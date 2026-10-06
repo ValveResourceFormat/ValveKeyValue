@@ -345,6 +345,8 @@ Used by Steam and the Source engine. Text files look like this:
 }
 ```
 
+Quotes are optional, and an `=` may separate a key from its value, so `key = value`, `key=value` and `"key" "value"` are the same pair. Outside quotes, `{`, `}` and `=` end a key or value.
+
 ### Root name
 
 Every KV1 file has a single named root object. When reading, the name ends up in `KVDocument.Name`. When writing, either pass a `KVDocument` or a bare `KVObject` plus a name:
@@ -376,11 +378,13 @@ A KV1 key-value pair can be followed by a bracketed condition, and the pair is o
 "platform"            "desktop"          [($WIN32 || $OSX) && !$MOBILE]
 ```
 
+A condition can also go between the key and the value, or on either side of an `=`. When a pair has more than one, the last one decides. A matching condition right after `=` also replaces the earlier pair with the same key, so `xpos = 10` followed by `xpos = [$WIN32] 20` leaves a single `xpos`.
+
 The set of variables that evaluate to true comes from the `Conditions` option. The defaults match the OS you are running on. To target a different platform, clear the list and add your own.
 
 ### Includes
 
-KV1 text files can reference other files. `#include` appends the included file's keys into the current block. `#base` loads a base file whose keys are recursively merged into the current file. The library never touches the file system on its own. Instead you provide an `IIncludedFileLoader` that turns the path written in the directive into a `Stream`. If a file contains a directive and no `FileLoader` is set, deserialization throws `KeyValueException`.
+KV1 text files can reference other files. `#include` appends the included file's keys into the current block. `#base` loads a base file whose keys are recursively merged into the current file. Directives go before or after the root object, and inside an object `#include` and `#base` are ordinary keys. The library never touches the file system on its own. Instead you provide an `IIncludedFileLoader` that turns the path written in the directive into a `Stream`. If a file contains a directive and no `FileLoader` is set, deserialization throws `KeyValueException`.
 
 ```csharp
 class DirectoryFileLoader(string directory) : IIncludedFileLoader

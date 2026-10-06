@@ -4,6 +4,9 @@ namespace ValveKeyValue.Deserialization.KeyValues1
     {
         InObjectBeforeKey,
         InObjectBetweenKeyAndValue,
-        InObjectAfterValue
+        InObjectAfterAssignment,
+        InObjectAfterValue,
+        InDocumentBeforeIncludePath,
+        InDocumentBeforeBasePath,
     }
 }

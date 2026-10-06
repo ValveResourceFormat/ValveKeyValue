@@ -31,6 +31,9 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         readonly KV1TextReaderStateMachine stateMachine;
         bool disposed;
 
+        // Whether the previous token was a conditional. Only one may appear in each position.
+        bool readCondition;
+
         public KVHeader ReadHeader()
         {
             ObjectDisposedException.ThrowIf(disposed, this);
@@ -48,24 +51,22 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                     throw tokenReader.MakeSyntaxException($"Found end of file while trying to read the token that started at {tokenReader.TokenStartPosition}.", ex);
                 }
 
+                token = ClassifyToken(token);
+
                 if (sourceMap != null && token.TokenType != KVTokenType.EndOfFile)
                 {
-                    // KV1 keys are always quoted strings. They appear either at the start of
-                    // an object (InObjectBeforeKey) or right after the previous value
-                    // (InObjectAfterValue), since the state machine only flips back to
-                    // BeforeKey once ReadText runs and decides the token starts a new pair.
-                    var state = stateMachine.Current;
-                    var resolved = token.TokenType == KVTokenType.String
-                        && (state == KV1TextReaderState.InObjectBeforeKey || state == KV1TextReaderState.InObjectAfterValue)
-                        ? KVTokenType.Key
-                        : token.TokenType;
-                    sourceMap.Add(new KvSourceSpan(tokenReader.LastTokenStart, tokenReader.LastTokenEnd, resolved));
+                    sourceMap.Add(new KvSourceSpan(tokenReader.LastTokenStart, tokenReader.LastTokenEnd, token.TokenType));
                 }
 
                 switch (token.TokenType)
                 {
+                    case KVTokenType.Key:
                     case KVTokenType.String:
                         ReadText(token.Value!);
+                        break;
+
+                    case KVTokenType.Assignment:
+                        ReadAssignment();
                         break;
 
                     case KVTokenType.ObjectStart:
@@ -92,32 +93,83 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                         break;
 
                     case KVTokenType.Comment:
+                        continue;
+
+                    case KVTokenType.IncludeAndAppend:
+                        stateMachine.Push(KV1TextReaderState.InDocumentBeforeIncludePath);
                         break;
 
                     case KVTokenType.IncludeAndMerge:
-                        if (!stateMachine.IsAtStart)
-                        {
-                            throw tokenReader.MakeSyntaxException($"Inclusions are only valid at the beginning of a file, but found one at {tokenReader.TokenStartPosition}.");
-                        }
-
-                        stateMachine.AddItemForMerging(token.Value!);
-                        break;
-
-                    case KVTokenType.IncludeAndAppend:
-                        if (!stateMachine.IsAtStart)
-                        {
-                            throw tokenReader.MakeSyntaxException($"Inclusions are only valid at the beginning of a file, but found one at {tokenReader.TokenStartPosition}.");
-                        }
-
-                        stateMachine.AddItemForAppending(token.Value!);
+                        stateMachine.Push(KV1TextReaderState.InDocumentBeforeBasePath);
                         break;
 
                     default:
                         throw new ArgumentOutOfRangeException(nameof(token.TokenType), token.TokenType, "Unhandled token type.");
                 }
+
+                readCondition = token.TokenType == KVTokenType.Condition;
             }
 
             return new KVHeader();
+        }
+
+        // The token reader cannot tell how a string or '=' is used, so this decides it from the state.
+        // '=' is an assignment only between a key and its value, anywhere else it is a plain string.
+        // Keys appear either at the start of an object (InObjectBeforeKey) or right after the previous
+        // value (InObjectAfterValue), and outside the root object "#include" and "#base" are directives.
+        KVToken ClassifyToken(KVToken token)
+        {
+            if (token.TokenType == KVTokenType.Assignment && stateMachine.Current != KV1TextReaderState.InObjectBetweenKeyAndValue)
+            {
+                token = token with { TokenType = KVTokenType.String };
+            }
+
+            if (token.TokenType == KVTokenType.String
+                && stateMachine.Current is KV1TextReaderState.InObjectBeforeKey or KV1TextReaderState.InObjectAfterValue)
+            {
+                if (stateMachine.IsAtDocumentLevel && string.Equals(token.Value, "#include", StringComparison.OrdinalIgnoreCase))
+                {
+                    return token with { TokenType = KVTokenType.IncludeAndAppend };
+                }
+
+                if (stateMachine.IsAtDocumentLevel && string.Equals(token.Value, "#base", StringComparison.OrdinalIgnoreCase))
+                {
+                    return token with { TokenType = KVTokenType.IncludeAndMerge };
+                }
+
+                return token with { TokenType = KVTokenType.Key };
+            }
+
+            return token;
+        }
+
+        void ReadAssignment()
+        {
+            if (stateMachine.IsAtDocumentLevel)
+            {
+                throw tokenReader.MakeSyntaxException($"Found '=' after the root key at {tokenReader.TokenStartPosition}, the root key must be followed by '{{'.");
+            }
+
+            stateMachine.Push(KV1TextReaderState.InObjectAfterAssignment);
+        }
+
+        void AddInclusion(string filePath)
+        {
+            if (filePath.Length == 0)
+            {
+                throw tokenReader.MakeSyntaxException($"Found an inclusion directive with an empty file path at {tokenReader.TokenStartPosition}.");
+            }
+
+            if (stateMachine.Current == KV1TextReaderState.InDocumentBeforeBasePath)
+            {
+                stateMachine.AddItemForMerging(filePath);
+            }
+            else
+            {
+                stateMachine.AddItemForAppending(filePath);
+            }
+
+            stateMachine.Pop();
         }
 
         public void Dispose()
@@ -150,11 +202,17 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                     break;
 
                 case KV1TextReaderState.InObjectBetweenKeyAndValue:
+                case KV1TextReaderState.InObjectAfterAssignment:
                     var value = ParseValue(text);
                     var name = stateMachine.CurrentName!;
                     listener.OnKeyValuePair(name, value);
 
                     stateMachine.Push(KV1TextReaderState.InObjectAfterValue);
+                    break;
+
+                case KV1TextReaderState.InDocumentBeforeIncludePath:
+                case KV1TextReaderState.InDocumentBeforeBasePath:
+                    AddInclusion(text);
                     break;
 
                 default:
@@ -170,7 +228,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
         void BeginNewObject()
         {
-            if (stateMachine.Current != KV1TextReaderState.InObjectBetweenKeyAndValue)
+            if (stateMachine.Current is not (KV1TextReaderState.InObjectBetweenKeyAndValue or KV1TextReaderState.InObjectAfterAssignment))
             {
                 throw tokenReader.MakeSyntaxException($"Attempted to begin new object while in state {stateMachine.Current} at {tokenReader.TokenStartPosition}.");
             }
@@ -228,7 +286,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
         void HandleCondition(string text)
         {
-            if (stateMachine.Current != KV1TextReaderState.InObjectAfterValue && stateMachine.Current != KV1TextReaderState.InObjectBetweenKeyAndValue)
+            if (stateMachine.Current is not (KV1TextReaderState.InObjectAfterValue or KV1TextReaderState.InObjectBetweenKeyAndValue or KV1TextReaderState.InObjectAfterAssignment))
             {
                 throw tokenReader.MakeSyntaxException($"Found conditional while in state {stateMachine.Current} at {tokenReader.TokenStartPosition}.");
             }
@@ -238,6 +296,11 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             if (stateMachine.Current == KV1TextReaderState.InObjectAfterValue && stateMachine.IsAtDocumentLevel)
             {
                 throw tokenReader.MakeSyntaxException($"Found data after the root object at {tokenReader.TokenStartPosition}, documents with multiple root objects are not supported.");
+            }
+
+            if (readCondition)
+            {
+                throw tokenReader.MakeSyntaxException($"Found a second consecutive conditional at {tokenReader.TokenStartPosition}.");
             }
 
             bool matches;
@@ -251,9 +314,13 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                 throw tokenReader.MakeSyntaxException($"Invalid conditional syntax \"{text}\" at {tokenReader.TokenStartPosition}.", ex);
             }
 
-            if (!matches)
+            // A pair can have a conditional before '=', after '=', and after its value. The last one decides.
+            stateMachine.SetDiscardCurrent(!matches);
+
+            // A matching conditional after '=' replaces the earlier pair with the same key.
+            if (matches && stateMachine.Current == KV1TextReaderState.InObjectAfterAssignment)
             {
-                stateMachine.SetDiscardCurrent();
+                listener.RemoveItem(stateMachine.CurrentName!);
             }
         }
 

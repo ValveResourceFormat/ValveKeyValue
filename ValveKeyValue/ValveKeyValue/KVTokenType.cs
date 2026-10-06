@@ -40,7 +40,7 @@ namespace ValveKeyValue
         Identifier,
         /// <summary>A KV3 flag prefix (e.g. <c>resource:</c>, <c>entity_name:</c>).</summary>
         Flag,
-        /// <summary>The KV3 assignment operator <c>=</c>.</summary>
+        /// <summary>The assignment operator <c>=</c> between a key and its value. Optional in KV1.</summary>
         Assignment,
         /// <summary>The KV3 array element separator <c>,</c>.</summary>
         Comma,

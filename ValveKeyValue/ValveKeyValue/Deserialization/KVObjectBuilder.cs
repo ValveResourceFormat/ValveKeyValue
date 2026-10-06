@@ -104,6 +104,20 @@ namespace ValveKeyValue.Deserialization
             }
         }
 
+        public void RemoveItem(string name)
+        {
+            var items = StateStack.Peek().Items;
+
+            for (var i = 0; i < items.Count; i++)
+            {
+                if (string.Equals(items[i].Key, name, StringComparison.OrdinalIgnoreCase))
+                {
+                    items.RemoveAt(i);
+                    return;
+                }
+            }
+        }
+
         public void OnObjectStart(string? name, KVFlag flag)
         {
             var state = new KVPartialState

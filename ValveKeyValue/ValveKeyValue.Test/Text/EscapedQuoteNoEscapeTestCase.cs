@@ -13,15 +13,24 @@ namespace ValveKeyValue.Test
                 .With.Message.Contains("KVSerializerOptions.HasEscapeSequences"));
         }
 
+        // Without escape sequences the quoted value ends at the backslash, and the rest of the line
+        // reads as an unquoted key and a quoted value.
         [Test]
-        public void SuggestsEnablingEscapeSequencesWhenInclusionIsMisparsed()
+        public void FontColorSplitsIntoTwoPairsWhenEscapeSequencesAreDisabled()
         {
-            using var stream = TestDataHelper.OpenResource("Text.escaped_quote_font_color.vdf");
-            Assert.That(
-                () => KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream),
-                Throws.Exception.TypeOf<KeyValueException>()
-                .With.Message.Contains("Unrecognized term after '#' symbol")
-                .And.Message.Contains("KVSerializerOptions.HasEscapeSequences"));
+            KVObject data;
+            using (var stream = TestDataHelper.OpenResource("Text.escaped_quote_font_color.vdf"))
+            {
+                data = KVSerializer.Create(KVSerializationFormat.KeyValues1Text).Deserialize(stream);
+            }
+
+            var tokens = data["Tokens"];
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(tokens.Count, Is.EqualTo(2));
+                Assert.That((string)tokens["leaderboard_region_abbr_Asia"], Is.EqualTo("<font color=\\"));
+                Assert.That((string)tokens["#fc8200\\"], Is.EqualTo(">AS</font>"));
+            }
         }
 
         [Test]
