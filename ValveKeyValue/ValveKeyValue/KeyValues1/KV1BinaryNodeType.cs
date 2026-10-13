@@ -11,7 +11,7 @@ namespace ValveKeyValue.KeyValues1
         Color = 6,
         UInt64 = 7,
         End = 8,
-        ProbablyBinary = 9,
+        BinaryBlob = 9,
         Int64 = 10,
         AlternateEnd = 11,
     }

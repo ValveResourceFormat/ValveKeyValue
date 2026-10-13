@@ -32,7 +32,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         readonly BinaryReader reader;
         readonly StringTable stringTable;
         bool disposed;
-        KV1BinaryNodeType endMarker = KV1BinaryNodeType.End;
+        bool hasMagicHeader;
 
         public KVHeader ReadHeader()
         {
@@ -73,14 +73,14 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         {
             var type = ReadNextNodeType();
 
-            if (type == endMarker)
+            if (IsEndMarker(type))
             {
                 return;
             }
 
             ReadValue(type);
 
-            if (ReadNextNodeType() != endMarker)
+            if (!IsEndMarker(ReadNextNodeType()))
             {
                 throw new KeyValueException($"Found data after the root object at offset {stream.Position}, documents with multiple root objects are not supported.");
             }
@@ -91,7 +91,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             KV1BinaryNodeType type = ReadNextNodeType();
 
             // Keep reading values, until we reach the terminator
-            while (type != endMarker)
+            while (!IsEndMarker(type))
             {
                 ReadValue(type);
                 type = ReadNextNodeType();
@@ -128,7 +128,8 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                     break;
 
                 case KV1BinaryNodeType.WideString:
-                    throw new NotSupportedException("Wide String is not supported, please create an issue saying where you found it: https://github.com/ValveResourceFormat/ValveKeyValue/issues");
+                    value = new KVObject(ReadWideString());
+                    break;
 
                 case KV1BinaryNodeType.Int32:
                 case KV1BinaryNodeType.Color:
@@ -136,6 +137,8 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                     break;
 
                 case KV1BinaryNodeType.Pointer:
+                    // Source 1 writes pointers as 4 bytes, Steam and Source 2 write them as 8 bytes.
+                    // No known files contain pointers, so only the Source 1 size is supported.
                     value = new KVObject(KVValueType.Pointer, (long)reader.ReadInt32());
                     break;
 
@@ -147,8 +150,11 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                     value = new KVObject(reader.ReadSingle());
                     break;
 
-                case KV1BinaryNodeType.ProbablyBinary:
-                    throw new NotSupportedException("Hit kv type 9, please create an issue saying where you found it: https://github.com/ValveResourceFormat/ValveKeyValue/issues");
+                case KV1BinaryNodeType.BinaryBlob:
+                    var blob = new byte[reader.ReadUInt32()];
+                    stream.ReadExactly(blob);
+                    value = KVObject.Blob(blob);
+                    break;
 
                 case KV1BinaryNodeType.Int64:
                     value = new KVObject(reader.ReadInt64());
@@ -198,6 +204,26 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             }
         }
 
+        string ReadWideString()
+        {
+            // Source 2 writes an int16 character count without a terminator,
+            // Steam writes an int32 character count that includes the null terminator.
+            var length = hasMagicHeader ? reader.ReadInt16() : reader.ReadInt32();
+
+            if (length < 0)
+            {
+                throw new KeyValueException($"Invalid wide string length {length} at offset {stream.Position}.");
+            }
+
+            var data = new byte[length * 2];
+            stream.ReadExactly(data);
+
+            var text = Encoding.Unicode.GetString(data);
+            var terminator = text.IndexOf('\0', StringComparison.Ordinal);
+
+            return terminator >= 0 ? text[..terminator] : text;
+        }
+
         void DetectMagicHeader()
         {
             if (stream.Length - stream.Position < 8)
@@ -207,17 +233,20 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
             if (reader.ReadUInt32() == BinaryMagicHeader)
             {
-                stream.Position += 4; // Skip crc32
-
-                // There is likely no reason to handle this separately
-                // as the types do not conflict between Steam or Dota 2
-                endMarker = KV1BinaryNodeType.AlternateEnd;
+                // Skip CRC32 of the remaining data
+                stream.Position += 4;
+                hasMagicHeader = true;
             }
             else
             {
                 stream.Position -= 4; // Go back as we did not detect the header
             }
         }
+
+        // Steam uses End, Source 2 uses AlternateEnd. Each format rejects the other's marker as a node type,
+        // so both are accepted regardless of whether the magic header is present.
+        static bool IsEndMarker(KV1BinaryNodeType type)
+            => type is KV1BinaryNodeType.End or KV1BinaryNodeType.AlternateEnd;
 
         KV1BinaryNodeType ReadNextNodeType()
             => (KV1BinaryNodeType)reader.ReadByte();
