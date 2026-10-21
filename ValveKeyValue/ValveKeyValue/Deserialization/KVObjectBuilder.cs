@@ -29,6 +29,7 @@ namespace ValveKeyValue.Deserialization
         }
 
         readonly Stack<KVPartialState> stateStack = new();
+        readonly Stack<KVPartialState> spareStates = new();
 
         public void OnKeyValuePair(string name, KVObject value)
         {
@@ -77,6 +78,7 @@ namespace ValveKeyValue.Deserialization
             var state = StateStack.Pop();
             var completedObject = MakeObject(state);
             StateStack.Peek().Items.Add(new KeyValuePair<string, KVObject>(state.Key!, completedObject!));
+            spareStates.Push(state);
         }
 
         public void OnArrayEnd()
@@ -89,6 +91,7 @@ namespace ValveKeyValue.Deserialization
             var state = StateStack.Pop();
             var completedObject = MakeArray(state);
             StateStack.Peek().Items.Add(new KeyValuePair<string, KVObject>(state.Key!, completedObject!));
+            spareStates.Push(state);
         }
 
         public void DiscardCurrentObject()
@@ -100,7 +103,7 @@ namespace ValveKeyValue.Deserialization
             }
             else
             {
-                StateStack.Pop();
+                spareStates.Push(StateStack.Pop());
             }
         }
 
@@ -120,23 +123,31 @@ namespace ValveKeyValue.Deserialization
 
         public void OnObjectStart(string? name, KVFlag flag)
         {
-            var state = new KVPartialState
-            {
-                Key = name,
-                Flag = flag,
-            };
+            var state = RentState();
+            state.Key = name;
+            state.Flag = flag;
             StateStack.Push(state);
         }
 
         public void OnArrayStart(string? name, KVFlag flag, int elementCount, bool allSimpleElements)
         {
-            var state = new KVPartialState
-            {
-                Key = name,
-                Flag = flag,
-                IsArray = true,
-            };
+            var state = RentState();
+            state.Key = name;
+            state.Flag = flag;
+            state.IsArray = true;
             StateStack.Push(state);
+        }
+
+        // States popped off the stack are reused for later objects and arrays.
+        KVPartialState RentState()
+        {
+            if (!spareStates.TryPop(out var state))
+            {
+                return new KVPartialState();
+            }
+
+            state.Reset();
+            return state;
         }
 
         public IParsingVisitationListener GetMergeListener()
@@ -189,10 +200,9 @@ namespace ValveKeyValue.Deserialization
                 return state.Value;
             }
 
-            // The state is discarded once its object is made, so a list-backed object takes over its list.
             KVObject result = useDictionary
                 ? KVObject.Collection(state.Items)
-                : new KVObject(KVValueType.Collection, state.Items);
+                : new KVObject(KVValueType.Collection, state.DetachItems());
 
             if (state.Flag != KVFlag.None)
             {

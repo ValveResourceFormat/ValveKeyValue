@@ -171,7 +171,7 @@ namespace ValveKeyValue
                 members.Add(member.Name, member);
             }
 
-            foreach (var (key, child) in kv)
+            foreach (var (key, child) in kv.EnumerateNamedChildren())
             {
                 if (!members.TryGetValue(key, out var member) || !member.CanWrite)
                 {
@@ -190,7 +190,7 @@ namespace ValveKeyValue
             // Keys must be exactly the indices 0..Count-1, in any order.
             object[]? items = null;
 
-            foreach (var (key, child) in obj)
+            foreach (var (key, child) in obj.EnumerateNamedChildren())
             {
                 if (!int.TryParse(key, NumberStyles.Number, CultureInfo.InvariantCulture, out var index))
                 {
@@ -411,7 +411,7 @@ namespace ValveKeyValue
 
         static void FillDictionary<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TKey, [DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TValue>(Dictionary<TKey, TValue> dictionary, KVObject kv, IObjectReflector reflector) where TKey : notnull
         {
-            foreach (var (childKey, child) in kv)
+            foreach (var (childKey, child) in kv.EnumerateNamedChildren())
             {
                 var key = ConvertValue<TKey>(childKey, reflector);
 

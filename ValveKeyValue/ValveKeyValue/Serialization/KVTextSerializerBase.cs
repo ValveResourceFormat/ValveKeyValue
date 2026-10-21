@@ -4,11 +4,13 @@ namespace ValveKeyValue.Serialization
 {
     abstract class KVTextSerializerBase : IDisposable
     {
+        static readonly UTF8Encoding Utf8NoBom = new(encoderShouldEmitUTF8Identifier: false);
+
         protected KVTextSerializerBase(Stream stream)
         {
             ArgumentNullException.ThrowIfNull(stream);
 
-            writer = new StreamWriter(stream, new UTF8Encoding(), bufferSize: 1024, leaveOpen: true)
+            writer = new StreamWriter(stream, Utf8NoBom, bufferSize: 1024, leaveOpen: true)
             {
                 NewLine = "\n"
             };

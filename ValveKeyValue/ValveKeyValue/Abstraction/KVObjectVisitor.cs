@@ -22,7 +22,7 @@ namespace ValveKeyValue.Abstraction
             {
                 case KVValueType.Collection:
                     listener.OnObjectStart(name, obj.Flag);
-                    foreach (var (childKey, child) in obj)
+                    foreach (var (childKey, child) in obj.EnumerateNamedChildren())
                     {
                         VisitObject(childKey, child, false);
                     }

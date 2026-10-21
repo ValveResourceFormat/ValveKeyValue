@@ -434,6 +434,18 @@ namespace ValveKeyValue
             return new KVObject(KVValueType.Collection, dict);
         }
 
+        // Enumerates the list directly rather than through IEnumerable, which would box its enumerator.
+        internal static KVObject Collection(List<KeyValuePair<string, KVObject>> children)
+        {
+            var dict = new Dictionary<string, KVObject>(children.Count);
+            foreach (var (key, value) in children)
+            {
+                dict[key] = value;
+            }
+
+            return new KVObject(KVValueType.Collection, dict);
+        }
+
         /// <summary>
         /// Creates an empty list-backed collection.
         /// Preserves insertion order and allows duplicate keys (used for KV1 format).

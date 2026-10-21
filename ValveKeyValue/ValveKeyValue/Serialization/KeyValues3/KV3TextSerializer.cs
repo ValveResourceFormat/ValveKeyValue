@@ -11,6 +11,8 @@ namespace ValveKeyValue.Serialization.KeyValues3
         static readonly SearchValues<char> CharsToEscape = SearchValues.Create("\n\t\\\"");
         static readonly ValveKeyValue.KeyValues3.KV3ID TextEncoding = new("text", ValveKeyValue.KeyValues3.Encoding.Text);
         static readonly ValveKeyValue.KeyValues3.KV3ID GenericFormat = new("generic", ValveKeyValue.KeyValues3.Format.Generic);
+        static readonly string TextEncodingText = TextEncoding.ToString();
+        static readonly string GenericFormatText = GenericFormat.ToString();
 
         // Fits any 64-bit integer.
         const int IntegerBufferLength = 32;
@@ -37,11 +39,15 @@ namespace ValveKeyValue.Serialization.KeyValues3
                 return;
             }
 
-            var format = header?.Format.Name != null ? header.Format : GenericFormat;
+            var formatText = header?.Format.Name != null ? header.Format.ToString() : GenericFormatText;
 
             // The output is always text, whatever encoding the document was read from
             var s = Position;
-            writer.Write($"<!-- kv3 encoding:{TextEncoding} format:{format} -->");
+            writer.Write("<!-- kv3 encoding:");
+            writer.Write(TextEncodingText);
+            writer.Write(" format:");
+            writer.Write(formatText);
+            writer.Write(" -->");
             Record(s, KVTokenType.Header);
             writer.WriteLine();
         }
