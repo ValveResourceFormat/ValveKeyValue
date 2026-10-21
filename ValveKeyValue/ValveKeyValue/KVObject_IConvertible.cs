@@ -215,6 +215,37 @@ namespace ValveKeyValue
             };
         }
 
+        // Formats numeric values exactly as ToString(provider) does, without allocating a string.
+        // Returns false for non-numeric values or when destination is too small.
+        internal bool TryFormatNumber(Span<char> destination, out int charsWritten, IFormatProvider? provider)
+        {
+            provider ??= CultureInfo.InvariantCulture;
+
+            switch (ValueType)
+            {
+                case KVValueType.FloatingPoint:
+                    return BitConverter.Int32BitsToSingle((int)_scalar).TryFormat(destination, out charsWritten, default, provider);
+                case KVValueType.FloatingPoint64:
+                    return BitConverter.Int64BitsToDouble(_scalar).TryFormat(destination, out charsWritten, default, provider);
+                case KVValueType.Int32:
+                case KVValueType.Pointer:
+                    return ((int)_scalar).TryFormat(destination, out charsWritten, default, provider);
+                case KVValueType.Int64:
+                    return _scalar.TryFormat(destination, out charsWritten, default, provider);
+                case KVValueType.UInt64:
+                    return ((ulong)_scalar).TryFormat(destination, out charsWritten, default, provider);
+                case KVValueType.UInt32:
+                    return ((uint)_scalar).TryFormat(destination, out charsWritten, default, provider);
+                case KVValueType.Int16:
+                    return ((short)_scalar).TryFormat(destination, out charsWritten, default, provider);
+                case KVValueType.UInt16:
+                    return ((ushort)_scalar).TryFormat(destination, out charsWritten, default, provider);
+                default:
+                    charsWritten = 0;
+                    return false;
+            }
+        }
+
         /// <inheritdoc cref="IConvertible.ToUInt16"/>
         public ushort ToUInt16(IFormatProvider? provider) => checked((ushort)ToUInt64(provider));
 

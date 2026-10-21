@@ -8,7 +8,8 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             Push(KV1TextReaderState.InObjectBeforeKey);
         }
 
-        readonly Stack<KVPartialState<KV1TextReaderState>> states = new();
+        readonly Stack<ObjectState> states = new();
+        readonly Stack<ObjectState> spareStates = new();
         readonly List<string> includedPathsToMerge = new();
         readonly List<string> includedPathsToAppend = new();
 
@@ -18,7 +19,16 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
         public bool IsAtDocumentLevel => states.Count == 1;
 
-        public void PushObject() => states.Push(new KVPartialState<KV1TextReaderState>());
+        public void PushObject()
+        {
+            if (!spareStates.TryPop(out var state))
+            {
+                state = new ObjectState();
+            }
+
+            state.Reset();
+            states.Push(state);
+        }
 
         public void Push(KV1TextReaderState state) => CurrentObject.States.Push(state);
 
@@ -26,6 +36,8 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         {
             var state = states.Pop();
             discard = state.Discard;
+
+            spareStates.Push(state);
         }
 
         public string? CurrentName => CurrentObject.Key;
@@ -33,10 +45,6 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         public void Pop() => CurrentObject.States.Pop();
 
         public void SetName(string name) => CurrentObject.Key = name;
-
-        public void SetValue(KVObject value) => CurrentObject.Value = value;
-
-        public void AddItem(string key, KVObject item) => CurrentObject.Items.Add(new KeyValuePair<string, KVObject>(key, item));
 
         public void SetDiscardCurrent(bool discard) => CurrentObject.Discard = discard;
 
@@ -48,6 +56,22 @@ namespace ValveKeyValue.Deserialization.KeyValues1
 
         public void AddItemForAppending(string item) => includedPathsToAppend.Add(item);
 
-        KVPartialState<KV1TextReaderState> CurrentObject => states.Peek();
+        ObjectState CurrentObject => states.Peek();
+
+        sealed class ObjectState
+        {
+            public string? Key { get; set; }
+
+            public bool Discard { get; set; }
+
+            public Stack<KV1TextReaderState> States { get; } = new();
+
+            public void Reset()
+            {
+                Key = null;
+                Discard = false;
+                States.Clear();
+            }
+        }
     }
 }

@@ -4,15 +4,14 @@ namespace ValveKeyValue.Deserialization.KeyValues3
     {
         public KV3TextReaderStateMachine()
         {
-            states = new Stack<KVPartialState<KV3TextReaderState>>();
-
             PushObject();
             Set(KV3TextReaderState.InObjectBeforeValue);
         }
 
-        readonly Stack<KVPartialState<KV3TextReaderState>> states;
+        readonly Stack<ObjectState> states = new();
+        readonly Stack<ObjectState> spareStates = new();
 
-        public KV3TextReaderState Current => CurrentObject.States.Peek();
+        public KV3TextReaderState Current => CurrentObject.State;
 
         public bool IsInObject => states.Count > 0;
 
@@ -20,19 +19,24 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         public bool IsInArray => states.Count > 0 && CurrentObject.IsArray;
 
-        public void PushObject() => states.Push(new KVPartialState<KV3TextReaderState>());
-
-        // Only the current state of each object is ever needed, so it replaces the previous one
-        public void Set(KV3TextReaderState state)
+        public void PushObject()
         {
-            var states = CurrentObject.States;
-            states.TryPop(out _);
+            if (!spareStates.TryPop(out var state))
+            {
+                state = new ObjectState();
+            }
+
+            state.Reset();
             states.Push(state);
         }
 
+        // Only the current state of each object is ever needed, so it replaces the previous one
+        public void Set(KV3TextReaderState state) => CurrentObject.State = state;
+
         public void PopObject()
         {
-            states.Pop();
+            var state = states.Pop();
+            spareStates.Push(state);
         }
 
         public string? CurrentName => CurrentObject.Key;
@@ -52,6 +56,25 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         public void SetArrayCurrent() => CurrentObject.IsArray = true;
 
-        KVPartialState<KV3TextReaderState> CurrentObject => states.Peek();
+        ObjectState CurrentObject => states.Peek();
+
+        sealed class ObjectState
+        {
+            public string? Key { get; set; }
+
+            public KVFlag Flag { get; set; }
+
+            public bool IsArray { get; set; }
+
+            public KV3TextReaderState State { get; set; }
+
+            public void Reset()
+            {
+                Key = null;
+                Flag = KVFlag.None;
+                IsArray = false;
+                State = default;
+            }
+        }
     }
 }

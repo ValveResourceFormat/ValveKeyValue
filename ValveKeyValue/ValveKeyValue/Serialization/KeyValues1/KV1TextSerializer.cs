@@ -9,6 +9,9 @@ namespace ValveKeyValue.Serialization.KeyValues1
     {
         static readonly SearchValues<char> CharsToEscape = SearchValues.Create("\"\\");
 
+        // Fits any integer and the shortest round-trip form of any float or double.
+        const int NumberBufferLength = 32;
+
         public KV1TextSerializer(Stream stream, KVSerializerOptions options)
             : base(stream)
         {
@@ -45,7 +48,8 @@ namespace ValveKeyValue.Serialization.KeyValues1
         {
             var count = arrayCount.Pop();
 
-            WriteKeyValuePair(count.ToString(CultureInfo.InvariantCulture), value);
+            Span<char> buffer = stackalloc char[NumberBufferLength];
+            WriteKeyValuePair(FormatIndex(count, buffer), value);
 
             arrayCount.Push(count + 1);
         }
@@ -61,24 +65,39 @@ namespace ValveKeyValue.Serialization.KeyValues1
             throw new NotSupportedException("Discard not supported when writing.");
         }
 
-        void WriteStartObject(string? name)
+        static ReadOnlySpan<char> FormatIndex(int index, Span<char> buffer)
         {
-            if (name == null)
+            if (index.TryFormat(buffer, out var charsWritten, default, CultureInfo.InvariantCulture))
             {
-                if (arrayCount.Count > 0)
-                {
-                    var count = arrayCount.Pop();
-
-                    name = count.ToString(CultureInfo.InvariantCulture);
-
-                    arrayCount.Push(count + 1);
-                }
-                else
-                {
-                    name = string.Empty;
-                }
+                return buffer[..charsWritten];
             }
 
+            return index.ToString(CultureInfo.InvariantCulture);
+        }
+
+        void WriteStartObject(string? name)
+        {
+            if (name != null)
+            {
+                WriteStartObjectCore(name);
+            }
+            else if (arrayCount.Count > 0)
+            {
+                var count = arrayCount.Pop();
+
+                Span<char> buffer = stackalloc char[NumberBufferLength];
+                WriteStartObjectCore(FormatIndex(count, buffer));
+
+                arrayCount.Push(count + 1);
+            }
+            else
+            {
+                WriteStartObjectCore(string.Empty);
+            }
+        }
+
+        void WriteStartObjectCore(ReadOnlySpan<char> name)
+        {
             WriteIndentation();
             var keyStart = Position;
             WriteText(name);
@@ -98,7 +117,7 @@ namespace ValveKeyValue.Serialization.KeyValues1
             writer.WriteLine();
         }
 
-        void WriteKeyValuePair(string name, KVObject value)
+        void WriteKeyValuePair(ReadOnlySpan<char> name, KVObject value)
         {
             WriteIndentation();
             var keyStart = Position;
@@ -115,20 +134,38 @@ namespace ValveKeyValue.Serialization.KeyValues1
             {
                 WriteText(value.ToBoolean(null) ? "1" : "0");
             }
-            else
+            else if (value.ValueType == KVValueType.String)
             {
                 WriteText(value.ToString(CultureInfo.InvariantCulture));
+            }
+            else
+            {
+                WriteValue(value);
             }
             Record(valueStart, KVTokenType.String);
 
             WriteLine();
         }
 
-        void WriteText(string text)
+        void WriteValue(KVObject value)
+        {
+            Span<char> buffer = stackalloc char[NumberBufferLength];
+
+            if (value.TryFormatNumber(buffer, out var charsWritten, CultureInfo.InvariantCulture))
+            {
+                WriteText(buffer[..charsWritten]);
+            }
+            else
+            {
+                WriteText(value.ToString(CultureInfo.InvariantCulture));
+            }
+        }
+
+        void WriteText(ReadOnlySpan<char> text)
         {
             writer.Write('"');
 
-            if (!text.AsSpan().ContainsAny(CharsToEscape))
+            if (!text.ContainsAny(CharsToEscape))
             {
                 writer.Write(text);
             }

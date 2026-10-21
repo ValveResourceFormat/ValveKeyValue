@@ -12,6 +12,12 @@ namespace ValveKeyValue.Serialization.KeyValues3
         static readonly ValveKeyValue.KeyValues3.KV3ID TextEncoding = new("text", ValveKeyValue.KeyValues3.Encoding.Text);
         static readonly ValveKeyValue.KeyValues3.KV3ID GenericFormat = new("generic", ValveKeyValue.KeyValues3.Format.Generic);
 
+        // Fits any 64-bit integer.
+        const int IntegerBufferLength = 32;
+
+        // Fits any float formatted with "F6"; very large doubles fall back to a string.
+        const int FloatBufferLength = 64;
+
         public KV3TextSerializer(Stream stream, KVHeader? header = null, bool skipHeader = false)
             : base(stream)
         {
@@ -248,7 +254,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
                 case KVValueType.UInt32:
                 case KVValueType.UInt64:
                 case KVValueType.Pointer:
-                    writer.Write(value.ToString(null));
+                    WriteInteger(value);
                     break;
                 default:
                     WriteText(value.ToString(null));
@@ -257,6 +263,20 @@ namespace ValveKeyValue.Serialization.KeyValues3
             }
 
             Record(s, type);
+        }
+
+        void WriteInteger(KVObject value)
+        {
+            Span<char> buffer = stackalloc char[IntegerBufferLength];
+
+            if (value.TryFormatNumber(buffer, out var charsWritten, null))
+            {
+                writer.Write(buffer[..charsWritten]);
+            }
+            else
+            {
+                writer.Write(value.ToString(null));
+            }
         }
 
         void WriteFloat(float value)
@@ -301,15 +321,26 @@ namespace ValveKeyValue.Serialization.KeyValues3
 
         // Matches Valve's %f (6 decimal places) + V_StripExcessTrailingZeros.
         // "0.0#####" can't be used here because it rounds differently than %f for edge cases.
-        void WriteFloatFormatted(float value) => WriteFloatTrimmed(value.ToString("F6", CultureInfo.InvariantCulture));
-        void WriteFloatFormatted(double value) => WriteFloatTrimmed(value.ToString("F6", CultureInfo.InvariantCulture));
+        void WriteFloatFormatted<T>(T value) where T : ISpanFormattable
+        {
+            Span<char> buffer = stackalloc char[FloatBufferLength];
 
-        void WriteFloatTrimmed(string formatted)
+            if (value.TryFormat(buffer, out var charsWritten, "F6", CultureInfo.InvariantCulture))
+            {
+                WriteFloatTrimmed(buffer[..charsWritten]);
+            }
+            else
+            {
+                WriteFloatTrimmed(value.ToString("F6", CultureInfo.InvariantCulture));
+            }
+        }
+
+        void WriteFloatTrimmed(ReadOnlySpan<char> formatted)
         {
             // Strip trailing zeros but keep at least one digit after the decimal point
-            var span = formatted.AsSpan().TrimEnd('0');
+            var span = formatted.TrimEnd('0');
             if (span[^1] == '.')
-                writer.Write(formatted.AsSpan(0, span.Length + 1));
+                writer.Write(formatted[..(span.Length + 1)]);
             else
                 writer.Write(span);
         }

@@ -210,6 +210,43 @@ namespace ValveKeyValue.Test.TextKV3
         }
 
         [Test]
+        public void SerializesNegativeZero()
+        {
+            var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
+
+            var root = KVObject.Collection();
+            root.Add("negativeZeroFloat", -0.0f);
+            root.Add("negativeZeroDouble", -0.0);
+            var doc = new KVDocument(null, null, root);
+
+            var result = SerializeToString(kv, doc);
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(result, Does.Contain("negativeZeroFloat = -0.0\n"));
+                Assert.That(result, Does.Contain("negativeZeroDouble = -0.0\n"));
+            }
+        }
+
+        [Test]
+        public void SerializesLargeFloats()
+        {
+            var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
+
+            var root = KVObject.Collection();
+            root.Add("maxFloat", float.MaxValue);
+            root.Add("largeDouble", Math.ScaleB(1.0, 200));
+            root.Add("negativeLargeDouble", -Math.ScaleB(1.0, 200));
+            var doc = new KVDocument(null, null, root);
+
+            var result = SerializeToString(kv, doc);
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(result, Does.Contain("maxFloat = 340282346638528859811704183484516925440.0\n"));
+                Assert.That(result, Does.Contain("largeDouble = 1606938044258990275541962092341162602522202993782792835301376.0\n"));
+                Assert.That(result, Does.Contain("negativeLargeDouble = -1606938044258990275541962092341162602522202993782792835301376.0\n"));            }
+        }
+
+        [Test]
         public void SerializesBlobInArrayIsNotShort()
         {
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
