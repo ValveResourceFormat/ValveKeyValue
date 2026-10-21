@@ -56,7 +56,13 @@ namespace ValveKeyValue
             }
             else if (keyValueObject.ValueType == KVValueType.Array)
             {
-                var arrayValues = keyValueObject.Values.Select(c => (object)c).ToArray();
+                var arrayElements = keyValueObject.AsArraySpan();
+                var arrayValues = new object[arrayElements.Length];
+                for (var i = 0; i < arrayElements.Length; i++)
+                {
+                    arrayValues[i] = arrayElements[i];
+                }
+
                 if (ConstructTypedEnumerable(typeof(TObject), arrayValues, reflector, out var enumerable))
                 {
                     return (TObject)enumerable;
@@ -159,7 +165,11 @@ namespace ValveKeyValue
             ArgumentNullException.ThrowIfNull(obj);
             ArgumentNullException.ThrowIfNull(reflector);
 
-            var members = reflector.GetMembers(objectType, obj).ToDictionary(m => m.Name, m => m, StringComparer.OrdinalIgnoreCase);
+            var members = new Dictionary<string, IObjectMember>(StringComparer.OrdinalIgnoreCase);
+            foreach (var member in reflector.GetMembers(objectType, obj))
+            {
+                members.Add(member.Name, member);
+            }
 
             foreach (var (key, child) in kv)
             {
@@ -177,25 +187,27 @@ namespace ValveKeyValue
         {
             values = null!;
 
-            if (obj.Any(kvp => !IsNumeric(kvp.Key)))
-            {
-                return false;
-            }
+            // Keys must be exactly the indices 0..Count-1, in any order.
+            object[]? items = null;
 
-            var items = obj
-                .Select(kvp => new { Index = int.Parse(kvp.Key, NumberStyles.Number, CultureInfo.InvariantCulture), kvp.Value })
-                .OrderBy(i => i.Index)
-                .ToArray();
-
-            for (int i = 0; i < items.Length; i++)
+            foreach (var (key, child) in obj)
             {
-                if (i != items[i].Index)
+                if (!int.TryParse(key, NumberStyles.Number, CultureInfo.InvariantCulture, out var index))
                 {
                     return false;
                 }
+
+                items ??= new object[obj.Count];
+
+                if (index < 0 || index >= items.Length || items[index] != null)
+                {
+                    return false;
+                }
+
+                items[index] = child;
             }
 
-            values = items.Select(i => (object)i.Value).ToArray();
+            values = items ?? [];
             return true;
         }
 
@@ -314,10 +326,20 @@ namespace ValveKeyValue
         [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Analysis cannot follow MakeGenericMethod. All callers validated manually.")]
         static object InvokeGeneric(string methodName, Type genericType, params object[] parameters)
         {
-            var method = typeof(ObjectCopier)
-                .GetTypeInfo()
-                .GetDeclaredMethods(methodName)
-                .Single(m => m.IsStatic && m.GetParameters().Length == parameters.Length);
+            MethodInfo? method = null;
+            foreach (var candidate in typeof(ObjectCopier).GetTypeInfo().GetDeclaredMethods(methodName))
+            {
+                if (candidate.IsStatic && candidate.GetParameters().Length == parameters.Length)
+                {
+                    method = candidate;
+                    break;
+                }
+            }
+
+            if (method == null)
+            {
+                throw new InvalidOperationException($"No method named {methodName} takes {parameters.Length} parameters.");
+            }
 
             try
             {
@@ -348,16 +370,6 @@ namespace ValveKeyValue
         static ObservableCollection<TElement> MakeObservableCollection<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TElement>(object[] items, IObjectReflector reflector)
         {
             return new ObservableCollection<TElement>(MakeList<TElement>(items, reflector));
-        }
-
-        static bool IsNumeric(string str)
-        {
-            if (str.Length == 0)
-            {
-                return false;
-            }
-
-            return int.TryParse(str, NumberStyles.Number, CultureInfo.InvariantCulture, out _);
         }
 
         static bool IsDictionary(Type type)

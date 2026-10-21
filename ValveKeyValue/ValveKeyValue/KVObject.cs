@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace ValveKeyValue
@@ -294,7 +293,7 @@ namespace ValveKeyValue
         public IEnumerable<string> Keys => _ref switch
         {
             Dictionary<string, KVObject> dict when ValueType == KVValueType.Collection => dict.Keys,
-            List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection => list.Select(kvp => kvp.Key),
+            List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection => EnumerateListKeys(list),
             _ => [],
         };
 
@@ -305,7 +304,7 @@ namespace ValveKeyValue
         public IEnumerable<KVObject> Values => _ref switch
         {
             Dictionary<string, KVObject> dict when ValueType == KVValueType.Collection => dict.Values,
-            List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection => list.Select(kvp => kvp.Value),
+            List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection => EnumerateListValues(list),
             List<KVObject> list when ValueType == KVValueType.Array => list,
             _ => [],
         };
@@ -557,7 +556,7 @@ namespace ValveKeyValue
                 case List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection:
                     if (behavior == InsertionBehavior.OverwriteExisting)
                     {
-                        var firstIndex = list.FindIndex(c => c.Key == key);
+                        var firstIndex = IndexOfInList(list, key);
                         if (firstIndex >= 0)
                         {
                             list[firstIndex] = new KeyValuePair<string, KVObject>(key, value);
@@ -606,19 +605,46 @@ namespace ValveKeyValue
             }
         }
 
-        private static bool TryFindInList(List<KeyValuePair<string, KVObject>> list, string name, [MaybeNullWhen(false)] out KVObject value)
+        private static IEnumerable<string> EnumerateListKeys(List<KeyValuePair<string, KVObject>> list)
         {
             foreach (var kvp in list)
             {
-                if (kvp.Key == name)
+                yield return kvp.Key;
+            }
+        }
+
+        private static IEnumerable<KVObject> EnumerateListValues(List<KeyValuePair<string, KVObject>> list)
+        {
+            foreach (var kvp in list)
+            {
+                yield return kvp.Value;
+            }
+        }
+
+        private static bool TryFindInList(List<KeyValuePair<string, KVObject>> list, string name, [MaybeNullWhen(false)] out KVObject value)
+        {
+            var index = IndexOfInList(list, name);
+            if (index < 0)
+            {
+                value = null!;
+                return false;
+            }
+
+            value = list[index].Value;
+            return true;
+        }
+
+        internal static int IndexOfInList(List<KeyValuePair<string, KVObject>> list, string name)
+        {
+            for (var i = 0; i < list.Count; i++)
+            {
+                if (list[i].Key == name)
                 {
-                    value = kvp.Value;
-                    return true;
+                    return i;
                 }
             }
 
-            value = null!;
-            return false;
+            return -1;
         }
 
         private string DebuggerDescription => ValueType switch

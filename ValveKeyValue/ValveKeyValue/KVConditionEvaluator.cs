@@ -114,11 +114,11 @@ namespace ValveKeyValue
         }
 
         // Case-insensitive to match Valve, whose symbol resolution uses V_stricmp.
-        bool EvaluateVariable(string variable)
+        bool EvaluateVariable(ReadOnlySpan<char> variable)
         {
             foreach (var definedVariable in definedVariables)
             {
-                if (string.Equals(definedVariable, variable, StringComparison.OrdinalIgnoreCase))
+                if (variable.Equals(definedVariable, StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
                 }
@@ -152,7 +152,7 @@ namespace ValveKeyValue
             return isNonZero;
         }
 
-        string ReadVariableName()
+        ReadOnlySpan<char> ReadVariableName()
         {
             var start = position;
             while (position < expressionText.Length && IsVariableCharacter(expressionText[position]))
@@ -160,7 +160,7 @@ namespace ValveKeyValue
                 position++;
             }
 
-            return expressionText[start..position];
+            return expressionText.AsSpan(start, position - start);
         }
 
         static bool IsVariableCharacter(char c) => char.IsLetterOrDigit(c) || c == '_';

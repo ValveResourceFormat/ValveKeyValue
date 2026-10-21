@@ -189,9 +189,10 @@ namespace ValveKeyValue.Deserialization
                 return state.Value;
             }
 
+            // The state is discarded once its object is made, so a list-backed object takes over its list.
             KVObject result = useDictionary
                 ? KVObject.Collection(state.Items)
-                : KVObject.ListCollection(state.Items);
+                : new KVObject(KVValueType.Collection, state.Items);
 
             if (state.Flag != KVFlag.None)
             {

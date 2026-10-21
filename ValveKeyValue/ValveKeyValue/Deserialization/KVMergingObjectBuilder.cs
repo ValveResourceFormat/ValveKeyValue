@@ -25,7 +25,7 @@ namespace ValveKeyValue.Deserialization
         {
             foreach (var item in from.Items)
             {
-                var matchingIndex = into.Items.FindIndex(i => i.Key == item.Key);
+                var matchingIndex = KVObject.IndexOfInList(into.Items, item.Key);
                 if (matchingIndex < 0)
                 {
                     into.Items.Add(item);

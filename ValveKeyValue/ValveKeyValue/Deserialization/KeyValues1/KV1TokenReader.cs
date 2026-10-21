@@ -94,7 +94,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             int next;
             while (!IsEndOfFile(next = Peek()) && next != '\n')
             {
-                sb.Append(Next());
+                Next();
 
                 if (next != '\r')
                 {
@@ -102,15 +102,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                 }
             }
 
-            if (sb.Length > 0 && sb[^1] == '\r')
-            {
-                sb.Length--;
-            }
-
-            var text = sb.ToString();
-            sb.Clear();
-
-            return new KVToken(KVTokenType.Comment, text);
+            return new KVToken(KVTokenType.Comment);
         }
 
         // Conditionals are not quoted, so escape sequences are not translated inside them.

@@ -196,7 +196,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                 }
                 while (true);
 
-                return Encoding.UTF8.GetString(buffer[..position]);
+                return Encoding.UTF8.GetString(buffer, 0, position);
             }
             finally
             {
