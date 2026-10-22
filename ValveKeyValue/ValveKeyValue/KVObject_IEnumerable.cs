@@ -68,5 +68,31 @@ namespace ValveKeyValue
 
             public readonly CollectionEnumerator GetEnumerator() => this;
         }
+
+        // The values of a packed array. Reads go through the owner, so the view stays correct
+        // after the owner is unpacked.
+        internal sealed class PackedArrayValues : IReadOnlyList<KVObject>
+        {
+            public PackedArrayValues(KVObject owner)
+            {
+                this.owner = owner;
+            }
+
+            readonly KVObject owner;
+
+            public int Count => owner.Count;
+
+            public KVObject this[int index] => owner[index];
+
+            public IEnumerator<KVObject> GetEnumerator()
+            {
+                for (var i = 0; i < owner.Count; i++)
+                {
+                    yield return owner[i];
+                }
+            }
+
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        }
     }
 }

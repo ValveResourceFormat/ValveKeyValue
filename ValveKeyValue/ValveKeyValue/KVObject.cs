@@ -34,7 +34,7 @@ namespace ValveKeyValue
 
         // Reference storage for heap types: string, byte[], List<KVObject>, Dictionary<string, KVObject>, etc.
         // An array holds either List<KVObject> or a packed primitive array, which is replaced
-        // by an equivalent List<KVObject> the first time an element object is needed.
+        // by an equivalent List<KVObject> when the elements are mutated, exposed as a span or boxed by ToType.
         private object? _ref;
 
         /// <summary>
@@ -49,8 +49,8 @@ namespace ValveKeyValue
 
         /// <summary>
         /// Gets a value indicating whether this is an array that still stores its values packed,
-        /// so every element is a scalar. Accessing the elements as <see cref="KVObject"/> instances,
-        /// for example through <see cref="Children"/> or <see cref="Values"/>, unpacks it.
+        /// so every element is a scalar. Reading elements leaves it packed; only <see cref="AsArraySpan"/>,
+        /// <see cref="Add(KVObject)"/>, <see cref="RemoveAt"/> and <see cref="ToType"/> unpack it.
         /// </summary>
         public bool IsPackedArray => TryGetPackedArray(out _);
 
@@ -230,7 +230,16 @@ namespace ValveKeyValue
             {
                 if (ValueType == KVValueType.Array)
                 {
-                    return GetArrayList()[index];
+                    var storage = _ref;
+
+                    if (storage is List<KVObject> elements)
+                    {
+                        return elements[index];
+                    }
+
+                    var packed = (System.Array)storage!;
+                    ThrowIfIndexOutOfRange(packed, index);
+                    return CreatePackedElement(packed, index);
                 }
 
                 if (ValueType == KVValueType.Collection && _ref is List<KeyValuePair<string, KVObject>> list)
@@ -311,7 +320,18 @@ namespace ValveKeyValue
         {
             Dictionary<string, KVObject> dict when ValueType == KVValueType.Collection => dict.Values,
             List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection => EnumerateListValues(list),
-            _ when ValueType == KVValueType.Array => GetArrayList(),
+            _ when ValueType == KVValueType.Array => Elements,
+            _ => [],
+        };
+
+        /// <summary>
+        /// Gets the elements of this array as a read-only list, or an empty list if this is not an array.
+        /// Reading the elements of a packed array does not unpack it.
+        /// </summary>
+        public IReadOnlyList<KVObject> Elements => _ref switch
+        {
+            List<KVObject> list when ValueType == KVValueType.Array => list,
+            System.Array when ValueType == KVValueType.Array => new PackedArrayValues(this),
             _ => [],
         };
 
@@ -505,11 +525,12 @@ namespace ValveKeyValue
         /// which must not be modified afterwards.
         /// </summary>
         /// <remarks>
+        /// Elements are created on each read, equal to <c>new KVObject(value)</c> with <paramref name="elementFlag"/> applied.
+        /// They are not the same object between reads, and a <see cref="Flag"/> set on one is lost.
+        /// Reads never unpack the array; <see cref="AsArraySpan"/>, <see cref="Add(KVObject)"/>, <see cref="RemoveAt"/>
+        /// and <see cref="ToType"/> unpack it into elements that are kept.
         /// <see cref="TryGetArraySpan{T}(out ReadOnlySpan{T})"/>, <see cref="ToArray{T}"/> and <see cref="GetElement{T}(int)"/>
-        /// read the values without unpacking.
-        /// Element access through the integer indexer, <see cref="AsArraySpan"/>, <see cref="Values"/>,
-        /// <see cref="Children"/> or mutation unpacks it into elements equal to <c>new KVObject(value)</c>
-        /// with <paramref name="elementFlag"/> applied.
+        /// read the values without creating elements.
         /// </remarks>
         /// <param name="values">The element values.</param>
         /// <param name="elementFlag">The flag of every element.</param>
@@ -871,8 +892,9 @@ namespace ValveKeyValue
             _ => 0,
         };
 
-        // Gets the elements of an array, unpacking it on first use. Concurrent first calls may each
-        // build a list, but only the first one published is stored and returned to all of them.
+        // Gets the elements of an array, unpacking it for the members that mutate, expose or box them.
+        // Concurrent unpacking calls may each build a list, but only the first one published is
+        // stored and returned to all of them.
         private List<KVObject> GetArrayList()
         {
             var storage = _ref;
@@ -900,12 +922,26 @@ namespace ValveKeyValue
             return (List<KVObject>)published!;
         }
 
-        private IEnumerable<KeyValuePair<string, KVObject>> EnumerateArray()
+        private IEnumerable<KeyValuePair<string, KVObject>> EnumerateArray() => _ref switch
         {
-            var list = GetArrayList();
+            List<KVObject> list => EnumerateArrayList(list),
+            System.Array packed => EnumeratePackedArray(packed),
+            _ => [],
+        };
+
+        private static IEnumerable<KeyValuePair<string, KVObject>> EnumerateArrayList(List<KVObject> list)
+        {
             foreach (var item in list)
             {
                 yield return new KeyValuePair<string, KVObject>(null!, item);
+            }
+        }
+
+        private IEnumerable<KeyValuePair<string, KVObject>> EnumeratePackedArray(System.Array packed)
+        {
+            for (var i = 0; i < packed.Length; i++)
+            {
+                yield return new KeyValuePair<string, KVObject>(null!, CreatePackedElement(packed, i));
             }
         }
 

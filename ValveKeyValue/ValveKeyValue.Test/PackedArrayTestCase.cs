@@ -14,6 +14,7 @@ namespace ValveKeyValue.Test
             Indexer,
             AsArraySpan,
             Values,
+            Elements,
             Children,
             Enumerator,
         }
@@ -260,13 +261,19 @@ namespace ValveKeyValue.Test
         }
 
         [TestCaseSource(nameof(AccessCases))]
-        public void IsNotPackedArrayAfterUnpacking(PackedCase testCase, KVFlag elementFlag, ElementAccess access)
+        public void IsPackedArrayOnlyUntilAsArraySpan(PackedCase testCase, KVFlag elementFlag, ElementAccess access)
         {
             var array = testCase.CreatePacked(elementFlag);
 
             ReadElements(array, access);
 
-            Assert.That(array.IsPackedArray, Is.False);
+            var expectPacked = access != ElementAccess.AsArraySpan;
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(array.IsPackedArray, Is.EqualTo(expectPacked));
+                Assert.That(testCase.PackedSpanIsValuesArray(array), Is.EqualTo(expectPacked), "Packed values");
+            }
         }
 
         [TestCaseSource(nameof(AllCases))]
@@ -388,7 +395,7 @@ namespace ValveKeyValue.Test
 
         #endregion
 
-        #region Unpacking
+        #region Element reads
 
         [TestCaseSource(nameof(AccessCases))]
         public void ElementsMatchListBackedArray(PackedCase testCase, KVFlag elementFlag, ElementAccess access)
@@ -399,22 +406,136 @@ namespace ValveKeyValue.Test
             var elements = ReadElements(array, access);
 
             AssertElementsEqual(elements, ReadElements(expected, access));
+            Assert.That(array.Count, Is.EqualTo(testCase.Length));
+
+            // Every later read gives equal elements, whether or not the first access unpacked the array.
+            foreach (var otherAccess in Accesses)
+            {
+                AssertElementsEqual(ReadElements(array, otherAccess), elements);
+            }
+        }
+
+        [TestCaseSource(nameof(AllCases))]
+        public void ReadsCreateNewElementsWhilePacked(PackedCase testCase)
+        {
+            var array = testCase.CreatePacked(KVFlag.Resource);
+
+            var first = array[0];
+            first.Flag = KVFlag.SoundEvent;
 
             using (Assert.EnterMultipleScope())
             {
-                Assert.That(array.Count, Is.EqualTo(testCase.Length));
-                Assert.That(GetMatchingSpanTypes(array), Is.Empty, "Array was not unpacked.");
+                Assert.That(array[0], Is.Not.SameAs(first));
+                Assert.That(array[0].Flag, Is.EqualTo(KVFlag.Resource));
+            }
+        }
+
+        [TestCaseSource(nameof(AllCases))]
+        public void ReadsReturnKeptElementsAfterUnpacking(PackedCase testCase)
+        {
+            var array = testCase.CreatePacked(KVFlag.Resource);
+            var unpacked = array.AsArraySpan()[0];
+
+            foreach (var access in Accesses)
+            {
+                Assert.That(ReadElements(array, access)[0], Is.SameAs(unpacked), access.ToString());
+            }
+        }
+
+        [TestCaseSource(nameof(AllCases))]
+        public void ElementsIndexerAndCountLeaveArrayPacked(PackedCase testCase)
+        {
+            var packed = testCase.CreatePacked(KVFlag.Resource);
+            var expected = testCase.CreateListBacked(KVFlag.Resource);
+
+            var packedElements = packed.Elements;
+
+            var elements = new List<KVObject>();
+            for (var i = 0; i < packedElements.Count; i++)
+            {
+                elements.Add(packedElements[i]);
             }
 
-            // Every later access sees the same element objects.
-            foreach (var otherAccess in Accesses)
+            AssertElementsEqual(elements, ReadElements(expected, ElementAccess.Indexer));
+
+            using (Assert.EnterMultipleScope())
             {
-                var again = ReadElements(array, otherAccess);
-                for (var i = 0; i < elements.Count; i++)
+                Assert.That(packedElements, Has.Count.EqualTo(testCase.Length));
+                Assert.That(packed.IsPackedArray, Is.True);
+                Assert.Throws<ArgumentOutOfRangeException>(() => _ = packedElements[testCase.Length]);
+                Assert.Throws<ArgumentOutOfRangeException>(() => _ = packedElements[-1]);
+            }
+        }
+
+        [TestCaseSource(nameof(AllCases))]
+        public void ElementsOfElementArrayIsTheElementList(PackedCase testCase)
+        {
+            var array = testCase.CreateListBacked();
+            var unpacked = testCase.CreatePacked();
+            _ = unpacked.AsArraySpan();
+
+            var arrayElements = array.Elements;
+            var unpackedElements = unpacked.Elements;
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(arrayElements, Is.InstanceOf<List<KVObject>>());
+                Assert.That(array.Elements, Is.SameAs(arrayElements));
+                Assert.That(array.Values, Is.SameAs(arrayElements));
+                Assert.That(unpackedElements, Is.InstanceOf<List<KVObject>>());
+                Assert.That(unpacked.Elements, Is.SameAs(unpackedElements));
+            }
+        }
+
+        [Test]
+        public void ElementsIsEmptyForOtherValues()
+        {
+            KVObject[] others =
+            [
+                KVObject.Blob([1, 2, 3]),
+                KVObject.Collection(),
+                KVObject.ListCollection(),
+                KVObject.Null(),
+                new KVObject(1),
+                new KVObject("text"),
+            ];
+
+            others[1].Add("key", new KVObject(1));
+            others[2].Add("key", new KVObject(1));
+
+            using (Assert.EnterMultipleScope())
+            {
+                foreach (var other in others)
                 {
-                    Assert.That(again[i], Is.SameAs(elements[i]), $"{otherAccess} [{i}]");
+                    Assert.That(other.Elements, Is.Empty, other.ValueType.ToString());
                 }
             }
+        }
+
+        [TestCaseSource(nameof(AllCases))]
+        public void ElementsTakenBeforeUnpackingReadsTheUnpackedElements(PackedCase testCase)
+        {
+            var array = testCase.CreatePacked(KVFlag.Resource);
+            var values = array.Elements;
+
+            var span = array.AsArraySpan();
+            var replacement = new KVObject("replaced");
+            span[0] = replacement;
+            array.Add(new KVObject("extra"));
+
+            var expected = testCase.CreateListBacked(KVFlag.Resource);
+            expected.AsArraySpan()[0] = new KVObject("replaced");
+            expected.Add(new KVObject("extra"));
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(array.IsPackedArray, Is.False);
+                Assert.That(values, Has.Count.EqualTo(testCase.Length + 1));
+                Assert.That(values[0], Is.SameAs(replacement));
+                Assert.That(values[testCase.Length].ToString(CultureInfo.InvariantCulture), Is.EqualTo("extra"));
+            }
+
+            AssertElementsEqual([.. values], ReadElements(expected, ElementAccess.Indexer));
         }
 
         [TestCaseSource(nameof(FlagCases))]
@@ -446,12 +567,20 @@ namespace ValveKeyValue.Test
         }
 
         [TestCaseSource(nameof(AllCases))]
-        public void IndexerOutOfRangeThrowsAfterUnpacking(PackedCase testCase)
+        public void IndexerOutOfRangeThrows(PackedCase testCase)
         {
             var array = testCase.CreatePacked();
+            var expected = testCase.CreateListBacked();
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => _ = array[testCase.Length]);
-            Assert.That(array.Count, Is.EqualTo(testCase.Length));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.Throws<ArgumentOutOfRangeException>(() => _ = array[testCase.Length]);
+                Assert.Throws<ArgumentOutOfRangeException>(() => _ = array[-1]);
+                Assert.Throws<ArgumentOutOfRangeException>(() => _ = expected[testCase.Length]);
+                Assert.Throws<ArgumentOutOfRangeException>(() => _ = expected[-1]);
+            }
+
+            Assert.That(array.IsPackedArray, Is.True);
         }
 
         #endregion
@@ -647,15 +776,54 @@ namespace ValveKeyValue.Test
         const int ConcurrentLength = 4096;
 
         [TestCaseSource(nameof(AllCases))]
-        public void ConcurrentFirstAccessPublishesOneElementList(PackedCase testCase)
+        public void ConcurrentReadsLeaveArrayPacked(PackedCase testCase)
         {
+            ElementAccess[] reads = [ElementAccess.Indexer, ElementAccess.Values, ElementAccess.Elements, ElementAccess.Children, ElementAccess.Enumerator];
             var expected = ReadElements(testCase.CreateListBacked(KVFlag.Resource, ConcurrentLength), ElementAccess.Indexer);
 
             for (var iteration = 0; iteration < ConcurrentIterations; iteration++)
             {
                 var array = testCase.CreatePacked(KVFlag.Resource, ConcurrentLength);
 
-                var results = ReadConcurrently(array, Accesses);
+                var results = ReadConcurrently(array, reads);
+
+                using (Assert.EnterMultipleScope())
+                {
+                    Assert.That(array.IsPackedArray, Is.True);
+
+                    for (var t = 0; t < results.Length; t++)
+                    {
+                        Assert.That(results[t], Has.Count.EqualTo(ConcurrentLength));
+
+                        var differentElements = 0;
+                        for (var i = 0; i < ConcurrentLength && i < results[t].Count; i++)
+                        {
+                            var actual = results[t][i];
+                            var sameValue = actual.ToString(CultureInfo.InvariantCulture) == expected[i].ToString(CultureInfo.InvariantCulture);
+
+                            if (actual.ValueType != expected[i].ValueType || actual.Flag != expected[i].Flag || !sameValue)
+                            {
+                                differentElements++;
+                            }
+                        }
+
+                        Assert.That(differentElements, Is.Zero, $"Thread {t} read elements that differ from the list-backed array.");
+                    }
+                }
+            }
+        }
+
+        [TestCaseSource(nameof(AllCases))]
+        public void ConcurrentAsArraySpanPublishesOneElementList(PackedCase testCase)
+        {
+            ElementAccess[] unpacks = [ElementAccess.AsArraySpan];
+            var expected = ReadElements(testCase.CreateListBacked(KVFlag.Resource, ConcurrentLength), ElementAccess.Indexer);
+
+            for (var iteration = 0; iteration < ConcurrentIterations; iteration++)
+            {
+                var array = testCase.CreatePacked(KVFlag.Resource, ConcurrentLength);
+
+                var results = ReadConcurrently(array, unpacks);
 
                 var elements = ReadElements(array, ElementAccess.AsArraySpan);
 
@@ -1196,6 +1364,13 @@ namespace ValveKeyValue.Test
 
                 case ElementAccess.Values:
                     elements.AddRange(array.Values);
+                    break;
+
+                case ElementAccess.Elements:
+                    foreach (var element in array.Elements)
+                    {
+                        elements.Add(element);
+                    }
                     break;
 
                 case ElementAccess.Children:

@@ -144,6 +144,7 @@ public class ValveKeyValue.KVObject : IConvertible, System.Collections.Generic.I
     protected void Finalize();
     public System.Collections.Generic.IEnumerable`1[[System.Collections.Generic.KeyValuePair`2[[string, ValveKeyValue.KVObject]]]] get_Children();
     public int get_Count();
+    public System.Collections.Generic.IReadOnlyList`1[[ValveKeyValue.KVObject]] get_Elements();
     public ValveKeyValue.KVFlag get_Flag();
     public bool get_IsArray();
     public bool get_IsCollection();
