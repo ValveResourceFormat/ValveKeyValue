@@ -56,6 +56,8 @@ namespace ValveKeyValue
         /// <param name="options">Options to use that can influence the deserialization process.</param>
         /// <returns>A <typeparamref name="TObject" /> instance representing the KeyValues structure in the stream.</returns>
         /// <typeparam name="TObject">The type of object to deserialize.</typeparam>
+        [RequiresUnreferencedCode(Trimming.ObjectMappingMessage)]
+        [RequiresDynamicCode(Trimming.ObjectDeserializationMessage)]
         public TObject Deserialize<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TObject>(Stream stream, KVSerializerOptions? options = null)
         {
             ArgumentNullException.ThrowIfNull(stream);
@@ -106,13 +108,14 @@ namespace ValveKeyValue
         /// <param name="name">The top-level object name.</param>
         /// <param name="options">Options to use that can influence the serialization process.</param>
         /// <typeparam name="TData">The type of object to serialize.</typeparam>
+        [RequiresUnreferencedCode(Trimming.ObjectMappingMessage)]
         public void Serialize<[DynamicallyAccessedMembers(Trimming.Properties)] TData>(Stream stream, TData data, string name, KVSerializerOptions? options = null)
         {
             ArgumentNullException.ThrowIfNull(stream);
             ArgumentNullException.ThrowIfNull(data);
             ArgumentNullException.ThrowIfNull(name);
 
-            var kvObjectTree = ObjectCopier.FromObject(typeof(TData), data);
+            var kvObjectTree = ObjectSerializer.FromObject(typeof(TData), data);
 
             using var serializer = MakeSerializer(stream, options ?? KVSerializerOptions.DefaultOptions);
             var visitor = new KVObjectVisitor(serializer);
@@ -196,12 +199,13 @@ namespace ValveKeyValue
         /// <param name="options">Options to use that can influence the serialization process.</param>
         /// <typeparam name="TData">The type of object to serialize.</typeparam>
         /// <returns>The serialized text and a list of <see cref="KvSourceSpan"/> records covering each token.</returns>
+        [RequiresUnreferencedCode(Trimming.ObjectMappingMessage)]
         public (string Text, IReadOnlyList<KvSourceSpan> Spans) SerializeWithSourceMap<[DynamicallyAccessedMembers(Trimming.Properties)] TData>(TData data, string name, KVSerializerOptions? options = null)
         {
             ArgumentNullException.ThrowIfNull(data);
             ArgumentNullException.ThrowIfNull(name);
 
-            var kvObjectTree = ObjectCopier.FromObject(typeof(TData), data);
+            var kvObjectTree = ObjectSerializer.FromObject(typeof(TData), data);
             return SerializeWithSourceMapCore(kvObjectTree, name, header: null, options);
         }
 

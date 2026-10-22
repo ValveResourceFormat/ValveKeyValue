@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace ValveKeyValue
 {
     interface IObjectMember
@@ -10,7 +8,6 @@ namespace ValveKeyValue
 
         bool CanWrite { get; }
 
-        [DynamicallyAccessedMembers(Trimming.Properties)]
         Type MemberType { get; }
 
         object? Value { get; set; }
