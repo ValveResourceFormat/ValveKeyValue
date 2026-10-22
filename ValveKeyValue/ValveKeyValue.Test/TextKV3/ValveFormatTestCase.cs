@@ -243,7 +243,8 @@ namespace ValveKeyValue.Test.TextKV3
             {
                 Assert.That(result, Does.Contain("maxFloat = 340282346638528859811704183484516925440.0\n"));
                 Assert.That(result, Does.Contain("largeDouble = 1606938044258990275541962092341162602522202993782792835301376.0\n"));
-                Assert.That(result, Does.Contain("negativeLargeDouble = -1606938044258990275541962092341162602522202993782792835301376.0\n"));            }
+                Assert.That(result, Does.Contain("negativeLargeDouble = -1606938044258990275541962092341162602522202993782792835301376.0\n"));
+            }
         }
 
         [Test]

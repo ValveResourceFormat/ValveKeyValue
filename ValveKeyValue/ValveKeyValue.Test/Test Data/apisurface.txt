@@ -148,11 +148,13 @@ public class ValveKeyValue.KVObject : IConvertible, System.Collections.Generic.I
     public bool get_IsArray();
     public bool get_IsCollection();
     public bool get_IsNull();
+    public bool get_IsPackedArray();
     public ValveKeyValue.KVObject get_Item(int index);
     public ValveKeyValue.KVObject get_Item(string key);
     public System.Collections.Generic.IEnumerable`1[[string]] get_Keys();
     public System.Collections.Generic.IEnumerable`1[[ValveKeyValue.KVObject]] get_Values();
     public ValveKeyValue.KVValueType get_ValueType();
+    public ValveKeyValue.T GetElement<ValveKeyValue.T>(int index);
     public System.Collections.Generic.IEnumerator`1[[System.Collections.Generic.KeyValuePair`2[[string, ValveKeyValue.KVObject]]]] GetEnumerator();
     public int GetHashCode();
     public Type GetType();
@@ -191,10 +193,20 @@ public class ValveKeyValue.KVObject : IConvertible, System.Collections.Generic.I
     public static ValveKeyValue.KVObject op_Implicit(uint value);
     public static ValveKeyValue.KVObject op_Implicit(ulong value);
     public static ValveKeyValue.KVObject op_Implicit(ushort value);
+    public static ValveKeyValue.KVObject PackedArray(bool[] values, ValveKeyValue.KVFlag elementFlag);
+    public static ValveKeyValue.KVObject PackedArray(double[] values, ValveKeyValue.KVFlag elementFlag);
+    public static ValveKeyValue.KVObject PackedArray(float[] values, ValveKeyValue.KVFlag elementFlag);
+    public static ValveKeyValue.KVObject PackedArray(int[] values, ValveKeyValue.KVFlag elementFlag);
+    public static ValveKeyValue.KVObject PackedArray(long[] values, ValveKeyValue.KVFlag elementFlag);
+    public static ValveKeyValue.KVObject PackedArray(short[] values, ValveKeyValue.KVFlag elementFlag);
+    public static ValveKeyValue.KVObject PackedArray(uint[] values, ValveKeyValue.KVFlag elementFlag);
+    public static ValveKeyValue.KVObject PackedArray(ulong[] values, ValveKeyValue.KVFlag elementFlag);
+    public static ValveKeyValue.KVObject PackedArray(ushort[] values, ValveKeyValue.KVFlag elementFlag);
     public bool Remove(string key);
     public void RemoveAt(int index);
     public void set_Flag(ValveKeyValue.KVFlag value);
     public void set_Item(string key, ValveKeyValue.KVObject value);
+    public ValveKeyValue.T[] ToArray<ValveKeyValue.T>();
     public bool ToBoolean();
     public bool ToBoolean(IFormatProvider provider);
     public byte ToByte();
@@ -225,6 +237,7 @@ public class ValveKeyValue.KVObject : IConvertible, System.Collections.Generic.I
     public ulong ToUInt64();
     public ulong ToUInt64(IFormatProvider provider);
     public bool TryAdd(string key, ValveKeyValue.KVObject value);
+    public bool TryGetArraySpan<ValveKeyValue.T>(out ReadOnlySpan`1& values);
     public bool TryGetValue(string name, out ValveKeyValue.KVObject& child);
 }
 

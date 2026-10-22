@@ -521,7 +521,7 @@ namespace ValveKeyValue
                 return true;
             }
 
-            if (CanConvertValueTo(targetType))
+            if (KVObject.CanConvertTo(targetType))
             {
                 try
                 {
@@ -537,25 +537,6 @@ namespace ValveKeyValue
 
             converted = default!;
             return false;
-        }
-
-        static bool CanConvertValueTo(Type type)
-        {
-            return
-                type == typeof(bool) ||
-                type == typeof(byte) ||
-                type == typeof(char) ||
-                type == typeof(decimal) ||
-                type == typeof(double) ||
-                type == typeof(float) ||
-                type == typeof(int) ||
-                type == typeof(long) ||
-                type == typeof(uint) ||
-                type == typeof(ulong) ||
-                type == typeof(ushort) ||
-                type == typeof(sbyte) ||
-                type == typeof(short) ||
-                type == typeof(string);
         }
 
         static KVObject? ConvertToKVObject(object value, Type type)

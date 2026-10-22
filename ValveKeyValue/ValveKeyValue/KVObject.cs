@@ -1,7 +1,9 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace ValveKeyValue
 {
@@ -27,11 +29,13 @@ namespace ValveKeyValue
         public KVFlag Flag { get; set; }
 
         // Inline storage for scalar types (no boxing).
-        // Interpretation depends on ValueType.
+        // Interpretation depends on ValueType. For a packed array, holds the element flag.
         private readonly long _scalar;
 
         // Reference storage for heap types: string, byte[], List<KVObject>, Dictionary<string, KVObject>, etc.
-        private readonly object? _ref;
+        // An array holds either List<KVObject> or a packed primitive array, which is replaced
+        // by an equivalent List<KVObject> the first time an element object is needed.
+        private object? _ref;
 
         /// <summary>
         /// Gets a value indicating whether this value is null.
@@ -42,6 +46,13 @@ namespace ValveKeyValue
         /// Gets a value indicating whether this value is an array.
         /// </summary>
         public bool IsArray => ValueType == KVValueType.Array;
+
+        /// <summary>
+        /// Gets a value indicating whether this is an array that still stores its values packed,
+        /// so every element is a scalar. Accessing the elements as <see cref="KVObject"/> instances,
+        /// for example through <see cref="Children"/> or <see cref="Values"/>, unpacks it.
+        /// </summary>
+        public bool IsPackedArray => TryGetPackedArray(out _);
 
         /// <summary>
         /// Gets a value indicating whether this value is a collection.
@@ -55,7 +66,7 @@ namespace ValveKeyValue
         public int Count => ValueType switch
         {
             KVValueType.Collection => GetCollectionCount(),
-            KVValueType.Array => ((List<KVObject>)_ref!).Count,
+            KVValueType.Array => GetArrayCount(_ref),
             _ => 0,
         };
 
@@ -86,81 +97,72 @@ namespace ValveKeyValue
         /// Initializes a new instance of the <see cref="KVObject"/> class with a boolean value.
         /// </summary>
         public KVObject(bool value)
+            : this(new ScalarValue(value))
         {
-            ValueType = KVValueType.Boolean;
-            _scalar = value ? 1L : 0L;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KVObject"/> class with a 16-bit integer value.
         /// </summary>
         public KVObject(short value)
+            : this(new ScalarValue(value))
         {
-            ValueType = KVValueType.Int16;
-            _scalar = value;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KVObject"/> class with an unsigned 16-bit integer value.
         /// </summary>
         public KVObject(ushort value)
+            : this(new ScalarValue(value))
         {
-            ValueType = KVValueType.UInt16;
-            _scalar = value;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KVObject"/> class with an integer value.
         /// </summary>
         public KVObject(int value)
+            : this(new ScalarValue(value))
         {
-            ValueType = KVValueType.Int32;
-            _scalar = value;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KVObject"/> class with an unsigned integer value.
         /// </summary>
         public KVObject(uint value)
+            : this(new ScalarValue(value))
         {
-            ValueType = KVValueType.UInt32;
-            _scalar = value;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KVObject"/> class with a 64-bit integer value.
         /// </summary>
         public KVObject(long value)
+            : this(new ScalarValue(value))
         {
-            ValueType = KVValueType.Int64;
-            _scalar = value;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KVObject"/> class with an unsigned 64-bit integer value.
         /// </summary>
         public KVObject(ulong value)
+            : this(new ScalarValue(value))
         {
-            ValueType = KVValueType.UInt64;
-            _scalar = unchecked((long)value);
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KVObject"/> class with a float value.
         /// </summary>
         public KVObject(float value)
+            : this(new ScalarValue(value))
         {
-            ValueType = KVValueType.FloatingPoint;
-            _scalar = BitConverter.SingleToInt32Bits(value);
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KVObject"/> class with a double value.
         /// </summary>
         public KVObject(double value)
+            : this(new ScalarValue(value))
         {
-            ValueType = KVValueType.FloatingPoint64;
-            _scalar = BitConverter.DoubleToInt64Bits(value);
         }
 
         /// <summary>
@@ -185,6 +187,11 @@ namespace ValveKeyValue
             ValueType = type;
             Flag = flag;
             _ref = refValue;
+        }
+
+        private KVObject(ScalarValue value, KVFlag flag = KVFlag.None)
+            : this(value.Type, value.Bits, value.Reference, flag)
+        {
         }
 
         #endregion
@@ -223,8 +230,7 @@ namespace ValveKeyValue
             {
                 if (ValueType == KVValueType.Array)
                 {
-                    var listArray = (List<KVObject>)_ref!;
-                    return listArray[index];
+                    return GetArrayList()[index];
                 }
 
                 if (ValueType == KVValueType.Collection && _ref is List<KeyValuePair<string, KVObject>> list)
@@ -305,7 +311,7 @@ namespace ValveKeyValue
         {
             Dictionary<string, KVObject> dict when ValueType == KVValueType.Collection => dict.Values,
             List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection => EnumerateListValues(list),
-            List<KVObject> list when ValueType == KVValueType.Array => list,
+            _ when ValueType == KVValueType.Array => GetArrayList(),
             _ => [],
         };
 
@@ -346,8 +352,7 @@ namespace ValveKeyValue
                 throw new InvalidOperationException($"Cannot add an array element to a {ValueType} value.");
             }
 
-            var list = (List<KVObject>)_ref!;
-            list.Add(value ?? Null());
+            GetArrayList().Add(value ?? Null());
         }
 
         /// <summary>
@@ -376,8 +381,7 @@ namespace ValveKeyValue
                 throw new InvalidOperationException($"Cannot remove by index from a {ValueType} value.");
             }
 
-            var list = (List<KVObject>)_ref!;
-            list.RemoveAt(index);
+            GetArrayList().RemoveAt(index);
         }
 
         /// <summary>
@@ -395,6 +399,10 @@ namespace ValveKeyValue
                     break;
                 case List<KVObject> list when ValueType == KVValueType.Array:
                     list.Clear();
+                    break;
+                case System.Array when ValueType == KVValueType.Array:
+                    // Dropping the packed values leaves an empty list, as unpacking and clearing would.
+                    _ref = new List<KVObject>();
                     break;
                 default:
                     throw new InvalidOperationException($"Cannot clear a {ValueType} value.");
@@ -492,6 +500,61 @@ namespace ValveKeyValue
         }
 
         /// <summary>
+        /// Creates a packed array-valued <see cref="KVObject"/> that stores <paramref name="values"/> directly,
+        /// without an element <see cref="KVObject"/> per value. Takes ownership of <paramref name="values"/>,
+        /// which must not be modified afterwards.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="TryGetArraySpan{T}(out ReadOnlySpan{T})"/>, <see cref="ToArray{T}"/> and <see cref="GetElement{T}(int)"/>
+        /// read the values without unpacking.
+        /// Element access through the integer indexer, <see cref="AsArraySpan"/>, <see cref="Values"/>,
+        /// <see cref="Children"/> or mutation unpacks it into elements equal to <c>new KVObject(value)</c>
+        /// with <paramref name="elementFlag"/> applied.
+        /// </remarks>
+        /// <param name="values">The element values.</param>
+        /// <param name="elementFlag">The flag of every element.</param>
+        public static KVObject PackedArray(bool[] values, KVFlag elementFlag = KVFlag.None)
+            => CreatePackedArray(values, elementFlag);
+
+        /// <inheritdoc cref="PackedArray(bool[], KVFlag)"/>
+        public static KVObject PackedArray(short[] values, KVFlag elementFlag = KVFlag.None)
+            => CreatePackedArray(values, elementFlag);
+
+        /// <inheritdoc cref="PackedArray(bool[], KVFlag)"/>
+        public static KVObject PackedArray(ushort[] values, KVFlag elementFlag = KVFlag.None)
+            => CreatePackedArray(values, elementFlag);
+
+        /// <inheritdoc cref="PackedArray(bool[], KVFlag)"/>
+        public static KVObject PackedArray(int[] values, KVFlag elementFlag = KVFlag.None)
+            => CreatePackedArray(values, elementFlag);
+
+        /// <inheritdoc cref="PackedArray(bool[], KVFlag)"/>
+        public static KVObject PackedArray(uint[] values, KVFlag elementFlag = KVFlag.None)
+            => CreatePackedArray(values, elementFlag);
+
+        /// <inheritdoc cref="PackedArray(bool[], KVFlag)"/>
+        public static KVObject PackedArray(long[] values, KVFlag elementFlag = KVFlag.None)
+            => CreatePackedArray(values, elementFlag);
+
+        /// <inheritdoc cref="PackedArray(bool[], KVFlag)"/>
+        public static KVObject PackedArray(ulong[] values, KVFlag elementFlag = KVFlag.None)
+            => CreatePackedArray(values, elementFlag);
+
+        /// <inheritdoc cref="PackedArray(bool[], KVFlag)"/>
+        public static KVObject PackedArray(float[] values, KVFlag elementFlag = KVFlag.None)
+            => CreatePackedArray(values, elementFlag);
+
+        /// <inheritdoc cref="PackedArray(bool[], KVFlag)"/>
+        public static KVObject PackedArray(double[] values, KVFlag elementFlag = KVFlag.None)
+            => CreatePackedArray(values, elementFlag);
+
+        private static KVObject CreatePackedArray(System.Array values, KVFlag elementFlag)
+        {
+            ArgumentNullException.ThrowIfNull(values);
+            return new KVObject(KVValueType.Array, (long)elementFlag, values);
+        }
+
+        /// <summary>
         /// Creates a binary blob <see cref="KVObject"/>.
         /// </summary>
         public static KVObject Blob(byte[] data)
@@ -520,7 +583,7 @@ namespace ValveKeyValue
             return (byte[])_ref!;
         }
 
-        /// <summary>Gets the array elements as a span.</summary>
+        /// <summary>Gets the array elements as a span. Unpacks a packed array.</summary>
         public Span<KVObject> AsArraySpan()
         {
             if (ValueType != KVValueType.Array)
@@ -528,7 +591,200 @@ namespace ValveKeyValue
                 throw new InvalidOperationException($"Cannot get list from a {ValueType} value.");
             }
 
-            return CollectionsMarshal.AsSpan((List<KVObject>)_ref!);
+            return CollectionsMarshal.AsSpan(GetArrayList());
+        }
+
+        /// <summary>
+        /// Gets the values of a packed array without unpacking it.
+        /// </summary>
+        /// <typeparam name="T">The element type, which must be exactly the type the array was created with.</typeparam>
+        /// <param name="values">The packed values.</param>
+        /// <returns>
+        /// <c>true</c> if this is a packed array of <typeparamref name="T"/>; <c>false</c> if it is not an array,
+        /// was created with another element type or from <see cref="KVObject"/> elements, or has been unpacked.
+        /// </returns>
+        public bool TryGetArraySpan<T>(out ReadOnlySpan<T> values)
+            where T : unmanaged
+        {
+            var storage = _ref;
+
+            if (ValueType == KVValueType.Array && IsPackedArrayOf<T>(storage!))
+            {
+                values = Unsafe.As<T[]>(storage);
+                return true;
+            }
+
+            values = default;
+            return false;
+        }
+
+        /// <summary>
+        /// Converts every array element to <typeparamref name="T"/> as the explicit cast operator to
+        /// <typeparamref name="T"/> does, without unpacking a packed array.
+        /// </summary>
+        /// <typeparam name="T">
+        /// A type with an explicit cast operator from <see cref="KVObject"/>: <see cref="bool"/>, <see cref="byte"/>,
+        /// <see cref="sbyte"/>, <see cref="char"/>, <see cref="short"/>, <see cref="ushort"/>, <see cref="int"/>,
+        /// <see cref="uint"/>, <see cref="long"/>, <see cref="ulong"/>, <see cref="float"/>, <see cref="double"/>,
+        /// <see cref="decimal"/> or <see cref="string"/>.
+        /// </typeparam>
+        /// <returns>A new array; a packed array of exactly <typeparamref name="T"/> is copied.</returns>
+        /// <exception cref="InvalidOperationException">This is not an array.</exception>
+        /// <exception cref="NotSupportedException"><typeparamref name="T"/> is not a supported type, or an element cannot be converted.</exception>
+        /// <exception cref="OverflowException">An element does not fit in <typeparamref name="T"/>.</exception>
+        /// <exception cref="FormatException">A string element cannot be parsed as <typeparamref name="T"/>.</exception>
+        public T[] ToArray<T>()
+        {
+            ThrowIfCannotConvertElementsTo<T>();
+
+            var storage = _ref!;
+
+            if (IsPackedArrayOf<T>(storage))
+            {
+                return (T[])Unsafe.As<T[]>(storage).Clone();
+            }
+
+            var converted = new T[GetArrayCount(storage)];
+
+            for (var i = 0; i < converted.Length; i++)
+            {
+                converted[i] = ConvertTo<T>(GetElementScalar(storage, i));
+            }
+
+            return converted;
+        }
+
+        /// <summary>
+        /// Converts one array element to <typeparamref name="T"/> as the explicit cast operator to
+        /// <typeparamref name="T"/> does, without unpacking a packed array.
+        /// </summary>
+        /// <typeparam name="T">A type supported by <see cref="ToArray{T}"/>.</typeparam>
+        /// <param name="index">The element index.</param>
+        /// <exception cref="InvalidOperationException">This is not an array.</exception>
+        /// <exception cref="NotSupportedException"><typeparamref name="T"/> is not a supported type, or the element cannot be converted.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> is outside the array.</exception>
+        /// <exception cref="OverflowException">The element does not fit in <typeparamref name="T"/>.</exception>
+        /// <exception cref="FormatException">A string element cannot be parsed as <typeparamref name="T"/>.</exception>
+        public T GetElement<T>(int index)
+        {
+            var storage = _ref;
+
+            if (ValueType == KVValueType.Array && IsPackedArrayOf<T>(storage!))
+            {
+                var values = Unsafe.As<T[]>(storage)!;
+                ThrowIfIndexOutOfRange(values, index);
+                return values[index];
+            }
+
+            ThrowIfCannotConvertElementsTo<T>();
+
+            return ConvertTo<T>(GetElementScalar(storage!, index));
+        }
+
+        // Gets the packed values of an array that has not been unpacked yet.
+        internal bool TryGetPackedArray([NotNullWhen(true)] out System.Array? packed)
+        {
+            if (ValueType == KVValueType.Array && _ref is System.Array storage)
+            {
+                packed = storage;
+                return true;
+            }
+
+            packed = null;
+            return false;
+        }
+
+        private void ThrowIfCannotConvertElementsTo<T>()
+        {
+            if (ValueType != KVValueType.Array)
+            {
+                throw new InvalidOperationException($"Cannot convert elements of a {ValueType} value.");
+            }
+
+            if (!CanConvertTo(typeof(T)))
+            {
+                throw new NotSupportedException($"Cannot convert array elements to {typeof(T)}.");
+            }
+        }
+
+        // Creates the element at index of this object's packed values, equal to what the public
+        // constructor for its type creates.
+        internal KVObject CreatePackedElement(System.Array packed, int index)
+            => new(GetPackedScalar(packed, index), (KVFlag)_scalar);
+
+        // Compares exact types, because the runtime also casts int[] to uint[] and other same-size pairs.
+        private static bool IsPackedArrayOf<T>(object storage) => storage.GetType() == typeof(T[]);
+
+        // Gets the element at index of an array's storage without unpacking it.
+        private static ScalarValue GetElementScalar(object storage, int index)
+        {
+            if (storage is List<KVObject> list)
+            {
+                return list[index].Scalar;
+            }
+
+            var packed = (System.Array)storage;
+            ThrowIfIndexOutOfRange(packed, index);
+            return GetPackedScalar(packed, index);
+        }
+
+        private static void ThrowIfIndexOutOfRange(System.Array packed, int index)
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(index);
+            ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(index, packed.Length);
+        }
+
+        // Compares exact array types, which the JIT turns into method table comparisons.
+        private static ScalarValue GetPackedScalar(System.Array packed, int index)
+        {
+            var arrayType = packed.GetType();
+
+            if (arrayType == typeof(float[]))
+            {
+                return new ScalarValue(Unsafe.As<float[]>(packed)[index]);
+            }
+
+            if (arrayType == typeof(int[]))
+            {
+                return new ScalarValue(Unsafe.As<int[]>(packed)[index]);
+            }
+
+            if (arrayType == typeof(uint[]))
+            {
+                return new ScalarValue(Unsafe.As<uint[]>(packed)[index]);
+            }
+
+            if (arrayType == typeof(double[]))
+            {
+                return new ScalarValue(Unsafe.As<double[]>(packed)[index]);
+            }
+
+            if (arrayType == typeof(long[]))
+            {
+                return new ScalarValue(Unsafe.As<long[]>(packed)[index]);
+            }
+
+            if (arrayType == typeof(ulong[]))
+            {
+                return new ScalarValue(Unsafe.As<ulong[]>(packed)[index]);
+            }
+
+            if (arrayType == typeof(short[]))
+            {
+                return new ScalarValue(Unsafe.As<short[]>(packed)[index]);
+            }
+
+            if (arrayType == typeof(ushort[]))
+            {
+                return new ScalarValue(Unsafe.As<ushort[]>(packed)[index]);
+            }
+
+            if (arrayType == typeof(bool[]))
+            {
+                return new ScalarValue(Unsafe.As<bool[]>(packed)[index]);
+            }
+
+            throw new InvalidOperationException($"Unsupported packed array type: {arrayType}.");
         }
 
         #endregion
@@ -608,9 +864,45 @@ namespace ValveKeyValue
             _ => [],
         };
 
+        private static int GetArrayCount(object? storage) => storage switch
+        {
+            List<KVObject> list => list.Count,
+            System.Array packed => packed.Length,
+            _ => 0,
+        };
+
+        // Gets the elements of an array, unpacking it on first use. Concurrent first calls may each
+        // build a list, but only the first one published is stored and returned to all of them.
+        private List<KVObject> GetArrayList()
+        {
+            var storage = _ref;
+
+            if (storage is List<KVObject> list)
+            {
+                return list;
+            }
+
+            var packed = (System.Array)storage!;
+            var unpacked = new List<KVObject>(packed.Length);
+
+            for (var i = 0; i < packed.Length; i++)
+            {
+                unpacked.Add(CreatePackedElement(packed, i));
+            }
+
+            var published = Interlocked.CompareExchange(ref _ref, unpacked, packed);
+
+            if (published == packed)
+            {
+                return unpacked;
+            }
+
+            return (List<KVObject>)published!;
+        }
+
         private IEnumerable<KeyValuePair<string, KVObject>> EnumerateArray()
         {
-            var list = (List<KVObject>)_ref!;
+            var list = GetArrayList();
             foreach (var item in list)
             {
                 yield return new KeyValuePair<string, KVObject>(null!, item);

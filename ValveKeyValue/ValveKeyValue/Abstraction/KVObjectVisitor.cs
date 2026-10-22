@@ -29,6 +29,16 @@ namespace ValveKeyValue.Abstraction
                     listener.OnObjectEnd();
                     break;
 
+                case KVValueType.Array when obj.TryGetPackedArray(out var packed):
+                    // Packed elements are all simple. Creating them per visit leaves the array packed.
+                    listener.OnArrayStart(name, obj.Flag, packed.Length, true);
+                    for (var i = 0; i < packed.Length; i++)
+                    {
+                        listener.OnArrayValue(obj.CreatePackedElement(packed, i));
+                    }
+                    listener.OnArrayEnd();
+                    break;
+
                 case KVValueType.Array:
                     var arrayList = obj.AsArraySpan();
                     var allSimple = true;
