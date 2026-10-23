@@ -123,13 +123,13 @@ namespace ValveKeyValue.Deserialization.KeyValues1
             return new KVToken(KVTokenType.Condition, text);
         }
 
-        string ReadUntil(Func<int, bool> isTerminator)
+        string ReadUntilQuotationMark()
         {
             var escapeNext = false;
             var escapeLine = 0;
             var escapeColumn = 0;
 
-            while (escapeNext || !isTerminator(Peek()))
+            while (escapeNext || Peek() != QuotationMark)
             {
                 var next = Next();
 
@@ -209,7 +209,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
         string ReadQuotedString()
         {
             ReadChar(QuotationMark);
-            var text = ReadUntil(static (c) => c == QuotationMark);
+            var text = ReadUntilQuotationMark();
             ReadChar(QuotationMark);
             return text;
         }

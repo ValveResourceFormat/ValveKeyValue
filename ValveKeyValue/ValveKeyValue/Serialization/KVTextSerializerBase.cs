@@ -5,6 +5,7 @@ namespace ValveKeyValue.Serialization
     abstract class KVTextSerializerBase : IDisposable
     {
         static readonly UTF8Encoding Utf8NoBom = new(encoderShouldEmitUTF8Identifier: false);
+        static readonly string Tabs = new('\t', 32);
 
         protected KVTextSerializerBase(Stream stream)
         {
@@ -57,10 +58,15 @@ namespace ValveKeyValue.Serialization
 
         protected void WriteIndentation()
         {
-            for (var i = 0; i < indentation; i++)
+            var remaining = indentation;
+
+            while (remaining > Tabs.Length)
             {
-                writer.Write('\t');
+                writer.Write(Tabs);
+                remaining -= Tabs.Length;
             }
+
+            writer.Write(Tabs.AsSpan(0, remaining));
         }
 
         public void Dispose()

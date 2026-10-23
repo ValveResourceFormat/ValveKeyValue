@@ -1,5 +1,5 @@
+using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.Runtime.CompilerServices;
 
 namespace ValveKeyValue
@@ -18,12 +18,11 @@ namespace ValveKeyValue
             }
 
             var result = new byte[hexadecimalRepresentation.Length / 2];
-            for (var i = 0; i < result.Length; i++)
+            var status = Convert.FromHexString(hexadecimalRepresentation, result, out _, out _);
+
+            if (status != OperationStatus.Done)
             {
-                if (!byte.TryParse(hexadecimalRepresentation.AsSpan(i * 2, 2), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out result[i]))
-                {
-                    return false;
-                }
+                return false;
             }
 
             data = result;

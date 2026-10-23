@@ -342,6 +342,49 @@ namespace ValveKeyValue.Deserialization.KeyValues3
         // Parses an unquoted value, returns null when it is not a valid literal.
         static KVObject? ParseValue(string text)
         {
+            // Most unquoted values are numbers, and no keyword starts with a digit
+            if (!char.IsAsciiDigit(text[0]))
+            {
+                var keyword = ParseKeyword(text);
+
+                if (keyword != null)
+                {
+                    return keyword;
+                }
+            }
+
+            const NumberStyles IntegerNumberStyles = NumberStyles.AllowLeadingSign;
+
+            if (text[0] == '-' && long.TryParse(text, IntegerNumberStyles, CultureInfo.InvariantCulture, out var intValue))
+            {
+                return new KVObject(intValue);
+            }
+            else if (ulong.TryParse(text, IntegerNumberStyles, CultureInfo.InvariantCulture, out var uintValue))
+            {
+                return new KVObject(uintValue);
+            }
+
+            if (text.AsSpan().ContainsAnyExcept(FloatCharacters))
+            {
+                return null;
+            }
+
+            const NumberStyles FloatingPointNumberStyles =
+                NumberStyles.AllowDecimalPoint |
+                NumberStyles.AllowExponent |
+                NumberStyles.AllowLeadingSign;
+
+            if (double.TryParse(text, FloatingPointNumberStyles, CultureInfo.InvariantCulture, out var floatValue))
+            {
+                return new KVObject(floatValue);
+            }
+
+            return null;
+        }
+
+        // Parses the literals that are not plain numbers, returns null for anything else.
+        static KVObject? ParseKeyword(string text)
+        {
             if (text.Equals("false", StringComparison.OrdinalIgnoreCase))
             {
                 return new KVObject(false);
@@ -371,32 +414,6 @@ namespace ValveKeyValue.Deserialization.KeyValues3
             if (text == "+")
             {
                 return new KVObject(0UL);
-            }
-
-            const NumberStyles IntegerNumberStyles = NumberStyles.AllowLeadingSign;
-
-            if (text[0] == '-' && long.TryParse(text, IntegerNumberStyles, CultureInfo.InvariantCulture, out var intValue))
-            {
-                return new KVObject(intValue);
-            }
-            else if (ulong.TryParse(text, IntegerNumberStyles, CultureInfo.InvariantCulture, out var uintValue))
-            {
-                return new KVObject(uintValue);
-            }
-
-            if (text.AsSpan().ContainsAnyExcept(FloatCharacters))
-            {
-                return null;
-            }
-
-            const NumberStyles FloatingPointNumberStyles =
-                NumberStyles.AllowDecimalPoint |
-                NumberStyles.AllowExponent |
-                NumberStyles.AllowLeadingSign;
-
-            if (double.TryParse(text, FloatingPointNumberStyles, CultureInfo.InvariantCulture, out var floatValue))
-            {
-                return new KVObject(floatValue);
             }
 
             return null;

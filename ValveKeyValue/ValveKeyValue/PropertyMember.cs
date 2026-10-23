@@ -11,15 +11,17 @@ namespace ValveKeyValue
 
             this.propertyInfo = propertyInfo;
             this.@object = @object;
+            propertyAttribute = propertyInfo.GetCustomAttribute<KVPropertyAttribute>();
         }
 
         readonly PropertyInfo propertyInfo;
         readonly object @object;
+        readonly KVPropertyAttribute? propertyAttribute;
 
-        bool IObjectMember.IsExplicitName => PropertyAttribute != null;
+        bool IObjectMember.IsExplicitName => propertyAttribute != null;
 
         string IObjectMember.Name
-            => PropertyAttribute?.PropertyName ?? propertyInfo.Name;
+            => propertyAttribute?.PropertyName ?? propertyInfo.Name;
 
         bool IObjectMember.CanWrite => propertyInfo.CanWrite;
 
@@ -30,7 +32,5 @@ namespace ValveKeyValue
             get { return propertyInfo.GetValue(@object); }
             set { propertyInfo.SetValue(@object, value); }
         }
-
-        KVPropertyAttribute? PropertyAttribute => propertyInfo.GetCustomAttribute<KVPropertyAttribute>();
     }
 }
