@@ -294,15 +294,15 @@ namespace ValveKeyValue.Test
         }
 
         [Test]
-        public void ObjectIsCreatedWithoutRunningConstructorOrInitializers()
+        public void ObjectIsCreatedThroughParameterlessConstructor()
         {
             var back = KV1.Deserialize<WithInitializers>("\"root\"\n{\n\t\"Name\"\t\"n\"\n}");
 
             using (Assert.EnterMultipleScope())
             {
                 Assert.That(back.Name, Is.EqualTo("n"));
-                Assert.That(back.Initialized, Is.Null);
-                Assert.That(back.ConstructorRan, Is.False);
+                Assert.That(back.Initialized, Is.EqualTo("init"));
+                Assert.That(back.ConstructorRan, Is.True);
             }
         }
 

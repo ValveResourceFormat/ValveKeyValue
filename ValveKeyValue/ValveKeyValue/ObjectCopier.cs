@@ -18,7 +18,7 @@ namespace ValveKeyValue
             => MakeObject<TObject>(keyValueObject, new DefaultObjectReflector());
 
         public static object MakeObject(
-            [DynamicallyAccessedMembers(Trimming.Properties)] Type objectType, KVObject keyValueObject, IObjectReflector reflector)
+            [DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] Type objectType, KVObject keyValueObject, IObjectReflector reflector)
             => InvokeGeneric(nameof(MakeObject), objectType, new object[] { keyValueObject, reflector });
 
         public static TObject MakeObject<[DynamicallyAccessedMembers(Trimming.Constructors | Trimming.Properties)] TObject>(KVObject keyValueObject, IObjectReflector reflector)
@@ -51,7 +51,7 @@ namespace ValveKeyValue
 
                 // The object must remain boxed until it is fully initiallized, as this is the only way
                 // that we can build a struct due to the nature of struct copying.
-                var typedObject = RuntimeHelpers.GetUninitializedObject(typeof(TObject));
+                var typedObject = CreateInstance(typeof(TObject));
                 CopyObject(keyValueObject, typeof(TObject), typedObject, reflector);
                 return (TObject)typedObject;
             }
@@ -80,6 +80,19 @@ namespace ValveKeyValue
                 // TODO: For nullable types this typeof is not that useful
                 throw new NotSupportedException($"Converting to {typeof(TObject).Name} is not supported. (type = {keyValueObject.ValueType})");
             }
+        }
+
+        // Runs the public parameterless constructor when there is one, so property and field
+        // initializers provide defaults for keys missing from the data.
+        static object CreateInstance([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type type)
+        {
+            var constructor = type.GetConstructor(Type.EmptyTypes);
+            if (constructor == null)
+            {
+                return RuntimeHelpers.GetUninitializedObject(type);
+            }
+
+            return constructor.Invoke(BindingFlags.DoNotWrapExceptions, binder: null, parameters: null, culture: null);
         }
 
         static void CopyObject(KVObject kv, [DynamicallyAccessedMembers(Trimming.Properties)] Type objectType, object obj, IObjectReflector reflector)

@@ -24,8 +24,8 @@ namespace ValveKeyValue.Test
 
             using (Assert.EnterMultipleScope())
             {
-                Assert.That(person.FirstName, Is.Null);
-                Assert.That(person.LastName, Is.Null);
+                Assert.That(person.FirstName, Is.Empty);
+                Assert.That(person.LastName, Is.Empty);
                 Assert.That(person.Age, Is.Zero);
             }
         }

@@ -86,7 +86,7 @@ namespace ValveKeyValue.Test
 
             using (Assert.EnterMultipleScope())
             {
-                // required is bypassed by GetUninitializedObject - property stays at default
+                // required is not enforced during deserialization - property stays at default
                 Assert.That(obj.RequiredName, Is.Null);
                 Assert.That(obj.Name, Is.EqualTo("hello"));
             }
@@ -107,8 +107,7 @@ namespace ValveKeyValue.Test
             {
                 Assert.That(obj.Name, Is.EqualTo("hello"));
 
-                // GetUninitializedObject zeroes all memory, so non-nullable string is null
-                // This violates the non-nullable contract silently
+                // The initializer assigns null!, so the non-nullable string stays null
                 Assert.That(obj.Title, Is.Null);
             }
         }
