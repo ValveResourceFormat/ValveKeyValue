@@ -118,21 +118,29 @@ namespace ValveKeyValue.Serialization.KeyValues3
                 WriteValue(value);
 
                 if (!isLast)
+                {
                     writer.Write(", ");
+                }
             }
             else if (allSimple)
             {
                 // Group 4 simple values per line
                 if (index % 4 == 0)
+                {
                     WriteIndentation();
+                }
 
                 WriteValue(value);
                 writer.Write(',');
 
                 if (!isLast && (index + 1) % 4 != 0)
+                {
                     writer.Write(' ');
+                }
                 else
+                {
                     writer.WriteLine();
+                }
             }
             else
             {
@@ -346,9 +354,13 @@ namespace ValveKeyValue.Serialization.KeyValues3
             // Strip trailing zeros but keep at least one digit after the decimal point
             var span = formatted.TrimEnd('0');
             if (span[^1] == '.')
+            {
                 writer.Write(formatted[..(span.Length + 1)]);
+            }
             else
+            {
                 writer.Write(span);
+            }
         }
 
         void WriteBinaryBlob(KVObject value)
@@ -366,7 +378,9 @@ namespace ValveKeyValue.Serialization.KeyValues3
                     WriteHexByte(b);
 
                     if (i < bytes.Length - 1)
+                    {
                         writer.Write(' ');
+                    }
                 }
 
                 writer.Write(" ]");
@@ -408,7 +422,7 @@ namespace ValveKeyValue.Serialization.KeyValues3
                     }
                 }
 
-                WriteHexByte(bytes[bytes.Length - 1]);
+                WriteHexByte(bytes[^1]);
 
                 indentation--;
 

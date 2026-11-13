@@ -14,9 +14,9 @@ namespace ValveKeyValue.Deserialization
 
         public KeyValuePair<string, KVObject> GetObject()
         {
-            if (stateStack.Count != 1)
+            if (StateStack.Count != 1)
             {
-                throw new KeyValueException($"Builder is not in a fully completed state (stack count is {stateStack.Count}).");
+                throw new KeyValueException($"Builder is not in a fully completed state (stack count is {StateStack.Count}).");
             }
 
             foreach (var associatedBuilder in associatedBuilders)
@@ -24,11 +24,10 @@ namespace ValveKeyValue.Deserialization
                 associatedBuilder.FinalizeState();
             }
 
-            var state = stateStack.Peek();
+            var state = StateStack.Peek();
             return state.IsArray ? MakeResult(state, MakeArray(state)) : MakeResult(state, MakeObject(state));
         }
 
-        readonly Stack<KVPartialState> stateStack = new();
         readonly Stack<KVPartialState> spareStates = new();
 
         public void OnKeyValuePair(string name, KVObject value)
@@ -168,7 +167,7 @@ namespace ValveKeyValue.Deserialization
         {
         }
 
-        internal Stack<KVPartialState> StateStack => stateStack;
+        internal Stack<KVPartialState> StateStack { get; } = new();
 
         protected virtual void FinalizeState()
         {

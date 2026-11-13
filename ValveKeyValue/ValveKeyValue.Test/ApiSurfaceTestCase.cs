@@ -93,7 +93,7 @@ namespace ValveKeyValue.Test
 
             foreach (var iface in directInterfaces
                 .Where(i => !directInterfaces.Any(other => other != i && ifaceChildren[other].Contains(i)))
-                .OrderBy(i => GetTypeAsString(i), StringComparer.InvariantCulture))
+                .OrderBy(GetTypeAsString, StringComparer.InvariantCulture))
             {
                 baseTypes.Add(GetTypeAsString(iface));
             }

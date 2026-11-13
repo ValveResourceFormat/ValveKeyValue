@@ -139,7 +139,7 @@ namespace ValveKeyValue.Deserialization.KeyValues1
                 case KV1BinaryNodeType.Pointer:
                     // Source 1 writes pointers as 4 bytes, Steam and Source 2 write them as 8 bytes.
                     // No known files contain pointers, so only the Source 1 size is supported.
-                    value = new KVObject(KVValueType.Pointer, (long)reader.ReadInt32());
+                    value = new KVObject(KVValueType.Pointer, reader.ReadInt32());
                     break;
 
                 case KV1BinaryNodeType.UInt64:

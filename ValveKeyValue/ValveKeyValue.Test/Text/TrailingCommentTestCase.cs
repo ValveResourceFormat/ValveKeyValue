@@ -14,7 +14,7 @@ namespace ValveKeyValue.Test
 
             using (Assert.EnterMultipleScope())
             {
-                Assert.That(((KVDocument)kv).Name, Is.EqualTo("vertexlitgeneric"));
+                Assert.That(kv.Name, Is.EqualTo("vertexlitgeneric"));
                 Assert.That(((string)kv["$basetexture"]), Is.EqualTo("models/props_oil/doors/oil_door"));
                 Assert.That(((string)kv["$surfaceprop"]), Is.EqualTo("metal"));
                 Assert.That(((string)kv["%keywords"]), Is.EqualTo("tf"));
@@ -33,7 +33,7 @@ namespace ValveKeyValue.Test
 
             using (Assert.EnterMultipleScope())
             {
-                Assert.That(((KVDocument)kv).Name, Is.EqualTo("vertexlitgeneric"));
+                Assert.That(kv.Name, Is.EqualTo("vertexlitgeneric"));
                 Assert.That(((string)kv["$basetexture"]), Is.EqualTo("models/props_oil/doors/oil_door"));
                 Assert.That(((string)kv["$surfaceprop"]), Is.EqualTo("metal"));
                 Assert.That(((string)kv["%keywords"]), Is.EqualTo("tf"));

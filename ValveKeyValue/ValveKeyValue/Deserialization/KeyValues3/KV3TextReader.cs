@@ -421,13 +421,41 @@ namespace ValveKeyValue.Deserialization.KeyValues3
 
         static KVFlag? ParseFlag(string flag)
         {
-            if (flag.Equals("resource", StringComparison.OrdinalIgnoreCase)) return KVFlag.Resource;
-            if (flag.Equals("resource_name", StringComparison.OrdinalIgnoreCase)) return KVFlag.ResourceName;
-            if (flag.Equals("panorama", StringComparison.OrdinalIgnoreCase)) return KVFlag.Panorama;
-            if (flag.Equals("soundevent", StringComparison.OrdinalIgnoreCase)) return KVFlag.SoundEvent;
-            if (flag.Equals("subclass", StringComparison.OrdinalIgnoreCase)) return KVFlag.SubClass;
-            if (flag.Equals("entity_name", StringComparison.OrdinalIgnoreCase)) return KVFlag.EntityName;
-            if (flag.Equals("localize", StringComparison.OrdinalIgnoreCase)) return KVFlag.Localize;
+            if (flag.Equals("resource", StringComparison.OrdinalIgnoreCase))
+            {
+                return KVFlag.Resource;
+            }
+
+            if (flag.Equals("resource_name", StringComparison.OrdinalIgnoreCase))
+            {
+                return KVFlag.ResourceName;
+            }
+
+            if (flag.Equals("panorama", StringComparison.OrdinalIgnoreCase))
+            {
+                return KVFlag.Panorama;
+            }
+
+            if (flag.Equals("soundevent", StringComparison.OrdinalIgnoreCase))
+            {
+                return KVFlag.SoundEvent;
+            }
+
+            if (flag.Equals("subclass", StringComparison.OrdinalIgnoreCase))
+            {
+                return KVFlag.SubClass;
+            }
+
+            if (flag.Equals("entity_name", StringComparison.OrdinalIgnoreCase))
+            {
+                return KVFlag.EntityName;
+            }
+
+            if (flag.Equals("localize", StringComparison.OrdinalIgnoreCase))
+            {
+                return KVFlag.Localize;
+            }
+
             return null;
         }
     }

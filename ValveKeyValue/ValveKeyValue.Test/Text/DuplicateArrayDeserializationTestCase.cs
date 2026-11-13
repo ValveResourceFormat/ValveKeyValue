@@ -41,23 +41,23 @@ namespace ValveKeyValue.Test
             var firstNode = children[0].Value;
             Assert.That(firstNode, Is.Not.Null);
 
-            var firstArray = firstNode!.ToArray();
+            var firstArray = firstNode.ToArray();
             using (Assert.EnterMultipleScope())
             {
                 Assert.That(firstArray, Has.Length.EqualTo(2));
-                Assert.That((string)firstArray[0].Value!["name"]!, Is.EqualTo("first"));
-                Assert.That((string)firstArray[1].Value!["name"]!, Is.EqualTo("second"));
+                Assert.That((string)firstArray[0].Value["name"], Is.EqualTo("first"));
+                Assert.That((string)firstArray[1].Value["name"], Is.EqualTo("second"));
             }
 
             var secondNode = children[1].Value;
             Assert.That(secondNode, Is.Not.Null);
 
-            var secondArray = secondNode!.ToArray();
+            var secondArray = secondNode.ToArray();
             using (Assert.EnterMultipleScope())
             {
                 Assert.That(secondArray, Has.Length.EqualTo(2));
-                Assert.That((string)secondArray[0].Value!["name"]!, Is.EqualTo("third"));
-                Assert.That((string)secondArray[1].Value!["name"]!, Is.EqualTo("fourth"));
+                Assert.That((string)secondArray[0].Value["name"], Is.EqualTo("third"));
+                Assert.That((string)secondArray[1].Value["name"], Is.EqualTo("fourth"));
             }
         }
 

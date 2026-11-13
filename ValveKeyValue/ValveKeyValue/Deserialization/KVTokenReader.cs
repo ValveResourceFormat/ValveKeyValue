@@ -15,7 +15,6 @@ namespace ValveKeyValue.Deserialization
 
         int lineOffset;
         int columnOffset;
-        int charOffset;
         int tokenEnd = -1;
 
         public int Line => lineOffset + 1;
@@ -24,7 +23,7 @@ namespace ValveKeyValue.Deserialization
         // Character offset of the next character to read, advancing by exactly one per character
         // consumed from the input. Source-map deserialization indexes into the same text as a
         // string, so these offsets line up with substring boundaries on the caller side.
-        public int CharOffset => charOffset;
+        public int CharOffset { get; private set; }
 
         // Character range [LastTokenStart, LastTokenEnd) of the most recently returned token,
         // measured after leading whitespace was skipped. Source-map deserializers read these
@@ -48,7 +47,7 @@ namespace ValveKeyValue.Deserialization
         // consume trailing characters (such as whitespace) that are not part of the token.
         protected void MarkTokenEnd()
         {
-            tokenEnd = charOffset;
+            tokenEnd = CharOffset;
         }
 
         public KVToken ReadNextToken()
@@ -58,10 +57,10 @@ namespace ValveKeyValue.Deserialization
 
             MarkTokenStart();
 
-            LastTokenStart = charOffset;
+            LastTokenStart = CharOffset;
             tokenEnd = -1;
             var token = ReadNextTokenInner();
-            LastTokenEnd = tokenEnd == -1 ? charOffset : tokenEnd;
+            LastTokenEnd = tokenEnd == -1 ? CharOffset : tokenEnd;
             return token;
         }
 
@@ -108,7 +107,7 @@ namespace ValveKeyValue.Deserialization
                 columnOffset++;
             }
 
-            charOffset++;
+            CharOffset++;
             next = (char)nextValue;
             return true;
         }

@@ -62,7 +62,7 @@ namespace ValveKeyValue.Serialization.KeyValues1
                     break;
 
                 case KVValueType.String:
-                    WriteNullTerminatedString((string)value!);
+                    WriteNullTerminatedString((string)value);
                     break;
 
                 case KVValueType.UInt32:

@@ -121,7 +121,7 @@ namespace ValveKeyValue
 
         static bool IsArray(KVObject obj, [MaybeNullWhen(false)] out object[] values)
         {
-            values = null!;
+            values = null;
 
             // Keys must be exactly the indices 0..Count-1, in any order.
             object[]? items = null;
@@ -149,7 +149,7 @@ namespace ValveKeyValue
 
         static bool IsLookupWithStringKey(Type type, [MaybeNullWhen(false)] out Type valueType)
         {
-            valueType = null!;
+            valueType = null;
 
             if (!type.IsConstructedGenericType)
             {
@@ -418,7 +418,7 @@ namespace ValveKeyValue
                 return Enum.ToObject(enumType, underlyingValue);
             }
 
-            var text = Convert.ToString(value, CultureInfo.InvariantCulture)!;
+            var text = Convert.ToString(value, CultureInfo.InvariantCulture);
 
             if (!Enum.TryParse(enumType, text, ignoreCase: true, out var result))
             {
@@ -464,7 +464,7 @@ namespace ValveKeyValue
                 return true;
             }
 
-            converted = default!;
+            converted = default;
             return false;
         }
     }

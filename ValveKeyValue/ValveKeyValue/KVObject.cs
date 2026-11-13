@@ -269,7 +269,7 @@ namespace ValveKeyValue
                 case List<KeyValuePair<string, KVObject>> list when ValueType == KVValueType.Collection:
                     return TryFindInList(list, name, out child);
                 default:
-                    child = null!;
+                    child = null;
                     return false;
             }
         }
@@ -966,7 +966,7 @@ namespace ValveKeyValue
             var index = IndexOfInList(list, name);
             if (index < 0)
             {
-                value = null!;
+                value = null;
                 return false;
             }
 

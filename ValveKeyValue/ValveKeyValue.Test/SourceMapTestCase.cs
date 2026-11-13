@@ -271,7 +271,7 @@ namespace ValveKeyValue.Test
         static void AssertSpanExists(string text, IReadOnlyList<KvSourceSpan> spans, KVTokenType tokenType, string expectedText)
         {
             var match = spans.FirstOrDefault(s =>
-                s.TokenType == tokenType && text.Substring(s.Start, s.End - s.Start) == expectedText);
+                s.TokenType == tokenType && text[s.Start..s.End] == expectedText);
             Assert.That(match, Is.Not.EqualTo(default(KvSourceSpan)),
                 $"expected a {tokenType} span covering '{expectedText}'");
         }

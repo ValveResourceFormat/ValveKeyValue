@@ -154,7 +154,7 @@ namespace ValveKeyValue.Test
             var obj = new KVObject("hello");
 
             Assert.That(
-                () => obj.Clear(),
+                obj.Clear,
                 Throws.InstanceOf<InvalidOperationException>());
         }
 
@@ -788,7 +788,7 @@ namespace ValveKeyValue.Test
         {
             var obj = new KVObject(42);
 
-            Assert.That(() => obj.Clear(), Throws.InstanceOf<InvalidOperationException>());
+            Assert.That(obj.Clear, Throws.InstanceOf<InvalidOperationException>());
         }
 
         #endregion

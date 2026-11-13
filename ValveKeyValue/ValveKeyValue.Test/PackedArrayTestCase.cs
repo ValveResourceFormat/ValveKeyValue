@@ -740,13 +740,13 @@ namespace ValveKeyValue.Test
         public void SerializesWithSourceMapLikeListBackedArray(PackedCase testCase, KVFlag elementFlag)
         {
             var kv = KVSerializer.Create(KVSerializationFormat.KeyValues3Text);
-            var packed = kv.SerializeWithSourceMap(WrapInCollection(testCase.CreatePacked(elementFlag)), "root");
-            var expected = kv.SerializeWithSourceMap(WrapInCollection(testCase.CreateListBacked(elementFlag)), "root");
+            var (packedText, packedSpans) = kv.SerializeWithSourceMap(WrapInCollection(testCase.CreatePacked(elementFlag)), "root");
+            var (expectedText, expectedSpans) = kv.SerializeWithSourceMap(WrapInCollection(testCase.CreateListBacked(elementFlag)), "root");
 
             using (Assert.EnterMultipleScope())
             {
-                Assert.That(packed.Text, Is.EqualTo(expected.Text));
-                Assert.That(packed.Spans, Is.EqualTo(expected.Spans));
+                Assert.That(packedText, Is.EqualTo(expectedText));
+                Assert.That(packedSpans, Is.EqualTo(expectedSpans));
             }
         }
 
