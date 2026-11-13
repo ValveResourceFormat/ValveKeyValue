@@ -178,7 +178,7 @@ namespace ValveKeyValue.Test
             var dataObject = new CharDecimalObject
             {
                 VChar = 'Ω',
-                VDecimal = 98765.4321m,
+                VDecimal = 98765.4375m,
             };
 
             using var ms = new MemoryStream();
@@ -191,7 +191,7 @@ namespace ValveKeyValue.Test
             using (Assert.EnterMultipleScope())
             {
                 Assert.That(d.VChar, Is.EqualTo('Ω'));
-                Assert.That(d.VDecimal, Is.EqualTo(98765.4321m));
+                Assert.That(d.VDecimal, Is.EqualTo(98765.4375m));
             }
         }
 
