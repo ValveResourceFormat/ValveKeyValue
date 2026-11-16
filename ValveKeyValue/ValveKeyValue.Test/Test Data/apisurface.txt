@@ -124,6 +124,7 @@ public class ValveKeyValue.KVObject : IConvertible, System.Collections.Generic.I
     public .ctor(long value);
     public .ctor(short value);
     public .ctor(string value);
+    public .ctor(System.Collections.Generic.IEqualityComparer`1[[string]] keyComparer);
     public .ctor(uint value);
     public .ctor(ulong value);
     public .ctor(ushort value);

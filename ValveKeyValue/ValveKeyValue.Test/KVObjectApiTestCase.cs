@@ -325,6 +325,21 @@ namespace ValveKeyValue.Test
             }
         }
 
+        [Test]
+        public void ConstructorWithKeyComparerLooksUpKeysWithIt()
+        {
+            var obj = new KVObject(StringComparer.OrdinalIgnoreCase);
+            obj.Add("StartDisabled", true);
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.ContainsKey("startdisabled"), Is.True);
+                Assert.That((bool)obj["STARTDISABLED"], Is.True);
+                Assert.That(obj.TryAdd("startdisabled", false), Is.False);
+                Assert.That(obj.Keys.Single(), Is.EqualTo("StartDisabled"));
+            }
+        }
+
         #endregion
 
         #region KVObject null
