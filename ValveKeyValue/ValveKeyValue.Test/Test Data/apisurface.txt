@@ -434,6 +434,7 @@ public static class ValveKeyValue.KeyValues3.Encoding
     public static Guid get_BinaryAuto();
     public static Guid get_BinaryBlockCompressed();
     public static Guid get_BinaryLZ4();
+    public static Guid get_BinaryZ3();
     public static Guid get_BinaryZstd();
     public static Guid get_Text();
     public int GetHashCode();
