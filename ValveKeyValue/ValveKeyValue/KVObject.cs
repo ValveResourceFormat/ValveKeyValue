@@ -84,6 +84,18 @@ namespace ValveKeyValue
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="KVObject"/> class as an empty dictionary-backed collection
+        /// whose keys are compared with the given comparer.
+        /// </summary>
+        /// <param name="keyComparer">The comparer keys are looked up with.</param>
+        public KVObject(IEqualityComparer<string> keyComparer)
+        {
+            ArgumentNullException.ThrowIfNull(keyComparer);
+            ValueType = KVValueType.Collection;
+            _ref = new Dictionary<string, KVObject>(keyComparer);
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="KVObject"/> class with a string value.
         /// </summary>
         public KVObject(string value)
@@ -463,9 +475,9 @@ namespace ValveKeyValue
         }
 
         // Enumerates the list directly rather than through IEnumerable, which would box its enumerator.
-        internal static KVObject Collection(List<KeyValuePair<string, KVObject>> children)
+        internal static KVObject Collection(List<KeyValuePair<string, KVObject>> children, IEqualityComparer<string>? keyComparer = null)
         {
-            var dict = new Dictionary<string, KVObject>(children.Count);
+            var dict = new Dictionary<string, KVObject>(children.Count, keyComparer);
             foreach (var (key, value) in children)
             {
                 dict[key] = value;

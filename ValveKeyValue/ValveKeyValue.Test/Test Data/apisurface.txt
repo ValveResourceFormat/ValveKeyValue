@@ -124,6 +124,7 @@ public class ValveKeyValue.KVObject : IConvertible, System.Collections.Generic.I
     public .ctor(long value);
     public .ctor(short value);
     public .ctor(string value);
+    public .ctor(System.Collections.Generic.IEqualityComparer`1[[string]] keyComparer);
     public .ctor(uint value);
     public .ctor(ulong value);
     public .ctor(ushort value);
@@ -307,6 +308,7 @@ public sealed class ValveKeyValue.KVSerializerOptions
     public bool get_EnableValveNullByteBugBehavior();
     public ValveKeyValue.IIncludedFileLoader get_FileLoader();
     public bool get_HasEscapeSequences();
+    public System.Collections.Generic.IEqualityComparer`1[[string]] get_KeyComparer();
     public bool get_SkipHeader();
     public ValveKeyValue.StringTable get_StringTable();
     public int GetHashCode();
@@ -315,6 +317,7 @@ public sealed class ValveKeyValue.KVSerializerOptions
     public void set_EnableValveNullByteBugBehavior(bool value);
     public void set_FileLoader(ValveKeyValue.IIncludedFileLoader value);
     public void set_HasEscapeSequences(bool value);
+    public void set_KeyComparer(System.Collections.Generic.IEqualityComparer`1[[string]] value);
     public void set_SkipHeader(bool value);
     public void set_StringTable(ValveKeyValue.StringTable value);
     public string ToString();

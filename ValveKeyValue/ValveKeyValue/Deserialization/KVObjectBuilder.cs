@@ -5,11 +5,13 @@ namespace ValveKeyValue.Deserialization
     class KVObjectBuilder : IParsingVisitationListener
     {
         readonly bool useDictionary;
+        readonly IEqualityComparer<string>? keyComparer;
         readonly List<KVObjectBuilder> associatedBuilders = new();
 
-        public KVObjectBuilder(bool useDictionaryForCollections = false)
+        public KVObjectBuilder(bool useDictionaryForCollections = false, IEqualityComparer<string>? keyComparer = null)
         {
             useDictionary = useDictionaryForCollections;
+            this.keyComparer = keyComparer;
         }
 
         public KeyValuePair<string, KVObject> GetObject()
@@ -200,7 +202,7 @@ namespace ValveKeyValue.Deserialization
             }
 
             KVObject result = useDictionary
-                ? KVObject.Collection(state.Items)
+                ? KVObject.Collection(state.Items, keyComparer)
                 : new KVObject(KVValueType.Collection, state.DetachItems());
 
             if (state.Flag != KVFlag.None)

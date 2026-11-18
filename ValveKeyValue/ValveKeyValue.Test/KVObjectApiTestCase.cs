@@ -325,6 +325,21 @@ namespace ValveKeyValue.Test
             }
         }
 
+        [Test]
+        public void ConstructorWithKeyComparerLooksUpKeysWithIt()
+        {
+            var obj = new KVObject(StringComparer.OrdinalIgnoreCase);
+            obj.Add("StartDisabled", true);
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(obj.ContainsKey("startdisabled"), Is.True);
+                Assert.That((bool)obj["STARTDISABLED"], Is.True);
+                Assert.That(obj.TryAdd("startdisabled", false), Is.False);
+                Assert.That(obj.Keys.Single(), Is.EqualTo("StartDisabled"));
+            }
+        }
+
         #endregion
 
         #region KVObject null
@@ -699,6 +714,26 @@ namespace ValveKeyValue.Test
             {
                 Assert.That(data.ContainsKey("foo"), Is.True);
                 Assert.That(data.ContainsKey("nonexistent"), Is.False);
+            }
+        }
+
+        [Test]
+        public void KV3DeserializationLooksUpKeysWithKeyComparer()
+        {
+            var options = new KVSerializerOptions
+            {
+                SkipHeader = true,
+                KeyComparer = StringComparer.OrdinalIgnoreCase,
+            };
+
+            using var stream = new MemoryStream("{ Outer = { StartDisabled = true } }"u8.ToArray());
+            var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream, options).Root;
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(data.ContainsKey("outer"), Is.True);
+                Assert.That((bool)data["OUTER"]["startdisabled"], Is.True);
+                Assert.That(data["outer"].Keys.Single(), Is.EqualTo("StartDisabled"));
             }
         }
 

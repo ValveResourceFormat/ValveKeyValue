@@ -278,6 +278,7 @@ Every `Deserialize` and `Serialize` overload takes an optional `KVSerializerOpti
 * `FileLoader` - Provider for files referenced by KV1 `#include` and `#base` directives. See [Includes](#includes).
 * `StringTable` - String table used by the KV1 binary format. See [Binary](#binary).
 * `SkipHeader` - Whether to omit the KV3 header comment when serializing and to not expect one when deserializing.
+* `KeyComparer` - Comparer that keys of deserialized KV3 objects are looked up with, for example `StringComparer.OrdinalIgnoreCase`. KV1 objects keep their keys in a list and always compare them exactly.
 
 ```csharp
 var options = new KVSerializerOptions

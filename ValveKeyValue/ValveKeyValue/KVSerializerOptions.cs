@@ -38,6 +38,12 @@ namespace ValveKeyValue
         public StringTable? StringTable { get; set; }
 
         /// <summary>
+        /// Gets or sets the comparer that keys of deserialized dictionary-backed collections are looked up with.
+        /// KV3 text is the format that deserializes into dictionary-backed collections.
+        /// </summary>
+        public IEqualityComparer<string>? KeyComparer { get; set; }
+
+        /// <summary>
         /// Gets the default options (used when none are specified).
         /// </summary>
         public static KVSerializerOptions DefaultOptions => new();
