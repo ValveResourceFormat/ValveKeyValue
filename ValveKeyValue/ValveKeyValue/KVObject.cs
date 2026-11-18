@@ -475,9 +475,9 @@ namespace ValveKeyValue
         }
 
         // Enumerates the list directly rather than through IEnumerable, which would box its enumerator.
-        internal static KVObject Collection(List<KeyValuePair<string, KVObject>> children)
+        internal static KVObject Collection(List<KeyValuePair<string, KVObject>> children, IEqualityComparer<string>? keyComparer = null)
         {
-            var dict = new Dictionary<string, KVObject>(children.Count);
+            var dict = new Dictionary<string, KVObject>(children.Count, keyComparer);
             foreach (var (key, value) in children)
             {
                 dict[key] = value;

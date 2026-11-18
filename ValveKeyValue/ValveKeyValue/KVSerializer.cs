@@ -39,9 +39,10 @@ namespace ValveKeyValue
         {
             ArgumentNullException.ThrowIfNull(stream);
 
-            var builder = new KVObjectBuilder(useDictionaryForCollections: format == KVSerializationFormat.KeyValues3Text);
+            options ??= KVSerializerOptions.DefaultOptions;
+            var builder = new KVObjectBuilder(useDictionaryForCollections: format == KVSerializationFormat.KeyValues3Text, options.KeyComparer);
 
-            using var reader = MakeReader(stream, builder, options ?? KVSerializerOptions.DefaultOptions);
+            using var reader = MakeReader(stream, builder, options);
 
             var header = reader.ReadHeader();
             var result = builder.GetObject();
@@ -138,7 +139,7 @@ namespace ValveKeyValue
 
             var resolvedOptions = options ?? KVSerializerOptions.DefaultOptions;
             var spans = new List<KvSourceSpan>();
-            var builder = new KVObjectBuilder(useDictionaryForCollections: format == KVSerializationFormat.KeyValues3Text);
+            var builder = new KVObjectBuilder(useDictionaryForCollections: format == KVSerializationFormat.KeyValues3Text, resolvedOptions.KeyComparer);
 
             using var stringReader = new StringReader(text);
             using var reader = MakeSourceMapReader(stringReader, builder, resolvedOptions, spans);

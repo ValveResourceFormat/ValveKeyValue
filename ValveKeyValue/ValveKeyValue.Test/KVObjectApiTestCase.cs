@@ -718,6 +718,26 @@ namespace ValveKeyValue.Test
         }
 
         [Test]
+        public void KV3DeserializationLooksUpKeysWithKeyComparer()
+        {
+            var options = new KVSerializerOptions
+            {
+                SkipHeader = true,
+                KeyComparer = StringComparer.OrdinalIgnoreCase,
+            };
+
+            using var stream = new MemoryStream("{ Outer = { StartDisabled = true } }"u8.ToArray());
+            var data = KVSerializer.Create(KVSerializationFormat.KeyValues3Text).Deserialize(stream, options).Root;
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(data.ContainsKey("outer"), Is.True);
+                Assert.That((bool)data["OUTER"]["startdisabled"], Is.True);
+                Assert.That(data["outer"].Keys.Single(), Is.EqualTo("StartDisabled"));
+            }
+        }
+
+        [Test]
         public void KV3DeserializationChildrenIterable()
         {
             using var stream = TestDataHelper.OpenResource("TextKV3.basic.kv3");
